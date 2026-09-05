@@ -96,9 +96,25 @@ else
     done
     if [ -n "$got_it" ]; then
         mkdir -p "$HOME/.elan"
-        tar -xzf "/tmp/${TARBALL}" -C "$HOME/.elan" --strip-components=1
-        rm -f "/tmp/${TARBALL}"
-        run "elan 已解压到 ~/.elan"
+        # **关键改进**:不预设 --strip-components。先解到临时,探测真实顶层。
+        EXTRACT=/tmp/elan_extract
+        rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
+        tar -xzf "/tmp/${TARBALL}" -C "$EXTRACT"
+        TOP=$(ls "$EXTRACT" | head -1)
+        run "  tarball 顶层:'$TOP'"
+        rm -rf "$HOME/.elan" && mkdir -p "$HOME/.elan"
+        if [ -d "$EXTRACT/$TOP" ] && [ -x "$EXTRACT/$TOP/bin/elan" ]; then
+            cp -r "$EXTRACT/$TOP/." "$HOME/.elan/"
+        elif [ -x "$EXTRACT/bin/elan" ]; then
+            cp -r "$EXTRACT/." "$HOME/.elan/"
+        elif [ -x "$EXTRACT/elan" ]; then
+            cp -r "$EXTRACT/." "$HOME/.elan/"
+        else
+            run "FATAL:tarball 未知结构:"; find "$EXTRACT" -maxdepth 3 | head -10 | tee -a "$LOG"; exit 1
+        fi
+        chmod +x "$HOME/.elan/bin/elan" 2>/dev/null
+        rm -rf "$EXTRACT" "/tmp/${TARBALL}"
+        [ -x "$HOME/.elan/bin/elan" ] || { run "FATAL:解压后 \$HOME/.elan/bin/elan 不在"; exit 1; }
     else
         run "警告:elan 三源都失败——可单独跑 scripts/wsl/remedy.sh 重试 Lean 部分"
     fi
@@ -131,12 +147,31 @@ if ! command -v lake >/dev/null 2>&1; then
             fi
         done
         if [ -n "$got_it" ]; then
-            mkdir -p "$HOME/.elan/toolchains/lean-${LEAN_VER}"
+            mkdir -p "$HOME/.elan/toolchains"
+            rm -f "$HOME/.elan/toolchains/stable"
+            # 解压(无 strip,探测后调整)
+            EXTRACT=/tmp/lean_extract
+            rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
             tar --use-compress-program=unzstd -xf "/tmp/${TARBALL}" \
-                -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" --strip-components=1 2>&1 | tail -3 | tee -a "$LOG"
+                -C "$EXTRACT" 2>&1 | tail -3 | tee -a "$LOG" \
+                || tar -xzf "/tmp/${TARBALL}" \
+                    -C "$EXTRACT" 2>&1 | tail -3 | tee -a "$LOG"
+            TOP=$(ls "$EXTRACT" | head -1)
+            run "  Lean toolchain 顶层:'$TOP'"
+            rm -rf "$HOME/.elan/toolchains/lean-${LEAN_VER}"
+            mkdir -p "$HOME/.elan/toolchains/lean-${LEAN_VER}"
+            if [ -d "$EXTRACT/$TOP" ] && [ -x "$EXTRACT/$TOP/bin/lake" ]; then
+                cp -r "$EXTRACT/$TOP/." "$HOME/.elan/toolchains/lean-${LEAN_VER}/"
+            elif [ -x "$EXTRACT/bin/lake" ]; then
+                cp -r "$EXTRACT/." "$HOME/.elan/toolchains/lean-${LEAN_VER}/"
+            else
+                run "FATAL:Lean toolchain tarball 未知结构"; find "$EXTRACT" -maxdepth 3 | head -10 | tee -a "$LOG"; exit 1
+            fi
             ln -sfn "$HOME/.elan/toolchains/lean-${LEAN_VER}" "$HOME/.elan/toolchains/stable"
-            rm -f "/tmp/${TARBALL}"
-            run "Lean ${LEAN_VER} 手动装到 toolchains/"
+            rm -rf "$EXTRACT" "/tmp/${TARBALL}"
+            [ -x "$HOME/.elan/toolchains/lean-${LEAN_VER}/bin/lake" ] \
+                || { run "FATAL:lake binary 不在 toolchains/lean-${LEAN_VER}/bin/"; exit 1; }
+            run "Lean ${LEAN_VER} 手动装到 toolchains/(lake 已验证)"
         else
             run "警告:Lean toolchain 三源失败 — 见 docs/wsl2-setup.md §6 Q5c"
         fi
@@ -154,30 +189,50 @@ fi
 run "首次构建 mathlib(可能 30–60 分钟,超时或非致命)..."
 timeout 1500 lake build 2>&1 | tail -8 || run "mathlib 构建未完成(非致命,可稍后手动 cd ~/verigis/lean4_proj && lake build)"
 
-# ---------- 5/7 Dafny(.deb 直装 + 三源 fallback)----------
-step "5/7 安装 Dafny (固定 v4.8.1 .deb)"
+# ---------- 5/7 Dafny(.zip 自包含 .NET + 三源 fallback + 类型校验)----------
+# 关键修正:**Dafny v4.5.0+ 官方不发 .deb,只发 .zip**(self-contained .NET)。
+# 之前的 v4.8.1-x64-ubuntu-22.04.deb URL 是错的,404 才是真相。
+step "5/7 安装 Dafny (固定 v4.11.0 .zip,self-contained .NET)"
 if command -v dafny >/dev/null 2>&1; then
     run "Dafny 已存在: $(dafny --version 2>&1 | head -1)"
 else
-    DAFNY_VER="4.8.1"
-    DEB="dafny-${DAFNY_VER}-x64-ubuntu-22.04.deb"
-    URL="https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VER}/${DEB}"
+    DAFNY_VER="4.11.0"
+    ZIP="dafny-${DAFNY_VER}-x64-ubuntu-22.04.zip"
+    URL="https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VER}/${ZIP}"
     stripped="${URL#https://}"
     got_it=""
     for src in "$URL" "https://gh-proxy.com/$stripped" "https://mirror.ghproxy.com/$stripped"; do
         run "  试源:$src"
-        if curl -sSLfL --max-time 1200 -o "/tmp/${DEB}" "$src" 2>/dev/null; then
-            got_it=1; break
+        if curl -sSLfL --max-time 1200 -o "/tmp/${ZIP}" "$src" 2>/dev/null; then
+            h1=$(head -c1 "/tmp/${ZIP}" | od -An -tx1 | tr -d ' ')
+            h2=$(head -c2 "/tmp/${ZIP}" | tail -c1 | od -An -tx1 | tr -d ' ')
+            # zip 头:50 4b 03 04 (PK..)
+            if [ "$h1" = "50" ] && [ "$h2" = "4b" ]; then
+                got_it=1; break
+            else
+                run "  ⚠ 头两字节 = ${h1:-?} ${h2:-?} ≠ PK,跳过"
+                rm -f "/tmp/${ZIP}"
+            fi
         fi
     done
     if [ -n "$got_it" ]; then
-        $SUDO apt-get install -y libssl3 libgcc-s1 libstdc++6 zlib1g 2>&1 | tail -2 | tee -a "$LOG"
-        $SUDO dpkg -i "/tmp/${DEB}" 2>&1 | tail -5 | tee -a "$LOG" \
-            || $SUDO apt-get install -fy 2>&1 | tail -3 | tee -a "$LOG"
-        rm -f "/tmp/${DEB}"
+        $SUDO rm -rf /opt/dafny && $SUDO mkdir -p /opt/dafny
+        $SUDO unzip -q "/tmp/${ZIP}" -d /opt/dafny
+        # Dafny zip 通常解出 /opt/dafny/dafny-<VER>/ 目录,内含 dafny shell 包装
+        DAFNY_HOME=$(ls -d /opt/dafny/dafny-*/ 2>/dev/null | head -1)
+        [ -z "$DAFNY_HOME" ] && DAFNY_HOME=/opt/dafny
+        DAFNY_BIN=$(ls "$DAFNY_HOME"/dafny "$DAFNY_HOME"/bin/dafny 2>/dev/null | head -1)
+        if [ -z "$DAFNY_BIN" ]; then
+            run "FATAL:dafny zip 解后找不到 dafny 可执行"
+            find /opt/dafny -maxdepth 3 -name 'dafny*' | head -10 | tee -a "$LOG"
+            exit 1
+        fi
+        $SUDO chmod +x "$DAFNY_BIN"
+        $SUDO ln -sf "$DAFNY_BIN" /usr/local/bin/dafny
+        rm -f "/tmp/${ZIP}"
         run "Dafny 版本: $(dafny --version 2>&1 | head -1)"
     else
-        run "Dafny .deb 三源都失败——可单独跑 scripts/wsl/remedy.sh 重试 Dafny 部分"
+        run "Dafny .zip 三源都失败——可单独跑 scripts/wsl/remedy.sh 重试 Dafny 部分"
     fi
 fi
 # 验证 Dafny 可证明一条小定理

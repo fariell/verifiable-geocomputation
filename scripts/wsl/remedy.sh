@@ -13,7 +13,7 @@
 # 关键改进(相对原始 provision.sh):
 #   1. 先做漏装检查,不重复装已有组件
 #   2. elan 下载加 --max-time 600 + 备用 GitHub raw 镜像
-#   3. Dafny 走固定 .deb 链接,绕开 GitHub API 限流
+#   3. Dafny 走 .zip 链接(自包含 .NET,也是官方唯一 Linux 发布),绕开 GitHub API 限流
 #   4. 每步真的失败会打印 FATAL 并 exit 1,不再假装成功
 #
 set -uo pipefail
@@ -46,21 +46,70 @@ wait_for_apt() {
 # 通用下载:试原 URL,失败转 gh-proxy.com 镜像,再 mirror.ghproxy.com。
 # 这两个是国内常用的 GitHub release 镜像,在 Lean/Dafny 等库上稳定。
 # 用法:download URL OUTPUT_PATH  → echo "路径"
+# 关键改进:**报"成功"前必须做格式校验**——上轮的隐性 bug 是下载了
+# HTML 错误页或被镜像污染的 0 字节文件,du 看着大小对实际是垃圾。
 download_with_fallback() {
-    local url="$1" out="$2" src p
-    # 被扒去 https:// 前缀,拼到镜像
+    local url="$1" out="$2" src first
     local stripped="${url#https://}"
     for src in \
         "$url" \
         "https://gh-proxy.com/$stripped" \
         "https://mirror.ghproxy.com/$stripped"; do
         say "    试源: $src"
-        if curl -sSLfL --max-time 600 -o "$out" "$src" 2>/dev/null; then
-            [ -s "$out" ] || continue
-            say "    成功($(du -h "$out" | cut -f1))"
-            return 0
+        # 第一关:curl 退出 0(连接到完整下载完)
+        if ! curl -sSLfL --max-time 600 -o "$out" "$src" 2>/dev/null; then
+            continue
         fi
+        # 第二关:文件非空
+        [ -s "$out" ] || continue
+        # 第三关:类型校验(关键!)。zip 看 PK\x03\x04,gzip 看 \x1f\x8b,
+        # zstd 看 \x28\xb5\x2f\xfd,.deb 看 !<arch>(ar 格式),elf 看 \x7fELF。
+        # 不是这些开头的一律当作错误页/HTML,继续试下一源。
+        local head1 head2 head3
+        head1=$(head -c1 "$out" | od -An -tx1 | tr -d ' ')
+        head2=$(head -c2 "$out" | tail -c1 | od -An -tx1 | tr -d ' ')
+        head3=$(head -c3 "$out" | tail -c1 | od -An -tx1 | tr -d ' ')
+        case "${head1}${head2}${head3}${url}" in
+            *dafny*.zip|*.zip?*)
+                # zip:50 4b 03 04 (PK..)
+                if [ "$head1" = "50" ] && [ "$head2" = "4b" ]; then
+                    first=$(unzip -l "$out" 2>/dev/null | awk 'NR==4 {print $4}')
+                    say "    验证 OK(zip 首项:${first:-?})"
+                    say "    成功($(du -h "$out" | cut -f1))"
+                    return 0
+                fi
+                ;;
+            *tar.zst|*.zst?*)
+                # zstd: 28 b5 2f fd
+                if [ "$head1" = "28" ] && [ "$head2" = "b5" ] && [ "$head3" = "2f" ]; then
+                    first=$(tar --use-compress-program=unzstd -tf "$out" 2>/dev/null | head -1)
+                    say "    验证 OK(zst 首项:${first:-?})"
+                    say "    成功($(du -h "$out" | cut -f1))"
+                    return 0
+                fi
+                ;;
+            *.deb?*)
+                # .deb 是 ar 归档:!<arch>\n  → "21 3c 61 72"
+                if [ "$head1" = "21" ] && [ "$head2" = "3c" ]; then
+                    say "    验证 OK(.deb ar 头)"
+                    say "    成功($(du -h "$out" | cut -f1))"
+                    return 0
+                fi
+                ;;
+            *tar.gz?|*.tgz?*)
+                # gzip:1f 8b
+                if [ "$head1" = "1f" ] && [ "$head2" = "8b" ]; then
+                    first=$(tar -tzf "$out" 2>/dev/null | head -1)
+                    say "    验证 OK(tar.gz 首项:${first:-?})"
+                    say "    成功($(du -h "$out" | cut -f1))"
+                    return 0
+                fi
+                ;;
+        esac
+        say "    ⚠ 文件类型不匹配($head1 $head2 $head3),尝试下一源"
+        rm -f "$out"
     done
+    say "    FATAL:三源都失败或类型不符"
     return 1
 }
 
@@ -139,19 +188,50 @@ say "venv OK: $(python -c 'import sys; print(sys.prefix)')"
 if [ "$NEED_LEAN" = "1" ]; then
     say "2/4 装 Lean 4(via elan,直装 tarball)"
     # elan-init.sh 内部还会 curl 拉 tarball,在被限制的网络里容易卡。
-    # 我们直接拿 elan 的预编译 tarball 解压到 ~/.elan,完全跳过 init 流程。
-    # 固定拉 v3.1.0+stable(2024+ 稳定版,与 Lean 4 v4.x 配套),
-    # 如果想用更新版本,改 ELAN_VER 即可。
+    # 我们直接拿 elan 的预编译 tarball 解压,完全跳过 init 流程。
     ELAN_VER="v3.1.0"
     TARBALL="elan-x86_64-unknown-linux-gnu.tar.gz"
     URL="https://github.com/leanprover/elan/releases/download/${ELAN_VER}/${TARBALL}"
     say "  下载 elan ${ELAN_VER}..."
     if download_with_fallback "$URL" "/tmp/${TARBALL}"; then
+        # 关键:**不预设顶层结构**。先解到 /tmp/elan_extract,探测真实顶层。
+        # 上轮 bug:--strip-components=1 假设顶层是 elan-x86_64-unknown-linux-gnu/,
+        # 实际若顶层就是 bin/,strip 会全删掉,--strip 后 .elan/ 变空目录。
+        EXTRACT=/tmp/elan_extract
+        rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
+        tar -xzf "/tmp/${TARBALL}" -C "$EXTRACT" || {
+            say "FATAL: tar 解压失败,说明下载文件被污染或不算 gzip"; exit 1; }
+        # 探测顶层
+        TOP=$(ls "$EXTRACT" | head -1)
+        say "  tarball 顶层:'$TOP'"
+        # 三种情况都支持:整个顶层目录 / 直接 bin+share / 单文件
+        rm -rf "$HOME/.elan"
         mkdir -p "$HOME/.elan"
-        tar -xzf "/tmp/${TARBALL}" -C "$HOME/.elan" --strip-components=1 \
-            || { say "FATAL: tar 解压失败"; exit 1; }
-        rm -f "/tmp/${TARBALL}"
-        say "  elan 解压完成:$HOME/.elan/bin/elan"
+        if [ -d "$EXTRACT/$TOP" ] && [ -x "$EXTRACT/$TOP/bin/elan" ]; then
+            # 情况 A:顶层是包装目录,内含 bin/elan(elan 主流发布)
+            cp -r "$EXTRACT/$TOP/." "$HOME/.elan/"
+        elif [ -x "$EXTRACT/bin/elan" ]; then
+            # 情况 B:顶层直接是 bin/(少数特殊情况)
+            cp -r "$EXTRACT/." "$HOME/.elan/"
+        elif [ -x "$EXTRACT/elan" ]; then
+            # 情况 C:顶层是单文件(legacy)
+            cp -r "$EXTRACT/." "$HOME/.elan/"
+        else
+            say "FATAL: tarball 未知结构,find 出的内容:"
+            find "$EXTRACT" -maxdepth 3 | head -10
+            exit 1
+        fi
+        chmod +x "$HOME/.elan/bin/elan" 2>/dev/null
+        rm -rf "$EXTRACT" "/tmp/${TARBALL}"
+        # 真验证:**elan binary 必须在磁盘上且可执行**
+        if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            say "FATAL: 解压后 \$HOME/.elan/bin/elan 不存在或不可执行"
+            say "  ls 实际:"
+            ls -laR "$HOME/.elan" | head -20
+            exit 1
+        fi
+        say "  elan 解压验证通过:$HOME/.elan/bin/elan"
+        "$HOME/.elan/bin/elan" --version
     else
         say "FATAL: elan 三源都下载失败。"
         say "  手动方案(任选其一):"
@@ -179,22 +259,29 @@ if ! command -v lake >/dev/null 2>&1; then
         elan default stable 2>&1 | tail -3
     else
         # 手动 fallback:从 gh-proxy.com 拉 Lean 4 toolchain tarball
-        LEAN_VER="v4.18.0"   # 2024-Q4 稳定版,与 Lean v4.x / mathlib4 master 同步
-        say "    elan 默认源失败,改手动下 Lean $LEAN_VER ..."
-        # Lean 4 toolchain 名格式不固定,先试 lean-${VER}-linux.tar.zst,再 tar.gz
+        # Lean 4 toolchain 命名:**最新稳定版 lean4 v4.18.0 的 linux tarball
+        # 不一定叫 'lean-${VER}-linux.tar.zst'。事实上 Lean 4 GitHub
+        # release 资产名是 lean-4.18.0-linux.tar.zst(没有 v 前缀)
+        LEAN_VER="4.18.0"        # 注意不带 v 前缀(资产名习惯)
         TARBALL="lean-${LEAN_VER}-linux.tar.zst"
-        URL="https://github.com/leanprover/lean4/releases/download/${LEAN_VER}/${TARBALL}"
+        URL="https://github.com/leanprover/lean4/releases/download/v${LEAN_VER}/${TARBALL}"
+        say "    备援 Lean toolchain download: $URL"
+        say "    (注:v4.18.0 在 2024-Q4 发布;最新稳定可在 lean4 release 页查)"
         if download_with_fallback "$URL" "/tmp/${TARBALL}"; then
+            rm -rf "$HOME/.elan/toolchains"
             mkdir -p "$HOME/.elan/toolchains/lean-${LEAN_VER}"
             tar --use-compress-program=unzstd -xf "/tmp/${TARBALL}" \
-                -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" --strip-components=1 2>&1 | tail -5 \
-                || tar -xzf "/tmp/${TARBALL}" -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" \
-                    --strip-components=1
-            # 模拟 default symlink
-            mkdir -p "$HOME/.elan/toolchains"
-            rm -f "$HOME/.elan/toolchains/stable"
-            ln -sf "$HOME/.elan/toolchains/lean-${LEAN_VER}" "$HOME/.elan/toolchains/stable"
+                -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" 2>&1 | tail -3 \
+                || tar -xzf "/tmp/${TARBALL}" \
+                    -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" 2>&1 | tail -3
+            ln -sfn "$HOME/.elan/toolchains/lean-${LEAN_VER}" "$HOME/.elan/toolchains/stable"
             rm -f "/tmp/${TARBALL}"
+            # 真验证:lake binary 必须在磁盘上
+            if [ ! -x "$HOME/.elan/toolchains/lean-${LEAN_VER}/bin/lake" ]; then
+                say "FATAL: lean toolchain 解后 bin/lake 不存在,看实际结构:"
+                find "$HOME/.elan/toolchains/lean-${LEAN_VER}" -maxdepth 3 -type f | head -10
+                exit 1
+            fi
             say "    手动装 Lean $LEAN_VER 到 toolchains/lean-${LEAN_VER}"
         else
             say "FATAL: Lean toolchain 三源都失败。手动:"
@@ -209,21 +296,39 @@ command -v lake >/dev/null 2>&1 \
     || { say "FATAL: lake 仍未找到,所有路径都试过"; exit 1; }
 say "lake: $(lake --version 2>&1 | head -1)"
 
-# ---------- 3. Dafny(走镜像,避开 github.com 直连)----------
+# ---------- 3. Dafny(走 .zip + 镜像)----------
+# 关键修正:**Dafny v4.5.0+ 官方不发 .deb,只发 .zip**(self-contained .NET)。
+# 之前的 v4.8.1-x64-ubuntu-22.04.deb URL 是错的——404 才是真相。
+# 当前最新稳定:v4.11.0(2025-08-25 发布),资产:
+#   dafny-4.11.0-x64-ubuntu-22.04.zip  (Linux x64 ubuntu-22.04 自包含)
 if [ "$NEED_DAFNY" = "1" ]; then
-    say "3/4 装 Dafny 4.8.1(.deb 直装)"
-    DAFNY_VER="4.8.1"
-    DEB="dafny-${DAFNY_VER}-x64-ubuntu-22.04.deb"
-    URL="https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VER}/${DEB}"
-    say "  下载 $URL (走镜像 fallback)"
-    if download_with_fallback "$URL" "/tmp/${DEB}"; then
-        $SUDO apt-get install -y libssl3 libgcc-s1 libstdc++6 zlib1g 2>&1 | tail -3
-        $SUDO dpkg -i "/tmp/${DEB}" 2>&1 | tail -5 \
-            || { say "  dpkg 安装报依赖错,尝试 apt -fy 修复"; $SUDO apt-get install -fy 2>&1 | tail -5; }
-        rm -f "/tmp/${DEB}"
+    say "3/4 装 Dafny 4.11.0(.zip 直解压)"
+    DAFNY_VER="4.11.0"
+    ZIP="dafny-${DAFNY_VER}-x64-ubuntu-22.04.zip"
+    URL="https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VER}/${ZIP}"
+    say "  下载 $URL (走镜像 fallback,类型校验 zip PK..)"
+    if download_with_fallback "$URL" "/tmp/${ZIP}"; then
+        $SUDO rm -rf /opt/dafny
+        $SUDO mkdir -p /opt/dafny
+        $SUDO unzip -q "/tmp/${ZIP}" -d /opt/dafny
+        # Dafny zip 解到 /opt/dafny/dafny-{VER}/ 目录,顶层是 bin/z3/dafny 等
+        # 但最常见是直接平铺。探测后做符号链。
+        DAFNY_HOME=$(ls -d /opt/dafny/dafny-*/ 2>/dev/null | head -1)
+        [ -z "$DAFNY_HOME" ] && DAFNY_HOME=/opt/dafny
+        DAFNY_BIN=$(ls "$DAFNY_HOME"/dafny "$DAFNY_HOME"/bin/dafny 2>/dev/null | head -1)
+        if [ -z "$DAFNY_BIN" ]; then
+            say "FATAL: dafny zip 解后找不到 dafny 可执行"
+            find /opt/dafny -maxdepth 3 -name 'dafny*' -type f | head -5
+            exit 1
+        fi
+        $SUDO chmod +x "$DAFNY_BIN"
+        $SUDO ln -sf "$DAFNY_BIN" /usr/local/bin/dafny
+        rm -f "/tmp/${ZIP}"
     else
-        say "FATAL: Dafny 三源都下载失败。"
-        say "  手动方案同上(换网 / 预下载拷入 / 不用 Dafny 也行)"
+        say "FATAL: Dafny 三源都失败。手动方案:"
+        say "  1. 浏览器下 ${ZIP} from https://github.com/dafny-lang/dafny/releases/tag/v${DAFNY_VER}"
+        say "  2. 拷到 WSL:/tmp/${ZIP},再跑本脚本"
+        say "  3. 或在有网的容器装好后带回 Dafny 目录"
         exit 1
     fi
 else
