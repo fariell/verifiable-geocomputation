@@ -65,10 +65,15 @@ fi
 # shellcheck disable=SC1091
 source ~/verigis/venv/bin/activate
 pip install --quiet --upgrade pip
-pip install --quiet numpy scipy richdem 2>&1 | tail -5 | tee -a "$LOG"
+# richdem 是 C++ 扩展,编译需 GDAL 头文件;venv 用 --system-site-packages
+# 暴露 osgeo 但不带 cflags → --no-build-isolation 让 pip 直接用系统 python
+# 的 sysconfig 找 headers。
+pip install --quiet --no-build-isolation richdem 2>&1 | tail -5 | tee -a "$LOG" \
+    || pip install --quiet --ignore-requires-python whiteboxtools==1.10.0 2>&1 | tail -3 | tee -a "$LOG" \
+    || run "提示:richdem/whitebox 编译装不上,后续 DEM 算子走 GDAL/python-numpy"
 # whiteboxtools PyPI 包装器在 Python 3.10+ 没匹配版本;优先 whitebox(同维护者 giswqs 迁的新名)。
 pip install --quiet whitebox 2>&1 | tail -3 | tee -a "$LOG" \
-    || pip install --quiet --ignore-requires-python whiteboxtools==1.10.0 2>&1 | tail -3 | tee -a "$LOG"
+    || run "whitebox 装不上(Python 3.10+ 限制,非致命)"
 run "Python 地理库安装完成"
 
 # ---------- 4/7 Lean 4 + mathlib(via elan,直装 tarball + 镜像 fallback)----------
@@ -104,7 +109,40 @@ if [ -f "$HOME/.elan/bin/elan" ] && ! grep -q '\.elan/bin' "$HOME/.bashrc" 2>/de
 fi
 # 确保本会话 PATH 含 elan
 export PATH="$HOME/.elan/bin:$PATH"
-run "lake 版本: $(lake --version 2>&1)"
+
+# elan 只是个版本管理器,Lean 4 编译器还得它装 toolchain。
+# elan-init.sh 默认跑过这两步,但直装 tarball 时漏了——上一版隐藏 bug:
+# lake --version 看似失败却没人补这一步,Lean 项目永远起不来。
+if ! command -v lake >/dev/null 2>&1; then
+    run "elan 已就位但 lake 缺 → 装 Lean toolchain (--max-time 1500s)"
+    if elan toolchain install stable 2>&1 | tail -10; then
+        run "elan 内部装 toolchain OK"
+    else
+        run "elan toolchain 失败,改手动下 Lean 4 toolchain tarball..."
+        LEAN_VER="v4.18.0"
+        TARBALL="lean-${LEAN_VER}-linux.tar.zst"
+        URL="https://github.com/leanprover/lean4/releases/download/${LEAN_VER}/${TARBALL}"
+        stripped="${URL#https://}"
+        got_it=""
+        for src in "$URL" "https://gh-proxy.com/$stripped" "https://mirror.ghproxy.com/$stripped"; do
+            run "  试源:$src"
+            if curl -sSLfL --max-time 1500 -o "/tmp/${TARBALL}" "$src" 2>/dev/null; then
+                got_it=1; break
+            fi
+        done
+        if [ -n "$got_it" ]; then
+            mkdir -p "$HOME/.elan/toolchains/lean-${LEAN_VER}"
+            tar --use-compress-program=unzstd -xf "/tmp/${TARBALL}" \
+                -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" --strip-components=1 2>&1 | tail -3 | tee -a "$LOG"
+            ln -sfn "$HOME/.elan/toolchains/lean-${LEAN_VER}" "$HOME/.elan/toolchains/stable"
+            rm -f "/tmp/${TARBALL}"
+            run "Lean ${LEAN_VER} 手动装到 toolchains/"
+        else
+            run "警告:Lean toolchain 三源失败 — 见 docs/wsl2-setup.md §6 Q5c"
+        fi
+    fi
+fi
+run "lake 版本: $(lake --version 2>&1 | head -1)"
 
 mkdir -p ~/verigis/lean4_proj
 cd ~/verigis/lean4_proj

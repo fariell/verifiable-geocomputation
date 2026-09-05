@@ -113,13 +113,25 @@ if [ "$NEED_VENV" = "1" ]; then
 fi
 # 不管 NEED_VENV 是什么,都跑一遍:幂等,缺啥补啥,已装的秒过
 python -m pip install --quiet --upgrade pip setuptools wheel
-if python -m pip install --quiet whitebox richdem 2>&1 | tail -3; then
-    say "  pip install whitebox richdem OK"
+
+# richdem 是 C++ 扩展,编译需 GDAL 头文件,venv 用 --system-site-packages
+# 暴露 osgeo 但不带 cflags → 必须 --no-build-isolation 用系统 python sysconfig
+# 来找 headers。whitebox 是纯 Python 包装器,优先装,失败再 whiteboxtools。
+say "  pip 装地理包(numpy/scipy 已就位,补 richdem/whitebox)..."
+if python -m pip install --quiet --no-build-isolation richdem 2>&1 | tail -3; then
+    say "  richdem OK(--no-build-isolation 编译成功)"
 else
-    say "  whitebox 装不上,改试 whiteboxtools --ignore-requires-python"
-    python -m pip install --quiet --ignore-requires-python \
-        numpy scipy whiteboxtools==1.10.0 richdem 2>&1 | tail -3 \
-        || say "  警告:地理包部分缺失,核心(numpy/scipy/osgeo)已就位"
+    say "  richdem --no-build-isolation 失败,再试一次 + 装编译依赖"
+    $SUDO apt-get install -y libgdal-dev g++ 2>&1 | tail -3
+    python -m pip install --quiet --no-build-isolation richdem 2>&1 | tail -3 \
+        || say "  警告:richdem 编译失败,GDAL/osgeo 已可用于 DEM 算子"
+fi
+# whitebox / whiteboxtools:Python 3.10+ PyPI 版本限定冲突,通常装不上,
+# 接受 warning(走 GDAL/RichDEM 兜底),不阻塞主线。
+if python -m pip install --quiet whitebox 2>&1 | tail -2; then
+    say "  whitebox OK"
+else
+    say "  whitebox 装不上(Python 3.10+ PyPI 限制,非致命)"
 fi
 say "venv OK: $(python -c 'import sys; print(sys.prefix)')"
 
@@ -156,8 +168,45 @@ export PATH="$HOME/.elan/bin:$PATH"
 if [ -f "$HOME/.elan/bin/elan" ] && ! grep -q '\.elan/bin' "$HOME/.bashrc" 2>/dev/null; then
     echo 'export PATH="$HOME/.elan/bin:$PATH"' >> "$HOME/.bashrc"
 fi
+
+# 关键差距:elan 只是个版本管理器,Lean 4 toolchain 还要再拉。
+# elan-init.sh 默认会跑 `elan toolchain install stable` + `elan default stable`,
+# 我们直装 tarball 跳过了它——lake 自然找不到,这是上一版的隐藏 bug。
+if ! command -v lake >/dev/null 2>&1; then
+    say "  elan 已装,但 lake 缺失 → 拉 Lean 4 toolchain (--max-time 1500s ~ 25 min)"
+    say "    试 'elan toolchain install stable'(优先,内部走 GitHub + cache)"
+    if elan toolchain install stable 2>&1 | tail -10; then
+        elan default stable 2>&1 | tail -3
+    else
+        # 手动 fallback:从 gh-proxy.com 拉 Lean 4 toolchain tarball
+        LEAN_VER="v4.18.0"   # 2024-Q4 稳定版,与 Lean v4.x / mathlib4 master 同步
+        say "    elan 默认源失败,改手动下 Lean $LEAN_VER ..."
+        # Lean 4 toolchain 名格式不固定,先试 lean-${VER}-linux.tar.zst,再 tar.gz
+        TARBALL="lean-${LEAN_VER}-linux.tar.zst"
+        URL="https://github.com/leanprover/lean4/releases/download/${LEAN_VER}/${TARBALL}"
+        if download_with_fallback "$URL" "/tmp/${TARBALL}"; then
+            mkdir -p "$HOME/.elan/toolchains/lean-${LEAN_VER}"
+            tar --use-compress-program=unzstd -xf "/tmp/${TARBALL}" \
+                -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" --strip-components=1 2>&1 | tail -5 \
+                || tar -xzf "/tmp/${TARBALL}" -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" \
+                    --strip-components=1
+            # 模拟 default symlink
+            mkdir -p "$HOME/.elan/toolchains"
+            rm -f "$HOME/.elan/toolchains/stable"
+            ln -sf "$HOME/.elan/toolchains/lean-${LEAN_VER}" "$HOME/.elan/toolchains/stable"
+            rm -f "/tmp/${TARBALL}"
+            say "    手动装 Lean $LEAN_VER 到 toolchains/lean-${LEAN_VER}"
+        else
+            say "FATAL: Lean toolchain 三源都失败。手动:"
+            say "  1. 浏览器下 'lean-x86_64-linux.tar.zst' from https://github.com/leanprover/lean4/releases"
+            say "  2. 解到 ~/.elan/toolchains/lean-<VER>/ 并 ln -s 到 ~/.elan/toolchains/stable"
+            say "  3. 重跑本脚本"
+            exit 1
+        fi
+    fi
+fi
 command -v lake >/dev/null 2>&1 \
-    || { say "FATAL: lake 仍未找到,elan 安装可能没成功"; exit 1; }
+    || { say "FATAL: lake 仍未找到,所有路径都试过"; exit 1; }
 say "lake: $(lake --version 2>&1 | head -1)"
 
 # ---------- 3. Dafny(走镜像,避开 github.com 直连)----------
