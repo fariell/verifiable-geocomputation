@@ -45,9 +45,24 @@ git push -u origin main
   - 勾选 `repo` 权限即可
   - 复制 token,粘贴到密码框
 
-### 3. 验证
+### 3. 备选:网页上传(零命令行,不受本机网络限制)
 
-推送完成后访问 https://github.com/fariell/verifiable-geocomputation,应该能看到全部内容。
+如果 `git push` 因网络限制失败(本机直连 github.com 已被确认不通),可以用 GitHub 网页直接上传:
+
+1. 在 https://github.com/new 创建空仓库(同上,不勾选任何初始化文件)
+2. 创建后,仓库页面会显示 **"…or create a new repository on the command line"** 上方有一行小字:
+   → 点击 **uploading an existing file**(或直接访问 `https://github.com/fariell/verifiable-geocomputation/upload`)
+3. 把本地 `verifiable-geocomputation/` 文件夹里的**所有文件和文件夹**拖进浏览器窗口
+   - ⚠️ 注意:要包含隐藏文件 `.gitignore` 和 `.gitattributes`
+   - ⚠️ 不要拖 `.git/` 文件夹(网页上传不需要它)
+4. 填写 commit 信息,点 **Commit changes**
+
+**代价**:网页上传不保留 git 历史(对首次提交无影响,后续仍可用命令行正常提交)。
+
+### 4. 验证
+
+推送/上传完成后访问 https://github.com/fariell/verifiable-geocomputation,应能看到全部内容:
+`README.md`、`docs/`、`site/`、`benchmark/`、`formal/`、`library/`、`papers/`
 
 ---
 
