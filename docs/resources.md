@@ -118,11 +118,7 @@ Y0–Y2 训练模型的边际收益极低:我们要证明的是"可验证性",�
 
 - [x] 问科研处确认 2027 年度**校内报送截止日** → 已确认 **2027-02-28**
 - [x] 确认本机 GPU → **RTX 3080,12 GB 显存**(已记录于上表)
-- [~] 本机装 **WSL2 + Ubuntu 22.04**,作为统一开发环境
-  - ⚠️ **agent 沙箱拦截 `wsl.exe`(Security Center 程序黑名单),无法在本会话内自动安装**。
-  - 已写好全套**一键脚本 + 文档**:[`docs/wsl2-setup.md`](../docs/wsl2-setup.md) + [`scripts/wsl/install_wsl.ps1`](../scripts/wsl/install_wsl.ps1) + [`scripts/wsl/provision.sh`](../scripts/wsl/provision.sh)。本机管理员 PowerShell 跑一条命令即可装好(详见该文档)。
-  - 若你愿意把 `wsl.exe` 从黑名单移除,我也可在本会话内驱动安装与核对。
-- [ ] 在 WSL2 内装:Lean 4 + mathlib、Dafny、GDAL、WhiteboxTools、RichDEM(由 `provision.sh` 自动完成)
+<omitted>
 - [ ] 给 LLM API 账户设**月度消费上限**(防 agent 跑飞)
 - [ ] 建 `~/.workbuddy` 之外的项目级 `MEMORY.md` 记录每次实验的 API 花费
 

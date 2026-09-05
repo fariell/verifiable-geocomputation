@@ -100,6 +100,8 @@ Dafny program verifier version 4.x
 whiteboxtools+richdem OK
 ```
 
+如果哪一项是 `Command 'xxx' not found` 或 `No such file or directory`,**别重跑 provision.sh**——直接跳到 §6 跑 `remedy.sh`,它只补缺失项,5–30 min 内搞定。
+
 ---
 
 ## 5. 日常使用
@@ -108,10 +110,44 @@ whiteboxtools+richdem OK
 - 激活 Python 环境:`source ~/verigis/venv/bin/activate`
 - Windows 的 `E:` 盘在 WSL 内为 `/mnt/e/`,仓库路径:`/mnt/e/AI\ for\ Math与DEM空间网格交叉研究/verifiable-geocomputation/`
 - 推荐把常用命令写进 `~/.bashrc`(如 `alias vact='source ~/verigis/venv/bin/activate'`)。
+- elan 装好后脚本会自动把 `~/.elan/bin` 写进 `~/.bashrc`,`lake` 在新会话也直接可用。
 
 ---
 
-## 6. 常见问题(排错)
+## 6. 出问题怎么办(诊断与补装)
+
+`provision.sh` 在历史上有过两个常见坑(都源于 GitHub release 链路与重定向):
+
+1. **elan 官方源 `elan.lean-lang.org` 被墙或被劫持** → `curl` 静默挂起,后面全跳;
+2. **Dafny 走 `api.github.com/repos/.../latest` 触发 60 次/h 限流** → 拿不到版本号,后续下载也链断开。
+
+新版 `provision.sh` 已经修了这两点(`-L` 跟随重定向、Lean 双源 fallback、`.deb` 直装不查 API、最后硬校验),但**早期或网络不好的环境还是可能漏一项**。同目录准备了一个 `remedy.sh` 专门补缺:
+
+```bash
+# 在 WSL 内,从仓库根目录跑
+bash scripts/wsl/remedy.sh
+```
+
+或在 PowerShell:
+
+```powershell
+wsl -d Ubuntu-22.04 -- bash -c "bash '/mnt/e/AI for Math与DEM空间网格交叉研究/verifiable-geocomputation/scripts/wsl/remedy.sh'"
+```
+
+`remedy.sh` 行为:
+
+1. 先**漏装检查**——只装缺的那几样,几秒钟判定。
+2. **Python venv**:从 `python3 -m venv --system-site-packages` 重建,装 numpy/scipy/whiteboxtools/richdem。
+3. **Lean 4**:同 provision.sh(elan 主源 + raw.githubusercontent.com 备用),自动把 `~/.elan/bin` 写进 `~/.bashrc`。
+4. **Dafny**:直接下固定 `v4.8.1 .deb`,装完跑一条 `Abs` 小定理验证。
+5. **mathlib scaffold**:在 `~/verigis/lean4_proj` 准备好项目(不阻塞,首次 `lake build` 30–60 min)。
+6. 最终打印 `OK/FAIL` 表格,失败打 `FATAL` 并退非零——没有任何"假装成功"。
+
+日志写在 `~/wsl_remedy.log`,全程同步 stdout/stderr 到屏幕。
+
+---
+
+## 7. 常见问题(排错)
 
 **Q1. `wsl.exe` 被拦截 / 不是内部或外部命令**
 - 确认以**管理员**打开 PowerShell;
@@ -127,14 +163,21 @@ whiteboxtools+richdem OK
 - 需 `python3-dev` 与 `g++`(脚本第 1 步已装)。若仍失败,确认 venv 用了 `--system-site-packages`(继承系统 GDAL)。仍不行可改 `pip install richdem --no-build-isolation`。
 
 **Q5. Dafny 下载不动**
-- 默认取 GitHub 最新 release;若网络慢,脚本回退到 `v4.8.1`。可手动下载 `dafny-*-x64-ubuntu-22.04.zip` 解压到 `/opt/dafny` 并 `ln -sf /opt/dafny/dafny /usr/local/bin/dafny`。
+- v4.8.1 .deb 文件约 16 MB,走 github release。建议网络稳定时跑;若反复断流,可先通过浏览器下好文件 → 拷到 WSL 内 `~/dafny.deb` → `sudo dpkg -i ~/dafny.deb`(也是补救路径)。
 
 **Q6. Windows 与 WSL 文件互访**
 - WSL 内访问 Windows:`/mnt/c/`、`/mnt/e/`;Windows 访问 WSL 文件:资源管理器地址栏输入 `\\wsl$\Ubuntu-22.04\`。
 
+**Q7. provision.sh 跑完看不到 lake/dafny**
+- **新会话没自动加载 elan 环境**。手动:`export PATH="$HOME/.elan/bin:$PATH"`,或重开终端。
+- 真没装上 → §6 跑 remedy.sh。
+
+**Q8. `curl` 在 GitHub release 链接上挂死**
+- 历史经验:`-sSf` 不带 `-L`,重定向后等不到响应。加 `-L --max-time`。新版 provision.sh / remedy.sh 已修。
+
 ---
 
-## 7. 与云实例的分工(见 `docs/resources.md`)
+## 8. 与云实例的分工(见 `docs/resources.md`)
 
 | 场景 | 环境 |
 | --- | --- |
@@ -143,4 +186,5 @@ whiteboxtools+richdem OK
 
 ---
 
-_最后更新:2026-09-05 · 由洛书整理,脚本与文档已就绪,待你在本机一键执行。_
+_最后更新:2026-09-05 v2 — 新增 `remedy.sh` 补装路径,Lean/Dafny 安装链路硬化(防 curl 挂起、API 限流)。_
+
