@@ -1,0 +1,187 @@
+{
+  "version": "0.1",
+  "batch": 1,
+  "count": 20,
+  "propositions": [
+    {
+      "id": "GPB-001",
+      "operator": "slope",
+      "difficulty": 1,
+      "statement": "For any DEM cell with finite elevation gradient, the slope magnitude is non-negative.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-002",
+      "operator": "slope",
+      "difficulty": 2,
+      "statement": "The slope magnitude of a constant-elevation surface is identically zero everywhere.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-003",
+      "operator": "aspect",
+      "difficulty": 2,
+      "statement": "Aspect is defined modulo 360 degrees and is undefined only where the gradient vanishes.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-004",
+      "operator": "aspect",
+      "difficulty": 3,
+      "statement": "For an east-facing planar slope, the computed aspect equals 90 degrees under the cartographic convention.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-005",
+      "operator": "curvature",
+      "difficulty": 3,
+      "statement": "Profile curvature is non-negative at a local elevation maximum of a smooth DEM.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-006",
+      "operator": "curvature",
+      "difficulty": 3,
+      "statement": "Plan (tangential) curvature is non-negative at a local elevation minimum of a smooth DEM.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-007",
+      "operator": "curvature",
+      "difficulty": 4,
+      "statement": "For a quadratic bump h = A - k*(x^2+y^2), the profile curvature at the apex equals -2k up to a sign convention.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-008",
+      "operator": "hillshade",
+      "difficulty": 2,
+      "statement": "Hillshade lies in [0,255] for any finite slope and any azimuth/altitude in their domains.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-009",
+      "operator": "hillshade",
+      "difficulty": 3,
+      "statement": "Hillshade of a flat surface equals 255 * sin(altitude) under the standard Horn shading model.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-010",
+      "operator": "flowdir",
+      "difficulty": 3,
+      "statement": "D8 flow direction at a local pit points to no downslope neighbor (undefined / no-flow).",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-011",
+      "operator": "flowdir",
+      "difficulty": 4,
+      "statement": "On a uniform planar slope the D8 flow direction is constant across all interior cells.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-012",
+      "operator": "viewshed",
+      "difficulty": 4,
+      "statement": "If point B is visible from A, then A is visible from B only when the line of sight is unobstructed in both directions (symmetry under mutual obstruction).",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-013",
+      "operator": "viewshed",
+      "difficulty": 5,
+      "statement": "Visibility is a reflexive relation only on the diagonal; for distinct points it is not guaranteed symmetric.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-014",
+      "operator": "contour",
+      "difficulty": 3,
+      "statement": "A closed contour encloses a region whose interior elevation is either entirely above or entirely below the contour level.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-015",
+      "operator": "watershed",
+      "difficulty": 4,
+      "statement": "Every interior cell belongs to exactly one watershed basin under a deterministic flow-routing rule.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-016",
+      "operator": "tpi",
+      "difficulty": 2,
+      "statement": "Topographic Position Index is zero on a planar (constant-curvature) surface.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-017",
+      "operator": "ruggedness",
+      "difficulty": 2,
+      "statement": "Terrain Ruggedness Index is non-negative and zero on a planar surface.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-018",
+      "operator": "resampling",
+      "difficulty": 3,
+      "statement": "Bilinear resampling of a planar surface at a coarser resolution preserves the plane (no introduced curvature).",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-019",
+      "operator": "slope",
+      "difficulty": 4,
+      "statement": "The Horn (1981) finite-difference slope operator is a consistent estimator of the analytic slope as the grid spacing tends to zero.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    },
+    {
+      "id": "GPB-020",
+      "operator": "curvature",
+      "difficulty": 5,
+      "statement": "The discrete profile-curvature operator converges to the analytic profile curvature of a C^2 surface in the limit of vanishing grid spacing.",
+      "status": "candidate",
+      "formal_lang": null,
+      "proved": false
+    }
+  ]
+}

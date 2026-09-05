@@ -63,3 +63,7 @@ desktop.ini
 # Logs
 *.log
 logs/
+
+# Secrets — local login credentials, NEVER commit
+autoDL登录信息.txt
+*登录信息*.txt

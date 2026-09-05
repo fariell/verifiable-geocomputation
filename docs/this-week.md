@@ -94,6 +94,15 @@ cd verigis && lake update
 ```
 确认编译通过,提交。
 
+### ✅ 9. 第一阶段实验已自动跑完(2026-09-05)
+
+- 在 SeetaCloud 实例(128 核/1TiB/无 GPU)上自动装机 + 跑通 `experiments/phase1`:
+  - 合成 DEM 算子可复现性实验:一阶算子(坡度/梯度)vs 解析真值 corr > 0.9999;二阶曲率 corr 仅 0.157(即"粗网格下曲率不可验证",本方向要解决的真实缺口)。
+  - 生成 GeoProofBench v0.1 的 20 条候选命题(json/csv/md)。
+  - 产出与日志已拉回本地 `experiments/phase1/results/`,报告见 [`experiments/phase1/REPORT.md`](../experiments/phase1/REPORT.md)。
+- Lean 4 因 elan 在 github 发布页重定向上挂起,已超时跳过(非必需);`bootstrap.sh` 已加固为固定版本 + 超时,下次可直接重跑。
+- ⚠️ 该实例 `nvidia-smi` 缺失,未挂载 GPU;Phase 1 纯 CPU 无影响,但 Y2 本地大模型评测前需确认显卡可见。
+
 ---
 
 ## 周末验收 · 三件事
