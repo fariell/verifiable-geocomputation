@@ -86,7 +86,18 @@ if [ "$NEED_VENV$NEED_LEAN$NEED_DAFNY" = "000" ]; then
     exit 0
 fi
 
-# ---------- 1. Python venv ----------
+# ---------- 1. Python venv(幂等:已存在就验证 + 补装缺的)----------
+if [ -f ~/verigis/venv/bin/activate ]; then
+    say "1/4 Python venv 已就位,验证包..."
+    # shellcheck disable=SC1091
+    source ~/verigis/venv/bin/activate
+    if ! python -c "import whitebox, whiteboxtools" 2>/dev/null; then
+        say "  whitebox/whiteboxtools 缺,补装"
+    else
+        say "  关键地理包齐全"
+        NEED_VENV=0
+    fi
+fi
 if [ "$NEED_VENV" = "1" ]; then
     say "1/4 建 Python venv ~/verigis/venv"
     $SUDO apt-get install -y python3-venv python3-dev g++ 2>&1 | tail -5 \
@@ -99,23 +110,18 @@ if [ "$NEED_VENV" = "1" ]; then
 
     # shellcheck disable=SC1091
     source ~/verigis/venv/bin/activate
-    python -m pip install --quiet --upgrade pip setuptools wheel
-    # whiteboxtools PyPI 包装器在 Python 3.10+ 没匹配版本;
-    # 优先装 whitebox(同一维护者 giswqs 迁的新名,3.10 OK),
-    # 退而求其次 whiteboxtools==1.10.0 + --ignore-requires-python。
-    # richdem 需要 GDAL 头文件(--system-site-packages 已经继承)
-    if python -m pip install --quiet whitebox richdem 2>&1 | tail -3; then
-        say "  pip install whitebox richdem OK"
-    else
-        say "  whitebox 装不上,改试 whiteboxtools --ignore-requires-python"
-        python -m pip install --quiet --ignore-requires-python \
-            numpy scipy whiteboxtools==1.10.0 richdem 2>&1 | tail -3 \
-            || say "  警告:地理包部分缺失,核心(numpy/scipy/osgeo)已就位"
-    fi
-    say "venv OK: $(python -c 'import sys; print(sys.prefix)')"
-else
-    say "1/4 Python venv 已就位,跳过"
 fi
+# 不管 NEED_VENV 是什么,都跑一遍:幂等,缺啥补啥,已装的秒过
+python -m pip install --quiet --upgrade pip setuptools wheel
+if python -m pip install --quiet whitebox richdem 2>&1 | tail -3; then
+    say "  pip install whitebox richdem OK"
+else
+    say "  whitebox 装不上,改试 whiteboxtools --ignore-requires-python"
+    python -m pip install --quiet --ignore-requires-python \
+        numpy scipy whiteboxtools==1.10.0 richdem 2>&1 | tail -3 \
+        || say "  警告:地理包部分缺失,核心(numpy/scipy/osgeo)已就位"
+fi
+say "venv OK: $(python -c 'import sys; print(sys.prefix)')"
 
 # ---------- 2. Lean 4 via elan(直装 tarball,绕开 init.sh 内部 curl)----------
 if [ "$NEED_LEAN" = "1" ]; then
