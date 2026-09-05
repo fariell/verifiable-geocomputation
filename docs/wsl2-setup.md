@@ -163,9 +163,9 @@ wsl -d Ubuntu-22.04 -- bash -c "bash '/mnt/e/AI for Math与DEM空间网格交叉
 - 需 `python3-dev` 与 `g++`(脚本第 1 步已装)。若仍失败,确认 venv 用了 `--system-site-packages`(继承系统 GDAL)。仍不行可改 `pip install richdem --no-build-isolation`。
 
 **Q5. Dafny / elan 下载超时(`curl: (28) ... Connection timed out`)**
-- 2026-09 国内/受限网络访问 `github.com` 必 134s 超时。`remedy.sh` / `provision.sh` 现在自动三源 fallback:原 URL → `gh-proxy.com` → `mirror.ghproxy.com`。
+- 2026-09 国内/受限网络访问 `github.com` 必 134s 超时。`remedy.sh` / `provision.sh` 现在自动三源 fallback:原 URL → `gh-proxy.com` → `mirror.ghproxy.com`,并**真解析**(`tar -tzf` / `unzip -l` / `unzstd -tf`)校验下载文件,避免"gzip 包装的 HTML 错误页"被当成真 tarball。
 - **elan 特别坑**:`elan-init.sh` 内部还会再 curl 拉 tarball,卡两次。新版脚本**改直装 tarball**,跳过 init 流程。
-- 三源都失败还有最后一手——手机热点 / VPN,或在能上 GitHub 的设备拉一份 `elan-x86_64-unknown-linux-gnu.tar.gz` / `dafny-4.8.1-x64-ubuntu-22.04.deb`,拷到 WSL 的 `/tmp/`,再跑一次 `bash scripts/wsl/remedy.sh`(脚本发现文件就在 /tmp 会优先用它)。
+- 三源都失败还有最后一手——见下方 Q5c "手机热点手动下载"路径。
 
 **Q5b. `whiteboxtools` `pip install` 报 "No matching distribution found"**
 - 2026 年 PyPI 上 `whiteboxtools` 包装器把 Python 限制在 `<3.10`,但 Ubuntu 22.04 系统 Python 是 3.10.6。
@@ -177,10 +177,25 @@ wsl -d Ubuntu-22.04 -- bash -c "bash '/mnt/e/AI for Math与DEM空间网格交叉
 
 **Q7. provision.sh 跑完看不到 lake/dafny**
 - **新会话没自动加载 elan 环境**。手动:`export PATH="$HOME/.elan/bin:$PATH"`,或重开终端。
-- 真没装上 → §6 跑 remedy.sh。
+- 真没装上 → §6 跑 remedy.sh;再装不上 → Q5c 手动下载路径。
 
 **Q8. `curl` 在 GitHub release 链接上挂死**
 - 历史经验:`-sSf` 不带 `-L`,重定向后等不到响应。加 `-L --max-time`。新版 provision.sh / remedy.sh 已修。
+
+**Q5c. 三源 fallback 全死,连手机热点都不行 — `manual_install.sh` 手动路径**
+- 这是**网络完全不可达**的最后退路:不再尝试下载,只校验文件 + 摆位。
+- 步骤:
+  1. 在**任何能上 GitHub 的设备**(手机+移动数据、VPN 后的电脑、隔壁 WiFi)下三个文件:
+     - `elan-x86_64-unknown-linux-gnu.tar.gz` 从 https://github.com/leanprover/elan/releases/download/v3.1.0/  (约 4 MB)
+     - `lean-4.18.0-linux.tar.zst` 从 https://github.com/leanprover/lean4/releases/download/v4.18.0/  (约 250 MB,**唯一大头**)
+     - `dafny-4.11.0-x64-ubuntu-22.04.zip` 从 https://github.com/dafny-lang/dafny/releases/download/v4.11.0/  (约 16 MB)
+  2. 把三个文件放进 Windows 的 `C:\Users\<你的用户名>\Downloads\`,**重命名**成:
+     - `elan.tar.gz`
+     - `lean.tar.zst`
+     - `dafny.zip`
+  3. 在 WSL bash 里跑:`bash scripts/wsl/manual_install.sh`
+- 脚本会先做**魔数校验**(失败立即报哪个文件坏、坏在哪),然后解 + 摆位 + 符号链 + 跑一条 `dafny verify /tmp/hello.dfy` 验证 Abs 定理。
+- 这个路径**保证能跑通**——只要文件本身没下错、没下坏。
 
 ---
 
@@ -193,5 +208,5 @@ wsl -d Ubuntu-22.04 -- bash -c "bash '/mnt/e/AI for Math与DEM空间网格交叉
 
 ---
 
-_最后更新:2026-09-05 v2 — 新增 `remedy.sh` 补装路径,Lean/Dafny 安装链路硬化(防 curl 挂起、API 限流)。_
+_最后更新:2026-09-05 v3 — 新增 Q5c `manual_install.sh` 手动退路(网络完全不可达);`remedy.sh` 真解析校验下载文件。_
 
