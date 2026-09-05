@@ -41,6 +41,35 @@ print_summary() {
     printf "  %-16s %s\n" "venv py  :" "$(python -c 'import sys; print(sys.prefix)' 2>&1)"
 }
 
+# ---------- 通用解压:zip 三级回退 ----------
+# Ubuntu 22.04 最小化安装默认**没有 unzip**。别假设它在:
+#   1) unzip 在 → 直接用
+#   2) 不在 → apt-get install unzip(静默,失败不中断)
+#   3) 还不行 → python3 -m zipfile(一定在,venv 外也有系统 python3)
+# 用法:extract_zip ZIP_PATH DEST_DIR
+extract_zip() {
+    local zip="$1" dest="$2"
+    mkdir -p "$dest" || return 1
+
+    if command -v unzip >/dev/null 2>&1; then
+        unzip -q "$zip" -d "$dest" && return 0
+    fi
+
+    say "   unzip 不在,尝试 apt-get install unzip ..."
+    if $SUDO apt-get install -y unzip >/dev/null 2>&1; then
+        unzip -q "$zip" -d "$dest" && return 0
+    fi
+
+    say "   apt 装不上,改用 python3 -m zipfile ..."
+    python3 - "$zip" "$dest" <<'PY' && return 0
+import sys, zipfile
+zip_path, dest = sys.argv[1], sys.argv[2]
+with zipfile.ZipFile(zip_path) as z:
+    z.extractall(dest)
+PY
+    return 1
+}
+
 # ---------- 自动探测 Windows 下载目录 ----------
 # WSL 的 $USER 是 Linux 用户名(如 fariel),但 Windows 用户目录可能是
 # Administrator / 其它名字 → 不能写死,要探测。
@@ -233,16 +262,32 @@ if [ "$DAFNY_INSTALLED" = "1" ]; then
 elif [ "$DAFNY_OK" = "1" ]; then
     say "📦 安装 Dafny ${VER_DAFNY} → /opt/dafny"
     $SUDO rm -rf /opt/dafny && $SUDO mkdir -p /opt/dafny
-    $SUDO unzip -q "$DAFNY_ZIP" -d /opt/dafny
 
-    DAFNY_HOME=$(ls -d /opt/dafny/dafny-*/ 2>/dev/null | head -1)
-    [ -z "$DAFNY_HOME" ] && DAFNY_HOME=/opt/dafny
-    DAFNY_BIN=$(ls "$DAFNY_HOME"/dafny "$DAFNY_HOME"/bin/dafny 2>/dev/null | head -1)
-    if [ -z "$DAFNY_BIN" ]; then
-        say "❌ Dafny 解后找不到可执行"; find /opt/dafny -maxdepth 3 -name 'dafny*' -type f | head -5; exit 1
+    # 先解到临时目录再 sudo 搬迁:extract_zip 内部可能用 python,
+    # 直接 sudo python 到 /opt 会有权限/属主问题,分两步更稳。
+    TMPD=/tmp/dafny_extract
+    rm -rf "$TMPD"
+    if ! extract_zip "$DAFNY_ZIP" "$TMPD"; then
+        say "❌ Dafny zip 解压失败(三级回退全挂)"; exit 1
     fi
-    $SUDO chmod +x "$DAFNY_BIN"
+
+    TOP=$(ls "$TMPD" | head -1)
+    say "   zip 顶层:$TOP"
+    if [ -d "$TMPD/$TOP" ]; then
+        $SUDO cp -r "$TMPD/$TOP/." /opt/dafny/
+    else
+        $SUDO cp -r "$TMPD/." /opt/dafny/
+    fi
+    rm -rf "$TMPD"
+
+    DAFNY_BIN=$(ls /opt/dafny/dafny /opt/dafny/bin/dafny 2>/dev/null | head -1)
+    if [ -z "$DAFNY_BIN" ]; then
+        say "❌ Dafny 解后找不到可执行"; find /opt/dafny -maxdepth 3 -name 'dafny*' | head -5; exit 1
+    fi
+    # zip 不保留 unix 权限位(尤其 python 解压路径)→ 整包补执行位
+    $SUDO chmod -R +x /opt/dafny 2>/dev/null
     $SUDO ln -sf "$DAFNY_BIN" /usr/local/bin/dafny
+    # Dafny 4.x 自带 .NET runtime,首次运行需要 HOME 可写(已在)
     say "✅ dafny: $(dafny --version 2>&1 | head -1)"
 else
     say "⚠️  跳过 Dafny:没找到有效的 dafny.zip"

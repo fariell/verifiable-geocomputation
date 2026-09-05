@@ -151,7 +151,8 @@ if [ -f ~/verigis/venv/bin/activate ]; then
 fi
 if [ "$NEED_VENV" = "1" ]; then
     say "1/4 建 Python venv ~/verigis/venv"
-    $SUDO apt-get install -y python3-venv python3-dev g++ 2>&1 | tail -5 \
+    # unzip 必须在这里就装:Dafny 是 .zip 分发,Ubuntu 最小化安装默认没有
+    $SUDO apt-get install -y python3-venv python3-dev g++ unzip 2>&1 | tail -5 \
         || { say "FATAL: python3-venv 装不上,需先解决 apt 源"; exit 1; }
 
     mkdir -p ~/verigis
