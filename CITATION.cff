@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+title: "Verifiable Geocomputation: Formal Specification, Machine-Checked Proofs and Autonomous Reasoning for DEM Terrain Analysis"
+message: "If you use this software or dataset, please cite it as below."
+type: software
+abstract: >-
+  Verifiable Geocomputation is an open research programme that brings formal
+  verification from AI theorem proving into geospatial analysis. It asks whether
+  the verifiability of spatial computing results can be formally defined, proved,
+  and machine-checked, and builds three layers of assets: VeriGIS (a formally
+  specified operator library), GeoProofBench (a benchmark of formal propositions
+  for DEM spatial reasoning), and GeoMath-Agent (an autonomous agent for
+  spatial theorem proving).
+
+authors:
+  - given-names: Yinggang
+    family-names: Guo
+    name-particle: ""
+    orcid: "https://orcid.org/0000-0002-8207-9941"
+    email: fariel_gyg@163.com
+    affiliation: "Northwest Institute of Nuclear Technology, Xi'an 710024, China"
+    alias: fariell
+    website: "https://github.com/fariell"
+
+identifiers:
+  - type: url
+    value: "https://github.com/fariell/verifiable-geocomputation"
+    description: Source repository.
+  - type: url
+    value: "https://fariell.github.io/verifiable-geocomputation/"
+    description: Project homepage.
+
+repository-code: "https://github.com/fariell/verifiable-geocomputation"
+url: "https://fariell.github.io/verifiable-geocomputation/"
+
+keywords:
+  - verifiable spatial computing
+  - formal verification
+  - digital elevation model
+  - terrain analysis
+  - spatial intelligence
+  - geographic big data
+  - AI for mathematics
+  - theorem proving
+  - Lean 4
+  - geospatial reasoning
+
+license: MIT

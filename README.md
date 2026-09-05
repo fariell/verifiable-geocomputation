@@ -11,7 +11,24 @@
 
 ![Repo](https://img.shields.io/badge/github-fariell%2Fverifiable--geocomputation-blue?logo=github)
 
+![ORCID](https://img.shields.io/badge/ORCID-0000--0002--8207--9941-A6CE39?logo=orcid)
+
+![Field](https://img.shields.io/badge/NSFC-D0116%20地理大数据与空间智能-blueviolet)
+
 **Verifiable Geocomputation** (可验证空间计算) 是一个把 AI 形式化数学推理能力迁移到地理空间分析场景的开源研究计划:让地形分析、空间算子、变化检测的每一步推理都可被机器证明。
+
+## 负责人
+
+| | |
+| --- | --- |
+| **姓名** | 郭迎钢 / Yinggang Guo |
+| **单位** | 西北核技术研究所(Northwest Institute of Nuclear Technology),Xi'an 710024, China |
+| **邮箱** | `fariel_gyg@163.com` |
+| **ORCID** | [0000-0002-8207-9941](https://orcid.org/0000-0002-8207-9941) |
+| **GitHub** | [@fariell](https://github.com/fariell) |
+| **学科口** | 地球科学部 · 地球科学一处 · **D01 地理科学 / D0116 地理大数据与空间智能** |
+
+> 论文署名、单位写法、基金学科代码、代表作 BibTeX 全部以 [`AUTHOR.md`](AUTHOR.md) 为唯一权威源,投稿前必查。
 
 ## 我们在做什么(一句话版)
 
@@ -70,13 +87,28 @@ verifiable-geocomputation/
 
 详见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
 
+## 引用本项目
+
+仓库提供 [`CITATION.cff`](CITATION.cff),GitHub 会自动生成引用信息。BibTeX:
+
+```bibtex
+@software{guo2026verifiable,
+  author  = {Guo, Yinggang},
+  title   = {Verifiable Geocomputation: Formal Specification, Machine-Checked
+             Proofs and Autonomous Reasoning for DEM Terrain Analysis},
+  year    = {2026},
+  url     = {https://github.com/fariell/verifiable-geocomputation},
+  license = {MIT}
+}
+```
+
 ## 联系方式
 
 - 主页:<https://fariell.github.io/verifiable-geocomputation/>
 - 仓库:<https://github.com/fariell/verifiable-geocomputation>
 - 讨论:GitHub Discussions
-- 邮件:`verifiable.geo [at] example.org`(待启用)
+- 邮件:`fariel_gyg@163.com`(郭迎钢)
 
 ---
 
-> v0.2 · 2026-09-05 · 本周启动 · 不绑域名,用 GitHub Pages 默认地址
+> v0.3 · 2026-09-05 · 本周启动 · 不绑域名,用 GitHub Pages 默认地址

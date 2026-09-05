@@ -57,20 +57,27 @@ https://fariell.github.io/verifiable-geocomputation/
 ### □ 5. 补上 About 与 Topics(3 分钟)
 
 - repo 首页右上角 ⚙️ → 填 Description + 站点地址
-- Topics 加:`gis` `dem` `formal-verification` `lean` `geocomputation` `spatial-analysis`
+- Topics 加:`gis` `dem` `formal-verification` `lean` `geocomputation` `spatial-analysis` `verifiable-computing` `ai-for-math`
+- 个人主页 <https://github.com/fariell> 的 Bio 建议写:
+  `Verifiable spatial computing · DEM terrain analysis · AI for Math · D0116 Geographic Big Data & Spatial Intelligence`
 
 ---
 
 ## 我和你一起做的
 
-### □ 6. 更新站点地址(推完后)
+### □ 6. 核对并锁定作者信息(3 分钟)
 
-拿到 `https://fariell.github.io/verifiable-geocomputation/` 后,替换三个文件里的 `YOUR-SITE-URL`:
-- `README.md`
-- `site/robots.txt`
-- `site/index.html`
+打开 [`../AUTHOR.md`](../AUTHOR.md),逐项核对:
 
-然后 `git add . && git commit -m "docs: update site URL" && git push`
+- [ ] 姓名拼写:`Yinggang Guo` / 郭迎钢
+- [ ] 单位:`Northwest Institute of Nuclear Technology, Xi'an 710024, China`
+- [ ] 邮箱:`fariel_gyg@163.com`(通讯作者)
+- [ ] ORCID:`0000-0002-8207-9941`
+- [ ] 学科口:`D0116 地理大数据与空间智能`(地球科学部 · 地球科学一处)
+
+**确认后,该文件就是唯一权威署名源**——今后所有投稿、简历、CITATION.cff 一律从这里复制,不再凭记忆写。
+
+站点地址已按 GitHub Pages 默认地址写死(`https://fariell.github.io/verifiable-geocomputation/`),无需再替换。
 
 ### □ 7. 攒 GeoProofBench 50 命题(agent 主跑)
 

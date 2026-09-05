@@ -152,6 +152,15 @@ img, svg { max-width: 100%; display: block; }
 }
 .btn-ghost:hover { background: var(--paper-2); border-color: var(--ink); text-decoration: none; }
 
+.hero-byline {
+  margin-top: 26px;
+  font-size: 14px; line-height: 1.7;
+  color: var(--ink-mute);
+  max-width: 720px;
+}
+.hero-byline a { color: var(--accent); border-bottom: 1px solid transparent; }
+.hero-byline a:hover { border-bottom-color: var(--accent); text-decoration: none; }
+
 .hero-meta {
   display: flex; gap: 32px; margin-top: 48px;
   padding-top: 28px; border-top: 1px solid var(--line-soft);
