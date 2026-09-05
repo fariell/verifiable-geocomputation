@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "verigis"
+version = "0.1.0-dev"
+description = "Verifiable Geocomputation: spatial operators with formal specifications and machine-checkable proofs."
+readme = "../../README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Verifiable Geocomputation Contributors"}
+]
+keywords = ["gis", "dem", "verification", "formal-methods", "geocomputation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/fariell/verifiable-geocomputation"
+"Repository" = "https://github.com/fariell/verifiable-geocomputation"
+"Issues" = "https://github.com/fariell/verifiable-geocomputation/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

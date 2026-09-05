@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifiable Geocomputation · 可验证空间计算</title>
+<meta name="description" content="把可验证性从数学定理证明搬到 DEM、地形分析与空间网格上。一个开源研究计划。">
+<meta name="keywords" content="verifiable geocomputation, 可验证空间计算, DEM, formal verification, Lean, Dafny, GIS">
+<meta property="og:title" content="Verifiable Geocomputation · 可验证空间计算">
+<meta property="og:description" content="把可验证性从数学定理证明搬到 DEM、地形分析与空间网格上。">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<!-- ============================================================
+     Header
+     ============================================================ -->
+<header class="site-header">
+  <nav class="nav">
+    <a href="#" class="brand">
+      <img src="assets/images/logo.svg" alt="logo" class="brand-logo">
+      <div class="brand-name">Verifiable Geocomputation<small>可验证空间计算</small></div>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#problem">问题</a></li>
+      <li><a href="#approach">思路</a></li>
+      <li><a href="#roadmap">路线图</a></li>
+      <li><a href="#outputs">资产</a></li>
+      <li><a href="#involve">参与</a></li>
+    </ul>
+    <a href="https://github.com/fariell/verifiable-geocomputation" class="nav-cta" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+  </nav>
+</header>
+
+<!-- ============================================================
+     Hero
+     ============================================================ -->
+<section class="hero">
+  <span class="hero-tag"><span class="dot"></span>Y0 立纲期 · 2026.09–2027.06</span>
+  <h1 class="hero-title">
+    让空间计算的每一步<br>
+    推理都<em>可被机器证明</em>
+  </h1>
+  <p class="hero-sub">
+    <strong>Verifiable Geocomputation</strong>(可验证空间计算)把 AI 在数学定理证明上爆发的能力——DeepSeekMath-V2、Lean、Dafny、形式化基准——迁移到地理空间分析:让 DEM 地形分析、空间算子、变化检测的每一步输出,都可被形式化规范定义、机器证明检验、并最终可被自主发现。
+  </p>
+  <div class="hero-cta">
+    <a href="https://github.com/fariell/verifiable-geocomputation" class="btn btn-primary" target="_blank" rel="noopener">
+      在 GitHub 查看 →
+    </a>
+    <a href="#approach" class="btn btn-ghost">了解思路</a>
+    <a href="#roadmap" class="btn btn-ghost">十年路线图</a>
+  </div>
+  <div class="hero-meta">
+    <div><b>核心问题</b><br>空间计算结果的可验证性能否被形式化定义?</div>
+    <div><b>当前位置</b><br>Y0 立纲期 · 第一份资产筹建中</div>
+    <div><b>下一步</b><br>组织仓、域名、静态站(本周)</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Problem
+     ============================================================ -->
+<section class="section" id="problem">
+  <div class="section-eyebrow">问题</div>
+  <h2 class="section-title">空间分析软件今天长这样</h2>
+  <p class="section-lead">
+    我们每天用 GDAL、WhiteboxTools、ArcGIS、TauDEM 跑上亿次空间算子——但从来没人能告诉你,<strong>这次计算的结果是不是对的</strong>。
+  </p>
+
+  <div class="problem-grid">
+    <div class="problem-side old">
+      <h3>现状</h3>
+      <p>
+        算子文档说"用 Horn 法算坡度",但 5 个实现跑出 5 个略有差异的结果。论文说"流向判定准确率 96%",但剩下 4% 错在哪、什么时候错、为什么错——没人能回答。审稿人质疑结论时,你只能"再跑一遍看看"。
+      </p>
+      <p style="margin-top: 12px;">
+        <strong>"结果可信但过程不可验证"</strong>——空间计算是黑箱。
+      </p>
+    </div>
+    <div class="problem-side new">
+      <h3>我们的命题</h3>
+      <p>
+        同样的范式迁移,在数学定理证明领域已经发生:DeepSeekMath-V2 用"验证器-生成器"双模型架构拿到 IMO 金牌;Numina-Lean-Agent 用编码智能体解完 Putnam 2025。
+      </p>
+      <p style="margin-top: 12px;">
+        这套范式从来没有被认真搬到空间分析。我们要做这件事——<strong>让空间算子的每一步,都有 Lean/Dafny 证明背书</strong>。
+      </p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-quote">
+      "空间计算结果的可验证性,能否被<strong style="color:#e8d2c3;">形式化地定义、证明与机器检验</strong>?"
+    </div>
+    <div class="callout-meta">— 这是我们整条研究路线要回答的一个问题</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Three-tier
+     ============================================================ -->
+<section class="section alt" id="approach">
+  <div class="inner">
+    <div class="section-eyebrow">思路</div>
+    <h2 class="section-title">三层资产结构</h2>
+    <p class="section-lead">
+      只发论文 = 高级论文工人。只做基准/库 = 在考核里活不到成型。必须三线并行,让论文从资产中自然产生——每发一个版本就有一篇论文,每跑一次基准就有一篇分析。
+    </p>
+
+    <div class="tier-grid">
+      <div class="tier-card l1">
+        <div class="tier-num">L1 · 流量层</div>
+        <h3 class="tier-title">论文</h3>
+        <p class="tier-desc">可见度与考核指标的硬通货。容易做,但不构成壁垒,可被绕过。</p>
+        <div class="tier-content">
+          <b>代表产出:</b> 形式化 DEM 算子论文、GeoProofBench 基准论文、可验证性度量论文。
+        </div>
+      </div>
+      <div class="tier-card l2">
+        <div class="tier-num">L2 · 壁垒层</div>
+        <h3 class="tier-title">开源库 + 基准</h3>
+        <p class="tier-desc">VeriGIS 库、GeoProofBench 命题库、排行榜。别人引用你的真正原因。</p>
+        <div class="tier-content">
+          <b>代表产出:</b> VeriGIS Python 包(Lean 绑定)、GeoProofBench v1 (300 命题)、持续更新的排行榜。
+        </div>
+      </div>
+      <div class="tier-card l3">
+        <div class="tier-num">L3 · 复利层</div>
+        <h3 class="tier-title">方向与社区</h3>
+        <p class="tier-desc">Special Issue、Workshop、标准提案、研究生梯队、编委身份。从"做研究"到"立方向"。</p>
+        <div class="tier-content">
+          <b>代表产出:</b> IJGIS Special Issue、OGC 可验证性议题提案、ISPRS Summer School。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Flywheel
+     ============================================================ -->
+<section class="section">
+  <div class="section-eyebrow">飞轮</div>
+  <h2 class="section-title">体系自我造血的四个齿轮</h2>
+  <p class="section-lead">
+    这是体系区别于"一组相关论文"的核心结构。<strong>飞轮启动的标志</strong>是:智能体自动发现一条新的空间性质,经人工核验后写回规范库——这件事一旦发生,体系就真正转起来了。
+  </p>
+
+  <div class="flywheel-wrap">
+    <div class="flywheel">
+      <div class="flywheel-step">
+        <div class="flywheel-num">1</div>
+        <div class="flywheel-title">理论与规范</div>
+        <div class="flywheel-desc">形式化 DEM 算子定理,定义规范语言子集</div>
+        <div class="flywheel-arrow">→</div>
+      </div>
+      <div class="flywheel-step">
+        <div class="flywheel-num">2</div>
+        <div class="flywheel-title">资产与基准</div>
+        <div class="flywheel-desc">VeriGIS 库 + GeoProofBench 命题 + 排行榜</div>
+        <div class="flywheel-arrow">→</div>
+      </div>
+      <div class="flywheel-step">
+        <div class="flywheel-num">3</div>
+        <div class="flywheel-title">自主智能体</div>
+        <div class="flywheel-desc">GeoMath-Agent 自动证明、发现、提出反例</div>
+        <div class="flywheel-arrow">→</div>
+      </div>
+      <div class="flywheel-step">
+        <div class="flywheel-num">4</div>
+        <div class="flywheel-title">新定理与新性质</div>
+        <div class="flywheel-desc">发现的空间性质写回 ①,启动下一轮</div>
+      </div>
+    </div>
+
+    <div class="flywheel-note">
+      <b>Y2 关键验收:</b> 智能体发现的新性质经人工核验后写进规范库,基准发布新版本——飞轮启动一次,体系真正成型。在此之前,你只是一组相关的论文。
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Roadmap
+     ============================================================ -->
+<section class="section alt" id="roadmap">
+  <div class="inner">
+    <div class="section-eyebrow">路线图</div>
+    <h2 class="section-title">十年:Y0 立纲 → Y3 成型 → Y7 扩张</h2>
+    <p class="section-lead">
+      不是"快速发 SCI",而是"在 10 年内造出一个别人会主动检索的词"。每年的硬性验收标准在 <code>docs/roadmap.md</code> 完整列出。
+    </p>
+
+    <div class="roadmap">
+      <div class="roadmap-track"></div>
+      <div class="roadmap-grid">
+        <div class="roadmap-year now"><strong>Y0</strong><small>2026.09–27.06</small></div>
+        <div class="roadmap-year"><strong>Y1</strong><small>27.07–28.06</small></div>
+        <div class="roadmap-year"><strong>Y2</strong><small>28.07–29.06</small></div>
+        <div class="roadmap-year"><strong>Y3</strong><small>29.07–30.06</small></div>
+        <div class="roadmap-year"><strong>Y4</strong><small>30.07–31.06</small></div>
+        <div class="roadmap-year"><strong>Y5</strong><small>31.07–32.06</small></div>
+        <div class="roadmap-year"><strong>Y6</strong><small>32.07–33.06</small></div>
+        <div class="roadmap-year"><strong>Y7</strong><small>33.07–34.06</small></div>
+      </div>
+
+      <div class="roadmap-cards">
+        <div class="roadmap-card">
+          <strong>立纲</strong>
+          P0 纲领 + GeoProofBench v1 + 第一笔钱(青C)。开仓、域名、静态站、VeriGIS 骨架。
+        </div>
+        <div class="roadmap-card">
+          <strong>地基</strong>
+          VeriGIS v0.1 开源、4 类算子形式化、招研究生。
+        </div>
+        <div class="roadmap-card">
+          <strong>闭环</strong>
+          智能体超零样本基线,可验证性度量定型。飞轮启动。
+        </div>
+        <div class="roadmap-card">
+          <strong>成型</strong>
+          GeoProofBench v2 跨域、Special Issue、青C 结题。
+        </div>
+        <div class="roadmap-card future">
+          <strong>扩张</strong>
+          矢量/点云/时空;OGC/ISO 标准提案;优青申报。
+        </div>
+        <div class="roadmap-card future">
+          <strong>标准化</strong>
+          教材出版、课程开设、国际合作。
+        </div>
+        <div class="roadmap-card future">
+          <strong>梯队</strong>
+          研究生梯队稳定,博士培养进入产出期。
+        </div>
+        <div class="roadmap-card future">
+          <strong>词汇</strong>
+          "可验证空间计算"成为被主动检索的术语。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Outputs
+     ============================================================ -->
+<section class="section" id="outputs">
+  <div class="section-eyebrow">资产</div>
+  <h2 class="section-title">正在筹建的四块核心产出</h2>
+  <p class="section-lead">
+    每一个都既是论文的载体,也是别人引用我们的真正原因。这是 L2 壁垒层的具体内容。
+  </p>
+
+  <div class="output-grid">
+    <div class="output-card">
+      <div class="output-head">
+        <div class="output-icon">VG</div>
+        <div class="output-title">VeriGIS</div>
+        <div class="output-status">筹建</div>
+      </div>
+      <p class="output-desc">
+        一个 Python 包,把 GDAL/WhiteboxTools 等成熟空间库的算子接口暴露为可形式化规范的形式:每个函数都附带 Lean/Dafny 形式规约、属性测试、与参考实现的差分验证。
+      </p>
+      <a class="output-link" href="https://github.com/fariell/verifiable-geocomputation/tree/main/library" target="_blank" rel="noopener">
+        → 查看 library/
+      </a>
+    </div>
+
+    <div class="output-card">
+      <div class="output-head">
+        <div class="output-icon">GB</div>
+        <div class="output-title">GeoProofBench</div>
+        <div class="output-status">v0 启动</div>
+      </div>
+      <p class="output-desc">
+        首个面向 DEM 空间推理的形式化定理证明基准:300 条经典命题(坡度/水文/可视域/变化检测),双语言形式化(Lean 4 + Dafny),公开排行榜,持续扩充。
+      </p>
+      <a class="output-link" href="https://github.com/fariell/verifiable-geocomputation/tree/main/benchmark" target="_blank" rel="noopener">
+        → 查看 benchmark/
+      </a>
+    </div>
+
+    <div class="output-card">
+      <div class="output-head">
+        <div class="output-icon">F4</div>
+        <div class="output-title">Formal Specs</div>
+        <div class="output-status">设计阶段</div>
+      </div>
+      <p class="output-desc">
+        Lean 4 + Dafny 双形式化规范库:定义核心 DEM 算子的形式语义,证明算子性质(单调性、对称性、环流守恒等),可机器检验。
+      </p>
+      <a class="output-link" href="https://github.com/fariell/verifiable-geocomputation/tree/main/formal" target="_blank" rel="noopener">
+        → 查看 formal/
+      </a>
+    </div>
+
+    <div class="output-card">
+      <div class="output-head">
+        <div class="output-icon">GA</div>
+        <div class="output-title">GeoMath-Agent</div>
+        <div class="output-status">Y2 启动</div>
+      </div>
+      <p class="output-desc">
+        基于通用编码智能体的空间定理证明器与发现器:可自主检索定理、生成证明、调用 GIS 工具验证、提出反例。是飞轮的引擎,Y2 启动。
+      </p>
+      <a class="output-link" href="https://github.com/fariell/verifiable-geocomputation/issues" target="_blank" rel="noopener">
+        → 关注 issue
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Get involved
+     ============================================================ -->
+<section class="section alt" id="involve">
+  <div class="inner">
+    <div class="section-eyebrow">参与</div>
+    <h2 class="section-title">如何加入这个方向</h2>
+    <p class="section-lead">
+      项目处于 Y0 早期,**欢迎任何形式的贡献**——你的每一步都是体系的一部分。
+    </p>
+
+    <div class="involve-grid">
+      <div class="involve-card">
+        <div class="involve-icon">📚</div>
+        <h3 class="involve-title">提命题</h3>
+        <p class="involve-desc">
+          你熟悉的某条 DEM 几何/水文性质——能写成一句话"对所有满足 X 的 DEM,输出 Y 满足 Z"的形式——就是 GeoProofBench 的素材。<a href="https://github.com/fariell/verifiable-geocomputation/issues/new">提 issue</a> 即可。
+        </p>
+        <a href="https://github.com/fariell/verifiable-geocomputation/issues/new" class="involve-action" target="_blank" rel="noopener">→ 提 issue</a>
+      </div>
+
+      <div class="involve-card">
+        <div class="involve-icon">💻</div>
+        <h3 class="involve-title">写代码</h3>
+        <p class="involve-desc">
+          VeriGIS 库的算子绑定、CI、文档、测试。门槛低:会 Python 就能起步;形式化那部分我们会带你过。<a href="https://github.com/fariell/verifiable-geocomputation/blob/main/CONTRIBUTING.md">看贡献指南</a>。
+        </p>
+        <a href="https://github.com/fariell/verifiable-geocomputation/blob/main/CONTRIBUTING.md" class="involve-action" target="_blank" rel="noopener">→ 阅读 CONTRIBUTING.md</a>
+      </div>
+
+      <div class="involve-card">
+        <div class="involve-icon">💬</div>
+        <h3 class="involve-title">讨论</h3>
+        <p class="involve-desc">
+          在 <a href="https://github.com/fariell/verifiable-geocomputation/discussions">GitHub Discussions</a> 聊方向、聊 RFC、聊你对"可验证空间计算"的理解。每条意见都会被认真回复。
+        </p>
+        <a href="https://github.com/fariell/verifiable-geocomputation/discussions" class="involve-action" target="_blank" rel="noopener">→ 进 Discussions</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     Footer
+     ============================================================ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col footer-brand">
+      <div class="brand-name">Verifiable Geocomputation</div>
+      <p class="footer-tag">
+        把可验证性从数学定理证明搬到 DEM、地形分析与空间网格上。<br>
+        一个开源研究计划。
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>导航</h4>
+      <ul>
+        <li><a href="#problem">问题</a></li>
+        <li><a href="#approach">思路</a></li>
+        <li><a href="#roadmap">路线图</a></li>
+        <li><a href="#outputs">资产</a></li>
+        <li><a href="#involve">参与</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>资源</h4>
+      <ul>
+        <li><a href="https://github.com/fariell/verifiable-geocomputation" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://github.com/fariell/verifiable-geocomputation/discussions" target="_blank" rel="noopener">Discussions</a></li>
+        <li><a href="https://github.com/fariell/verifiable-geocomputation/blob/main/docs/roadmap.md" target="_blank" rel="noopener">完整路线图</a></li>
+        <li><a href="https://github.com/fariell/verifiable-geocomputation/blob/main/docs/vision.md" target="_blank" rel="noopener">愿景文档</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>联系</h4>
+      <ul>
+        <li><a href="https://github.com/fariell/verifiable-geocomputation/issues" target="_blank" rel="noopener">提交 issue</a></li>
+        <li><a href="https://github.com/fariell/verifiable-geocomputation/releases.atom" target="_blank" rel="noopener">RSS 订阅</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Verifiable Geocomputation · MIT License</div>
+    <div>v0.1 · 2026-09-05 启动</div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

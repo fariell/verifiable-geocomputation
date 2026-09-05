@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Hexagonal grid cell with verification checkmark -->
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b85c38"/>
+      <stop offset="1" stop-color="#8b3a3a"/>
+    </linearGradient>
+  </defs>
+  <!-- Grid background suggesting spatial grid -->
+  <g stroke="#b85c38" stroke-width="1" opacity="0.25">
+    <line x1="2" y1="8" x2="30" y2="8"/>
+    <line x1="2" y1="16" x2="30" y2="16"/>
+    <line x1="2" y1="24" x2="30" y2="24"/>
+    <line x1="8" y1="2" x2="8" y2="30"/>
+    <line x1="16" y1="2" x2="16" y2="30"/>
+    <line x1="24" y1="2" x2="24" y2="30"/>
+  </g>
+  <!-- Verified cell highlight -->
+  <rect x="6" y="6" width="10" height="10" rx="2" fill="url(#grad)" opacity="0.9"/>
+  <!-- Verification checkmark -->
+  <path d="M8.5 11 L11 13.5 L16 8.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Adjacent cells -->
+  <rect x="16" y="6" width="4" height="4" fill="#1a1d24" opacity="0.15"/>
+  <rect x="20" y="6" width="4" height="4" fill="#1a1d24" opacity="0.15"/>
+  <rect x="16" y="10" width="4" height="4" fill="#1a1d24" opacity="0.15"/>
+  <rect x="20" y="10" width="4" height="4" fill="#1a1d24" opacity="0.15"/>
+</svg>

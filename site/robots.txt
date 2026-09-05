@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fariell.github.io/verifiable-geocomputation/sitemap.xml
