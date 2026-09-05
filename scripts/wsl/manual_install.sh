@@ -32,9 +32,10 @@ print_summary() {
     say ""
     say "===== 汇总 ====="
     printf "  %-16s %s\n" "gdalinfo :" "$(gdalinfo --version 2>&1)"
-    printf "  %-16s %s\n" "elan     :" "$($HOME/.elan/bin/elan --version 2>&1 | head -1)"
+    printf "  %-16s %s\n" "lean     :" "$(command -v lean >/dev/null 2>&1 && lean --version 2>&1 | head -1 || echo '未安装')"
     printf "  %-16s %s\n" "lake     :" "$(command -v lake >/dev/null 2>&1 && lake --version 2>&1 | head -1 || echo '未安装')"
     printf "  %-16s %s\n" "dafny    :" "$(command -v dafny >/dev/null 2>&1 && dafny --version 2>&1 | head -1 || echo '未安装')"
+    printf "  %-16s %s\n" "elan     :" "$(command -v elan >/dev/null 2>&1 && elan --version 2>&1 | head -1 || echo '未安装(可选)')"
     # shellcheck disable=SC1091
     source ~/verigis/venv/bin/activate 2>/dev/null
     printf "  %-16s %s\n" "venv py  :" "$(python -c 'import sys; print(sys.prefix)' 2>&1)"
@@ -138,46 +139,43 @@ command -v dafny >/dev/null 2>&1 && DAFNY_INSTALLED=1
 [ -x "$HOME/.elan/bin/elan" ] && ELAN_OK_INSTALLED=1
 
 say "── 当前状态 ──"
-say "  elan 已装: $ELAN_OK_INSTALLED    lake 已装: $LAKE_OK    dafny 已装: $DAFNY_INSTALLED"
+say "  lake 已装: $LAKE_OK     dafny 已装: $DAFNY_INSTALLED     elan: $ELAN_OK_INSTALLED(可选)"
 echo ""
 
-# 如果全装好了,直接退出
-if [ "$LAKE_OK" = "1" ] && [ "$DAFNY_INSTALLED" = "1" ] && [ "$ELAN_OK_INSTALLED" = "1" ]; then
-    say "✅ Lean / Dafny / elan 全部已就位,无需安装。"
-    say "   要重装请先手动删除 ~/.elan 和 /opt/dafny"
+# Lean + Dafny 都好了就退出(elan 可选,不作为完成条件)
+if [ "$LAKE_OK" = "1" ] && [ "$DAFNY_INSTALLED" = "1" ]; then
+    say "✅ Lean / Dafny 已就位,无需安装。"
+    say "   要重装请先手动删除 ~/lean-${VER_LEAN} 和 /opt/dafny"
     print_summary
     exit 0
 fi
 
-# ---------- 装 elan ----------
+# ---------- elan:可选组件,失败不阻塞主线 ----------
+# 关键认知:elan-x86_64-unknown-linux-gnu.tar.gz 里**只有一个 elan-init**,
+# 那是 12.9 MB 的 ELF 安装器,不是 elan 二进制——运行它会去联网下载,
+# 在当前受限网络里必然失败。
+# 而 elan 本身只是 Lean 的版本管理器(类比 rustup 之于 Rust),**并非必需**:
+# 只要有 lean-4.18.0-linux.tar.zst 本体,解压后把 bin 加进 PATH 就能直接
+# 用 lake / lean。所以这里把 elan 降级为可选。
 if [ "$ELAN_OK_INSTALLED" = "1" ]; then
     say "📦 elan 已装,跳过"
 elif [ "$ELAN_OK" = "1" ]; then
-    say "📦 安装 elan → ~/.elan"
-    mkdir -p "$HOME/.elan"
-    if tar -xzf "$ELAN_TGZ" -C "$HOME/.elan" --strip-components=1 2>/dev/null; then
-        :
-    else
-        # 顶层结构不对,试探测模式
-        EXTRACT=/tmp/elan_extract
-        rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
-        tar -xzf "$ELAN_TGZ" -C "$EXTRACT" || { say "❌ elan 解压失败"; exit 1; }
-        TOP=$(ls "$EXTRACT" | head -1)
-        rm -rf "$HOME/.elan" && mkdir -p "$HOME/.elan"
-        if [ -x "$EXTRACT/$TOP/bin/elan" ]; then
-            cp -r "$EXTRACT/$TOP/." "$HOME/.elan/"
-        elif [ -x "$EXTRACT/bin/elan" ]; then
-            cp -r "$EXTRACT/." "$HOME/.elan/"
+    if tar -tzf "$ELAN_TGZ" 2>/dev/null | grep -qE '(^|/)bin/elan$'; then
+        say "📦 安装 elan → ~/.elan"
+        mkdir -p "$HOME/.elan"
+        tar -xzf "$ELAN_TGZ" -C "$HOME/.elan" --strip-components=1 2>/dev/null
+        if [ -x "$HOME/.elan/bin/elan" ]; then
+            say "✅ elan: $($HOME/.elan/bin/elan --version 2>&1 | head -1)"
         else
-            say "❌ elan tarball 结构未知"; find "$EXTRACT" -maxdepth 3 | head -10; exit 1
+            say "⚠️  elan 解压后 binary 不在,跳过(不影响 Lean 使用)"
         fi
-        rm -rf "$EXTRACT"
+    else
+        say "⚠️  跳过 elan:该 tarball 只含 elan-init(安装器),不是二进制"
+        say "    运行它会联网下载,在受限网络里必然失败。"
+        say "    **但 elan 并非必需** —— Lean toolchain 本体解压后加 PATH 即可用。"
     fi
-    [ -x "$HOME/.elan/bin/elan" ] || { say "❌ 解压后 \$HOME/.elan/bin/elan 不存在"; exit 1; }
-    say "✅ elan: $($HOME/.elan/bin/elan --version 2>&1 | head -1)"
 else
-    say "⚠️  跳过 elan:没找到有效的 elan.tar.gz"
-    say "   下载:https://github.com/leanprover/elan/releases/download/v3.1.0/elan-x86_64-unknown-linux-gnu.tar.gz"
+    say "⚠️  跳过 elan:没找到 elan.tar.gz(不影响 Lean / Dafny)"
 fi
 
 export PATH="$HOME/.elan/bin:$PATH"
@@ -186,14 +184,14 @@ if ! grep -q '\.elan/bin' "$HOME/.bashrc" 2>/dev/null; then
 fi
 echo ""
 
-# ---------- 装 Lean toolchain ----------
+# ---------- 装 Lean toolchain(不依赖 elan,直接解压 + 加 PATH)----------
+LEAN_HOME="$HOME/lean-${VER_LEAN}"
 if [ "$LAKE_OK" = "1" ]; then
     say "📦 Lean 已装,跳过:$(lake --version 2>&1 | head -1)"
 elif [ "$LEAN_OK" = "1" ]; then
-    say "📦 安装 Lean ${VER_LEAN} → ~/.elan/toolchains/lean-${VER_LEAN}/"
-    mkdir -p "$HOME/.elan/toolchains"
-    rm -rf "$HOME/.elan/toolchains/lean-${VER_LEAN}"
-    mkdir -p "$HOME/.elan/toolchains/lean-${VER_LEAN}"
+    say "📦 安装 Lean ${VER_LEAN} → ${LEAN_HOME}/"
+    rm -rf "$LEAN_HOME"
+    mkdir -p "$LEAN_HOME"
 
     EXTRACT=/tmp/lean_extract
     rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
@@ -203,25 +201,26 @@ elif [ "$LEAN_OK" = "1" ]; then
     TOP=$(ls "$EXTRACT" | head -1)
     say "   tarball 顶层:$TOP"
     if [ -x "$EXTRACT/$TOP/bin/lake" ]; then
-        cp -r "$EXTRACT/$TOP/." "$HOME/.elan/toolchains/lean-${VER_LEAN}/"
+        cp -r "$EXTRACT/$TOP/." "$LEAN_HOME/"
     elif [ -x "$EXTRACT/bin/lake" ]; then
-        cp -r "$EXTRACT/." "$HOME/.elan/toolchains/lean-${VER_LEAN}/"
+        cp -r "$EXTRACT/." "$LEAN_HOME/"
     else
         say "❌ Lean 解后找不到 bin/lake"; find "$EXTRACT" -maxdepth 3 -type f | head -10; exit 1
     fi
     rm -rf "$EXTRACT"
-    ln -sfn "$HOME/.elan/toolchains/lean-${VER_LEAN}" "$HOME/.elan/toolchains/stable"
 
-    if [ ! -x "$HOME/.elan/toolchains/lean-${VER_LEAN}/bin/lake" ]; then
+    if [ ! -x "$LEAN_HOME/bin/lake" ]; then
         say "❌ 装完 lake binary 仍不存在"; exit 1
     fi
-    # 用 elan 注册(若 elan 在)
-    if command -v elan >/dev/null 2>&1; then
-        elan toolchain link "${VER_LEAN}" "$HOME/.elan/toolchains/lean-${VER_LEAN}" 2>&1 | tail -1
-        elan default "${VER_LEAN}" 2>&1 | tail -1
+
+    # 直接把 toolchain 的 bin 写进 ~/.bashrc(不需要 elan)
+    if ! grep -q "lean-${VER_LEAN}/bin" "$HOME/.bashrc" 2>/dev/null; then
+        echo "export PATH=\"\$HOME/lean-${VER_LEAN}/bin:\$PATH\"" >> "$HOME/.bashrc"
+        say "   已把 \$HOME/lean-${VER_LEAN}/bin 写进 ~/.bashrc"
     fi
-    export PATH="$HOME/.elan/bin:$PATH"
+    export PATH="$LEAN_HOME/bin:$PATH"
     say "✅ lake: $(lake --version 2>&1 | head -1)"
+    say "✅ lean: $(lean --version 2>&1 | head -1)"
 else
     say "⚠️  跳过 Lean:没有完整文件,先跑续传:"
     say "     bash scripts/wsl/resume_lean.sh"

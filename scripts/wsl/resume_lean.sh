@@ -163,13 +163,15 @@ else
     say "⚠️  系统没有 unzstd,跳过 CRC 校验(装:sudo apt install zstd)"
 fi
 
-# ---------- 5. 解压到 toolchains ----------
+# ---------- 5. 解压到独立目录(不依赖 elan)----------
+# Lean toolchain 是自包含的:解压后把 bin/ 加进 PATH 就能直接跑
+# lake / lean。elan 只是版本管理器,在受限网络里装不上也不影响使用。
+LEAN_HOME="$HOME/lean-${VER}"
 say ""
-say "===== 安装到 ~/.elan/toolchains/lean-${VER}/ ====="
-export PATH="$HOME/.elan/bin:$PATH"
+say "===== 安装到 ${LEAN_HOME}/ ====="
 
-rm -rf "$HOME/.elan/toolchains/lean-${VER}"
-mkdir -p "$HOME/.elan/toolchains"
+rm -rf "$LEAN_HOME"
+mkdir -p "$LEAN_HOME"
 
 EXTRACT=/tmp/lean_extract
 rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
@@ -180,11 +182,10 @@ fi
 
 TOP=$(ls "$EXTRACT" | head -1)
 say "tarball 顶层目录:$TOP"
-mkdir -p "$HOME/.elan/toolchains/lean-${VER}"
 if [ -x "$EXTRACT/$TOP/bin/lake" ]; then
-    cp -r "$EXTRACT/$TOP/." "$HOME/.elan/toolchains/lean-${VER}/"
+    cp -r "$EXTRACT/$TOP/." "$LEAN_HOME/"
 elif [ -x "$EXTRACT/bin/lake" ]; then
-    cp -r "$EXTRACT/." "$HOME/.elan/toolchains/lean-${VER}/"
+    cp -r "$EXTRACT/." "$LEAN_HOME/"
 else
     say "❌ 解后找不到 bin/lake,实际结构:"
     find "$EXTRACT" -maxdepth 3 -type f | head -10
@@ -192,26 +193,19 @@ else
 fi
 rm -rf "$EXTRACT"
 
-ln -sfn "$HOME/.elan/toolchains/lean-${VER}" "$HOME/.elan/toolchains/stable"
-
 # ---------- 6. 强校验:lake 必须真能跑 ----------
-if [ ! -x "$HOME/.elan/toolchains/lean-${VER}/bin/lake" ]; then
+if [ ! -x "$LEAN_HOME/bin/lake" ]; then
     say "❌ lake binary 不存在"
     exit 1
 fi
-say "✅ lake: $($HOME/.elan/toolchains/lean-${VER}/bin/lake --version 2>&1 | head -1)"
-
 # 写 PATH 到 bashrc
-if ! grep -q '\.elan/bin' "$HOME/.bashrc" 2>/dev/null; then
-    echo 'export PATH="$HOME/.elan/bin:$PATH"' >> "$HOME/.bashrc"
-    say "已把 elan 写进 ~/.bashrc"
+if ! grep -q "lean-${VER}/bin" "$HOME/.bashrc" 2>/dev/null; then
+    echo "export PATH=\"\$HOME/lean-${VER}/bin:\$PATH\"" >> "$HOME/.bashrc"
+    say "已把 \$HOME/lean-${VER}/bin 写进 ~/.bashrc"
 fi
-
-# 用 elan 注册(若 elan 在)
-if command -v elan >/dev/null 2>&1; then
-    elan toolchain link "${VER}" "$HOME/.elan/toolchains/lean-${VER}" 2>&1 | tail -2
-    elan default "${VER}" 2>&1 | tail -2
-fi
+export PATH="$LEAN_HOME/bin:$PATH"
+say "✅ lake: $(lake --version 2>&1 | head -1)"
+say "✅ lean: $(lean --version 2>&1 | head -1)"
 
 say ""
 say "===== ✅ Lean 4 toolchain 安装完成 ====="
