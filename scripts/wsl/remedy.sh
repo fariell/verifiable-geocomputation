@@ -43,73 +43,75 @@ wait_for_apt() {
     return 1
 }
 
-# 通用下载:试原 URL,失败转 gh-proxy.com 镜像,再 mirror.ghproxy.com。
-# 这两个是国内常用的 GitHub release 镜像,在 Lean/Dafny 等库上稳定。
+# 通用下载:三源(原 URL → gh-proxy.com → mirror.ghproxy.com)+ 真解析验证。
+# 关键改进(相对之前的版本):
+#   - **只信 magic bytes**(前 4 字节),不再靠 URL 字符串 case 匹配——
+#     上一版 case `*.tar.gz?` 漏了 URL 末尾,elan 永远被判错。
+#   - 真解析:gz 用 tar -tzf、zip 用 unzip -l、zst 用 tar --use-compress-program
+#     unzstd -tf、deb 查 ar 头,**任意解析失败立刻 continue**。HTML 错误页
+#     即便被 gzip 包了,内部 tar 也认不出。
 # 用法:download URL OUTPUT_PATH  → echo "路径"
-# 关键改进:**报"成功"前必须做格式校验**——上轮的隐性 bug 是下载了
-# HTML 错误页或被镜像污染的 0 字节文件,du 看着大小对实际是垃圾。
 download_with_fallback() {
-    local url="$1" out="$2" src first
+    local url="$1" out="$2" src
     local stripped="${url#https://}"
     for src in \
         "$url" \
         "https://gh-proxy.com/$stripped" \
         "https://mirror.ghproxy.com/$stripped"; do
         say "    试源: $src"
-        # 第一关:curl 退出 0(连接到完整下载完)
         if ! curl -sSLfL --max-time 600 -o "$out" "$src" 2>/dev/null; then
-            continue
+            say "      → curl 失败"
+            rm -f "$out"; continue
         fi
-        # 第二关:文件非空
-        [ -s "$out" ] || continue
-        # 第三关:类型校验(关键!)。zip 看 PK\x03\x04,gzip 看 \x1f\x8b,
-        # zstd 看 \x28\xb5\x2f\xfd,.deb 看 !<arch>(ar 格式),elf 看 \x7fELF。
-        # 不是这些开头的一律当作错误页/HTML,继续试下一源。
-        local head1 head2 head3
-        head1=$(head -c1 "$out" | od -An -tx1 | tr -d ' ')
-        head2=$(head -c2 "$out" | tail -c1 | od -An -tx1 | tr -d ' ')
-        head3=$(head -c3 "$out" | tail -c1 | od -An -tx1 | tr -d ' ')
-        case "${head1}${head2}${head3}${url}" in
-            *dafny*.zip|*.zip?*)
-                # zip:50 4b 03 04 (PK..)
-                if [ "$head1" = "50" ] && [ "$head2" = "4b" ]; then
-                    first=$(unzip -l "$out" 2>/dev/null | awk 'NR==4 {print $4}')
-                    say "    验证 OK(zip 首项:${first:-?})"
-                    say "    成功($(du -h "$out" | cut -f1))"
+        [ -s "$out" ] || { say "      → 文件空"; rm -f "$out"; continue; }
+        # 取前 4 字节 hex
+        local magic
+        magic=$(head -c4 "$out" | od -An -tx1 | tr -d ' \n')
+        say "      magic: $magic ($(du -h "$out" | cut -f1))"
+        case "$magic" in
+            "1f8b"*)        # gzip(.tar.gz 主流)
+                if first=$(tar -tzf "$out" 2>/dev/null | head -1) && [ -n "$first" ]; then
+                    say "      ✅ gzip 真 tar,首项:$first"
                     return 0
+                else
+                    say "      → gzip magic 但 tar 解析失败(可能 HTML 错误页)"
+                    rm -f "$out"; continue
                 fi
                 ;;
-            *tar.zst|*.zst?*)
-                # zstd: 28 b5 2f fd
-                if [ "$head1" = "28" ] && [ "$head2" = "b5" ] && [ "$head3" = "2f" ]; then
-                    first=$(tar --use-compress-program=unzstd -tf "$out" 2>/dev/null | head -1)
-                    say "    验证 OK(zst 首项:${first:-?})"
-                    say "    成功($(du -h "$out" | cut -f1))"
+            "504b"*)        # zip(Dafny 走这个)
+                if first=$(unzip -l "$out" 2>/dev/null | awk 'NR==4{print $4}') && [ -n "$first" ]; then
+                    say "      ✅ zip 真,首项:$first"
                     return 0
+                else
+                    say "      → zip magic 但 unzip 失败"
+                    rm -f "$out"; continue
                 fi
                 ;;
-            *.deb?*)
-                # .deb 是 ar 归档:!<arch>\n  → "21 3c 61 72"
-                if [ "$head1" = "21" ] && [ "$head2" = "3c" ]; then
-                    say "    验证 OK(.deb ar 头)"
-                    say "    成功($(du -h "$out" | cut -f1))"
+            "28b52ffd"*|"28b52f"*)   # zstd
+                if first=$(tar --use-compress-program=unzstd -tf "$out" 2>/dev/null | head -1) && [ -n "$first" ]; then
+                    say "      ✅ zstd 真 tar,首项:$first"
                     return 0
+                else
+                    say "      → zstd magic 但 tar 解析失败"
+                    rm -f "$out"; continue
                 fi
                 ;;
-            *tar.gz?|*.tgz?*)
-                # gzip:1f 8b
-                if [ "$head1" = "1f" ] && [ "$head2" = "8b" ]; then
-                    first=$(tar -tzf "$out" 2>/dev/null | head -1)
-                    say "    验证 OK(tar.gz 首项:${first:-?})"
-                    say "    成功($(du -h "$out" | cut -f1))"
+            "213c"*)        # .deb = ar 归档
+                if ar t "$out" 2>/dev/null | head -1 | grep -q '^control.tar'; then
+                    say "      ✅ deb ar 归档 OK"
                     return 0
+                else
+                    say "      → deb magic 但 ar 解析失败"
+                    rm -f "$out"; continue
                 fi
+                ;;
+            *)
+                say "      → 未知 magic(可能是 HTML 错误页)"
+                rm -f "$out"; continue
                 ;;
         esac
-        say "    ⚠ 文件类型不匹配($head1 $head2 $head3),尝试下一源"
-        rm -f "$out"
     done
-    say "    FATAL:三源都失败或类型不符"
+    say "    FATAL:三源都失败或文件不可解析"
     return 1
 }
 
@@ -269,13 +271,30 @@ if ! command -v lake >/dev/null 2>&1; then
         say "    (注:v4.18.0 在 2024-Q4 发布;最新稳定可在 lean4 release 页查)"
         if download_with_fallback "$URL" "/tmp/${TARBALL}"; then
             rm -rf "$HOME/.elan/toolchains"
+            mkdir -p "$HOME/.elan/toolchains"
+            # 先解到 /tmp/lean_extract 探测真实顶层(Lean 4 release 资产
+            # 命名不固定:lean-4.18.0-linux.tar.zst 顶层是 lean-4.18.0-linux/,
+            # 但其它版本可能直接平铺 bin/+lib/+,不能预设 strip)
+            EXTRACT=/tmp/lean_extract
+            rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
+            tar --use-compress-program=unzstd -xf "/tmp/${TARBALL}" -C "$EXTRACT" \
+                || tar -xzf "/tmp/${TARBALL}" -C "$EXTRACT"
+            TOP=$(ls "$EXTRACT" | head -1)
+            say "    tarball 顶层:'$TOP'"
             mkdir -p "$HOME/.elan/toolchains/lean-${LEAN_VER}"
-            tar --use-compress-program=unzstd -xf "/tmp/${TARBALL}" \
-                -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" 2>&1 | tail -3 \
-                || tar -xzf "/tmp/${TARBALL}" \
-                    -C "$HOME/.elan/toolchains/lean-${LEAN_VER}" 2>&1 | tail -3
+            if [ -x "$EXTRACT/$TOP/bin/lake" ]; then
+                # 顶层是包装目录(常见)
+                cp -r "$EXTRACT/$TOP/." "$HOME/.elan/toolchains/lean-${LEAN_VER}/"
+            elif [ -x "$EXTRACT/bin/lake" ]; then
+                # 顶层直接 bin/(少数情况)
+                cp -r "$EXTRACT/." "$HOME/.elan/toolchains/lean-${LEAN_VER}/"
+            else
+                say "FATAL: lean toolchain 解后找不到 bin/lake,实际:"
+                find "$EXTRACT" -maxdepth 3 -type f | head -10
+                exit 1
+            fi
             ln -sfn "$HOME/.elan/toolchains/lean-${LEAN_VER}" "$HOME/.elan/toolchains/stable"
-            rm -f "/tmp/${TARBALL}"
+            rm -rf "$EXTRACT" "/tmp/${TARBALL}"
             # 真验证:lake binary 必须在磁盘上
             if [ ! -x "$HOME/.elan/toolchains/lean-${LEAN_VER}/bin/lake" ]; then
                 say "FATAL: lean toolchain 解后 bin/lake 不存在,看实际结构:"

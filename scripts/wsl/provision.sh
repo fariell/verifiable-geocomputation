@@ -31,6 +31,35 @@ ts() { date '+%Y-%m-%d %H:%M:%S'; }
 step() { echo ""; echo "===== [$(ts)] $1 =====" | tee -a "$LOG"; }
 run() { echo "[$(ts)] $*" | tee -a "$LOG"; }
 
+# ---------- 共享下载函数(从 remedy.sh 源入,避免代码分叉)----------
+HELPER="$(dirname "$0")/remedy.sh"
+if [ -f "$HELPER" ]; then
+    # 只源 download_with_fallback(不执行 remedy 主体)
+    # shellcheck disable=SC1090
+    source <(sed -n '/^download_with_fallback() {/,/^}$/p' "$HELPER")
+fi
+if ! command -v download_with_fallback >/dev/null 2>&1; then
+    # 内联简化版 fallback(若 remedy.sh 不在)
+    download_with_fallback() {
+        local url="$1" out="$2" src stripped
+        stripped="${url#https://}"
+        for src in "$url" "https://gh-proxy.com/$stripped" "https://mirror.ghproxy.com/$stripped"; do
+            run "  试源:$src"
+            if curl -sSLfL --max-time 600 -o "$out" "$src" 2>/dev/null \
+                && [ -s "$out" ]; then
+                local magic; magic=$(head -c4 "$out" | od -An -tx1 | tr -d ' \n')
+                case "$magic" in
+                    "1f8b"*) tar -tzf "$out" 2>/dev/null | head -1 | grep -q . && return 0 ;;
+                    "504b"*) unzip -l "$out" 2>/dev/null | awk 'NR==4{print $4}' | grep -q . && return 0 ;;
+                    "28b52ffd"*|"28b52f"*) tar --use-compress-program=unzstd -tf "$out" 2>/dev/null | head -1 | grep -q . && return 0 ;;
+                esac
+            fi
+            rm -f "$out"
+        done
+        return 1
+    }
+fi
+
 # 若非 root,后续 apt 命令加 sudo
 SUDO=""
 [ "$(id -u)" -ne 0 ] && SUDO="sudo"
@@ -85,23 +114,12 @@ else
     ELAN_VER="v3.1.0"
     TARBALL="elan-x86_64-unknown-linux-gnu.tar.gz"
     URL="https://github.com/leanprover/elan/releases/download/${ELAN_VER}/${TARBALL}"
-    # 三源 fallback:原 URL → gh-proxy.com → mirror.ghproxy.com
-    stripped="${URL#https://}"
-    got_it=""
-    for src in "$URL" "https://gh-proxy.com/$stripped" "https://mirror.ghproxy.com/$stripped"; do
-        run "  试源:$src"
-        if curl -sSLfL --max-time 600 -o "/tmp/${TARBALL}" "$src" 2>/dev/null; then
-            got_it=1; break
-        fi
-    done
-    if [ -n "$got_it" ]; then
-        mkdir -p "$HOME/.elan"
-        # **关键改进**:不预设 --strip-components。先解到临时,探测真实顶层。
+    if download_with_fallback "$URL" "/tmp/${TARBALL}"; then
         EXTRACT=/tmp/elan_extract
         rm -rf "$EXTRACT" && mkdir -p "$EXTRACT"
-        tar -xzf "/tmp/${TARBALL}" -C "$EXTRACT"
+        tar -xzf "/tmp/${TARBALL}" -C "$EXTRACT" || { run "FATAL: elan tar 解压失败"; exit 1; }
         TOP=$(ls "$EXTRACT" | head -1)
-        run "  tarball 顶层:'$TOP'"
+        run "  elan tarball 顶层:'$TOP'"
         rm -rf "$HOME/.elan" && mkdir -p "$HOME/.elan"
         if [ -d "$EXTRACT/$TOP" ] && [ -x "$EXTRACT/$TOP/bin/elan" ]; then
             cp -r "$EXTRACT/$TOP/." "$HOME/.elan/"
@@ -110,7 +128,7 @@ else
         elif [ -x "$EXTRACT/elan" ]; then
             cp -r "$EXTRACT/." "$HOME/.elan/"
         else
-            run "FATAL:tarball 未知结构:"; find "$EXTRACT" -maxdepth 3 | head -10 | tee -a "$LOG"; exit 1
+            run "FATAL: elan tarball 未知结构"; find "$EXTRACT" -maxdepth 3 | head -10 | tee -a "$LOG"; exit 1
         fi
         chmod +x "$HOME/.elan/bin/elan" 2>/dev/null
         rm -rf "$EXTRACT" "/tmp/${TARBALL}"
