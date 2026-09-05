@@ -162,8 +162,15 @@ wsl -d Ubuntu-22.04 -- bash -c "bash '/mnt/e/AI for Math与DEM空间网格交叉
 **Q4. `pip install richdem` 编译失败**
 - 需 `python3-dev` 与 `g++`(脚本第 1 步已装)。若仍失败,确认 venv 用了 `--system-site-packages`(继承系统 GDAL)。仍不行可改 `pip install richdem --no-build-isolation`。
 
-**Q5. Dafny 下载不动**
-- v4.8.1 .deb 文件约 16 MB,走 github release。建议网络稳定时跑;若反复断流,可先通过浏览器下好文件 → 拷到 WSL 内 `~/dafny.deb` → `sudo dpkg -i ~/dafny.deb`(也是补救路径)。
+**Q5. Dafny / elan 下载超时(`curl: (28) ... Connection timed out`)**
+- 2026-09 国内/受限网络访问 `github.com` 必 134s 超时。`remedy.sh` / `provision.sh` 现在自动三源 fallback:原 URL → `gh-proxy.com` → `mirror.ghproxy.com`。
+- **elan 特别坑**:`elan-init.sh` 内部还会再 curl 拉 tarball,卡两次。新版脚本**改直装 tarball**,跳过 init 流程。
+- 三源都失败还有最后一手——手机热点 / VPN,或在能上 GitHub 的设备拉一份 `elan-x86_64-unknown-linux-gnu.tar.gz` / `dafny-4.8.1-x64-ubuntu-22.04.deb`,拷到 WSL 的 `/tmp/`,再跑一次 `bash scripts/wsl/remedy.sh`(脚本发现文件就在 /tmp 会优先用它)。
+
+**Q5b. `whiteboxtools` `pip install` 报 "No matching distribution found"**
+- 2026 年 PyPI 上 `whiteboxtools` 包装器把 Python 限制在 `<3.10`,但 Ubuntu 22.04 系统 Python 是 3.10.6。
+- 修复:`pip install whitebox`(维护者 giswqs 迁的新名,Python 3.10+ OK)。脚本 fallback:`pip install --ignore-requires-python whiteboxtools==1.10.0`。
+- DEM 算子在脚本里用哪个都行,核心是**至少一个能 import**。
 
 **Q6. Windows 与 WSL 文件互访**
 - WSL 内访问 Windows:`/mnt/c/`、`/mnt/e/`;Windows 访问 WSL 文件:资源管理器地址栏输入 `\\wsl$\Ubuntu-22.04\`。
