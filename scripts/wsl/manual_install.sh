@@ -31,14 +31,21 @@ VER_DAFNY="4.11.0"
 print_summary() {
     say ""
     say "===== 汇总 ====="
-    printf "  %-16s %s\n" "gdalinfo :" "$(gdalinfo --version 2>&1)"
+    # gdalinfo 可能在 /usr/bin(apt)也可能在 conda env 里;非登录 shell
+    # 看不到 conda → 退化显示,别误判成"未安装"
+    printf "  %-16s %s\n" "gdalinfo :" "$(command -v gdalinfo >/dev/null 2>&1 \
+        && gdalinfo --version 2>&1 || echo '不在当前 PATH(交互终端里再确认)')"
     printf "  %-16s %s\n" "lean     :" "$(command -v lean >/dev/null 2>&1 && lean --version 2>&1 | head -1 || echo '未安装')"
     printf "  %-16s %s\n" "lake     :" "$(command -v lake >/dev/null 2>&1 && lake --version 2>&1 | head -1 || echo '未安装')"
     printf "  %-16s %s\n" "dafny    :" "$(command -v dafny >/dev/null 2>&1 && dafny --version 2>&1 | head -1 || echo '未安装')"
     printf "  %-16s %s\n" "elan     :" "$(command -v elan >/dev/null 2>&1 && elan --version 2>&1 | head -1 || echo '未安装(可选)')"
     # shellcheck disable=SC1091
+    # 非登录 bash 不加载 ~/.bashrc → conda base 未激活,可能没有 `python`
+    # (只有 python3)。两个都试,别让汇总行假报缺失。
     source ~/verigis/venv/bin/activate 2>/dev/null
-    printf "  %-16s %s\n" "venv py  :" "$(python -c 'import sys; print(sys.prefix)' 2>&1)"
+    printf "  %-16s %s\n" "venv py  :" "$(command -v python >/dev/null 2>&1 \
+        && python -c 'import sys; print(sys.prefix)' 2>&1 \
+        || python3 -c 'import sys; print(sys.prefix)' 2>&1)"
 }
 
 # ---------- 通用解压:zip 三级回退 ----------
