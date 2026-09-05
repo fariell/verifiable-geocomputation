@@ -43,6 +43,27 @@ wait_for_apt() {
     return 1
 }
 
+# 通用下载:试原 URL,失败转 gh-proxy.com 镜像,再 mirror.ghproxy.com。
+# 这两个是国内常用的 GitHub release 镜像,在 Lean/Dafny 等库上稳定。
+# 用法:download URL OUTPUT_PATH  → echo "路径"
+download_with_fallback() {
+    local url="$1" out="$2" src p
+    # 被扒去 https:// 前缀,拼到镜像
+    local stripped="${url#https://}"
+    for src in \
+        "$url" \
+        "https://gh-proxy.com/$stripped" \
+        "https://mirror.ghproxy.com/$stripped"; do
+        say "    试源: $src"
+        if curl -sSLfL --max-time 600 -o "$out" "$src" 2>/dev/null; then
+            [ -s "$out" ] || continue
+            say "    成功($(du -h "$out" | cut -f1))"
+            return 0
+        fi
+    done
+    return 1
+}
+
 # ---------- 0. 漏装检查 ----------
 say "=== remedy.sh 开始 $(date '+%Y-%m-%d %H:%M:%S') ==="
 say "0/5 等 apt 锁释放"
@@ -79,50 +100,77 @@ if [ "$NEED_VENV" = "1" ]; then
     # shellcheck disable=SC1091
     source ~/verigis/venv/bin/activate
     python -m pip install --quiet --upgrade pip setuptools wheel
-    python -m pip install --quiet numpy scipy whiteboxtools richdem
+    # whiteboxtools PyPI 包装器在 Python 3.10+ 没匹配版本;
+    # 优先装 whitebox(同一维护者 giswqs 迁的新名,3.10 OK),
+    # 退而求其次 whiteboxtools==1.10.0 + --ignore-requires-python。
+    # richdem 需要 GDAL 头文件(--system-site-packages 已经继承)
+    if python -m pip install --quiet whitebox richdem 2>&1 | tail -3; then
+        say "  pip install whitebox richdem OK"
+    else
+        say "  whitebox 装不上,改试 whiteboxtools --ignore-requires-python"
+        python -m pip install --quiet --ignore-requires-python \
+            numpy scipy whiteboxtools==1.10.0 richdem 2>&1 | tail -3 \
+            || say "  警告:地理包部分缺失,核心(numpy/scipy/osgeo)已就位"
+    fi
     say "venv OK: $(python -c 'import sys; print(sys.prefix)')"
 else
     say "1/4 Python venv 已就位,跳过"
 fi
 
-# ---------- 2. Lean 4 via elan ----------
+# ---------- 2. Lean 4 via elan(直装 tarball,绕开 init.sh 内部 curl)----------
 if [ "$NEED_LEAN" = "1" ]; then
-    say "2/4 装 Lean 4(via elan)"
-    say "  下载 elan-init.sh(超时 600s)..."
-    # 主源
-    if curl -sSfL --max-time 600 https://elan.lean-lang.org/elan-init.sh -o /tmp/elan-init.sh; then
-        :
+    say "2/4 装 Lean 4(via elan,直装 tarball)"
+    # elan-init.sh 内部还会 curl 拉 tarball,在被限制的网络里容易卡。
+    # 我们直接拿 elan 的预编译 tarball 解压到 ~/.elan,完全跳过 init 流程。
+    # 固定拉 v3.1.0+stable(2024+ 稳定版,与 Lean 4 v4.x 配套),
+    # 如果想用更新版本,改 ELAN_VER 即可。
+    ELAN_VER="v3.1.0"
+    TARBALL="elan-x86_64-unknown-linux-gnu.tar.gz"
+    URL="https://github.com/leanprover/elan/releases/download/${ELAN_VER}/${TARBALL}"
+    say "  下载 elan ${ELAN_VER}..."
+    if download_with_fallback "$URL" "/tmp/${TARBALL}"; then
+        mkdir -p "$HOME/.elan"
+        tar -xzf "/tmp/${TARBALL}" -C "$HOME/.elan" --strip-components=1 \
+            || { say "FATAL: tar 解压失败"; exit 1; }
+        rm -f "/tmp/${TARBALL}"
+        say "  elan 解压完成:$HOME/.elan/bin/elan"
     else
-        say "  elan.lean-lang.org 不通,改用 raw.githubusercontent.com 镜像"
-        curl -sSfL --max-time 600 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh \
-            || { say "FATAL: elan 装不上,网络受限或 DNS 被污染。请发邮件或换网后重试,或直接装 Lean 4 二进制包"; exit 1; }
+        say "FATAL: elan 三源都下载失败。"
+        say "  手动方案(任选其一):"
+        say "    1. 换网(手机热点 / VPN)后重跑本脚本"
+        say "    2. 在能上 GitHub 的设备下载 ${TARBALL},拷到 WSL 后:"
+        say "         bash scripts/wsl/remedy.sh"
+        exit 1
     fi
-    sh /tmp/elan-init.sh -y --default-toolchain stable 2>&1 | tail -8
 else
     say "2/4 lake 已就位,跳过 elan"
 fi
 export PATH="$HOME/.elan/bin:$PATH"
-# 把 elan 环境装进 ~/.bashrc,后续会话自动可用
-if [ -f "$HOME/.elan/env" ] && ! grep -q 'elan/env' "$HOME/.bashrc" 2>/dev/null; then
+# 把 elan 装进 ~/.bashrc,后续会话自动可用
+if [ -f "$HOME/.elan/bin/elan" ] && ! grep -q '\.elan/bin' "$HOME/.bashrc" 2>/dev/null; then
     echo 'export PATH="$HOME/.elan/bin:$PATH"' >> "$HOME/.bashrc"
 fi
 command -v lake >/dev/null 2>&1 \
     || { say "FATAL: lake 仍未找到,elan 安装可能没成功"; exit 1; }
 say "lake: $(lake --version 2>&1 | head -1)"
 
-# ---------- 3. Dafny(直装 .deb,不走 GitHub API)----------
+# ---------- 3. Dafny(走镜像,避开 github.com 直连)----------
 if [ "$NEED_DAFNY" = "1" ]; then
     say "3/4 装 Dafny 4.8.1(.deb 直装)"
     DAFNY_VER="4.8.1"
     DEB="dafny-${DAFNY_VER}-x64-ubuntu-22.04.deb"
     URL="https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VER}/${DEB}"
-    say "  下载 $URL (超时 20 min)"
-    curl -sSLfL --max-time 1200 -o "/tmp/${DEB}" "$URL" \
-        || { say "FATAL: Dafny .deb 下载失败(网络限速?)。可重试或换网"; exit 1; }
-    ls -lh "/tmp/${DEB}"
-    $SUDO apt-get install -y libssl3 libgcc-s1 libstdc++6 zlib1g 2>&1 | tail -3
-    $SUDO dpkg -i "/tmp/${DEB}" 2>&1 | tail -5 \
-        || { say "  dpkg 安装报依赖错,尝试 apt -fy 修复"; $SUDO apt-get install -fy 2>&1 | tail -5; }
+    say "  下载 $URL (走镜像 fallback)"
+    if download_with_fallback "$URL" "/tmp/${DEB}"; then
+        $SUDO apt-get install -y libssl3 libgcc-s1 libstdc++6 zlib1g 2>&1 | tail -3
+        $SUDO dpkg -i "/tmp/${DEB}" 2>&1 | tail -5 \
+            || { say "  dpkg 安装报依赖错,尝试 apt -fy 修复"; $SUDO apt-get install -fy 2>&1 | tail -5; }
+        rm -f "/tmp/${DEB}"
+    else
+        say "FATAL: Dafny 三源都下载失败。"
+        say "  手动方案同上(换网 / 预下载拷入 / 不用 Dafny 也行)"
+        exit 1
+    fi
 else
     say "3/4 dafny 已就位,跳过"
 fi
@@ -157,14 +205,24 @@ fi
 say "===== 最终验证 ====="
 # shellcheck disable=SC1091
 source ~/verigis/venv/bin/activate
+# 在新名称和老名称之间二选一;两边都试,谁成算谁
 python - <<'PY'
-import importlib
-for m in ["numpy", "scipy", "whiteboxtools", "richdem", "osgeo"]:
+import importlib, sys
+for m in ["numpy", "scipy", "richdem", "osgeo"]:
     try:
         v = getattr(importlib.import_module(m), "__version__", "ok")
         print(f"  OK   {m:14s} {v}")
     except Exception as e:
         print(f"  FAIL {m:14s} {e}")
+# 地形分析后端,二选一:新 whitebox 或旧 whiteboxtools
+for m in ["whitebox", "whiteboxtools"]:
+    try:
+        importlib.import_module(m); print(f"  OK   {m:14s} (选了这个)")
+        sys.modules["__wb__"] = importlib.import_module(m); break
+    except ImportError:
+        print(f"  -    {m:14s} 跳过")
+else:
+    print("  WARN 都没有 whitebox / whiteboxtools,后续 DEM 算子脚本走 GDAL/RichDEM")
 PY
 
 printf "  %-22s %s\n" "gdalinfo :"  "$(gdalinfo --version 2>&1)"

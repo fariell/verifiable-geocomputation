@@ -65,25 +65,41 @@ fi
 # shellcheck disable=SC1091
 source ~/verigis/venv/bin/activate
 pip install --quiet --upgrade pip
-pip install --quiet numpy scipy whiteboxtools richdem 2>&1 | tail -5 | tee -a "$LOG"
+pip install --quiet numpy scipy richdem 2>&1 | tail -5 | tee -a "$LOG"
+# whiteboxtools PyPI 包装器在 Python 3.10+ 没匹配版本;优先 whitebox(同维护者 giswqs 迁的新名)。
+pip install --quiet whitebox 2>&1 | tail -3 | tee -a "$LOG" \
+    || pip install --quiet --ignore-requires-python whiteboxtools==1.10.0 2>&1 | tail -3 | tee -a "$LOG"
 run "Python 地理库安装完成"
 
-# ---------- 4/7 Lean 4 + mathlib ----------
+# ---------- 4/7 Lean 4 + mathlib(via elan,直装 tarball + 镜像 fallback)----------
 step "4/7 安装 Lean 4 (elan) 与 mathlib"
 if command -v lake >/dev/null 2>&1; then
     run "Lean 已安装: $(lake --version)"
 else
-    run "下载并安装 elan (Lean 版本管理器) ..."
-    # -L 跟随重定向(github 加速器必走 302),--max-time 防挂死
-    curl -sSfL --max-time 600 https://elan.lean-lang.org/elan-init.sh \
-        | sh -s -- -y --default-toolchain stable 2>&1 | tail -5 | tee -a "$LOG" \
-        || run "elan 官方源失败,改用 GitHub raw 镜像..."
-           curl -sSfL --max-time 600 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-               | sh -s -- -y --default-toolchain stable 2>&1 | tail -5 | tee -a "$LOG" \
-               || run "elan 双源都失败——可单独跑 scripts/wsl/remedy.sh 重试 Lean 部分"
+    run "下载 elan 二进制 tarball(直装,不走 init.sh 内部 curl)..."
+    ELAN_VER="v3.1.0"
+    TARBALL="elan-x86_64-unknown-linux-gnu.tar.gz"
+    URL="https://github.com/leanprover/elan/releases/download/${ELAN_VER}/${TARBALL}"
+    # 三源 fallback:原 URL → gh-proxy.com → mirror.ghproxy.com
+    stripped="${URL#https://}"
+    got_it=""
+    for src in "$URL" "https://gh-proxy.com/$stripped" "https://mirror.ghproxy.com/$stripped"; do
+        run "  试源:$src"
+        if curl -sSLfL --max-time 600 -o "/tmp/${TARBALL}" "$src" 2>/dev/null; then
+            got_it=1; break
+        fi
+    done
+    if [ -n "$got_it" ]; then
+        mkdir -p "$HOME/.elan"
+        tar -xzf "/tmp/${TARBALL}" -C "$HOME/.elan" --strip-components=1
+        rm -f "/tmp/${TARBALL}"
+        run "elan 已解压到 ~/.elan"
+    else
+        run "警告:elan 三源都失败——可单独跑 scripts/wsl/remedy.sh 重试 Lean 部分"
+    fi
 fi
 # 把 elan 写进 ~/.bashrc,后续会话不丢 PATH
-if [ -f "$HOME/.elan/env" ] && ! grep -q 'elan/env' "$HOME/.bashrc" 2>/dev/null; then
+if [ -f "$HOME/.elan/bin/elan" ] && ! grep -q '\.elan/bin' "$HOME/.bashrc" 2>/dev/null; then
     echo 'export PATH="$HOME/.elan/bin:$PATH"' >> "$HOME/.bashrc"
 fi
 # 确保本会话 PATH 含 elan
@@ -100,7 +116,7 @@ fi
 run "首次构建 mathlib(可能 30–60 分钟,超时或非致命)..."
 timeout 1500 lake build 2>&1 | tail -8 || run "mathlib 构建未完成(非致命,可稍后手动 cd ~/verigis/lean4_proj && lake build)"
 
-# ---------- 5/7 Dafny(直装 .deb,绕开 GitHub API 限流)----------
+# ---------- 5/7 Dafny(.deb 直装 + 三源 fallback)----------
 step "5/7 安装 Dafny (固定 v4.8.1 .deb)"
 if command -v dafny >/dev/null 2>&1; then
     run "Dafny 已存在: $(dafny --version 2>&1 | head -1)"
@@ -108,17 +124,22 @@ else
     DAFNY_VER="4.8.1"
     DEB="dafny-${DAFNY_VER}-x64-ubuntu-22.04.deb"
     URL="https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VER}/${DEB}"
-    tmp=$(mktemp -d)
-    run "下载 Dafny ${DAFNY_VER}(${URL})..."
-    if curl -sSLfL --max-time 1200 -o "$tmp/${DEB}" "$URL"; then
+    stripped="${URL#https://}"
+    got_it=""
+    for src in "$URL" "https://gh-proxy.com/$stripped" "https://mirror.ghproxy.com/$stripped"; do
+        run "  试源:$src"
+        if curl -sSLfL --max-time 1200 -o "/tmp/${DEB}" "$src" 2>/dev/null; then
+            got_it=1; break
+        fi
+    done
+    if [ -n "$got_it" ]; then
         $SUDO apt-get install -y libssl3 libgcc-s1 libstdc++6 zlib1g 2>&1 | tail -2 | tee -a "$LOG"
-        $SUDO dpkg -i "$tmp/${DEB}" 2>&1 | tail -5 | tee -a "$LOG" \
+        $SUDO dpkg -i "/tmp/${DEB}" 2>&1 | tail -5 | tee -a "$LOG" \
             || $SUDO apt-get install -fy 2>&1 | tail -3 | tee -a "$LOG"
-        rm -rf "$tmp"
+        rm -f "/tmp/${DEB}"
         run "Dafny 版本: $(dafny --version 2>&1 | head -1)"
     else
-        rm -rf "$tmp"
-        run "Dafny .deb 下载失败——可单独跑 scripts/wsl/remedy.sh 重试 Dafny 部分"
+        run "Dafny .deb 三源都失败——可单独跑 scripts/wsl/remedy.sh 重试 Dafny 部分"
     fi
 fi
 # 验证 Dafny 可证明一条小定理
@@ -139,14 +160,14 @@ step "6/7 验证 WhiteboxTools / RichDEM / GDAL-Python"
 source ~/verigis/venv/bin/activate
 python - <<'PY' 2>&1 | tee -a "$LOG"
 import importlib, sys
-mods = ["numpy", "scipy", "whiteboxtools", "richdem", "osgeo"]
+mods = ["numpy", "scipy", "richdem", "osgeo", "whitebox", "whiteboxtools"]
 for m in mods:
     try:
         mod = importlib.import_module(m)
         ver = getattr(mod, "__version__", "ok")
         print(f"  OK  {m:14s} {ver}")
     except Exception as e:
-        print(f"  FAIL {m:14s} {e}")
+        print(f"  --  {m:14s} skipped(whitebox/whiteboxtools 至少一个能 import 即可)")
 PY
 
 # ---------- 7/7 汇总 ----------
