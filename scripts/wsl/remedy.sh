@@ -25,8 +25,28 @@ say()   { printf "[%s] %s\n" "$(date '+%H:%M:%S')" "$*"; }
 SUDO=""
 [ "$(id -u)" -ne 0 ] && SUDO="sudo"
 
+# 任何 apt 操作前:等锁释放(典型场景 unattended-upgrades 自动跑了 ~16 min)
+# fuser 非零 = 锁被占;最多等 5 分钟。卡死时给出明确"kill 这些 PID 解锁"的回退。
+wait_for_apt() {
+    local tries=0 max=30 pid
+    while [ "$tries" -lt "$max" ]; do
+        if ! fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/cache/apt/archives/lock >/dev/null 2>&1; then
+            return 0
+        fi
+        pid=$(fuser /var/lib/dpkg/lock-frontend 2>/dev/null | tr -d ' \n')
+        say "apt 锁被 PID ${pid:-?} 占用,等 10s... ($((tries+1))/$max)"
+        sleep 10
+        tries=$((tries+1))
+    done
+    say "apt 锁等了 $((max*10))s 仍未释放。手动解锁:"
+    say "  sudo systemctl stop unattended-upgrades && sudo kill -9 $pid 2>/dev/null"
+    return 1
+}
+
 # ---------- 0. 漏装检查 ----------
 say "=== remedy.sh 开始 $(date '+%Y-%m-%d %H:%M:%S') ==="
+say "0/5 等 apt 锁释放"
+wait_for_apt
 say "0/4 漏装检查"
 
 NEED_VENV=0; NEED_LEAN=0; NEED_DAFNY=0
