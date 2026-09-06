@@ -689,6 +689,59 @@ task11 verdict = PASS
 
 ---
 
+## P-COMP-5 元一致(task12)
+
+---
+
+[task]      task12 / P-COMP-5 元一致
+[step]      本地 1D 三码 hash + 4 DEM 幂等/调度
+[cmd]       & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_5.py
+[rc]        0
+[key lines]
+  [PASS] plane    py=dfy=lean=[5,5,5,5]  sha=8bf7125626de67c4…
+  [PASS] pit      py=dfy=lean=[3,3,4]    sha=3fc2f480b5457660…
+  [PASS] slope    py=dfy=lean=[0,1,2,3]  sha=84deff01f1994516…
+  [PASS] cascade  py=dfy=lean=[3,3,3]    sha=b7d44aa6581b85f1…
+  PLANE 64²  idem σ=0 sched σ=0
+  ROW_1e-6 64² idem σ=0 sched σ=0
+  WEST 64² (task11 平面族) idem σ=0 sched σ=0
+  PIT5 5×5 idem σ=0 sched σ=0
+  GPB-026 ENTRY: PASS  hash 12/12  idempotent 4/4  schedule 4/4
+  metrics -> experiments/phase2/results/gpb026_pcomp5/gpb026_metrics.json
+[gates]     hash 12/12 PASS; idempotent 4/4 PASS; schedule (heap tie ±index) 4/4 PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task12 / P-COMP-5 元一致
+[step]      overlay + 云端 dafny PCOMP_5_idempotent + lake
+[cmd]       python %USERPROFILE%\.autodl_run.py --upload-list %USERPROFILE%\.autodl_pcomp5_upload.txt ; python %USERPROFILE%\.autodl_run.py --cmd-file %USERPROFILE%\.autodl_cmd_task12_verify.sh --timeout 180
+[rc]        0
+[key lines]
+  [autodl_run] uploaded 7 files (+1 after extra lemmas)
+🚀  START @ 23:08:57   $  dafny verify formal/dafny/PCOMP_5_idempotent.dfy
+   23:08:59  Dafny program verifier finished with 15 verified, 0 errors
+   lake: [2762/2764] Running VeriGIS.Composition.PitFillingIdempotent
+         [2763/2764] Running VeriGIS
+         Build completed successfully.
+   log=/root/.workbuddy/jobs/20260906_230857.log (15/0) + 20260906_230741.log (first 10/0 then +lemmas)
+[gates]     dafny PCOMP_5: PASS 15/0; lake: PASS 2764 modules 0 errors
+[verdict]   PASS
+[blocker]
+
+改了什么:
+- 新: `formal/dafny/PCOMP_5_idempotent.dfy` (FillIdempotent / Max 交换 / 四条 hash 实例 / FillStrip≡Fill)
+- 新: `formal/dafny/PCOMP_5_README.md`
+- 新: `formal/lean4/VeriGIS/Composition/PitFillingIdempotent.lean` (`fill_idem` + `floodMax` ac_rfl + native_decide 四例)
+- 新: `experiments/phase2/{p_comp_5.py,run_p_comp_5.sh}`
+- 改: `VeriGIS.lean` import PitFillingIdempotent; `verify_all.sh` 加 PCOMP_5 闸
+未改 PROP_CHAIN / this-week / MEMORY / PAPER_P2_*。未 git push。不复制 Fill 核。
+
+task12 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

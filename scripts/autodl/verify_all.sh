@@ -125,6 +125,12 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-COMP-4 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
+    if [ -f "$REPO/formal/dafny/PCOMP_5_idempotent.dfy" ]; then
+        echo "[dafny] P-COMP-5 (fill idempotent)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/PCOMP_5_idempotent.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-COMP-5 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
 else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
