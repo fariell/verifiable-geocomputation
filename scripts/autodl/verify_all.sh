@@ -95,6 +95,12 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-005 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
+    if [ -f "$REPO/formal/dafny/P006_watershed.dfy" ]; then
+        echo "[dafny] P-006 (watershed)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/P006_watershed.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-006 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
 else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
@@ -142,7 +148,7 @@ else
     echo "[gpb004] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
 fi
 
-echo "==[7/7] GPB-010/011 / P-005 =="
+echo "==[7/8] GPB-010/011 / P-005 =="
 if [ -f "$REPO/experiments/phase1/run_p005.sh" ]; then
     echo "[gpb005] 跑实验中" | tee -a "$SUMMARY"
     bash "$REPO/experiments/phase1/run_p005.sh" 2>&1 \
@@ -150,6 +156,16 @@ if [ -f "$REPO/experiments/phase1/run_p005.sh" ]; then
         echo "  ⚠️ GPB-005 失败" | tee -a "$SUMMARY"
 else
     echo "[gpb005] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
+fi
+
+echo "==[8/8] GPB-015 / P-006 =="
+if [ -f "$REPO/experiments/phase1/run_p006.sh" ]; then
+    echo "[gpb015] 跑实验中" | tee -a "$SUMMARY"
+    bash "$REPO/experiments/phase1/run_p006.sh" 2>&1 \
+        | tail -20 | tee -a "$LOG" "$SUMMARY" || \
+        echo "  ⚠️ GPB-015 失败" | tee -a "$SUMMARY"
+else
+    echo "[gpb015] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
 fi
 
 echo "============================================================"

@@ -31,6 +31,10 @@
 | `p005_d8.wl` | 平面上 D8 argmax(Python `subprocess` 调 wolframscript) |
 | `p005_manim.py` | 洼地 vs 平面西向的 Manim 场景 |
 | `run_p005.sh` | AutoDL / `verify_all.sh` 调用的 P-005 驱动 |
+| `p006_watershed.py` | **P-006 入口**:D8 流域出口唯一 + flat 4-环不终止;可选 wolframscript / Manim |
+| `p006_watershed.wl` | 有限集上轨道鸽笼(穷举 4^4)+ 4-环无不动点 |
+| `p006_manim.py` | 斜面流域箭头 vs flat 环循环 |
+| `run_p006.sh` | AutoDL / `verify_all.sh` 调用的 P-006 驱动 |
 | `propositions.py` | 生成 20 条 GeoProofBench 候选命题（json/csv/md） |
 | `run_experiment.sh` | 实验驱动（激活 venv 后运行上述两个 py） |
 | `bootstrap.sh` | 远程一键装机：装系统依赖 → 建 venv → 装包 → 跑实验 → 装 Lean → 构建 |
@@ -65,6 +69,20 @@ Wolfram / Manim 缺席不挡 PASS。本机渲染:`P003_MANIM=1 python experiment
 - `experiments/phase1/figures/ZTStencil.mp4` — Manim 3×3 模板与 `1/w²` 放大,10.6 s
 - `experiments/phase1/figures/ZTStencil_full.png` — 满屏关键帧
 - `experiments/phase1/figures/gpb003_hxx_compare.png` — 解析 / 正确 ZT / Phase1 错误模板
+
+## P-006 / GPB-015(本机写,AutoDL 验)
+
+确定性 D8 ⇒ 终止轨道的出口唯一(层 A)。未填洼的 flat 4-环不终止(层 B / P-006b)。D8 核 `from p005_d8 import`,不复制。
+
+```bash
+bash /root/verigis/repo/experiments/phase1/run_p006.sh
+```
+
+门控:斜面内部 100% 终止且每格一个出口;洼地中心 `NoFlow`、其余格仍出口唯一;人工 4-环步数超上界。Wolfram 穷举 4^4 映射的鸽笼 + 4-环无不动点。本机渲染:`P006_MANIM=1 python experiments/phase1/p006_watershed.py`。
+
+可播放成品:
+
+- `experiments/phase1/figures/WatershedStencil.mp4` — 左斜面流域箭头,右 flat 环
 
 ## 本地部署（需要能 SSH 到远程的环境）
 

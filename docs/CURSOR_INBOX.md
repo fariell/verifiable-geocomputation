@@ -6,8 +6,8 @@
 
 ---
 
-STATUS: PENDING
-UPDATED: 2026-09-06 17:25
+STATUS: DONE
+UPDATED: 2026-09-06 17:48
 TASK: **P-005 云端复核(§五)→ P-006 = GPB-015 流域唯一性**
 
 ---
