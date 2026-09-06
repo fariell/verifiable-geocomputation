@@ -126,10 +126,93 @@ bash scripts/autodl/results_pull.sh
 
 ---
 
+## 四点五、JupyterLab 上跑长任务时的进度观察
+
+`setup.sh` 首次装机含 Lake build 可能跑 30–60 min,在此期间 PI 不会一直
+盯屏。**直接 `bash scripts/autodl/setup.sh` 在 cell 里跑**有两个坑:
+1. Jupyter cell 的 stdout 默认走 ZMQ 流,长时间无输出的话 PI 看不到任何进度,
+   误判"hang 住了"
+2. 即便出成果,Dafny `1 verified,0 errors` 这种里程碑淹没在几百行里,扫不到
+
+提供 `scripts/autodl/jupyter_progress.py` 解决。**setup.sh / verify_all.sh 完全
+不改**,helper 通过 `subprocess.Popen + bufsize=1` 流式抓 + 注解 + 心跳。
+
+**最简用法**(首次装机,在 JupyterLab cell):
+
+```python
+import sys
+sys.path.insert(0, '/root/verigis/repo/scripts/autodl')     # 仅首次
+from jupyter_progress import run_streamed
+
+rc, log = run_streamed(
+    'bash /root/verigis/repo/scripts/autodl/setup.sh',
+    cwd='/root/verigis/repo',
+    heartbeat_min=30,   # 默认 30 min;长任务可调到 15 或 60
+)
+print('DONE rc=', rc, 'log=', log)
+```
+
+**日常验**(已在 setup 跑通后):
+
+```python
+rc, log = run_streamed('bash /root/verigis/repo/scripts/autodl/verify_all.sh',
+                       cwd='/root/verigis/repo')
+```
+
+**观测到的输出长这样**(截 autoDL Jupyter 实际渲染):
+
+```
+🚀  START @ 14:02:18   elapsed 0:00:00
+   $  bash /root/verigis/repo/scripts/autodl/setup.sh
+   log → /root/.workbuddy/jobs/20260907_140218.log
+   cwd → /root/verigis/repo
+   heartbeat = 30 min
+────────────────────────────────────────────────────────────────────────
+   14:02:19  +    0:00  AutoDL setup START @ 2026-09-07 14:02:19
+   14:02:19  +    0:01  ==[1/7] apt 基础工具 ==         📍 节点 1/7 完成
+   14:02:35  +    0:17    ℹ apt 完成(unzip/git/curl/wget/gdal-bin/zstd)
+   14:02:36  +    0:18  ==[2/7] Lean 4.18 via elan ==   📍 节点 2/7 完成
+   14:02:42  +    0:24    ✅ lean Lean (version 4.18.0, ...)
+   14:02:42  +    0:24    ✅ lake 4.18.0 ...
+    ⏳  心跳 @ 14:32:48  已静默 30 min;最后输出: '  ⏳  lake build 增量编译...'
+   14:32:54  + 30:36  Dafny program verifier finished with 19 verified, 0 errors   ✅ VERIFY:19 verified / 0 errors
+────────────────────────────────────────────────────────────────────────
+✅  END @ 14:32:54  rc=0  elapsed=30:36  log=/root/.workbuddy/jobs/20260907_140218.log
+```
+
+四种信号一眼可辨:
+- **`📍 节点 N/M 完成`** — 节点里程碑(setup.sh 的 `==[N/M]==` 行)
+- **`✅ VERIFY: 19 verified / 0 errors`** — Dafny/Lean 验证完成
+- **`⏳  心跳 @ HH:MM:SS  已静默 N min`** — 长时间无输出时的 ping,默认 30 min
+- **`✅ END rc=0`** — 整任务成功;`rc≠0` 即失败
+
+**完整 stdout 落 `~/.workbuddy/jobs/<时间戳>.log`**,事后可重读、可经
+`results_pull.sh` scp 回来。
+
+**配置经环境变量**(不开新接口):
+
+```python
+import os
+os.environ['AUTODL_HEARTBEAT_MIN'] = '15'   # 心跳 15 min 一次
+os.environ['AUTODL_POLL_EVERY']    = '5'    # polling 5 s 一次(默认)
+```
+
+**`%run` 用法**(不想 import):
+
+```python
+%run /root/verigis/repo/scripts/autodl/jupyter_progress.py
+run_streamed('bash /root/verigis/repo/scripts/autodl/verify_all.sh',
+             cwd='/root/verigis/repo')
+```
+
+`heartbeat_min=0.05` 是一次跑通的小窍门 — 让"心跳 3 秒就来一次",
+能确认即使 Lake 在编译,pi 也看得到进度。
+
+---
+
 ## 五、本地 WSL 还用得上吗?(降级规则)
 
 迁不意味着弃。**本地 WSL 保留,但用途收窄**:
-
 | 任务 | 主场 |
 | --- | --- |
 | Lean/Dafny 跑通链路 | **autoDL** ✓ |
