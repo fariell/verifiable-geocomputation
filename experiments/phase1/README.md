@@ -53,6 +53,12 @@ bash /root/verigis/repo/experiments/phase1/run_p003.sh
 门控:抛物面 `|hxx+2k|<1e-10`;正确 hxx corr(dx=1)≥0.90 且高于错误模板;旧模板剖面曲率 corr<0.5;正确 ZT 剖面曲率在 dx=1 仍 <0.5(GPB-020 不是模板写反就能过)。
 Wolfram / Manim 缺席不挡 PASS。本机渲染:`P003_MANIM=1 python experiments/phase1/p003_curvature.py`。
 
+可播放成品(从 gitignore 的 `results/gpb003/` 拷出,避免再丢):
+
+- `experiments/phase1/figures/ZTStencil.mp4` — Manim 3×3 模板与 `1/w²` 放大,10.6 s
+- `experiments/phase1/figures/ZTStencil_full.png` — 满屏关键帧
+- `experiments/phase1/figures/gpb003_hxx_compare.png` — 解析 / 正确 ZT / Phase1 错误模板
+
 ## 本地部署（需要能 SSH 到远程的环境）
 
 ```bash
