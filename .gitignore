@@ -35,6 +35,7 @@ ENV/
 
 # Lean / Dafny
 .lean/
+.lake/
 lake-packages/
 lakefile.olean
 Build/
@@ -67,3 +68,5 @@ logs/
 # Secrets — local login credentials, NEVER commit
 autoDL登录信息.txt
 *登录信息*.txt
+autodl.env
+scripts/autodl/autodl.env

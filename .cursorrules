@@ -11,7 +11,9 @@ docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
 # ── 铁律(2026-09-06;PI 已多次口头强调) ────────────────────────
 [cred]   凭据三连:password / host / port 一律 <your-autoDL-...> 占位符;真值仅在仓外 autoDL登录信息.txt(.gitignore 已拦)。git add 后必跑 `grep -rE 'Ju8Y|connect\.bjb2\.seetacloud\.com|<your-autoDL-port>' docs/ scripts/ --exclude 'CURSOR_HANDOFF.md' --exclude '.cursorrules'` 自检。
 
-[lean]   formal/lean4/{lakefile.toml, lean-toolchain, VeriGIS/HornSlope.lean} 三个文件未 commit;lake build 通了 + PI 显式拍板才能 commit。
+[lab]    实验与验证只在 AutoDL `/root/verigis/repo`。不要再让 PI 跑本机 sync_push / results_pull。命令写成 AutoDL bash 可粘贴块;产物读 ~/.workbuddy。
+
+[lean]   formal/lean4 已在 AutoDL lake build 通过;commit 仍要 PI 口头拍板(可在云端 git,不要从 AutoDL 把凭据推进 GitHub)。
 
 [sandbox]  你的 Bash = Git Bash / MSYS ≠ WSL ≠ AutoDL ssh。所有云端/WSL 操作让 PI 在原生 terminal 跑,沙箱禁 wsl.exe。
 

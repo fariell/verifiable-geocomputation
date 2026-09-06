@@ -1,0 +1,16 @@
+name = "verigis_formal"
+version = "0.1.0"
+defaultTargets = ["VeriGIS"]
+
+# GeoProofBench 形式化命题库。
+# mathlib 版本必须与 lean-toolchain 的 Lean 版本对齐(4.18.0 ↔ mathlib v4.18.0),
+# 否则 lake 会报 "toolchain mismatch"。换 Lean 版本时两个文件一起改。
+# 语法必须是 TOML `=`,不能写 lakefile.lean 的 `:=`。
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.18.0"
+
+[[lean_lib]]
+name = "VeriGIS"

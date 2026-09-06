@@ -27,10 +27,10 @@
 ## 本地部署（需要能 SSH 到远程的环境）
 
 ```bash
-# 在本机（能联网到 SeetaCloud 的机器）执行：
+# 在本机（能联网到云实例的机器）执行：
 python experiments/phase1/deploy.py
-# 监控：
-ssh -p <your-autoDL-port> root@<your-autoDL-host> "tail -f /root/verigis/logs/progress.log"
+# 监控(host/port 用环境变量,不要把实例地址写进仓库):
+ssh -p "$AUTODL_SSH_PORT" "$AUTODL_SSH_HOST" "tail -f /root/verigis/logs/progress.log"
 ```
 
 ## 设计判断

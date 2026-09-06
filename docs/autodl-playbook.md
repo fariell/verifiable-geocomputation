@@ -1,58 +1,40 @@
 # AutoDL 作战手册 · Verifiable Geocomputation 云端工作流
 
-> **决策(2026-09-06)**:本地 WSL 的 Lean/Dafny 链路装得通但太费劲,**主路径迁 AutoDL**。
-> 本文档是这条主路径的入口。硬件与预算沿用 [`autodl-rental.md`](autodl-rental.md)
-> (4090 + PyTorch 2.5.1/UB22.04,月 ¥60-120),不重复;本文档专讲**怎么用**。
+> **决策(2026-09-06 10:09,PI)**:W1 闭环已在云端打上之后,**实验室 = AutoDL**。
+> 不再本机跑实验,不再 `sync_push` / `results_pull` 来回 overlay。
+> 工作目录:`/root/verigis/repo`。日志:`~/.workbuddy/`。
+> 硬件与预算见 [`autodl-rental.md`](autodl-rental.md)。
 
 ## 〇、一句话
 
+日常只在 AutoDL bash(或 JupyterLab **Terminal**,不要把 Python 贴进 bash):
+
 ```bash
-# 本机一行(密码在 ~/.autodl_pwd 私有文件,模式 600)
-sshpass -f ~/.autodl_pwd ssh -p <your-autoDL-port> -o StrictHostKeyChecking=no \
-    root@<your-autoDL-host> \
-    'bash -s' < scripts/autodl/setup.sh       # 首次装机
-sshpass -f ~/.autodl_pwd ssh -p <your-autoDL-port> -o StrictHostKeyChecking=no \
-    root@<your-autoDL-host> \
-    'bash -s' < scripts/autodl/verify_all.sh  # 日常跑
+source /etc/network_turbo          # GitHub 学术加速;elan/mathlib/release 都要
+source ~/.elan/env                 # lean / lake
+export PATH="/usr/local/bin:$PATH" # dafny
+
+cd /root/verigis/repo
+python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 ```
 
-然后**在 autoDL 实例内**的工作目录里干活。本机只看拉回来的结果(`results_pull.sh`)。
+产物不要往本机拉。读 `~/.workbuddy/summary_*.txt` 和 `~/.workbuddy/jobs/*.log`。
+
+**销毁实例会丢系统盘。** 长活数据(mathlib 缓存、日后 DEM、本仓)放到 `/root/autodl-tmp/`。
+当前仓库仍在 `~/verigis/repo`;W2 起若要防销毁,把仓迁到数据盘(你点头后再搬)。
 
 ---
 
-## 一、前置:本地只准备一个密码文件(再也不手敲密码)
+## 一、本机 overlay 已停用
 
-`autoDL登录信息.txt` 是**唯一可信源**,但明文密码不进任何脚本。
+`scripts/autodl/sync_push.sh` 与 `results_pull.sh` **冻结**,只留档。
+W1 曾用它们把本机修改 overlay 到云端;那条路结束了。
 
-```bash
-# 本机 PowerShell / Git Bash 都行,把密码写到用户私有文件
-echo '<your-autoDL-password>' > ~/.autodl_pwd
-chmod 600 ~/.autodl_pwd      # Git Bash: 也行;Windows 上 Git Bash 强制 600
-# 验证
-cat ~/.autodl_pwd            # 只回显自己看
-```
-
-**为什么不在脚本里硬编码密码?**
-- 进 commit 即泄露(同事/审稿人/学生能看到)
-- `autoDL登录信息.txt` 走 `.gitignore` 不进 git,但脚本里若也写一份就两处风险源
-- 用 SSH_ASKPASS 每次还得手输,用密码文件 + sshpass 一行命令,**全部离线脚本可启动**
-
-**前置依赖:装 sshpass**
-
-```bash
-# Git Bash
-pacman -S sshpass          # 或 scoop install sshpass / choco install sshpass
-
-# WSL(如果以后还要用)
-sudo apt-get install sshpass
-
-# macOS
-brew install hudochenkov/sshpass/sshpass
-```
+凭据仍不进仓库。AutoDL 上也不要存放 `autoDL登录信息.txt`。
 
 ---
 
-## 二、首次装机:`setup.sh`(约 10-20 分钟)
+## 二、首次装机:`setup.sh`(已完成,可重入)
 
 `scripts/autodl/setup.sh` 在 autoDL 实例里**装 Lean + Dafny + GDAL/Python + clone 本仓 + 跑冒烟**。
 
@@ -60,25 +42,25 @@ brew install hudochenkov/sshpass/sshpass
 - Lean: `curl https://elan.lean-lang.org/elan-init.sh | sh`(elan 反而在云端好装)
 - Dafny: `wget https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip`,自带 unzip
 
-跑法:
+跑法(已在实例内,可重入):
 
 ```bash
-# 本机 Git Bash
-sshpass -f ~/.autodl_pwd ssh -p <your-autoDL-port> \
-    -o StrictHostKeyChecking=no \
-    root@<your-autoDL-host> \
-    'bash -s' < scripts/autodl/setup.sh
+source /etc/network_turbo
+python3 /root/verigis/repo/scripts/autodl/jupyter_progress.py \
+  'bash /root/verigis/repo/scripts/autodl/setup.sh'
 ```
 
 实例里大约做这些事(脚本本身):
-1. `apt update && apt install -y unzip git curl wget build-essential python3-venv python3-pip libgdal-dev gdal-bin zstd`
-2. `curl https://elan.lean-lang.org/elan-init.sh | sh -s -- -y --default-toolchain lean-4.18.0`
-3. 装 Dafny v4.11.0(.zip → /opt/dafny → 符号链)
-4. `python3 -m venv --system-site-packages ~/verigis/venv` + pip 装 numpy/scipy/osgeo
-5. `git clone https://github.com/fariell/verifiable-geocomputation.git ~/verigis/repo`
-6. `dafny verify formal/dafny/SmokeAbs.dfy` 冒烟 + `lake build` 暖机(可选,首次 30-60 min)
+1. `apt`(已是 root 则不用 sudo)装 unzip/git/curl/gdal-bin 等
+2. `source /etc/network_turbo`(GitHub 学术加速;**不开则 elan/Dafny 会 443 超时**)
+3. Lean: `elan-init` → toolchain 4.18.0
+4. Dafny v4.11.0(.zip → /opt/dafny)
+5. Python venv + numpy/scipy(osgeo 不阻塞 W1)
+6. 已有 overlay 则不 `git clone`
+7. 冒烟:`dafny verify` Abs + `lake build`(可选,首次 30-60 min)
 
 **详细输出**会写到 `~/.workbuddy/setup_<时间戳>.log`。
+lean 或 dafny 没装上时脚本以 **rc=1** 退出,不要把 rc=0 当成工具链就绪。
 
 ---
 
@@ -93,36 +75,24 @@ sshpass -f ~/.autodl_pwd ssh -p <your-autoDL-port> \
 5. **GPB-019** DEM 噪声实验入口(若 `experiments/phase1/` 里已经有 benchmark 脚本就跑)
 
 每项跑完都把 stdout/stderr + 摘要 append 到 `~/.workbuddy/verify_<时间戳>.log`。
-**关键**:脚本还把摘要 grep 出来写到 `~/.workbuddy/summary_<时间戳>.txt`,**方便本地拉**。
+**关键**:脚本还把摘要写到 `~/.workbuddy/summary_<时间戳>.txt`。
 
-跑法(本机):
+跑法:
 
 ```bash
-# 同 sshpass 包装,一行
-sshpass -f ~/.autodl_pwd ssh -p <your-autoDL-port> \
-    -o StrictHostKeyChecking=no \
-    root@<your-autoDL-host> \
-    'bash -s' < scripts/autodl/verify_all.sh
+source /etc/network_turbo && source ~/.elan/env
+python3 /root/verigis/repo/scripts/autodl/jupyter_progress.py \
+  'bash /root/verigis/repo/scripts/autodl/verify_all.sh'
 ```
 
 ---
 
-## 四、回传结果:`results_pull.sh`(本机跑)
+## 四、结果留在云端(不再 results_pull)
 
-把今天云端跑出来的所有产物拉到 `experiments/phase1/`,统一管理:
+摘要:`~/.workbuddy/summary_*.txt`  
+全文:`~/.workbuddy/verify_*.txt` / `setup_*.log` / `jobs/*.log`
 
-```bash
-# 本机
-bash scripts/autodl/results_pull.sh
-```
-
-脚本做的事:
-1. `scp -P <your-autoDL-port>` 拉 `~/.workbuddy/summary_*.txt` 到 `experiments/phase1/logs/`(名字按日期)
-2. 拉 `~/.workbuddy/dafny_*.log` + `~/.workbuddy/lake_*.log` 原始档(若有)
-3. 在 `experiments/phase1/STATUS.md` 里 append 一行 "<日期> \| P-001 pass=P P-002 pass=?"
-
-**幂等**:重复跑不会丢档(同名就 `.bak`)。
-**零凭据风险**:密码从 `~/.autodl_pwd` 读,不进 git。
+把关键行贴回 chat 即可。不要为了归档再 scp 回 Windows。
 
 ---
 
@@ -186,8 +156,7 @@ rc, log = run_streamed('bash /root/verigis/repo/scripts/autodl/verify_all.sh',
 - **`⏳  心跳 @ HH:MM:SS  已静默 N min`** — 长时间无输出时的 ping,默认 30 min
 - **`✅ END rc=0`** — 整任务成功;`rc≠0` 即失败
 
-**完整 stdout 落 `~/.workbuddy/jobs/<时间戳>.log`**,事后可重读、可经
-`results_pull.sh` scp 回来。
+**完整 stdout 落 `~/.workbuddy/jobs/<时间戳>.log`**,事后在 AutoDL 上重读即可。
 
 **配置经环境变量**(不开新接口):
 
@@ -232,11 +201,17 @@ WSL 不再试图装"完整工具链"——**已装好的不删**(dafny 还在),
 
 | # | 任务 | 跑在哪 | 预估时间 | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | 首次 `setup.sh` 把工具链装好 | autoDL | 10–20 min | ⏳ 待启动 |
-| 2 | `lake build` 暖通 mathlib | autoDL | 30–60 min | ⏳ 待启动 |
-| 3 | Dafny P-001 + P-002 重跑(云端一致性锚) | autoDL | 2 min | ⏳ |
-| 4 | Lean P-001 verify(`VeriGIS/HornSlope.lean`,222 行) | autoDL(暖机后) | 1 min | ⏳ |
-| 5 | GPB-019 DEM 噪声实验入口脚本 | autoDL + 本仓 | 30 min | ⏳ |
+| 0 | `sync_push.sh` overlay | 已冻结 | — | ⏹ 2026-09-06 PI:不再本机同步 |
+| 1 | 首次 `setup.sh` | autoDL | 10–20 min | ✅ 2026-09-06 09:59 · Lean 4.18 / Dafny 4.11 |
+| 2 | `lake build` 暖通 mathlib | autoDL | 30–60 min | ✅ mathlib 已暖;增量 2 秒过 |
+| 3 | Dafny P-001 + P-002 | autoDL | 2 min | ✅ 19 + 24 verified, 0 errors |
+| 4 | Lean P-001 `lake build` | autoDL | 1 min | ✅ 2026-09-06 10:07 success |
+| 5 | 后续实验(GPB-019 / Lean P-002 / P-003) | **只在 autoDL** | — | ⏳ W2 |
+| 1 | 首次 `setup.sh` 把工具链装好 | autoDL | 10–20 min | ✅ 2026-09-06 09:59 · Lean 4.18 / Dafny 4.11 |
+| 2 | `lake build` 暖通 mathlib | autoDL | 30–60 min | ✅ mathlib 已暖;增量 2 秒过 |
+| 3 | Dafny P-001 + P-002 | autoDL | 2 min | ✅ 19 + 24 verified, 0 errors |
+| 4 | Lean P-001 `lake build` | autoDL | 1 min | ✅ 2026-09-06 10:07 success |
+| 5 | GPB-019 DEM 噪声实验入口脚本 | autoDL + 本仓 | 30 min | ⏳ W2/W3 候选 |
 
 ---
 

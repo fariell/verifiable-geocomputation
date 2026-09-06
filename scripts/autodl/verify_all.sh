@@ -39,6 +39,11 @@ run_step() {
     echo "" >> "$SUMMARY"
 }
 
+# ---- 0. PATH + GitHub 加速(新开的 bash 默认没有 elan / 代理) ----
+[ -f /etc/network_turbo ] && . /etc/network_turbo
+[ -f "$HOME/.elan/env" ] && . "$HOME/.elan/env"
+export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH"
+
 # ---- 1. 工具链现状 ----
 echo "==[1/4] 工具链现状 =="
 {
@@ -61,8 +66,8 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -3 | tee -a "$LOG" "$SUMMARY" || true
     fi
     if [ -f "$REPO/formal/dafny/P002_pit_filling.dfy" ]; then
-        echo "[dafny] P-002 (SMT 可能超时)" | tee -a "$SUMMARY"
-        timeout 180 dafny verify "$REPO/formal/dafny/P002_pit_filling.dfy" 2>&1 \
+        echo "[dafny] P-002 (1D Fill; 若 SMT 超时把 log 贴回)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/P002_pit_filling.dfy" 2>&1 \
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-002 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
@@ -70,18 +75,14 @@ else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
 
-# ---- 3. Lean ----
+# ---- 3. Lean(首次 lake update+build 30-60 min;不要因为没有 .lake/build 就跳过) ----
 echo "==[3/4] Lean P-001 =="
 if command -v lake >/dev/null 2>&1; then
     cd "$REPO/formal/lean4"
-    if [ -d ".lake/build" ]; then
-        echo "[lean] lake build 增量" | tee -a "$SUMMARY"
-        timeout 600 lake build 2>&1 | tail -5 \
-            | tee -a "$LOG" "$SUMMARY" || \
-            echo "  ⚠️ lake build 超时" | tee -a "$SUMMARY"
-    else
-        echo "[lean] ⏭  mathlib 未暖机;先跑 setup.sh 暖一次" | tee -a "$SUMMARY"
-    fi
+    echo "[lean] lake update + lake build (首次会拉 mathlib)" | tee -a "$SUMMARY"
+    timeout 1800 bash -c 'lake update && lake build' 2>&1 | tail -20 \
+        | tee -a "$LOG" "$SUMMARY" || \
+        echo "  ⚠️ lake 超时或失败 — 这在首次暖机时可能非致命,详见 $LOG" | tee -a "$SUMMARY"
 else
     echo "[lean] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
