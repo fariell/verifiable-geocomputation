@@ -8,9 +8,9 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: DONE
-UPDATED: 2026-09-06 18:42
-TASK: **task7.5 → task8A**(串行,内含并行起草)
+STATUS: PENDING
+UPDATED: 2026-09-06 19:42
+TASK: **task9** · 多分辨率迁移 (5×5 5m → 256² 5m → 30m SRTM → LiDAR 点云)
 
 ### A.0 主任务链(必跑)
 
@@ -120,6 +120,80 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - 本机 `python3 scripts/autodl/jupyter_progress.py '...'` 自动捕获 elapsed 与 log
 - 云端缺 wolfram 时直接 SKIP,不报错
 
+### A.6 task9 · 多分辨率迁移(主任务三,本机 + AutoDL 双端)
+
+> **范围**:从 `plane-5m` 5×5 扩到 `terrain-A` 256² → `SRTM-30m` 3601² → LiDAR 点云降采样栅格。
+> 目标:**同一算法 + 同一形式化**在 4 套 DEM 上全部 PASS,从而支撑 v1.4 / 顶级期刊(TGIS / JGSA)。
+> **不阻塞 SciDA 投稿**(2026-11-15)— paper v_final 仍按 v1.3 NUM 走。
+
+#### 任务清单(逐项给阶段)
+
+```
+阶段 1 (本机, ~30 min)                          验证多分辨率 metrics 一致性
+  ├── 输入准备:
+  │   ├── plane-5m      : 5×5, 5m    (已有, 测试基线)
+  │   ├── terrain-A     : 256², 5m   (experiments/phase1/results 已存在, 复用)
+  │   ├── SRTM-30m      : 3601², 30m (需 download from USGS, 已有 N32E110 tile?)
+  │   └── LiDAR-downsampled : 从 USGS TNM 或 自采, 1m → 256²  (新)
+  │       (如 LiDAR 缺, 用 256² 5m × 3 套 OK 即可)
+  ├── 对每套:
+  │   ├── bash experiments/phase2/run_p_comp_1.sh
+  │   ├── 4 门控 metric + 出口计数 + 长程
+  │   └── 写 results/gpb024_PLANE / gpb024_TERRAIN_A / gpb024_SRTM_30M /
+  │          results/gpb024_LIDAR / metrics.json
+
+阶段 2 (AutoDL, ~15 min, 等 P-COMP-1 + T6 重 verify)
+  ├── python3 scripts/autodl/jupyter_progress.py 'dafny verify formal/dafny/PCOMP_1.dfy'
+  ├── python3 scripts/autodl/jupyter_progress.py 'dafny verify formal/dafny/P006_terminate_under_strict.dfy'
+  └── cd formal/lean4 && lake build
+      ├── 期望:PCOMP_1 17/0 + T6 12/0 + lake 2760 modules 0 errors
+      └── 形式化证明**不依赖网格尺寸**,所以预期可直接过;
+          如果挂,先看 SMT timeout, --timeout 200 加跑
+
+阶段 3 (本机, ~10 min)                          Wolfram 多分辨率穷举
+  ├── 对每套 DEM 的粗化版 (256² → 8², 3601² → 16²),跑 p_comp_*.wl
+  └── 输出 pigeonholeAll + descentAllFix + ringHasFixedPoint 三判(应保持 True/True/False)
+
+阶段 4 (本机, ~15 min)                          manim 多分辨率对比
+  ├── 对每套 DEM 渲染 FillThenWatershedMultiresStencil.mp4
+  │   4 子图:plane-5m / terrain-A / SRTM-30m / LiDAR-down
+  └── experiments/phase2/figures/MultiresFillThenWatershed.mp4
+
+阶段 5 (~30 min)                                 README + 表
+  ├── formal/dafny/PCOMP_1_MULTIRES_README.md (dafny readme, 解释形式化与分辨率无关)
+  ├── docs/phase2/MULTIRES_TABLE.md (3-4 列: DEM / n_pit / n_term / uniq_out / longest / verd)
+  ├── v1.3 NUM SUPP 写"任务 9 v1.4 row" 占位 (我后面补)
+  └── this-week.md 加 task9 row (我后面补)
+```
+
+#### 验收标准(全部 PASS = task9 verdict=PASS)
+
+| 闸 | 期待 | 备注 |
+|---|---|---|
+| 4 门控 PASS(每套 DEM) | 全 4 PASS | 形式化同算法,预期不变 |
+| dafny PCOMP_1.dfy | 17/0 verify | 同 task7.5 数 |
+| dafny P006_terminate_under_strict.dfy | 12/0 verify | 同 task7.5 数 |
+| lake build | 2760 modules / 0 errors | 增量秒过 |
+| wolfram 多分辨率 | pigeon=True descent=True fixed=False | 不依赖分辨率 |
+| manim | 4 子图 mp4 渲染 | 166+ KB 套 |
+| README / MULTIRES_TABLE | commit 上 | 给 v1.4 升级 |
+
+#### 任务边界(严禁)
+
+- **不重写代码**:形式化 P-COMP-1 / P006_T6 已 commit,不动
+- **不复制 phase1 gpb001-015 metrics**:只看是否一致
+- **不动** `docs/PAPER_P2_OUTLINE.md` / `PAPER_P2_v1.1_SUPP.md` / `PAPER_P2_v1.3_NUM.md`(洛书自管)
+- **不动** `docs/this-week.md` / `MEMORY.md`(洛书投完顺手补 task9 row)
+- **不 git push**(PI 18:22 push gate 永久)
+- **新真值从 `autoDL登录信息.txt` 读**,绝不下地
+
+#### 完成时
+
+- INBOX §A STATUS=DONE + UPDATED 改 current ts
+- 末尾总结:`task9 verdict = PASS / FAIL / BLOCKED`
+- git commit `feat(phase2): task9 多分辨率迁移 PASS (<expected metrics>)`(local only)
+- OUTBOX 新增一段 `## 多分辨率迁移(task9)`
+
 ---
 
 ## §B · 协议与档案(只读)
@@ -141,8 +215,9 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 ### B.2 任务历史(只读,以后每完成一段归档到这里)
 - **task6(2026-09-06 17:38-17:48,STATUS=CLOSED)** = P-005 云端复核 + P-006 流域唯一
 - **task7(2026-09-06 18:08-18:10,STATUS=CLOSED LOCAL)** = P-COMP-1 + 第 6 条 本机段
-- **task7.5(2026-09-06 18:15-pending,STATUS=CLOSED LOCAL 代码 + 等云端)** = P-COMP-1 + T6 形式化云端复核
-- **task8A(2026-09-06 18:20-pending,STATUS=待 task7.5 完成后接力)** = P-COMP-3 反例素材
+- **task7.5(2026-09-06 18:15-18:30,STATUS=CLOSED LOCAL+云端)** = P-COMP-1 + T6 形式化云端复核
+- **task8A(2026-09-06 18:20-18:42,STATUS=CLOSED)** = P-COMP-3 反例素材 (NEGATIVE-RESULT PASS)
+- **task9(2026-09-06 19:42-PENDING,STATUS=ACTIVE)** = 多分辨率迁移 5×5 → 256² → 3601² → LiDAR
 
 ### B.3 触发器(`.cursorrules` `[mailbox]` 规则契约)
 - Cursor session 启动时自动 `Read` 本文件
