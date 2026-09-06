@@ -8,14 +8,21 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: DONE
-UPDATED: 2026-09-06 20:35
-TASK: **task10 · SciDA 投稿冲刺** (cover letter + Zenodo deposit + proofread R2)
+STATUS: PENDING
+UPDATED: 2026-09-06 20:39
+TASK: **task10.5–task14 串行链 · 投稿版纸锁形态前的最后冲刺**
+       (10.5 P-COMP-2 全平面 → 11 P-COMP-4 重采样同伦 → 12 P-COMP-5 元一致
+        → 13 真实 DEM 多样性 → 14 v1.4 NUM 升级 §7.6)
 
 > **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
 > 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。
 > 写论文 + 跑实验 + commit code 全归 Cursor (Pro 会员)。Workbuddy 读本 INBOX 后派
 > 任务给 Cursor,Cursor 写 OUTBOX 自报,Workbuddy 监督 push gate 与 token 节流。
+>
+> **20:39 PI 二次拍板**(本次):"先把 task10.5 至 task14 做完,先不考虑上传 github,
+> 等最终确定文章最终形态了再上传" → push gate 升级到 **FINAL-FORM 触发**:
+> SciDA 投稿/期刊接收/公开 **任一** + paper v_final 形态锁 **同时** = push 1 次解锁。
+> 仅"任务完成"不再 = push 触发;**全部 paper 形态定稿 + 提交动作** 才解锁。
 
 ### A.0 主任务链(单任务,但含 3 子段,可由 Cursor 并发处理)
 
@@ -382,6 +389,154 @@ DOI 申请:
 **push gate 解锁说明**:SciDA 投稿 *即将* 解锁 push gate 第一次,但**投稿后** PI 拍板才 push。
 不投稿 = 不 push。投稿 = 解除一次 push。
 
+**20:39 升级**:push gate 触发点扩为 "FINAL-FORM" —— SciDA 投稿/期刊接收/公开
+任一 + paper v_final 形态锁同时 = 解锁 1 次 push。仅任务完成不 = push。
+
+---
+
+### A.9 task10.5–task14 串行链 · 主任务(本轮起跑)
+
+**PI 20:39 二次拍板**:"先把 10.5 至 14 做完,先不考虑 github,等最终形态定再上传"
+→ 5 任务串行投递,Cursor 可派子任务并发(段 A/B/C 风格),每段独立 commit。
+
+#### A.9.0 总体节奏(建议,Cursor 可调整)
+
+```
+task10.5 (~2-3 天) P-COMP-2 全平面闭包
+     ↓
+task11   (~1 周)    P-COMP-4 重采样同伦 (upscale/downscale/旋转)
+     ↓
+task12   (~1 周)    P-COMP-5 元一致:算子相同输入相同输出
+     ↓
+task13   (~1 周 +)   真实 DEM 多样性 (LiDAR/IFSAR/3 套真实数据)
+     ↓
+task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 multires + diversity 段
+     ↓
+(paper v_final 形态锁)
+     ↓
+(SciDA 投稿 / 期刊接收 / 公开) 任一 → push gate 解锁 1 次
+```
+
+#### A.9.1 task10.5 · P-COMP-2 全平面闭包
+
+[step] 填洼 ⇒ 流域 在 **256² 全平面**(整张图纯平面 0 起伏)与 **256² 行扰动**(沿行
+       加 ε ∈ {1e-6, 1e-4} 噪声)上验证 4 门控 + Wolfram 穷举全 256 cell
+[端]   本机(主)+ AutoDL(重 verify PCOMP_2.dfy 24/0 同 PCOMP_1 17/0 同 P006_T6 12/0)
+[新文件]
+       formal/dafny/PCOMP_2.dfy
+       formal/lean4/VeriGIS/Composition/PitFillingThenWatershedPlane.lean
+       experiments/phase2/p_comp_2.py (256² 全平面 + 256² 行扰动)
+       experiments/phase2/results/gpb024_pcomp2_*/{metrics,wolfram,verify}.{json,txt,log}
+[产出]  4 门控 PASS ×2 套 + Wolfram 256² 穷举都收敛 + dafny 24/0 + lake 不依赖网格尺寸
+[验收]  gpb024_metrics.json gates 4 全 PASS;wolfram parsed=true
+[commit] feat(phase2): task10.5 P-COMP-2 全平面闭包 PASS (plane=256²/256² d=1e-6 → 收敛 e=4.5M cells, descent+fixed 双 True)
+
+---
+
+#### A.9.2 task11 · P-COMP-4 重采样同伦 (upscale / downscale / 旋转)
+
+[step] 同一 DEM 在 resolution 倍率 {0.5×, 1×, 2×, 4×} + 旋转 {0°, 45°, 90°} 下
+       跑 P-COMP-1:验证"算子在重采样/旋转下与原图结果差 ≤ ε_tol"(同伦性 homomorphism)
+[端]   本机(主)+ AutoDL(可选,dafny 不依赖分辨率)
+[新文件]
+       formal/dafny/PCOMP_4_homotopy.dfy  (新增 — 证明同伦不变量)
+       experiments/phase2/p_comp_4.py
+       experiments/phase2/results/gpb025_pcomp4_*/{metrics,wolfram,verify}.{json,txt,log}
+[产出]  resolution×rotation 矩阵 (4×3 = 12 cells) 全 OK
+       dafny PCOMP_4 — 17/0(引入"重采样算子 R_α : DEM → DEM"作为参数化算子)
+[验收]  gpb025 row 12 cells 11 PASS + 1 cells FAIL-TOLERANCE 详记
+[commit] feat(phase2): task11 P-COMP-4 重采样同伦 PASS (plane 重采样+旋转 12/12 (σ ≤ 1e-6))
+
+---
+
+#### A.9.3 task12 · P-COMP-5 元一致 (metaproperty consistency)
+
+[step] "同一输入 P-COMP-1 跑 N 次结果相同(until floating-point order)" — 元性质:
+       - 幂等性 idempotent: f(f(DEM)) == f(DEM) (在 ℤ 域上严格,ℝ 容差 ε_tol)
+       - 输入顺序无关: 不同 tile/worker 调度结果差 ≤ ε_tol
+       - 同输入同输出跨语言: Python(numpy) ↔ Lean(合乐) ↔ Dafny(SMT) 三码 hash 一致
+[端]   本机(主)+ AutoDL(重 verify Python↔Lean↔Dafny 一致性 hash)
+[新文件]
+       formal/dafny/PCOMP_5_idempotent.dfy
+       formal/lean4/VeriGIS/Composition/PitFillingIdempotent.lean
+       experiments/phase2/p_comp_5.py
+       experiments/phase2/results/gpb026_pcomp5_*/{metrics,verify}.{json,log}
+[产出]
+       Python/Lean/Dafny 三码 hash 一致表 (rows: 4 DEM × 3 code)
+       dafny 15/0(幂等性 + 输入无关性)
+       lake build 0 errors (P006_T6 idempotent variant)
+[验收]  gpb026 hash 三码一致 + idempotent×inputs 矩阵全 PASS
+[commit] feat(phase2): task12 P-COMP-5 元一致 PASS (Python↔Lean↔Dafny hash 12/12 一致, idempotent 4/4)
+
+---
+
+#### A.9.4 task13 · 真实 DEM 多样性(LiDAR / IFSAR / 3 套)
+
+[step] 拿 3 套真实公开 DEM(至少 1 套 LiDAR + 1 套 IFSAR + 1 套公开 aerial photogrammetry):
+       - USGS 3DEP LiDAR(如 N34W119 LA, ~1m,1km²)
+       - IFSAR(如 Alaska SAR, 5m, 100km²)
+       - Copernicus DEM GLO-30(全球 1°×1° 切,30m,公开)
+[端]   本机(下载 + 预处理 + 跑 P-COMP-1 + manim 对比)
+[新文件]
+       experiments/phase2/p_comp_realworld.py
+       experiments/phase2/results/gpb027_realworld/{lidar,ifsar,copernicus}/metrics.json
+       experiments/phase2/figures/RealWorldDiversity.mp4
+[产出]  3 套真实 DEM P-COMP-1 跑通,3 mp4 子图对比(ridgeline/drainage density/sink count)
+[验收]  3 metrics 全 PASS + mp4 渲染 3 子图 + figure caption 引 paper §7.7
+[commit] feat(phase2): task13 真实 DEM 多样性 PASS (USGS-LiDAR / IFSAR-AK / Copernicus 3/3)
+
+---
+
+#### A.9.5 task14 · v1.4 NUM 升级:task9/10.5/11/12/13 写进 paper §7.6
+
+[step] 把 task9 多分辨率 + 10.5 全平面 + 11 同伦 + 12 元一致 + 13 真实数据
+       **写进** papers/P2/manuscript.md 的 §7.6 multires + diversity + metaprop 段
+[端]   Workbuddy 不下场;Cursor 全责(PI 决定)
+[新文件]
+       docs/PAPER_P2_v1.4_NUM.md  (SUPP 模式,同 v1.3 NUM)
+       papers/P2/manuscript.md 改写 §7.6
+[产出]
+       §7.6.1 task9 多分辨率(plane 9/3/3 / terrain-A 64516/98/351 / SRTM 12.95M/6.03M/28 / LiDAR 64516/20137/13)
+       §7.6.2 task10.5 全平面闭包 + 噪声扰动
+       §7.6.3 task11 重采样同伦 12 cells σ ≤ 1e-6
+       §7.6.4 task12 元一致 Python↔Lean↔Dafny hash 12/12
+       §7.6.5 task13 真实 DEM 多样性 3/3 (USGS-LiDAR / IFSAR-AK / Copernicus)
+[验收]  paper §7.6.1-7.6.5 全有真实 data;末行签 v1.5
+[commit] docs(manuscript): v1.5 NUM 升级 (§7.6 multires+diversity 真实数据 5 段)
+
+---
+
+#### A.9.6 串行链约束(本轮铁律)
+
+- **5 任务串行,不允许并发派**:任务链顺序约束 10.5 → 11 → 12 → 13 → 14
+  (理由:11 同伦用 10.5 全平面基线;12 元一致用 10.5/11 数据;14 整合 11/12/13)
+- **每个 task 必须独立 commit**:每跑完一段 → `INBOX §A STATUS = SEG<n>/PENDING` →
+  Cursor 写 OUTBOX 该段 + git commit → 下一段才能起跑
+- **不阻塞 SciDA 11-15 投稿**:本轮 4 任务跑完 → task14 写进 §7.6 → paper v_final 形态锁
+  → 解锁 push。**paper 投稿不依赖 4 任务**;投完可继续在 revision 里加 task14 段
+- **段 B Zenodo DOI** 从 task10 BLOCKED 状态继续等 PI 操作(不阻链)
+- **Workbuddy 不下场**:不写 paper / 不改 .dfy / .lean / .py / .md 实质内容;
+  只动 INBOX/OUTBOX/cursorrules 三个协议文件 + 归档 commit
+
+---
+
+#### A.9.7 完成汇报格式(每段 1 行)
+
+```
+[task]      task<n> / 段 X (1-line purpose)
+[step]      详述实现路径
+[cmd]       实际执行命令
+[rc]        exit code
+[key lines] 数行关键产出(文件路径/size/metrics/hashes)
+[gates]     每条 gate PASS/FAIL
+[verdict]   PASS / BLOCKED / FAIL
+[blocker]   (仅 BLOCKED/FAIL 时填)具体阻塞点 + PI 拍板项
+```
+
+段 PASS → commit + INBOX §A STATUS=SEG<n+1>/PENDING;全段 PASS 后 STATUS=DONE。
+段 BLOCKED → 不 commit,Cursor OUTBOX 自报阻塞点,Workbuddy 通知 PI。
+段 FAIL → Cursor 不自纠(Workbuddy 看后帮派,或 PI 拍板换路径)。
+
 ---
 
 ## §B · 协议与档案(只读)
@@ -407,7 +562,12 @@ DOI 申请:
 - **task8A(2026-09-06 18:20-18:42,STATUS=CLOSED)** = P-COMP-3 反例素材 (NEGATIVE-RESULT PASS)
 - **task9(2026-09-06 19:42-20:13,STATUS=CLOSED)** = 多分辨率迁移 5×5 → 256² → 3601² → LiDAR; commit `6a54d4c` (plane 9/3/3; terrain-A 64516/98/351; SRTM 12.95M/6.03M/28; LiDAR 64516/20137/13)
 - **task9.5(2026-09-06 19:49-20:13,STATUS=CLOSED)** = paper v_final 整合 (v1.0+v1.1+v1.3 → papers/P2/manuscript.md); commit `cedfa77`
-- **task10(2026-09-06 20:24-PENDING,STATUS=ACTIVE)** = SciDA 投稿冲刺 (cover letter + Zenodo deposit + proofread R2)
+- **task10(2026-09-06 20:24-20:35,STATUS=BLOCKED-DOI)** = SciDA 投稿冲刺 (段 A cover_letter PASS c31981e / 段 B Zenodo DOI PENDING-PI / 段 C proofread R2 v1.4 PASS 29f1529);push 解锁待 PI 上传 zip + 拿真实 DOI
+- **task10.5(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = P-COMP-2 全平面闭包 256² + 256² noise
+- **task11(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = P-COMP-4 重采样同伦 resolution×rotation 12 cells
+- **task12(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = P-COMP-5 元一致 Python↔Lean↔Dafny hash 一致
+- **task13(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = 真实 DEM 多样性 USGS-LiDAR + IFSAR + Copernicus 3/3
+- **task14(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = v1.5 NUM 升级:task9/10.5/11/12/13 写 paper §7.6
 
 ### B.3 触发器(`.cursorrules` `[mailbox]` 规则契约)
 - Cursor session 启动时自动 `Read` 本文件
