@@ -215,7 +215,7 @@ WSL 不再试图装"完整工具链"——**已装好的不删**(dafny 还在),
 | 4 | Lean P-001 `lake build` | autoDL | 1 min | ✅ 2026-09-06 10:07 success |
 | 5 | Lean P-002 `PitFilling.lean` | autoDL | 增量 | ✅ 2026-09-06 10:29 lake build success |
 | 6 | GPB-019 入口 | autoDL | <1 s | ✅ 2026-09-06 10:41 ENTRY PASS |
-| 7 | P-003 曲率 / P-002-bis | autoDL | — | ⏳ 等 PI 选下一题 |
+| 7 | P-003 曲率 | 本机写 → autoDL 验 | — | Lean ✅ 11:45; GPB-003 PASS; Dafny DivTwice 末修 |
 
 ---
 

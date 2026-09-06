@@ -4,3 +4,4 @@
 -/
 import VeriGIS.HornSlope
 import VeriGIS.PitFilling
+import VeriGIS.Curvature

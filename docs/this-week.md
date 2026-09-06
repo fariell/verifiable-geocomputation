@@ -6,6 +6,7 @@
 W1:Dafny P-001 19 / P-002 24 verified 0 errors;Lean P-001 lake build success。
 W2 Lean P-002:10:29 `Built VeriGIS.PitFilling`。
 W3 GPB-019:10:41 AutoDL **ENTRY: PASS**(rc=0)。
+P-003 实验 AutoDL 11:36 **GPB-003 ENTRY: PASS**;Lean 11:45 `Built VeriGIS.Curvature`。Dafny 从 18 errors 收到 1(`DivTwice` 外层 `/w`),末修已纳入本提交。
 
 ---
 
@@ -52,8 +53,8 @@ python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 ## 等你拍板 / 下一步
 
 1. **防销毁** — 是否把仓迁到 `/root/autodl-tmp/verigis/repo`。
-2. **P-003 曲率**(Evans / Zevenbergen–Thorne)已选定;本机写 Dafny/Lean + wolframscript/manim,overlay 后 AutoDL 验。
+2. **Dafny P-003** — overlay 后若还未跑 DivTwice 末修,补一次 `dafny verify formal/dafny/P003_curvature.dfy`。
 
 ---
 
-_v0.7 · 2026-09-06 · GPB-019 PASS_
+_v0.9 · 2026-09-06 · P-003 入库(Lean + GPB-003 PASS)_

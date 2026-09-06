@@ -57,4 +57,10 @@ autodl_scp \
     "$ROOT/experiments/phase1/"*.sh \
     "$HOST:$REMOTE_REPO/experiments/phase1/"
 
+if ls "$ROOT/experiments/phase1/"*.wl >/dev/null 2>&1; then
+    autodl_scp \
+        "$ROOT/experiments/phase1/"*.wl \
+        "$HOST:$REMOTE_REPO/experiments/phase1/"
+fi
+
 echo "==[done] overlay 完成。下一步在 AutoDL 跑实验 =="

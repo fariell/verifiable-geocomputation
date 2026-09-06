@@ -45,7 +45,7 @@ run_step() {
 export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH"
 
 # ---- 1. 工具链现状 ----
-echo "==[1/4] 工具链现状 =="
+echo "==[1/5] 工具链现状 =="
 {
     echo "---- tools ----"
     for t in lean lake dafny python3 gdalinfo unzip; do
@@ -58,7 +58,7 @@ echo "==[1/4] 工具链现状 =="
 } | tee -a "$LOG" "$SUMMARY"
 
 # ---- 2. Dafny ----
-echo "==[2/4] Dafny P-001 + P-002 =="
+echo "==[2/5] Dafny P-001 + P-002 + P-003 =="
 if command -v dafny >/dev/null 2>&1; then
     if [ -f "$REPO/formal/dafny/P001_horn_slope.dfy" ]; then
         echo "[dafny] P-001" | tee -a "$SUMMARY"
@@ -71,12 +71,18 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-002 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
+    if [ -f "$REPO/formal/dafny/P003_curvature.dfy" ]; then
+        echo "[dafny] P-003 (ZT Hessian)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/P003_curvature.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-003 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
 else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
 
 # ---- 3. Lean(首次 lake update+build 30-60 min;不要因为没有 .lake/build 就跳过) ----
-echo "==[3/4] Lean P-001 =="
+echo "==[3/5] Lean =="
 if command -v lake >/dev/null 2>&1; then
     cd "$REPO/formal/lean4"
     echo "[lean] lake update + lake build (首次会拉 mathlib)" | tee -a "$SUMMARY"
@@ -87,8 +93,8 @@ else
     echo "[lean] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
 
-# ---- 4. (可选) GPB-019 入口 ----
-echo "==[4/4] GPB-019 DEM 噪声实验入口 =="
+# ---- 4. GPB-019 / P-003 实验入口 ----
+echo "==[4/5] GPB-019 DEM 噪声实验入口 =="
 if [ -f "$REPO/experiments/phase1/run_benchmark.sh" ]; then
     echo "[gpb019] 跑实验中" | tee -a "$SUMMARY"
     bash "$REPO/experiments/phase1/run_benchmark.sh" 2>&1 \
@@ -96,7 +102,16 @@ if [ -f "$REPO/experiments/phase1/run_benchmark.sh" ]; then
         echo "  ⚠️ GPB-019 失败" | tee -a "$SUMMARY"
 else
     echo "[gpb019] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
-    echo "        待补:experiments/phase1/run_benchmark.sh" | tee -a "$SUMMARY"
+fi
+
+echo "==[5/5] GPB-003 / P-003 曲率入口 =="
+if [ -f "$REPO/experiments/phase1/run_p003.sh" ]; then
+    echo "[gpb003] 跑实验中" | tee -a "$SUMMARY"
+    bash "$REPO/experiments/phase1/run_p003.sh" 2>&1 \
+        | tail -20 | tee -a "$LOG" "$SUMMARY" || \
+        echo "  ⚠️ GPB-003 失败" | tee -a "$SUMMARY"
+else
+    echo "[gpb003] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
 fi
 
 echo "============================================================"
