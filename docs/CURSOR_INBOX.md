@@ -8,29 +8,37 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: DONE
-UPDATED: 2026-09-06 20:15
-TASK: **task9 (多分辨率迁移) ∥ task9.5 (paper v_final 整合)** — 双任务并行
+STATUS: PENDING
+UPDATED: 2026-09-06 20:24
+TASK: **task10 · SciDA 投稿冲刺** (cover letter + Zenodo deposit + proofread R2)
 
 > **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
 > 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。
 > 写论文 + 跑实验 + commit code 全归 Cursor (Pro 会员)。Workbuddy 读本 INBOX 后派
 > 任务给 Cursor,Cursor 写 OUTBOX 自报,Workbuddy 监督 push gate 与 token 节流。
 
-### A.0 主任务链(双任务并行,本轮 main 段 1 1+1)
+### A.0 主任务链(单任务,但含 3 子段,可由 Cursor 并发处理)
 
 ```
-┌─ task9   ─ 本机 + AutoDL ─────────────────────────────────────────┐
-│  多分辨率迁移:plane-5m → terrain-A 256² → SRTM-30m 3601² → LiDAR  │
-│  阶段 1-5:实测 4 套 + verify 重跑 + Wolfram 多分 + manim + README  │
+┌─ task10 (SciDA 投稿冲刺) ────────────────────────────────────────┐
+│  段 A · cover letter (papers/P2/cover_letter.md)              │
+│       写给 SciDA Editor-in-Chief,2-3 页,highlight 5 novel:    │
+│       (i)  GeoProofBench benchmark suite                       │
+│       (ii) Dafny + Lean 双轨形式化机器证明                       │
+│       (iii) 反例 as feature (P-006b 4-ring + ZT vs Horn)        │
+│       (iv) conditional theorem 边界                              │
+│       (v)  数据集 + reference impl 一站                            │
+│  段 B · Zenodo deposit (~500 MB)                              │
+│       上传 phase1+phase2 results / formal/*.dfy+lean /         │
+│       benchmark/ / figures/*.mp4 → 申请 DOI,链接挂进 §A.5       │
+│  段 C · proofread R2                                           │
+│       通读 papers/P2/manuscript.md (~1219 行),                  │
+│       - 引用统一 v_final.§X(去掉 v1.x §X 残留)                │
+│       - §9.2 不留 PENDING(全部云端 PASS,见 v1.3 NUM + task9)   │
+│       - 末行签 v1.4 (含 v1.3 NUM + task9 evidence)             │
+│       - 5 处引用一致性 (Data availability / Code availability) │
 └────────────────────────────────────────────────────────────────────┘
-┌─ task9.5 ─ Workbuddy 不下场,只 dispatch(全归 Cursor)────────────┐
-│  paper v_final 整合:                                         │
-│  (a) v1.0 + v1.1 SUPP + v1.3 NUM → single manuscripts/P2/manuscript.md │
-│  (b) figures/*.mp4 移到 papers/P2/figures/                   │
-│  (c) 第一轮 proofread + 共 5 处引用一致性修复                    │
-└────────────────────────────────────────────────────────────────────┘
-两任务独立 commit 到本地,Workbuddy 只监督:SHA + push gate + token 节流
+秘书只看:cover_letter.md + Zenodo DOI + commit hash + push gate
 ```
 
 ### A.1 task7.5 · 5 闸云端复核(主任务先)
@@ -264,6 +272,116 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - git commit `docs(manuscript): v_final 整合 (v1.0+v1.1+v1.3 → papers/P2/manuscript.md)` (local only)
 - OUTBOX 新增一段 `## paper v_final 整合(task9.5)`
 
+### A.8 task10 · SciDA 投稿冲刺(本机段,主任务)
+
+> 目标:Scientific Data 2026-11-15 投稿窗口。3 子段并发,由 Cursor 处理,
+> Workbuddy 不下场(token 节流)。
+
+#### 段 A:cover letter(papers/P2/cover_letter.md)
+
+```
+致:Scientific Data Editor-in-Chief
+```
+
+结构:
+- 第 1 段:研究意义(空间计算结果是否可机器证明 / benchmark / dataset 作为 reference software)
+- 第 2 段:novel contribution(5 项,与 §A.0 一致)
+- 第 3 段:数据描述(6 算子 + 3 组合 + 4 反例 + 5 noise + 4 套 DEM 全栈)
+- 第 4 段:验证方法(Dafny + Lean 双闸 / 17 verified / 12 verified / 2760 modules / 0 errors)
+- 第 5 段:数据可获得性(Zenodo DOI + GitHub 公开仓库 repo URL,公开时机 = 接收后一次性公开)
+- 第 6 段:作者贡献说明(以 AUTHOR.md 为准)
+- 第 7 段:funding / 利益冲突 / ethics declaration
+
+字数:~800-1000 词。
+
+#### 段 B:Zenodo deposit
+
+Zenodo 上传清单(估重):
+```
+experiments/phase1/results/        — gpb003..006 + phase1_metrics.json  ~30 MB
+experiments/phase2/results/        — gpb021/023 + task9 多分辨率 metrics  ~50 MB
+formal/dafny/*.dfy                 — 7 文件, ~80 KB
+formal/lean4/**/*.lean             — 10+ 文件, ~50 KB + lake 构建缓存  ~200 MB
+benchmark/                         — GeoProofBench v0.1, ~50 MB
+experiments/phase1/figures/*.mp4   — 4 mp4, ~600 KB
+experiments/phase2/figures/*.mp4   — 2 mp4 (含 MultiresFillThenWatershed.mp4 task9 新)
+experiments/phase1/results/*.csv   — geoproofbench_v0.1_batch1, ~5 MB
+papers/P2/manuscript.md            — ~120 KB
+papers/P2/figures/                 — 含 task9 manim, ~600 KB
+─────────────────────────────────────────────────────────────
+估算总大小:~330-380 MB,峰值 ~500 MB(带 lake 缓存)
+```
+
+DOI 申请:
+```
+访问 https://zenodo.org/deposit/new
+填表:
+- upload type = "dataset" + "software"
+- title = "GeoProofBench v0.1: a verified spatial-computation benchmark suite for terrain algorithms"
+- author = "Yinggang Guo" (其他作者见 AUTHOR.md)
+- description = 见 papers/P2/manuscript.md §Abstract (v_final.§3)
+- keywords = "spatial computation, formal verification, DEM, GeoProofBench"
+- license = CC-BY-4.0 (data) + MIT (code)
+- related identifier = GitHub repo 待 push 后填
+```
+
+**生成 DOI 后**:
+- 把 DOI 链接(如 `https://doi.org/10.5281/zenodo.XXXXXXX`)挂到 `papers/P2/manuscript.md` §A.5 (Data availability)
+- 把 DOI 链接也写到 cover letter §5
+
+#### 段 C:proofread R2 第二轮
+
+```
+目标文件:papers/P2/manuscript.md (~1219 行)
+校验项:
+1. 引用统一
+   - 所有 "v1.0 §X" / "v1.1 §X" / "v1.3 §X" → "v_final §X" 
+2. §9.2 limitations
+   - 不留 PENDING(全部云端 PASS,见 v1.3 NUM + task9 evidence)
+   - 末行签 v1.4 (含 v1.3 NUM + task9 4-DEM evidence)
+3. 5 处引用一致性
+   - Author name (Yinggang Guo / 郭迎钢)
+   - ORCID (0000-0002-8207-9941)
+   - Affiliation (Northwest Institute of Nuclear Technology, Xi'an 710024)
+   - Email (fariel_gyg@163.com)
+   - License (CC-BY-4.0 data + MIT code)
+4. 双盲审准备
+   - §Acknowledgements 留空(或写 "Removed for review")
+   - 不要在 §A.1 提及 PI 名字以外的私有信息
+5. 通读错别字 / 标点 / 中英混排一致性
+```
+
+#### 验收标准(task10 verdict)
+
+| 段 | 文件 | 期望 |
+|---|---|---|
+| 段 A | papers/P2/cover_letter.md | ~800-1000 词,7 段结构完整 |
+| 段 B | Zenodo deposit + DOI | DOI 链接挂进 manuscript §A.5 + cover letter §5 |
+| 段 C | papers/P2/manuscript.md | 引用统一 / 末行签 v1.4 / 5 处一致性 PASS |
+
+#### 严令(secretary-protocol)
+
+- **Workbuddy 不下场**:不写 cover letter / 不上传 Zenodo / 不改 manuscript 行
+- **Workbuddy 只验**:
+  1. `papers/P2/cover_letter.md` 存在 + 长度 800-1000 词
+  2. Zenodo DOI 链接挂进 manuscript §A.5
+  3. manuscript 末行签 = `v1.4`
+  4. commit hash (建议 3 commit,段 A/B/C 各 1)
+- **不 git push**(PI 18:22 push gate 永久,SciDA 投稿触发 push 解锁 1 次)
+
+#### 完成后
+
+- INBOX §A STATUS=DONE + UPDATED 改 current ts
+- 末尾 verdict:PASS = 段 A 文件存在 + 段 B DOI 挂入 + 段 C 末行签 v1.4
+- git commit 3 条(local only):
+  - `docs(cover): SciDA cover letter (任务 A)`
+  - `chore(zenodo): upload GeoProofBench v0.1 + DOI 链接挂入(任务 B)`
+  - `docs(proofrd): v1.4 终稿(任务 C)`
+- OUTBOX 新增一段 `## SciDA 投稿冲刺(task10)`
+
+**push gate 解锁说明**:SciDA 投稿 *即将* 解锁 push gate 第一次,但**投稿后** PI 拍板才 push。
+不投稿 = 不 push。投稿 = 解除一次 push。
+
 ---
 
 ## §B · 协议与档案(只读)
@@ -289,6 +407,7 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - **task8A(2026-09-06 18:20-18:42,STATUS=CLOSED)** = P-COMP-3 反例素材 (NEGATIVE-RESULT PASS)
 - **task9(2026-09-06 19:42-20:13,STATUS=CLOSED)** = 多分辨率迁移 5×5 → 256² → 3601² → LiDAR; commit `6a54d4c` (plane 9/3/3; terrain-A 64516/98/351; SRTM 12.95M/6.03M/28; LiDAR 64516/20137/13)
 - **task9.5(2026-09-06 19:49-20:13,STATUS=CLOSED)** = paper v_final 整合 (v1.0+v1.1+v1.3 → papers/P2/manuscript.md); commit `cedfa77`
+- **task10(2026-09-06 20:24-PENDING,STATUS=ACTIVE)** = SciDA 投稿冲刺 (cover letter + Zenodo deposit + proofread R2)
 
 ### B.3 触发器(`.cursorrules` `[mailbox]` 规则契约)
 - Cursor session 启动时自动 `Read` 本文件
