@@ -146,5 +146,110 @@ GPB-015 ENTRY: PASS
 
 ---
 
+## P-COMP-1 + P-006 T6(task7)
+
+A.1 自检:
+1. 内部编号 = `task7 / P-COMP-1 + 第 6 条`(一致)
+2. HEAD 当时是 `e0b0001`,不是 `8ce0ee6`(报 HEAD;import 链在,未 checkout formal/)
+3. `P006_watershed.dfy:14` = `include "P005_d8.dfy"`(是)
+4. 第 6 条原 PENDING;现已起草,本机无 dafny/lake,README 标 VERIFY PENDING
+
+---
+
+[task]      task7 / P-COMP-1 + 第 6 条
+[step]      本地 numpy + wolfram
+[cmd]       & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_1.py
+[rc]        0
+[key lines]
+  fill min=5.000 max=5.000  checked=25 pits=0
+  strict descent: n=9 min_drop=1.0000
+  terminate: n=9 term=9 longest=3 uniq_out=3
+  start=(0,0) terminated=False end=(0, 0) steps=8
+  wolframscript rc=0
+  wolfram pigeonhole: True
+  wolfram descentAllFix: True
+  wolfram ringFixed: False
+  [PASS] NoPitImpliesDescent after W&L fill  (checked=25 pits=0)
+  [PASS] StrictDescent plane A=1 each step drop>=1  (n=9 min_drop=1.0000)
+  [PASS] TerminatesUnderStrictDescent 5x5 interior <=50  (n=9 term=9 longest=3 uniq_out=3)
+  [PASS] unfilled flat 4-ring does not terminate (P-006b contrast)  (ring_terminated=False)
+  [PASS] wolfram pigeon + descent-fix + ring  (pigeon=True descent=True fixed=False)
+GPB-021 ENTRY: PASS
+[gates]     (i) NoPitImpliesDescent: PASS; (ii) StrictDescent drop>=1: PASS; (iii) 5x5 terminate<=50: PASS; P-006b ring: PASS; wolfram 4^4 pigeon + descent-fix + ring: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task7 / P-COMP-1 + 第 6 条
+[step]      本地 manim
+[cmd]       $env:PCOMP1_MANIM='1'; & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_1.py
+[rc]        0
+[key lines]
+  manim rc=0
+GPB-021 ENTRY: PASS
+[gates]     manim FillThenWatershedStencil: PASS; copied to experiments/phase2/figures/FillThenWatershedStencil.mp4 (166513 bytes)
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task7 / P-COMP-1 + 第 6 条
+[step]      本地 dafny
+[cmd]       dafny verify formal/dafny/P006_terminate_under_strict.dfy ; dafny verify formal/dafny/PCOMP_1.dfy
+[rc]        n/a
+[key lines]
+  where.exe dafny → empty
+  本机 Windows PATH 无 dafny(P-006 权威 verify 在 AutoDL)
+[gates]     dafny P006 T6: SKIP; dafny PCOMP_1: SKIP
+[verdict]   BLOCKED
+[blocker]   本机无 dafny;未改种子核。请 AutoDL overlay 后跑 verify_all.sh 的 P-006 T6 + P-COMP-1 两闸
+
+---
+
+[task]      task7 / P-COMP-1 + 第 6 条
+[step]      本地 lean
+[cmd]       cd formal/lean4 && lake build
+[rc]        n/a
+[key lines]
+  lake / elan 不在本机 PATH(按 LOOP,lake build 在 AutoDL)
+[gates]     lake build VeriGIS.P006Terminate + VeriGIS.Composition: SKIP
+[verdict]   BLOCKED
+[blocker]   本机无 lake;VeriGIS.lean 已加 import。请云端 lake build
+
+---
+
+## 改了什么(给洛书沉淀)
+
+新文件:
+- `formal/dafny/P006_terminate_under_strict.dfy` — include P-006;`StrictDescent`/`Bound`/`decreases c`;`TerminatesUnderStrictDescent`;`HeightSucc` 实例
+- `formal/lean4/VeriGIS/P006Terminate.lean` — `Nat.lt_wfRel.wf.induction`;`stepN_succ_head`;独立重述
+- `formal/dafny/P006_terminate_under_strict_README.md` — 第 6 条台账 + 引用 P-COMP-1 §2.4 (iii)
+- `formal/dafny/PCOMP_1.dfy` — include P-002-bis + T6;(i)~(v) 全是 import 引理,不复制 Fill/D8/stepN
+- `formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean` — import 三模块 + T6;`pit_fill_then_watershed` = T6 终止 + `basin_unique`
+- `formal/dafny/PCOMP_1_README.md` — 组合策略图 + 反向引用 P-006 README
+- `experiments/phase2/p_comp_1.py` — `from p005_d8 / p006_watershed import`;W&L 4 连通 `pit_fill_2d`(P-002 Python 仍未公开,try-import 回退)
+- `experiments/phase2/p_comp_1.wl` — 穷举 4^4 鸽笼 + `f[i]<=i` 子集全触不动点 + 4-环无不动点
+- `experiments/phase2/p_comp_1_manim.py` — 左:不填洼 flat 环;右:平面唯一出口
+- `experiments/phase2/run_p_comp_1.sh` — `GPB-021 ENTRY: PASS`
+- `experiments/phase2/figures/FillThenWatershedStencil.mp4`
+
+改文件:
+- `formal/lean4/VeriGIS.lean` L12-13 加 `import VeriGIS.P006Terminate` 与 `import VeriGIS.Composition.PitFillingThenWatershed`
+- `formal/lean4/VeriGIS/Watershed.lean` 头注释:第 6 条指向 `P006Terminate`(不改核)
+- `formal/dafny/P006_watershed.dfy` 头注释:PENDING → 指向 T6 文件(不改核)
+- `formal/dafny/P006_README.md` 证了什么表加 T6 行;没证什么第 6 条改 VERIFY PENDING;跑命令加 T6 verify
+- `scripts/autodl/verify_all.sh` 加 P-006 T6 + PCOMP_1 dafny 闸,以及 `run_p_comp_1.sh`(9/9)
+- `.gitignore` 加 `experiments/phase2/results/`
+
+未改:`docs/phase2/PROP_CHAIN.md` / `this-week.md` / `MEMORY.md`。未复制 P-002/P-005/P-006 核。未 git push。
+
+种子层没有整幅 `pitFill2D` / 格网 `basin`,P-COMP-1 主定理落在 Fill + RaiseNbr + FlowDescent + T6 Bound + BasinUnique 的接口面上(PROP_CHAIN §2.4)。
+
+P-COMP-1 + T6 verdict = BLOCKED
+(数值+符号化+manim 本机 PASS;形式化等 AutoDL dafny verify + lake build)
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。

@@ -25,6 +25,7 @@ P-005 的 `FlowDescent` 保证**一旦选出方向,邻格严格低于中心**。
 | `TerminatesImpliesBasin` / `terminates_implies_basin` | A | 若某步到达不动点,则 `basin(c)` 有定义 |
 | `BasinUnique` / `basin_unique` | A | **主定理**:两个出口都是不动点 ⇒ 出口相同(`∃!`) |
 | `FlatCycleNoTermination` / `flat_cycle_no_termination` | B / P-006b | Fin 4 上 `i ↦ i+1` 永无不动点 |
+| `TerminatesUnderStrictDescent` / `terminates_under_strict_descent` | B / T6 | 高程 `nat` 严格下降 ⇒ 终止(`P006_terminate_under_strict.dfy`) |
 
 并列扫描序与 `drop²/dist2` 比较仍以 P-005 为准,本文件不重写 8 路核。
 
@@ -33,15 +34,17 @@ P-005 的 `FlowDescent` 保证**一旦选出方向,邻格严格低于中心**。
 - **P-006b 是科学资产。** 未填洼、又允许「等高也可走」的 naive 路由时,flat 上可以转圈;
   形式化里用 4-环后继作 witness。P-005 的 D8 要求 `drop>0`,它自己不会在真平坦上选方向
   (全 `NoFlow`),环来自**另一条**平坦路由,用来钉住「无条件终止」为假。
-- **第 6 条 `TerminatesUnderStrictDescent` = PENDING。** 有限格网 + 每步高程严格下降 ⇒
-  终止,需要把高程嵌进良基关系;本轮不卡在这条上。论文叙事走 P-002 填洼 ⇒ 无环,而不是
-  在本文件重证终止。
+- **第 6 条 `TerminatesUnderStrictDescent` = 已起草,形式化 VERIFY PENDING。** 高程嵌进
+  `nat` 良基关系(`decreases c` / Lean `Nat.lt_wfRel`)。见 `P006_terminate_under_strict.dfy`
+  与 `VeriGIS.P006Terminate`;P-COMP-1 §2.4 (iii) 引用 `Bound`。本机无 dafny/lake,云端
+  `verify_all.sh` 闸已加。坐标后继(如 `ChainSucc`)不必下降,那种轨道仍走鸽笼。
 - 一般符号 DEM、任意大小格网、多出口竞争的算法实现(优先队列填洼等)都不在范围内。
 
 ## 跑
 
 ```bash
 dafny verify formal/dafny/P006_watershed.dfy
+dafny verify formal/dafny/P006_terminate_under_strict.dfy
 cd formal/lean4 && lake build
 python3 experiments/phase1/p006_watershed.py
 # P006_MANIM=1 python experiments/phase1/p006_watershed.py

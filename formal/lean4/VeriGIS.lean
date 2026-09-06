@@ -9,3 +9,5 @@ import VeriGIS.Curvature
 import VeriGIS.Consistency
 import VeriGIS.D8
 import VeriGIS.Watershed
+import VeriGIS.P006Terminate
+import VeriGIS.Composition.PitFillingThenWatershed

@@ -8,8 +8,8 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: PENDING
-UPDATED: 2026-09-06 17:55
+STATUS: DONE
+UPDATED: 2026-09-06 18:10
 TASK: **task7 · P-COMP-1 = P-002 ∘ P-006 组合证明 + P-006 第 6 条 `TerminatesUnderStrictDescent`**
 
 ### A.1 一次性自检(开始前回答,一行一句)
