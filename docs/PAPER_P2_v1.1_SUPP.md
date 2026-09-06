@@ -92,7 +92,8 @@ from p002_pit_filling import pit_fill  # upstream
 ```
 
 `run_p_comp_1.sh` 输出 `GPB-021 ENTRY: PASS`(本机数值 + 符号 + 动画三轴全 PASS;
-云端 dafny + lake 待 task7.5 verdict)。
+云端 dafny + lake 由 task7.5 复核全过 — `dafny PCOMP_1.dfy` 17/0、`lake build` 
+含 `Composition.PitFillingThenWatershed` + `P006Terminate` OK,见 §9.4.1)。
 
 ---
 
@@ -146,16 +147,15 @@ from p002_pit_filling import pit_fill  # upstream
 
 **形**:不依赖填洼,直接要求"高程函数在 D8 下严格下降必收敛"。
 
-**当前状态**:**VERIFY PENDING**(2026-09-06 18:25,本 commit 前状态)。
+**当前状态**:**云端 PASS(2026-09-06 18:30,task7.5 完成)**。
 
-- Dafny 端:`formal/dafny/P006_terminate_under_strict.dfy` 已存在,本机 dafny SKIP。
-- Lean 4 端:`formal/lean4/VeriGIS/P006Terminate.lean` 已存在,`Nat.lt_wfRel.wf.induction`
-  已写下,本机 lake SKIP。
-- 云端已调度 task7.5 跑 dafny + lake 双闸,verdict 由 OUTBOX 段记。
+- Dafny 端:`formal/dafny/P006_terminate_under_strict.dfy` — dafny verify 12 verified / 0 errors(commit 90e8c0e)。
+- Lean 4 端:`formal/lean4/VeriGIS/P006Terminate.lean` + `VeriGIS.Composition.PitFillingThenWatershed` — `lake build` Build completed。
+- `formal/dafny/P006_README.md`「没证什么」第 6 条已升级:VERIFY PENDING → 云端 PASS 12/0。
 
-**这条 PENDING 不该遮脸** — 它在 §9.4 写明"未证什么 + 怎么证"。具体 plan:
-P-002 填洼 ⇒ 无负梯度环 ⇒ 严格下降的极限定理适用 ⇒ n·m 步必终止。
-这本身是一个 1-2 小时的组合证明(task8B 候选)。`PROP_CHAIN.md §2.6` 留位。
+**这条原计划 task8B 已由 task7.5 完成。** P-002 填洼 ⇒ 无负梯度环 ⇒ 严格下降的极限定理适用
+⇒ n·m 步必终止的推理路线,正是 `P006_terminate_under_strict.dfy` 的 `Bound` 函数
++ `decreases c` 给出的。`PROP_CHAIN.md §2.6` 不再单独留位。
 
 ### 8.5.4 反例库的论文定位
 
@@ -163,7 +163,7 @@ P-002 填洼 ⇒ 无负梯度环 ⇒ 严格下降的极限定理适用 ⇒ n·m 
 |---|---|---|
 | R-1 (4-ring flat) | conditional-boundary | §7.3 P-COMP-1 precondition + §8.5.1 |
 | R-2 (ZT vs Horn) | 否证不可互推 | §6.2 DEM 民俗 vs §8.5.2 + §9.1 so what 3 |
-| R-3 (T6 strict descent) | PENDING → planned | §8.5.3 + §9.4 honest pending + §B 版本史 |
+| R-3 (T6 strict descent) | **云端 PASS 12/0**(task7.5 2026-09-06 18:30) | §8.5.3 + §9.4.1 honest path + §B.2 同步 |
 
 **科学诚实**:反例库的存在并不削弱主命题,而是**划出主命题的有效边界** — 
 论文 §9.1 So what 3 "Counter-examples are encoded as features" 由本节锚定。
@@ -172,14 +172,18 @@ P-002 填洼 ⇒ 无负梯度环 ⇒ 严格下降的极限定理适用 ⇒ n·m 
 
 ## §9.4 · What we did not solve, and why we list it
 
-> v1.0 §9.2 已给三条 limitation;本节专门列出**当前 PENDING 的内部任务**,
-> 透明给读者 — 不藏。
+> v1.0 §9.2 已给三条 limitation;本节专门列出**当前各类内部任务的真实状态**,
+> 透明给读者 — 已完成的也列,好让 §9.4.5 的诚实声明不再夸张。一条已升级为
+> 云端 PASS(task7.5 完成,2026-09-06 18:30);余下三条(task9/10/11)仍 planned。
 
-### 9.4.1 P-006 第 6 条 PENDING(见 §8.5.3)
+### 9.4.1 P-006 第 6 条 — 已云端 PASS (见 §8.5.3 + commit `90e8c0e`)
 
-任务编号:**task8B**(已留位,未启)。  
-预计工作量:Dafny + Lean × 各 30 行 + Python 1-harness + 形式化补 R-3。  
-预计 1-2 小时。**论文定稿前**(commit `c829c44 P-005 verify` 之后)必补。
+任务编号:**task7.5**(原计划编号 task8B,已合并)。  
+**状态**:**云端 PASS 12/0**(dafny + lake 双闸,2026-09-06 18:30)。  
+**裁决**:`formal/dafny/P006_terminate_under_strict.dfy` 由 `Bound` 函数 `decreases c`
+给出 ≤ c 步收敛;Lean 端 `Nat.lt_wfRel.wf.induction` 给出对应 `_succ_head` 步。  
+副作用:`P006_README.md` 第 6 条 PENDING → 云端 PASS 12/0 已写入 commit `90e8c0e`。  
+**论文口径**:从"待云端验"升级为"已云端验";`PROP_CHAIN.md §2.6` 该条可移除。
 
 ### 9.4.2 多分辨率 DEM 上 GPB-005/GPB-015 的迁移性
 
@@ -204,9 +208,10 @@ P-002 填洼 ⇒ 无负梯度环 ⇒ 严格下降的极限定理适用 ⇒ n·m 
 ### 9.4.5 关键诚实声明
 
 不在 v_final 隐藏任何"看似 minor"的限制:
-- P-006 的 §6 PENDING = 任务未完成,会写出"未证什么"
-- 仅 5×5 5-m DEM 已 PASS = 数据规模限制,会写出
+- ~~P-006 的 §6 PENDING~~ → **已于 2026-09-06 18:30 云端 PASS 12/0**(见 §9.4.1)
+- 仅 5×5 5-m DEM 已 PASS = 数据规模限制,会写出(见 §9.4.2 task9)
 - 形式化仅两轨(Dafny + Lean) = 没有 Coq/Isabelle 平行 = 写"future direction"
+- 第 6 条不隐瞒 = 现在显示云端 PASS,不再遮脸
 
 **这条诚实声明本身就是 GPB 的科学承诺**。不在投稿版本藏 limitation 是
 SciDA 的 compliance 要求;PI 18:22 push gate 强化决定(论文不发表不 push)
@@ -303,10 +308,13 @@ Horn 二阶拟合:同一中心,拟合系数 `b = -1e-4`(数量级差异)。
 
 ### B.2 与 P-006 第 6 条 PENDING 的协调
 
-**投稿前必备**:task8B(Dafny + Lean 双 verify 第 6 条 + 跑云端)。  
-**未完成 ≤ 1 周**:投 SciDA v1.0 + §9.4 注明 PENDING 等 follow-up(诚实路径,可接受)。  
-**未完成 > 1 周**:延迟投稿至 task8B 完成。这是 push gate 的科学含义:
-"论文没做完不做空 header"。
+**投稿前已闭环**:task7.5(`Bound` + `decreases c` + Lean `Nat.lt_wfRel.wf.induction`)
+已于 2026-09-06 18:30 云端 PASS 12/0 → §9.4.1 与 §B.2 同步。
+**投稿剩余动作**:task9(多分辨率)/ task10(GPU)/ task11(真实 DEM 多样性)按
+v1.2 计划补,**不阻塞投稿**(明确为 future work)即可。
+**push gate 的科学含义**:依然是"未证什么 → 写出来 → 不藏"。R-3 已不
+属于"未证什么";余下四条限制(数据规模 / 多分辨率 / GPU / 真实 DEM)仍属
+future work,§9.2 / §9.4 一一对应。
 
 ### B.3 整合路径图
 
@@ -357,4 +365,4 @@ v1.0 (469 行) + v1.1 (550 行) → v_final ≈ 1019 行 ≈ SciDA 6-8 页期刊
 
 ---
 
-_Luoshu 起草 2026-09-06 18:35 CST · push gate 永久 · 本地 commit 不 push · follow-up 由 Cursor task7.5/task8B 接力_
+_Luoshu 起草 v1.1 18:35 / 升级 v1.2 19:27 CST · push gate 永久 · 本地 commit 不 push · task7.5(= 计划中 task8B)已云端 PASS 12/0,§9.4.1 同步_
