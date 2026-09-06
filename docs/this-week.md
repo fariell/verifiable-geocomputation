@@ -52,26 +52,54 @@
 
 ---
 
-## 4. 等你拍板 / 下一步
+## 4. 实验-论文双轨(18:22 起)
 
-1. **PUSH 当前仓**(8ce0ee6 → 476afa1 → 33282c1 ...)到 GitHub:
-   ```bash
-   cd "E:\AI for Math与DEM空间网格交叉研究\verifiable-geocomputation"
-   git push origin main
-   ```
-   你点名"上传/自己传"我执行。
+**PI 18:22 决定:** **任何 commit 不 push 到 GitHub,直到论文终稿定型 + 投稿**。
+目标优先级:尽快完成实验 → 写论文 → 发论文。"GitHub 同步" 在投稿后再说,期间完全离线。
 
-2. **Phase 2 入口**(17:55 INBOX 已武装):
-   - (A) **P-COMP-1** = P-002 ∘ P-006 组合证明(`docs/phase2/PROP_CHAIN.md` 2.2 五步骨架 →
-     2.4 executable spec)
-   - (B) **P-006 第 6 条** `TerminatesUnderStrictDescent`(在 P-COMP-1 框架内一并证)
-   两者一起是同一次 Cursor session 内的工作,Dafny+Lean 双轨,7+1 件套扩展。
+**双轨轴:**
 
-3. **Phase 2 之后的路线**(已草案,未 commit):
-   - 10 月:P-COMP-1 + P-COMP-2(全平面 ⇒ 流域唯一)
-   - 11 月:P-COMP-3(不对称反例,叙事素材)
-   - 12 月:P-COMP-4(重采样同伦)
-   详见 `docs/phase2/SCOPE.md` 与 `docs/PAPER_P2_OUTLINE.md`。
+### A 轴 · 实验(以 Cursor + AutoDL 为主)
+
+| 已过 | 待跑 |
+|---|---|
+| P-001 / P-002 / P-002-bis / P-003 / P-004 / P-005 / P-006 (本机+云端全 PASS) | **task7.5** P-COMP-1 + T6 5 闸云端复核(INBOX §A PENDING)|
+| GPB-019 数值基准 | **task8A** P-COMP-3 反例素材(77e436d INBOX §A 串联) |
+| P-COMP-1 本机 4 门控 PASS + manim mp4 | Phase 2.1 月: P-COMP-2(全平面) |
+| T6 P-COMP-1 (iii) 替代支撑 | Phase 2.2 月: P-COMP-4(重采样同伦) |
+| | Phase 2.3 月: P-COMP-5(元一致) |
+
+### B 轴 · 论文(以洛书为主,Cursor 仅供原始数据/figure)
+
+- **`docs/PAPER_P2_OUTLINE.md` v1.0 已写**(18:25,334 行中文,15 节真实草稿,§3 abstract 248 词)
+- 投稿目标:Scientific Data 2026-11-15
+- 节奏:v1.0(draft)→ v1.1(扩 §7/§8 数据)→ v1.2(扩 §9 discussion "So what?")→ arXiv/EarthArXiv 挂 → 投稿
+- 该轴每次更新在该文件加 §B 版本史一行
+
+### Push gate(永久)
+
+```
+本仓库 commit chain(本地):
+  bd48901 → 77e436d → 2fe6a3a → e0b0001 → 8ce0ee6 → d6bcaae → 66fd312 → 476afa1 → 33282c1 → 8a8194d ...
+
+不在下列情况下 push:
+  - 论文发表/Scientific Data 接收(投后)(候补 §A.2 一句话)
+  - 期刊编辑 + 作者决议同等同意 fork 公开(无内部数据未脱敏)
+
+GIANT CAVEAT: 任何 GitHub fork / 缓存 / archive(GitHub Archive、SHM
+缓存、Zenodo .workbuddy 备份等)已被 17:21/18:22 强化推 gate 圈定;
+凭据轮换 + 历史过滤(filter-repo 端到端 0 命中)。详情:
+docs/security-rotation-log.md (待补)。
+```
+
+### 等你拍板(谁都不应卡,洛书自决)
+
+- 双轴推进节奏(快/慢/直线/折返)
+- Phase 2.1 是否需要在 9 月提前跑到 P-COMP-2 闭环,还是放到 10 月
+- 论文 v1.1 何时 commit(默认每个增量大到 v0.1 升就 commit,不卡日报)
+- 投稿目标(默认 Scientific Data,可考虑 Computers & Geosciences / ISPRS J. Photogramm. Remote Sens. 备选)
+
+详见 `docs/phase2/SCOPE.md` 与 `docs/PAPER_P2_OUTLINE.md`。
 
 ---
 

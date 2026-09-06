@@ -106,3 +106,49 @@ Cursor 修完回传时,**额外**说明:改动了哪个文件哪几行、为什�
 - Dafny + Lean 都 verify 通过(云端权威)
 
 **缺任何一条 = 没做完**,commit message 标 PENDING。
+
+## 八、哨兵 discipline(Luoshu 必守,18:13 PI 反馈后加)
+
+**问题:** Cursor session 完工后改 `INBOX STATUS: DONE` 并 git commit。
+无自动推送通知,Luoshu 需主动巡视。本节是巡视纪律。
+
+**每 turn deliver reply 前,Luoshu 必跑:**
+
+```bash
+cd "<repo>"
+head -12 docs/CURSOR_INBOX.md        # STATUS 在 PENDING → DASH 还没跑
+wc -c docs/CURSOR_OUTBOX.md           # 大小变化 = Cursor 新产出
+git log --oneline -3                  # 新 commit?
+git status --short                    # 未 commit 修改?
+```
+
+任一变化 → 读 OUTBOX 末段 30 行找新 `[task]` 入口 → 一句话告知 PI。
+
+**Skip 条件**(不污染 deliver):
+
+- 纯聊天 turn(无 git/文件提及)
+- 本 turn 自己写 OUTBOX / INBOX / commit(我是 delta 来源)
+
+**PI 反馈原话(2026-09-06 18:13):**
+
+> "每次 cursor 完工应该你发消息,你看他已经完工了呀,你咋还没动静呢"
+
+存档于 `~/.workbuddy/skills/cursor-done-sentinel.md` (user-level,
+跨项目生效)。
+
+## 九、Push gate(PI 18:22 后强化,临时变永久)
+
+| 时间 | 状态 | 含义 |
+|---|---|---|
+| 2026-09-06 17:21 | 临时 | PI 停 git 远端操作,本机 commit 不 push |
+| 2026-09-06 18:22 | **永久** | 论文发表前 / Scientific Data 接收前,**任何 commit 不 push 到 GitHub** |
+
+后续 push 触发条件(枚举):
+
+- 论文 v_final 投稿时同步一次
+- 期刊接收 + final 版本固定时二次同步
+- 期刊要求公开代码时三次同步(配合/无配合)
+
+**Cursor 严令:** commit 受 §一 "禁止 push" 强约束,任意 turn 触碰
+`git push` / `git push origin main` / `git push --force-with-lease` / 等
+均属越界,Luoshu 回退 + 报告。

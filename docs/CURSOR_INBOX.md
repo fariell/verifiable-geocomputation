@@ -129,6 +129,13 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - 17:24 PI 轮换 autoDL SSH 密码 → 新真值存 `autoDL登录信息.txt`(.gitignored,行 77)
 - 18:13 PI 提醒 Cursor 完工失声 → 已装 user-level sentinel skill
 - 18:18 PI 让"下一步干活" → task7.5(task7.5 已是 PENDING)+ task8A(P-COMP-3 反例)**并行链**
+- **18:22 PI 升级 push gate:** **实验完成 + 论文发出之前,任何 commit 不 push 到 GitHub**。
+  这是 17:21 决定的强化版 —— 原"本机 commit 不 push"现在是"一切 commit 不 push,直到论文终稿定型"。
+  论文 → 实验 → 公众号文章 → arXiv preprint → 期刊投稿 → 接收后才一次性同步 GitHub。
+  Cursor 由此可以毫无顾忌地调源码、不用在 push 上踩刹车。
+- **目标优先级(18:22 重申):** 尽快完成实验 → 写论文 → 发论文
+  - 实验: P-001..P-006 / P-COMP-1..N / P-005..P-006 T6 云端复核(当前 task7.5 + task8A)
+  - 论文: docs/PAPER_P2_OUTLINE.md v1.0+(洛书自管)+ 实验部分由 Cursor 提供原始数据
 - **不要把新密码写进仓库、脚本、OUTBOX 回传**
 
 ### B.2 任务历史(只读,以后每完成一段归档到这里)
