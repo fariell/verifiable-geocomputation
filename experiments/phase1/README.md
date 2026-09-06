@@ -23,7 +23,10 @@
 | `p003_curvature.py` | **P-003 入口**:正确 ZT Hessian vs Phase 1 错误模板;可选 wolframscript / Manim |
 | `p003_taylor.wl` | ZT Hxx 的 Taylor 余项(由 Python `subprocess` 调 wolframscript) |
 | `p003_manim.py` | 3×3 模板与 `1/w²` 放大的 Manim 场景 |
-| `run_p003.sh` | AutoDL / `verify_all.sh` 调用的 P-003 驱动 |
+| `p004_consistency.py` | **P-004 入口**:Horn 二次精确 + 三次 O(w²);可选 wolframscript / Manim |
+| `p004_taylor.wl` | Horn Dx 的 Taylor 余项(Python `subprocess` 调 wolframscript) |
+| `p004_manim.py` | Horn 3×3 模板与 `G w² → 0` 的 Manim 场景 |
+| `run_p004.sh` | AutoDL / `verify_all.sh` 调用的 P-004 驱动 |
 | `propositions.py` | 生成 20 条 GeoProofBench 候选命题（json/csv/md） |
 | `run_experiment.sh` | 实验驱动（激活 venv 后运行上述两个 py） |
 | `bootstrap.sh` | 远程一键装机：装系统依赖 → 建 venv → 装包 → 跑实验 → 装 Lean → 构建 |

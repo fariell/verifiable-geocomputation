@@ -8,6 +8,7 @@ W2 Lean P-002:10:29 `Built VeriGIS.PitFilling`。
 W3 GPB-019:10:41 AutoDL **ENTRY: PASS**(rc=0)。
 P-003 闭环:Dafny 12:43 **52 verified / 0 errors**;Lean 11:45;GPB-003 ENTRY PASS。
 P-002-bis 闭环:Dafny 12:54 **19 verified / 0 errors**;Lean 12:53 `Built VeriGIS.PitFilling2D`。
+P-004 闭环:Dafny 13:08 **22 verified / 0 errors**;Lean `Built VeriGIS.Consistency`;**GPB-019 ALGEBRA ENTRY: PASS**。
 
 ---
 
@@ -53,10 +54,10 @@ python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 
 ## 等你拍板 / 下一步
 
-P-003 与 P-002-bis 均已 0 errors。说 **commit** 即可(含 P-003 52/0 与 P-002-bis 19/0)。
+P-004 已 0 errors + 实验 PASS。说 **commit**(含本机 `HornStencil.mp4` / `gpb004_cubic_remainder.png`)。
 
-下一刀未开:路线图上是 P-004(`w→0` 相容性,需实分析)或 P-005(D8)。不证完整 2D W&L 堆终止。
+下一刀按路线图是 **P-005**(D8 流向确定性与闭合性,GPB-010/011)。Wolfram 余项与 Manim 仍走 `subprocess`。
 
 ---
 
-_v1.2 · 2026-09-06 · P-002-bis Dafny 19/0 + Lean build_
+_v1.4 · 2026-09-06 · P-004 Dafny 22/0 + Lean + ALGEBRA PASS_

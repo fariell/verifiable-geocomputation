@@ -217,6 +217,7 @@ WSL 不再试图装"完整工具链"——**已装好的不删**(dafny 还在),
 | 6 | GPB-019 入口 | autoDL | <1 s | ✅ 2026-09-06 10:41 ENTRY PASS |
 | 7 | P-003 曲率 | 本机写 → autoDL 验 | — | ✅ Dafny 12:43 · 52 verified / 0 errors; Lean 11:45; GPB-003 PASS |
 | 8 | P-002-bis 2D 邻域抬升 | 本机写 → autoDL 验 | — | ✅ Dafny 12:54 · 19 verified / 0 errors; Lean 12:53 `Built VeriGIS.PitFilling2D` |
+| 9 | P-004 Horn w→0 | 本机写 → autoDL 验 | — | ✅ Dafny 13:08 · 22 verified / 0 errors; Lean `Built VeriGIS.Consistency`; ALGEBRA PASS |
 
 ---
 

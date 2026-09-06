@@ -58,7 +58,7 @@ echo "==[1/5] 工具链现状 =="
 } | tee -a "$LOG" "$SUMMARY"
 
 # ---- 2. Dafny ----
-echo "==[2/5] Dafny P-001 + P-002 + P-003 =="
+echo "==[2/5] Dafny P-001 + P-002 + P-002-bis + P-003 + P-004 =="
 if command -v dafny >/dev/null 2>&1; then
     if [ -f "$REPO/formal/dafny/P001_horn_slope.dfy" ]; then
         echo "[dafny] P-001" | tee -a "$SUMMARY"
@@ -82,6 +82,12 @@ if command -v dafny >/dev/null 2>&1; then
         timeout 300 dafny verify "$REPO/formal/dafny/P003_curvature.dfy" 2>&1 \
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-003 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
+    if [ -f "$REPO/formal/dafny/P004_consistency.dfy" ]; then
+        echo "[dafny] P-004 (Horn w→0)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/P004_consistency.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-004 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
 else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
@@ -118,6 +124,16 @@ if [ -f "$REPO/experiments/phase1/run_p003.sh" ]; then
         echo "  ⚠️ GPB-003 失败" | tee -a "$SUMMARY"
 else
     echo "[gpb003] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
+fi
+
+echo "==[6/6] GPB-019 algebra / P-004 =="
+if [ -f "$REPO/experiments/phase1/run_p004.sh" ]; then
+    echo "[gpb004] 跑实验中" | tee -a "$SUMMARY"
+    bash "$REPO/experiments/phase1/run_p004.sh" 2>&1 \
+        | tail -20 | tee -a "$LOG" "$SUMMARY" || \
+        echo "  ⚠️ GPB-004 失败" | tee -a "$SUMMARY"
+else
+    echo "[gpb004] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
 fi
 
 echo "============================================================"
