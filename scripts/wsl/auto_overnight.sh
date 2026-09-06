@@ -61,7 +61,28 @@ fi
 RUN_ID="$(date +%Y%m%d_%H%M%S)"
 LOG_DIR="$HOME/.workbuddy/overnight"
 LOG="$LOG_DIR/${RUN_ID}.log"
-SUMMARY="$REPO/.workbuddy/memory/$(date +%Y-%m-%d).md"
+
+# 摘要落点:优先 workspace 根(.workbuddy/memory 与 .git 同层),
+# 回退到仓库内,再回退到 $HOME。
+# 根因:auto_overnight.sh 起初把 SUMMARY 硬编到 "$REPO/.workbuddy/memory/",
+# 但 PI 的 memory 系统在仓库**外**(workspace 根,与 .git 平级),
+# 第一次跑报 "No such file or directory" 但又看似成功,PI 醒来找不到摘要。
+WS_ROOT="$(dirname "$REPO")"
+SUMMARY=""
+for cand in \
+    "$WS_ROOT/.workbuddy/memory/$(date +%Y-%m-%d).md" \
+    "$REPO/.workbuddy/memory/$(date +%Y-%m-%d).md" \
+    "$HOME/.workbuddy/memory/$(date +%Y-%m-%d).md"; do
+    if mkdir -p "$(dirname "$cand")" 2>/dev/null; then
+        SUMMARY="$cand"
+        break
+    fi
+done
+if [ -z "$SUMMARY" ]; then
+    echo "❌ auto_overnight: 三个候选 memory 目录都建不了,放弃"
+    exit 1
+fi
+
 mkdir -p "$LOG_DIR"
 # 用 install 而非 exec tee,把整个脚本输出同时拉到终端(若人看着)+ 日志
 # 退出码保留:不强求 exec,失败时下一步也要接着跑(我们只要记录)
