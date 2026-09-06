@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "title": "GeoProofBench v0.1: a verified spatial-computation benchmark suite for terrain algorithms",
+    "upload_type": "dataset",
+    "publication_type": "softwaredocumentation",
+    "creators": [
+      {
+        "name": "Guo, Yinggang",
+        "affiliation": "Northwest Institute of Nuclear Technology, Xi'an 710024, China",
+        "orcid": "0000-0002-8207-9941"
+      }
+    ],
+    "description": "Digital elevation model (DEM) analysis underlies terrain-related work across geomorphology, hydrology, and civil engineering, yet published algorithms are rarely machine-checked. GeoProofBench (GPB) is a proposition set of terrain-analysis claims expressed in two proof languages simultaneously — Dafny and Lean 4 — and a reproducible pipeline that compiles each proposition to a numerical witness, a Wolfram symbolic check, and a manim visualization, all keyed to a single GPB-N ENTRY: PASS verdict. This deposit contains six first-order operators, three composition records, four boundary witnesses, five noise levels, four DEM stacks, Dafny/Lean sources, Python/Wolfram drivers, and mp4 animations. Data are licensed CC-BY-4.0; software is licensed MIT. Public release is intended at journal acceptance; until then this record may be reserved/restricted.",
+    "keywords": [
+      "spatial computation",
+      "formal verification",
+      "DEM",
+      "GeoProofBench",
+      "terrain analysis",
+      "hydrology",
+      "Dafny",
+      "Lean 4"
+    ],
+    "notes": "Companion Data Descriptor: GeoProofBench: A Machine-Checked Proposition Set for Digital Elevation Model Analysis, submitted to Scientific Data. Related identifier (GitHub) to be filled after the repository is made public: https://github.com/fariell/verifiable-geocomputation",
+    "license": "cc-by-4.0",
+    "access_right": "restricted",
+    "language": "eng",
+    "communities": [],
+    "related_identifiers": []
+  }
+}
