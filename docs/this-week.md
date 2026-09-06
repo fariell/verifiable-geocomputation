@@ -9,6 +9,7 @@ W3 GPB-019:10:41 AutoDL **ENTRY: PASS**(rc=0)。
 P-003 闭环:Dafny 12:43 **52 verified / 0 errors**;Lean 11:45;GPB-003 ENTRY PASS。
 P-002-bis 闭环:Dafny 12:54 **19 verified / 0 errors**;Lean 12:53 `Built VeriGIS.PitFilling2D`。
 P-004 闭环:Dafny 13:08 **22 verified / 0 errors**;Lean `Built VeriGIS.Consistency`;**GPB-019 ALGEBRA ENTRY: PASS**。
+P-005 Dafny 本机 **18 verified / 0 errors**(八方位核与 Lean 同为 `A=1,w=1`;`PlaneConstant` 仍一般)。待 AutoDL 复核。Lean 与实验已过,不必重跑。
 
 ---
 
@@ -54,10 +55,18 @@ python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 
 ## 等你拍板 / 下一步
 
-P-004 已 0 errors + 实验 PASS。说 **commit**(含本机 `HornStencil.mp4` / `gpb004_cubic_remainder.png`)。
+1. **P-005** overlay 后 AutoDL:
 
-下一刀按路线图是 **P-005**(D8 流向确定性与闭合性,GPB-010/011)。Wolfram 余项与 Manim 仍走 `subprocess`。
+```bash
+source /etc/network_turbo && source ~/.elan/env
+export PATH="/usr/local/bin:$PATH"
+cd /root/verigis/repo
+python3 scripts/autodl/jupyter_progress.py \
+  'dafny verify formal/dafny/P005_d8.dfy'
+```
+
+2. 通过后说 **commit**。不证平坦处全局无环(GPB-015 流域唯一另开)。
 
 ---
 
-_v1.4 · 2026-09-06 · P-004 Dafny 22/0 + Lean + ALGEBRA PASS_
+_v1.5 · 2026-09-06 · P-005 待云端验_

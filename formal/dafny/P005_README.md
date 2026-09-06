@@ -9,11 +9,11 @@
 |---|---|---|
 | `PitNoFlow` / `pit_no_flow` | GPB-010 | 八邻都不低于中心 ⇒ `NoFlow` |
 | `PlaneConstant` / `plane_constant` | GPB-011 | 平面只差高程基准 C,流向不变 |
-| `PlaneWest` / `example_plane_west` | GPB-011 | `A>0,B=0` ⇒ 西 |
-| `PlaneNorthwest` / `example_plane_northwest` | GPB-011 | `A=B>0` ⇒ 西北 |
+| `PlaneWest` / `example_plane_west` | GPB-011 | `A=1,B=0,w=1` ⇒ 西(与 Lean 同实例;一般 `A,w` 被 SMT 非线性挡住) |
+| `PlaneNorthwest` / `example_plane_northwest` | GPB-011 | `A=B=w=1` ⇒ 西北 |
 | `FlowDescent` | 闭合核 | 一旦选出方向,该邻格严格低于中心 |
 
-并列时扫描序 `E,SE,S,SW,W,NW,N,NE` 里更早者胜。比较用 `drop²/dist2`,不用 √2。
+并列时扫描序 `E,SE,S,SW,W,NW,N,NE` 里更早者胜。比较用 `drop²/dist2`,不用 √2。Dafny/Lean 都走 8 路分数,不递归扫描(避免 SMT 超时)。
 
 ## 没证什么
 

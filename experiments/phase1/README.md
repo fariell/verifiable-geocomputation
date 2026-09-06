@@ -27,6 +27,10 @@
 | `p004_taylor.wl` | Horn Dx 的 Taylor 余项(Python `subprocess` 调 wolframscript) |
 | `p004_manim.py` | Horn 3×3 模板与 `G w² → 0` 的 Manim 场景 |
 | `run_p004.sh` | AutoDL / `verify_all.sh` 调用的 P-004 驱动 |
+| `p005_d8.py` | **P-005 入口**:D8 洼地 NoFlow + 平面恒定流向;可选 wolframscript / Manim |
+| `p005_d8.wl` | 平面上 D8 argmax(Python `subprocess` 调 wolframscript) |
+| `p005_manim.py` | 洼地 vs 平面西向的 Manim 场景 |
+| `run_p005.sh` | AutoDL / `verify_all.sh` 调用的 P-005 驱动 |
 | `propositions.py` | 生成 20 条 GeoProofBench 候选命题（json/csv/md） |
 | `run_experiment.sh` | 实验驱动（激活 venv 后运行上述两个 py） |
 | `bootstrap.sh` | 远程一键装机：装系统依赖 → 建 venv → 装包 → 跑实验 → 装 Lean → 构建 |

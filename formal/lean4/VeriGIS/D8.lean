@@ -10,7 +10,7 @@
     GPB-010  八邻都不低于中心 ⇒ noFlow
     GPB-011  平面只差常数 ⇒ 流向相同;A=1 B=0 ⇒ 西;A=B=1 ⇒ 西北
 
-  Lean 用 8 路比较(无递归),Dafny 用 BestFrom 扫描。同一套分数:
+  Lean 与 Dafny 都用 8 路分数比较(无递归扫描,避免 SMT 超时)。
   drop>0 时 proxy = drop² / dist2,dist2 ∈ {1,2}。
   ==========================================================================
 -/
@@ -120,33 +120,26 @@ def planeWin (A B C w : ℝ) : Win :=
     B * w + C,
     A * w + B * w + C⟩
 
+theorem score_add_const (e z K dist2 : ℝ) :
+    score (e + K) (z + K) dist2 = score e z dist2 := by
+  unfold score
+  have : e + K - (z + K) = e - z := by ring
+  simp [this]
+
+def shift (win : Win) (K : ℝ) : Win :=
+  ⟨win.a + K, win.b + K, win.c + K, win.d + K, win.e + K,
+    win.f + K, win.g + K, win.h + K, win.i + K⟩
+
+theorem d8_shift (win : Win) (K : ℝ) : d8 (shift win K) = d8 win := by
+  simp [d8, shift, score_add_const]
+
+theorem planeWin_shift (A B C w : ℝ) :
+    planeWin A B C w = shift (planeWin A B 0 w) C := by
+  simp [planeWin, shift]
+
 theorem plane_constant (A B C w : ℝ) :
     d8 (planeWin A B C w) = d8 (planeWin A B 0 w) := by
-  have hE : score (planeWin A B C w).e (planeWin A B C w).f 1 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).f 1 := by
-    simp [planeWin, score]; ring_nf
-  have hSE : score (planeWin A B C w).e (planeWin A B C w).i 2 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).i 2 := by
-    simp [planeWin, score]; ring_nf
-  have hS : score (planeWin A B C w).e (planeWin A B C w).h 1 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).h 1 := by
-    simp [planeWin, score]; ring_nf
-  have hSW : score (planeWin A B C w).e (planeWin A B C w).g 2 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).g 2 := by
-    simp [planeWin, score]; ring_nf
-  have hW : score (planeWin A B C w).e (planeWin A B C w).d 1 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).d 1 := by
-    simp [planeWin, score]; ring_nf
-  have hNW : score (planeWin A B C w).e (planeWin A B C w).a 2 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).a 2 := by
-    simp [planeWin, score]; ring_nf
-  have hN : score (planeWin A B C w).e (planeWin A B C w).b 1 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).b 1 := by
-    simp [planeWin, score]; ring_nf
-  have hNE : score (planeWin A B C w).e (planeWin A B C w).c 2 =
-      score (planeWin A B 0 w).e (planeWin A B 0 w).c 2 := by
-    simp [planeWin, score]; ring_nf
-  simp [d8, hE, hSE, hS, hSW, hW, hNW, hN, hNE]
+  rw [planeWin_shift, d8_shift]
 
 theorem example_plane_west :
     d8 (planeWin 1 0 0 1) = .to .W := by
