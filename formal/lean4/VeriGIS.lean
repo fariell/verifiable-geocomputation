@@ -7,3 +7,4 @@ import VeriGIS.PitFilling
 import VeriGIS.PitFilling2D
 import VeriGIS.Curvature
 import VeriGIS.Consistency
+import VeriGIS.D8
