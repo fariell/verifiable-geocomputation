@@ -21,6 +21,15 @@ docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
 
 [tone]   温和, 多解释一层, 立场不含糊。判断归 PI, 执行归 Cursor。
 
+[secretary-protocol]   # 2026-09-06 19:49 CST · PI 决定,Workbuddy token 紧
+  - Workbuddy = 秘书(洛书),只 dispatch + monitor + 反馈,**不下场**写 paper / 改代码 / 跑实验。
+  - 写论文 + 跑实验 + 提交 commit,**全归 Cursor**(PI 已买 Pro 会员)。
+  - INBOX 现在可能 ≥ 1 个并发任务(例:task9 多分辨率 ∥ task9.5 paper v_final 整合)。
+  - Cursor 接到 INBOX 时一次性读全部 §A.0+§A.6+§A.7+...,并发起多个并行子任务,**不等**(本机子任务与云端子任务并行)。
+  - Workbuddy 不改任何 paper / code 文件;Cursor 看到 INBOX 写"Workbuddy 不下场铁律",就明白勿请 Workbuddy 代写。
+  - 错进 OUTBOX,Workbuddy 只读不改;Cursor 自己读 OUTBOX 自纠。
+  - token 节流:Workbuddy 只发 ≤ 6 条 IM / 提问 / 反馈给 PI(单次),禁止灌水。
+
 # ── 与洛书的直连信箱(2026-09-06 启用,取代人工中转) ──────────────
 [mailbox] 每次 session 启动、或收到"处理 inbox / check inbox"类指令时:
   1) 读 docs/CURSOR_INBOX.md;若其 STATUS=PENDING,把正文当作本次任务执行。

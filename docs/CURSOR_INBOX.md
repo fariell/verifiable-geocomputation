@@ -9,17 +9,28 @@
 ## §A · 当前活跃任务(读这个)
 
 STATUS: PENDING
-UPDATED: 2026-09-06 19:42
-TASK: **task9** · 多分辨率迁移 (5×5 5m → 256² 5m → 30m SRTM → LiDAR 点云)
+UPDATED: 2026-09-06 19:49
+TASK: **task9 (多分辨率迁移) ∥ task9.5 (paper v_final 整合)** — 双任务并行
 
-### A.0 主任务链(必跑)
+> **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
+> 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。
+> 写论文 + 跑实验 + commit code 全归 Cursor (Pro 会员)。Workbuddy 读本 INBOX 后派
+> 任务给 Cursor,Cursor 写 OUTBOX 自报,Workbuddy 监督 push gate 与 token 节流。
+
+### A.0 主任务链(双任务并行,本轮 main 段 1 1+1)
 
 ```
-task7.5 = AutoDL cloud settle P-COMP-1 + P-006 T6 (5 闸)
-    ↓
-    (云端响应间隙 5-15 min 内起草 task8A 的非 verify 文件)
-    ↓
-task8A = P-COMP-3 反例素材 (本机完整闸)
+┌─ task9   ─ 本机 + AutoDL ─────────────────────────────────────────┐
+│  多分辨率迁移:plane-5m → terrain-A 256² → SRTM-30m 3601² → LiDAR  │
+│  阶段 1-5:实测 4 套 + verify 重跑 + Wolfram 多分 + manim + README  │
+└────────────────────────────────────────────────────────────────────┘
+┌─ task9.5 ─ Workbuddy 不下场,只 dispatch(全归 Cursor)────────────┐
+│  paper v_final 整合:                                         │
+│  (a) v1.0 + v1.1 SUPP + v1.3 NUM → single manuscripts/P2/manuscript.md │
+│  (b) figures/*.mp4 移到 papers/P2/figures/                   │
+│  (c) 第一轮 proofread + 共 5 处引用一致性修复                    │
+└────────────────────────────────────────────────────────────────────┘
+两任务独立 commit 到本地,Workbuddy 只监督:SHA + push gate + token 节流
 ```
 
 ### A.1 task7.5 · 5 闸云端复核(主任务先)
@@ -193,6 +204,65 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - 末尾总结:`task9 verdict = PASS / FAIL / BLOCKED`
 - git commit `feat(phase2): task9 多分辨率迁移 PASS (<expected metrics>)`(local only)
 - OUTBOX 新增一段 `## 多分辨率迁移(task9)`
+
+### A.7 task9.5 · paper v_final 整合(全归 Cursor)
+
+> 19:49 PI 重定义角色:Workbuddy token 紧,写论文全归 Cursor (Pro 会员)。
+> Workbuddy 只 dispatch + monitor。本任务 Cursor 接手,Workbuddy 不下场。
+
+#### 整合目标
+
+把 v1.0 + v1.1 SUPP + v1.3 NUM 三份 outline **合并为 single** `papers/P2-geoproofbench/manuscript.md`(或 `.tex`,推荐 md) — 这是 SciDA 投稿唯一稿件。
+
+#### 三源模板
+
+| 源 | 行数 | 处理 |
+|---|---|---|
+| `docs/PAPER_P2_OUTLINE.md`(v1.0) | 469 | 主体 §1-§6,§7 (原版骨架),§9.2 limitations,§A.1 intro |
+| `docs/PAPER_P2_v1.1_SUPP.md` | 368 | §7.5 worked example 骨架,§8.5 反例库,§9.4 honest pending,§A.5 行数表 |
+| `docs/PAPER_P2_v1.3_NUM.md` | 176 | §7.5.4 实测数值,§A.6 profiling,§B.3 整合路径说明 |
+
+#### 操作清单(Cursor 执行)
+
+```
+1. 创建 papers/P2-geoproofbench/ 目录(mkdir)
+2. 拷贝 v1.0 全文件 → papers/P2-geoproofbench/manuscript.md(初稿)
+3. 段对齐 v1.0 §7.3 → 用 v1.1 §7.5.1-7.5.2 + v1.3 §7.5.4 替换
+   (保留 v1.0 命题陈述,加 v1.1 接口面 + v1.3 实测数据)
+4. 段对齐 v1.0 §8.4 → 用 v1.1 §8.5 (反例库)替换
+5. 段对齐 v1.0 §9.2 → 用 v1.1 §9.4 (honest pending)+ v1.3 §A.6 (profiling)
+6. figures:experiments/phase*/figures/*.mp4 → papers/P2-geoproofbench/figures/
+7. proofread 第 1 轮:
+   - 引用 §7.5.4 时须配套 v_final §7.3(不再写 illustrative 数字)
+   - §9.2 不留 PENDING,task9.5 已闭环可改 "已云端 PASS"
+   - 末行签处改 v_final.version = v1.4 (含 v1.3 NUM + task9 evidence)
+```
+
+#### 期望产出
+
+- `papers/P2-geoproofbench/manuscript.md` ~1219 行 ≈ SciDA 8-10 页
+- 引用统一指向 v_final.§X
+- 5 处"v1.x 引用" 全部升级为 v_final.§X
+- 末行签 `version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-XX`
+
+#### Workbuddy 不下场铁律(本任务期间)
+
+- Workbuddy **不**写、改、删任何 manuscript.md 行
+- Workbuddy **不**做 proofread
+- Workbuddy 只验:
+  1. `papers/P2-geoproofbench/manuscript.md` 文件存在
+  2. 长度 ≈ 1219 ± 50 行
+  3. commit hash 进日志
+  4. push gate 守住(local only)
+- 错误反馈到 OUTBOX 第 4 段 (`## paper v_final 整合(task9.5)`)
+  Cursor 看到后再修;Workbuddy 不直接动文件
+
+#### 完成后
+
+- INBOX §A STATUS=DONE + UPDATED 改 current ts
+- 末尾 verdict:pass = manuscript.md 存在 + 长 1219 ± 50 行
+- git commit `docs(manuscript): v_final 整合 (v1.0+v1.1+v1.3 → papers/P2/manuscript.md)` (local only)
+- OUTBOX 新增一段 `## paper v_final 整合(task9.5)`
 
 ---
 
