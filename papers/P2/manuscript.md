@@ -1,6 +1,6 @@
 # GeoProofBench: A Machine-Checked Proposition Set for Digital Elevation Model Analysis
 
-> **version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-06**
+> **version: v1.5 (incl. v1.3 NUM + task9/10.5/11/12/13 §7.6 evidence)  2026-09-06**
 > Scientific Data Data Descriptor (sole submission file). Figures: `papers/P2-geoproofbench/figures/`.
 > License: **CC-BY-4.0 (data) + MIT (code)**. Cite sections as **v_final §X** only.
 
@@ -12,7 +12,7 @@
 目标期刊:    Scientific Data
 学科代码:    D0116 地理大数据与空间智能(地球科学部 · 地球科学一处)
 投稿日:      2026-11-15(目标)
-状态:        v_final draft(P-001..P-006 / P-COMP-1 / P-COMP-3 / T6 云端 PASS;task9 多分辨率 PASS)
+状态:        v_final draft(P-COMP-1..5 + T6 云端 PASS;task9–13 §7.6 实测已入稿)
 arXiv:       (待 EarthArXiv / arXiv 挂,先于期刊投稿)
 许可证:      CC-BY-4.0 (data) + MIT (code)
 代码仓库:    https://github.com/fariell/verifiable-geocomputation
@@ -427,7 +427,75 @@ is controlled via a single `--sigma` flag. Each GPB entry writes its
 logfiles and figures into a `results/gpb<N>/` directory that is
 git-ignored and reproducible on rerun.
 
-数值闸与误差见 v_final §7.3.4;多分辨率见 v_final §A.7。
+数值闸与误差见 v_final §7.3.4;多分辨率与后续实测见 v_final §7.6 与 §A.7。
+
+### 7.6 Scale-out, homotopy, metaproperty, diversity(NUM)
+
+本节把 task9–task13 的实测写入正文。补丁底稿:`docs/PAPER_P2_v1.4_NUM.md`。口径约束:task9 的 SRTM/LiDAR 行仍是合成栅格;task11 是 8 PASS + 4 FAIL-TOLERANCE,不是 12/12 σ≤1e-6。
+
+#### 7.6.1 task9 多分辨率(GPB-024)
+
+同一 fill + D8 + terminate,四套尺寸。形式化不绑定网格边长。完整来源备注见 v_final §A.7。
+
+| DEM | 网格 | n_term | uniq_out | longest | verd |
+|---|---|---|---|---|---|
+| plane-5m | 5×5 | 9 | 3 | 3 | PASS |
+| terrain-A | 256² | 64516 | 98 | 351 | PASS |
+| SRTM-30m | 3601² | 12952801 | 6027216 | 28 | PASS |
+| LiDAR-down | 256² | 64516 | 20137 | 13 | PASS |
+
+shorthand:`n_term/uniq_out/longest` = 9/3/3; 64516/98/351; 12.95M/6.03M/28; 64516/20137/13。SRTM 与 LiDAR 行为同尺寸合成(公开 tile 本机 502),不是 USGS 产品精度声明。Wolfram 粗化 pigeon/descent/ring = True/True/False。图:v_final §A.7.1 `MultiresFillThenWatershed.mp4`。
+
+#### 7.6.2 task10.5 全平面闭包(GPB-022 / P-COMP-2)
+
+256² 常值平面(0 起伏)与沿行斜率 ε∈{1e-6, 1e-4}。
+
+| 套 | n_term | longest | uniq_out | notes |
+|---|---|---|---|---|
+| PLANE 0-relief | 65536/65536 | 0 | 65536 | 全 NoFlow |
+| ROW ε=1e-6 | 65536/65536 | 255 | 256 | 全 N |
+| ROW ε=1e-4 | 65536/65536 | 255 | 256 | 全 N |
+
+visited 合计 **16,908,288**。Wolfram:`pigeonholeAll`/`descentAllFix`/`chain256AllHit0`/`plane16x16AllTerm` 全 True。dafny `PCOMP_2.dfy` 25/0。
+
+#### 7.6.3 task11 重采样同伦(GPB-025 / P-COMP-4)
+
+西倾平面,`{0.5,1,2,4}× × {0°,45°,90°}` = 12 cells(默认 n=128)。上采样为双线性。
+
+|  | 0° | 45° | 90° |
+|---|---|---|---|
+| 0.5× / 1× / 2× / 4× | PASS σ=0, unique D8 | FAIL-TOLERANCE, mixed D8 | PASS σ=0, unique D8 |
+
+**8 PASS + 4 FAIL-TOLERANCE。** 全部 45° 格因插值破坏单坡,D8 不再唯一 — 这是同伦边界,不改标 PASS。dafny `PCOMP_4_homotopy.dfy` 20/0(`R(α,w)=αw`)。
+
+#### 7.6.4 task12 元一致(GPB-026 / P-COMP-5)
+
+1D Fill 四实例 SHA-256 跨 Python / Dafny / Lean:**hash 12/12**。
+
+| 实例 | Fill 输出 | sha256 前缀 |
+|---|---|---|
+| plane `[5,5,5,5]` | `[5,5,5,5]` | `8bf7125626de67c4…` |
+| pit `[3,1,4]` | `[3,3,4]` | `3fc2f480b5457660…` |
+| slope `[0,1,2,3]` | `[0,1,2,3]` | `84deff01f1994516…` |
+| cascade `[3,1,0]` | `[3,3,3]` | `b7d44aa6581b85f1…` |
+
+2D `fill(fill(h))=fill(h)` 与堆 tie `(r,c)` vs `(-r,-c)`:PLANE / ROW_1e-6 / WEST 各 64²,PIT5 5×5,**idempotent 4/4, schedule 4/4**,σ=0。dafny `PCOMP_5_idempotent.dfy` 15/0; `lake build` 2764 modules / 0 errors。
+
+#### 7.6.5 task13 真实 DEM 多样性(GPB-027)
+
+三套真实公开产品窗口,禁止合成占位。同一 P-COMP-1 四闸,填后内部坑 = 0,内部 64516/64516 终止。
+
+| 套 | 产品 | 像元 | z (m) | n_pit | uniq_out | longest | ridge | Dd (m⁻¹) |
+|---|---|---|---|---|---|---|---|---|
+| lidar | USGS 3DEP 1 m LiDAR, Griffith Park | 1 m | 218–367 | 88 | 234 | 157 | 0.125 | 0.106 |
+| ifsar | USGS 3DEP 5 m Alaska IFSAR, Fairbanks 窗 | 5 m | 176–365 | 270 | 253 | 142 | 0.225 | 0.0363 |
+| copernicus | Copernicus GLO-30 N32E110 | 28.4 m | 244–1027 | 626 | 4981 | 77 | 0.318 | 0.00685 |
+
+staged USGS COG(`prd-tnm` S3)本机 vsicurl 502/timeout;LiDAR 与 IFSAR 走 3DEP ImageServer 同产品族窗口。Copernicus 为 AWS eu-central-1 GLO-30 COG。窗口 256²,不是整幅 1 km² / 100 km² 产品。图见 v_final §7.7。
+
+### 7.7 Figure caption — RealWorldDiversity
+
+Three public DEMs, same P-COMP-1 fill-then-D8. Each panel reports ridgeline fraction (D8 in-degree 0), drainage density (in-degree ≥ 2 as channel-length/area), and sink count (interior 4-neighbour pits before fill). Source products: USGS 3DEP LiDAR 1 m, Alaska IFSAR 5 m, Copernicus GLO-30. File:`experiments/phase2/figures/RealWorldDiversity.mp4` (148437 B).
 
 ---
 
@@ -555,8 +623,9 @@ Three contributions are *geographically* specific, not method-portable:
 
 ## §9.2 · Limitations
 
-> 本节列出当前真实边界。T6 与多分辨率迁移已闭环(云端 / 本机 PASS);
-> GPU 并行流累积与真实 LiDAR/IFSAR 多样性仍为 future work,不藏。
+> 本节列出当前真实边界。T6、多分辨率、平面闭包、同伦矩阵、元一致、
+> 真实 DEM 窗口多样性已闭环;GPU 并行流累积仍为 future work,不藏。
+> task11 的 45° 格是 FAIL-TOLERANCE,不改标 PASS。
 
 ### 9.2.1 P-006 第 6 条 — 已云端 PASS (见 §8.4.3 + commit `90e8c0e`)
 
@@ -580,14 +649,16 @@ Three contributions are *geographically* specific, not method-portable:
 
 ### 9.2.4 真实 DEM(LiDAR / IFSAR / 高山)的多样性测试
 
-瓶颈:数据获取 + 与 v_final §A.7 四套 DEM 的对比表。  
-本稿 SRTM / LiDAR 行为同尺寸合成栅格。**投稿后 version 2**(Scientific Data 有 versioning 政策)可换真实产品。
+任务编号:**task13 / GPB-027**。  
+**状态**:**本机 PASS 3/3**(commit `a33159a`)。USGS 3DEP 1 m LiDAR(Griffith Park)、Alaska IFSAR 5 m(Fairbanks 窗)、Copernicus GLO-30 N32E110,同一 P-COMP-1 四闸全过。权威数字见 v_final §7.6.5;图题见 v_final §7.7。  
+**仍须声明**:staged S3 COG 本机不可达,LiDAR/IFSAR 用 3DEP ImageServer 窗口,不是整幅 1 km² / 100 km² 产品;task9 的 SRTM/LiDAR 行仍是合成栅格(v_final §7.6.1 / §A.7)。
 
 ### 9.2.5 关键诚实声明
 
 不在 v_final 隐藏任何"看似 minor"的限制:
 - P-006 第 6 条 **已于 2026-09-06 18:30 云端 PASS 12/0**(见 v_final §9.2.1)
-- 多分辨率已做(v_final §A.7);SRTM/LiDAR 行仍是合成栅格,不是 USGS 产品精度声明(见 v_final §9.2.2)
+- 多分辨率已做(v_final §7.6.1 / §A.7);task9 的 SRTM/LiDAR 行仍是合成栅格(见 v_final §9.2.2)
+- 真实产品窗口已做 3/3(v_final §7.6.5);45° 重采样为 FAIL-TOLERANCE(v_final §7.6.3)
 - 形式化仅两轨(Dafny + Lean) = 没有 Coq/Isabelle 平行 = future direction
 - 第 6 条不隐瞒 = 显示云端 PASS
 
@@ -598,7 +669,7 @@ Scientific Data 的 compliance 要求。
 
 ### 9.3 Threats to validity
 
-task9 把同一算法扩到 5×5 / 256² / 3601² / 256² 四套(v_final §A.7)。SRTM 与 LiDAR 行目前是合成栅格(公开 tile 本机不可用)。P-COMP-1 仍假设矩形边界;真实流域不规则边界不在本证明内。caveat 见 v_final §7.3。
+task9 把同一算法扩到 5×5 / 256² / 3601² / 256² 四套(v_final §7.6.1 / §A.7);其中 SRTM 与 LiDAR 行仍是合成栅格。task13 另用三套真实产品窗口(v_final §7.6.5),不是整幅瓦片。P-COMP-1 仍假设矩形边界;真实流域不规则边界不在本证明内。caveat 见 v_final §7.3 与 §7.6.3(45° FAIL-TOLERANCE)。
 
 ---
 
@@ -844,8 +915,9 @@ n_pit = 填洼前内部 4 邻局部最低点。填后内部坑数均为 0。边�
 | `figures/ZTNotHornStencil.mp4` | P-COMP-3 不可互推 | phase2 |
 | `figures/MultiresFillThenWatershed.mp4` | task9 四套 DEM | 225006 |
 | `figures/FillThenWatershedMultiresStencil.mp4` | 同上(场景名) | 225006 |
+| `figures/RealWorldDiversity.mp4` | task13 三套真实 DEM(§7.7) | 148437 |
 
-引用这些图时写 v_final §A.7.1,不要写 v1.x 路径。
+引用这些图时写 v_final §A.7.1 或 §7.7,不要写 v1.x 路径。
 
 ## §B · 版本史
 
@@ -856,9 +928,10 @@ n_pit = 填洼前内部 4 邻局部最低点。填后内部坑数均为 0。边�
 | v1.1 | 2026-09-06 18:35 | SUPP:worked example / 反例库 / honest pending |
 | v1.2 | 2026-09-06 19:27 | R-3 unverified clause → 云端 PASS 12/0 |
 | v1.3 | 2026-09-06 19:32 | NUM:§7.5.3 illustrative → 实测 |
-| **v1.4** | **2026-09-06** | **本文件:三源整合 + task9 多分辨率证据** |
+| **v1.4** | **2026-09-06** | **三源整合 + task9 多分辨率证据** |
+| **v1.5** | **2026-09-06** | **§7.6 NUM:task9/10.5/11/12/13 实测 5 段** |
 
-version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-06
+version: v1.5 (incl. v1.3 NUM + task9/10.5/11/12/13 §7.6 evidence)  2026-09-06
 
 _Local v_final; GitHub public snapshot at acceptance._
 
@@ -1118,7 +1191,7 @@ log PCOMP_1 → /root/.workbuddy/jobs/20260906_194831.log
 log T6      → /root/.workbuddy/jobs/20260906_194833.log
 ```
 
-Cite v_final §7.3.4 for P-COMP-1 5×5 numbers; cite v_final §A.7 for multi-res numbers.
+Cite v_final §7.3.4 for P-COMP-1 5×5 numbers; cite v_final §7.6 / §A.7 for scale-out numbers.
 Cite v_final §8.4 for the counter-example library; cite v_final §9.2 for limitations.
 
 ## §C · Citation map (v_final only)
@@ -1136,14 +1209,18 @@ Submitters must cite the following v_final anchors, never v1.x section numbers.
 | 7 | flat 4-ring counter-example | v_final §8.4.1 |
 | 8 | ZT not Horn | v_final §8.4.2 |
 | 9 | T6 already cloud PASS | v_final §8.4.3 / §9.2.1 |
-| 10 | task9 multi-res table | v_final §A.7 |
+| 10 | task9 multi-res table | v_final §7.6.1 / §A.7 |
 | 11 | task9 raw metrics | v_final §A.8 |
-| 12 | limitations GPU/diversity | v_final §9.2.3 / §9.2.4 |
+| 12 | limitations GPU / real-DEM window | v_final §9.2.3 / §9.2.4 |
 | 13 | manim four-panel | v_final §A.7.1 |
 | 14 | noise sweep | v_final §A.2 |
 | 15 | author block | v_final §2 |
+| 16 | P-COMP-2 plane closure | v_final §7.6.2 |
+| 17 | P-COMP-4 homotopy 8+4 | v_final §7.6.3 |
+| 18 | P-COMP-5 hash 12/12 | v_final §7.6.4 |
+| 19 | real DEM diversity 3/3 | v_final §7.6.5 / §7.7 |
 
-version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-06
+version: v1.5 (incl. v1.3 NUM + task9/10.5/11/12/13 §7.6 evidence)  2026-09-06
 
 Note-01: plane-5m n_pit=0 n_term=9 uniq_out=3 longest=3 PASS.
 Note-02: terrain-A n_pit=53 n_term=64516 uniq_out=98 longest=351 PASS.
@@ -1152,5 +1229,9 @@ Note-04: LiDAR-down n_pit=1782 n_term=64516 uniq_out=20137 longest=13 PASS (synt
 Note-05: wolfram pigeonholeAll=True descentAllFix=True ringHasFixedPoint=False.
 Note-06: manim MultiresFillThenWatershed.mp4 225006 bytes.
 Note-07: commit task9=6a54d4c local only.
+Note-08: P-COMP-2 visited=16908288; dafny 25/0; commit 04571d5.
+Note-09: P-COMP-4 8 PASS + 4 FAIL-TOLERANCE (all 45°); dafny 20/0; commit 624d131.
+Note-10: P-COMP-5 hash 12/12 idempotent 4/4; dafny 15/0; lake 2764; commit 10a9ebb.
+Note-11: GPB-027 lidar/ifsar/copernicus 3/3 PASS; RealWorldDiversity.mp4 148437 B; commit a33159a.
 
-version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-06
+version: v1.5 (incl. v1.3 NUM + task9/10.5/11/12/13 §7.6 evidence)  2026-09-06

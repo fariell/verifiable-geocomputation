@@ -774,6 +774,36 @@ task13 verdict = PASS
 
 ---
 
+## v1.5 NUM 升级(task14)
+
+---
+
+[task]      task14 / v1.5 NUM 升级 §7.6
+[step]      把 task9/10.5/11/12/13 实测写入 §7.6.1–7.6.5 + §7.7 图题;同步两份 manuscript
+[cmd]       edit docs/PAPER_P2_v1.4_NUM.md ; papers/P2/manuscript.md ; copy papers/P2-geoproofbench/manuscript.md
+[rc]        0
+[key lines]
+  §7.6.1 plane 9/3/3 ; terrain-A 64516/98/351 ; SRTM 12952801/6027216/28 (synthetic) ; LiDAR-down 64516/20137/13 (synthetic)
+  §7.6.2 P-COMP-2 visited=16908288 ; 65536/65536 term ; dafny 25/0
+  §7.6.3 P-COMP-4 8 PASS + 4 FAIL-TOLERANCE (all 45°) ; 不是 12/12 σ≤1e-6 ; dafny 20/0
+  §7.6.4 P-COMP-5 hash 12/12 ; idempotent 4/4 ; dafny 15/0 ; lake 2764
+  §7.6.5 GPB-027 lidar/ifsar/copernicus 3/3 ; sinks 88/270/626
+  §7.7 RealWorldDiversity.mp4 148437 B
+  末行签 version: v1.5 ; 9.2.4 从 future work 改为已测+窗口 caveat
+[gates]     §7.6.1–7.6.5 均有 metrics.json 真数; task11 未改标 PASS; task9 SRTM/LiDAR 合成 caveat 保留; 两份 manuscript 同步
+[verdict]   PASS
+[blocker]
+
+改了什么:
+- 新: `docs/PAPER_P2_v1.4_NUM.md` (SUPP; 文件名按 A.9.5,内容签 v1.5)
+- 改: `papers/P2/manuscript.md` §7.6.1–7.6.5 + §7.7 + §9.2.4 + 版本史 v1.5
+- 拷: `papers/P2-geoproofbench/manuscript.md` + `papers/P2-geoproofbench/figures/RealWorldDiversity.mp4`
+未改 PROP_CHAIN / this-week / MEMORY。未 git push。
+
+task14 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 
