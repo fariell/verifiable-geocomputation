@@ -517,6 +517,69 @@ task9.5 verdict = PASS
 
 ---
 
+## SciDA 投稿冲刺(task10)
+
+---
+
+[task]      task10 / 段 A cover letter
+[step]      write cover_letter.md (SciDA EiC Guy Jones; 7 段)
+[cmd]       write papers/P2-geoproofbench/cover_letter.md ; copy → papers/P2/cover_letter.md
+[rc]        0
+[key lines]
+  papers/P2/cover_letter.md exists
+  papers/P2-geoproofbench/cover_letter.md exists
+  body words=863 (Dear Dr Jones … end); file words=915
+  5 novel: (i) GPB suite (ii) Dafny+Lean (iii) counter-examples as records (iv) conditional theorems (v) one-stop data+impl
+  author block: Yinggang Guo / NINT Xi'an 710024 / ORCID 0000-0002-8207-9941 / fariel_gyg@163.com
+[gates]     file exists; 800–1000 words: PASS (863); 7-paragraph structure: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task10 / 段 B Zenodo deposit
+[step]      metadata + pack zip; no API token so DOI not minted
+[cmd]       powershell -File papers/P2-geoproofbench/zenodo/pack.ps1
+[rc]        0
+[key lines]
+  ZENODO_TOKEN=unset
+  ZIP papers/P2-geoproofbench/zenodo/GeoProofBench-v0.1-deposit.zip bytes=4575507 MB=4.36
+  lake/.lake excluded
+  mint URL https://zenodo.org/deposit/new
+  DOI: not minted (no fabricated 10.5281/zenodo.*)
+  §11 + §A.5 hang the mint URL + "not yet minted" (not a DOI)
+[gates]     package ready: PASS; DOI minted: FAIL
+[verdict]   BLOCKED
+[blocker]   无 ZENODO_TOKEN / 无 PI Zenodo 登录;Cursor 不能伪造 DOI。PI 把 zip 拖到 zenodo.org/deposit/new 后把真实 DOI 回写 INBOX,Cursor 再挂 §A.5 + cover letter §5。
+
+---
+
+[task]      task10 / 段 C proofread R2
+[step]      manuscript.md 引用统一 / §9.2 / 末行签 / 5 处一致性 / 双盲 Acknowledgements
+[cmd]       edit papers/P2-geoproofbench/manuscript.md ; copy → papers/P2/manuscript.md
+[rc]        0
+[key lines]
+  lines=1157 (collapsed duplicate Note-08..82; was 1219 padded)
+  PENDING count=0 in manuscript
+  末行签: version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-06
+  Yinggang Guo=2 ORCID=2 NINT=2 fariel_gyg=3 CC-BY-4.0=5
+  Acknowledgements: Removed for review
+  live v1.x § cites removed; changelog §B still lists v1.0–v1.3 as history
+  Zerniko/Zernike–Torrance → Zevenbergen–Thorne 1987; dafny paths fixed to P001_horn_slope / P003_curvature / P004_consistency
+[gates]     引用统一: PASS; §9.2 no PENDING: PASS; 末行签 v1.4: PASS; 5 处一致性: PASS; Acknowledgements blanked: PASS
+[verdict]   PASS
+[blocker]
+
+改了什么:
+- 新: `papers/P2-geoproofbench/cover_letter.md` + `papers/P2/cover_letter.md`
+- 新: `papers/P2-geoproofbench/zenodo/{README,FILELIST,metadata.json,pack.ps1,GeoProofBench-v0.1-deposit.zip}`
+- 改: `papers/P2-geoproofbench/manuscript.md` (proofread R2) 并拷到 `papers/P2/manuscript.md`
+未改 `docs/PAPER_P2_*.md` / `this-week.md` / `MEMORY.md` / `PROP_CHAIN.md`。未 git push。
+
+task10 verdict = BLOCKED (段 A PASS / 段 B DOI 未铸造 / 段 C PASS)
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

@@ -8,8 +8,8 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: PENDING
-UPDATED: 2026-09-06 20:24
+STATUS: DONE
+UPDATED: 2026-09-06 20:35
 TASK: **task10 · SciDA 投稿冲刺** (cover letter + Zenodo deposit + proofread R2)
 
 > **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
