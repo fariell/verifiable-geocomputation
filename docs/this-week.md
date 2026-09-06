@@ -24,7 +24,7 @@
 
 - **GPB-014**(P-005 D8 八路核) ✓ → `formal/dafny/P005_d8.dfy` + `formal/lean4/VeriGIS/D8.lean`
 - **GPB-015**(P-006 流域唯一性) ✓ → `formal/dafny/P006_watershed.dfy`(20 verified)+ `formal/lean4/VeriGIS/Watershed.lean`
-- **GPB-021**(P-COMP-1 填洼 ⇒ 流域唯一) ◌ → Phase 2 第 1 条组合命题,由 INBOX-2026-09-06 17:55 后启动
+- **GPB-021**(P-COMP-1 填洼 ⇒ 流域唯一) ✓ → Phase 2 第 1 条组合命题,本机 4 门控 PASS(6.669s)+ dafny PCOMP_1 17/0 + P006_T6 12/0 + lake 2760 modules。**v1.3 实测补丁**:`docs/PAPER_P2_v1.3_NUM.md` §7.5.4(2026-09-06 19:32)
 
 ---
 
@@ -65,7 +65,7 @@
 |---|---|
 | P-001 / P-002 / P-002-bis / P-003 / P-004 / P-005 / P-006 (本机+云端全 PASS) | **task7.5** P-COMP-1 + T6 5 闸云端复核(INBOX §A PENDING)|
 | GPB-019 数值基准 | **task8A** P-COMP-3 反例素材(77e436d INBOX §A 串联) |
-| P-COMP-1 本机 4 门控 PASS + manim mp4 | Phase 2.1 月: P-COMP-2(全平面) |
+| P-COMP-1 本机 4 门控 PASS + manim mp4 + **v1.3 NUM**(§7.5.4 实测)| Phase 2.1 月: P-COMP-2(全平面) |
 | T6 P-COMP-1 (iii) 替代支撑 | Phase 2.2 月: P-COMP-4(重采样同伦) |
 | | Phase 2.3 月: P-COMP-5(元一致) |
 

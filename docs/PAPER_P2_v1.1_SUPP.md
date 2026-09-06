@@ -365,4 +365,26 @@ v1.0 (469 行) + v1.1 (550 行) → v_final ≈ 1019 行 ≈ SciDA 6-8 页期刊
 
 ---
 
-_Luoshu 起草 v1.1 18:35 / 升级 v1.2 19:27 CST · push gate 永久 · 本地 commit 不 push · task7.5(= 计划中 task8B)已云端 PASS 12/0,§9.4.1 同步_
+## §D · v1.3 衔接补丁(2026-09-06 19:32 CST)
+
+> §7.5.3 当前 illustrative 数字(7 步 / 5 出口 / n_term=25)是教学示意,
+> **不是实测**。v1.3 SUPP `docs/PAPER_P2_v1.3_NUM.md` §7.5.4 已把该节
+> 全部替换为实测:
+>
+> | 来源 | v1.1 §7.5.3 (illustrative) | v1.3 §7.5.4 (实测) |
+> |---|---|---|
+> | 4 门控 | 无具体数 | checked=25 pits=0 / n=9 min_drop=1.0000 / n=9 term=9 longest=3 uniq_out=3 / ring_terminated=False |
+> | 内 9 单元 | "5×5 = 25 cell, n_term=25" | interior 9 cell, longest=3, uniq_out=3 |
+> | Wolfram | 无 | 4^4=256 穷举, descentMaps=24 |
+> | Dafny | "17/0" 一般描述 | PCOMP_1.dfy 17/0, P006_terminate_under_strict.dfy 12/0 |
+> | Lean | "OK" 一般描述 | lake build 2760 modules, 0 errors |
+>
+> 本节不再 inline replace §7.5.3 内容(v1.1 SUPP 已 commit 保持稳定),
+> 由 v1.3 NUM 集中承载实测数据。投稿前整合路径见 v1.3 NUM §B.3。
+>
+> **v1.1 SUPP 文件本身保持稳定**;下游引用 §7.5.3 时**应同时 cite v1.3 §7.5.4**
+> 才能给读者真实数字。
+
+---
+
+_Luoshu 起草 v1.1 18:35 / 升级 v1.2 19:27 CST / 衔接 v1.3 19:32 CST · push gate 永久 · 本地 commit 不 push · task7.5(= 计划中 task8B)已云端 PASS 12/0,§9.4.1 同步 · v1.3 NUM `PAPER_P2_v1.3_NUM.md` §7.5.4 已建_
