@@ -637,6 +637,58 @@ task10.5 verdict = PASS
 
 ---
 
+## P-COMP-4 重采样同伦(task11)
+
+---
+
+[task]      task11 / P-COMP-4 重采样同伦
+[step]      本地 numpy scale×rot 12 cells + wolfram
+[cmd]       & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_4.py
+[rc]        0
+[key lines]
+  base 128² A=1 B=0 (P-COMP-2 平面族; bilinear upsample 非 nearest 台阶)
+  [PASS] 0.5× 0°/90°   σ=0  d8_uniq=1
+  [PASS] 1×   0°/90°   σ=0  d8_uniq=1
+  [PASS] 2×   0°/90°   σ=0  d8_uniq=1
+  [PASS] 4×   0°/90°   σ=0  d8_uniq=1
+  [FAIL-TOLERANCE] 四档 45°  σ=1.4e-14  d8_uniq=6..9 (栅格插值混方向,不是 bug)
+  wolfram planarAllA=True cubicShrinks=True rc=0
+  GPB-025 ENTRY: PASS  (8 PASS + 4 FAIL-TOLERANCE + 0 FAIL / 12)
+  metrics -> experiments/phase2/results/gpb025_pcomp4/gpb025_metrics.json
+[gates]     8 PASS (σ≤1e-6 + unique D8); 4×45° FAIL-TOLERANCE; wolfram parsed=true; n_fail=0
+[verdict]   PASS
+[blocker]   inbox 预期 11 PASS + 1 FAIL-TOLERANCE;实得 8+4,因为四档尺度的 45° 全部混 D8。未把 45° 谎报成 PASS。
+
+---
+
+[task]      task11 / P-COMP-4 重采样同伦
+[step]      overlay + 云端 dafny PCOMP_4_homotopy + lake
+[cmd]       python %USERPROFILE%\.autodl_run.py --upload-list %USERPROFILE%\.autodl_pcomp4_upload.txt ; python %USERPROFILE%\.autodl_run.py --cmd-file %USERPROFILE%\.autodl_cmd_task11_verify.sh --timeout 180
+[rc]        0
+[key lines]
+  [autodl_run] uploaded 8 files
+🚀  START @ 21:02:27   $  dafny verify formal/dafny/PCOMP_4_homotopy.dfy
+   21:02:29  Dafny program verifier finished with 20 verified, 0 errors
+   lake: [2761/2763] Running VeriGIS.Composition.ResampleHomotopy
+         [2762/2763] Running VeriGIS
+         Build completed successfully.
+   log=/root/.workbuddy/jobs/20260906_210227.log
+[gates]     dafny PCOMP_4: PASS 20/0 (inbox 预期 17/0,实得 20); lake: PASS 2763 modules 0 errors
+[verdict]   PASS
+[blocker]
+
+改了什么:
+- 新: `formal/dafny/PCOMP_4_homotopy.dfy` (`R(alpha,w)=alpha*w`; QuadraticExact 在 α∈{0.5,2,4}; CubicErrorShrinks; PlaneConstant; PlaneWest; Rotate90 North)
+- 新: `formal/dafny/PCOMP_4_README.md`
+- 新: `formal/lean4/VeriGIS/Composition/ResampleHomotopy.lean`
+- 新: `experiments/phase2/{p_comp_4.py,p_comp_4.wl,run_p_comp_4.sh}`
+- 改: `VeriGIS.lean` import ResampleHomotopy; `verify_all.sh` 加 PCOMP_4 闸
+未改 PROP_CHAIN / this-week / MEMORY / PAPER_P2_*。未 git push。不 include P-001(Main 冲突),走 P-004。
+
+task11 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

@@ -12,4 +12,5 @@ import VeriGIS.Watershed
 import VeriGIS.P006Terminate
 import VeriGIS.Composition.PitFillingThenWatershed
 import VeriGIS.Composition.PitFillingThenWatershedPlane
+import VeriGIS.Composition.ResampleHomotopy
 import VeriGIS.Composition.ZTNotImpliesHorn

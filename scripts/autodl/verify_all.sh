@@ -119,6 +119,12 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-COMP-2 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
+    if [ -f "$REPO/formal/dafny/PCOMP_4_homotopy.dfy" ]; then
+        echo "[dafny] P-COMP-4 (resample homotopy)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/PCOMP_4_homotopy.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-COMP-4 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
 else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
