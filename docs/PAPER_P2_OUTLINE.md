@@ -464,7 +464,8 @@ flagged `FP (failure of property)` not `FAIL`.
 | v0.2 | 2026-09-06 | §2.4 executable pre-spec appended |
 | v0.3 | 2026-09-06 (77e436d) | §2.5 P-COMP-3 反例 pre-spec |
 | **v1.0** | **2026-09-06 18:25** | **全 15 节真实草稿(本文)|**
-| v1.1 | 2026-09-06 18:35 | additive supplement PAPER_P2_v1.1_SUPP.md · §7.5 worked example + §8.5 反例库 + §9.4 honest pending + §A 附录充实(共 +360 行,整合路径见 SUPP §B) |
+| v1.1 | 2026-09-06 18:35 | additive supplement
+| **v1.2** | **2026-09-06 19:27** | **R-3 PENDING → 云端 PASS 12/0(task7.5 18:30)sync in SUPP §7.5/§8.5.3/§8.5.4/§9/§9.4.1/§9.4.5/§B.2/commit 6eb281f** | PAPER_P2_v1.1_SUPP.md · §7.5 worked example + §8.5 反例库 + §9.4 honest pending + §A 附录充实(共 +360 行,整合路径见 SUPP §B) |
 
 _本 v1.0 在 commit `bd48901` 之上随 §B.1 "PI 18:22 强化 push gate" 决策落笔;
 论文写作与实验双轨推进,不再 push 任何 commit 到 GitHub 直到论文终稿。_
