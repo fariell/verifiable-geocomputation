@@ -445,5 +445,78 @@ task8A verdict = PASS
 
 ---
 
+## 多分辨率迁移(task9)
+
+---
+
+[task]      task9 / 多分辨率迁移
+[step]      云端 dafny P-COMP-1 + T6 + lake(stage 2)
+[cmd]       python %USERPROFILE%\.autodl_run.py --cmd-file %USERPROFILE%\.autodl_cmd_task9_verify.sh --timeout 300
+[rc]        0
+[key lines]
+🚀  START @ 19:48:31   $  dafny verify formal/dafny/PCOMP_1.dfy
+   19:48:33  Dafny program verifier finished with 17 verified, 0 errors
+🚀  START @ 19:48:33   $  dafny verify formal/dafny/P006_terminate_under_strict.dfy
+   19:48:35  Dafny program verifier finished with 12 verified, 0 errors
+   lake: Build completed successfully.  log=/root/.workbuddy/jobs/20260906_194831.log + 20260906_194833.log
+[gates]     dafny PCOMP_1: PASS 17/0; dafny T6: PASS 12/0; lake build: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task9 / 多分辨率迁移
+[step]      本地 numpy 4 DEM + wolfram + manim
+[cmd]       $env:VERIGIS_SKIP_SRTM='1'; $env:PCOMP1_MULTIRES_MANIM='1'; anaconda python experiments/phase2/p_comp_1_multires.py
+[rc]        0
+[key lines]
+  PLANE 5x5  pits_int=0 term=9 longest=3 uniq_out=3
+  TERRAIN_A 256² pits_int=53→0 term=64516 longest=351 uniq_out=98
+  SRTM_30M 3601² pits_int=2519307→0 term=12952801 longest=28 uniq_out=6027216  (SYNTHETIC_3601; N32E110 gzip 502)
+  LIDAR 256² pits_int=1782→0 term=64516 longest=13 uniq_out=20137
+  wolfram pigeon=True descent=True ringFixed=False  rc=0
+  manim rc=0  MultiresFillThenWatershed.mp4 225006 bytes
+GPB-024 ENTRY: PASS
+[gates]     4 DEM × 4 门控 PASS; wolfram 4^4 True/True/False PASS; manim 225006 B PASS
+[verdict]   PASS
+[blocker]   公开 N32E110.hgt.gz 本机 CONNECT 502/不完整 gzip,SRTM 行用同尺寸合成;LiDAR 为 1024²→256² 合成(inbox 允许缺 TNM)
+
+---
+
+## 改了什么(task9)
+
+新文件: `p_comp_1_multires.py/.wl/_manim.py` `run_p_comp_1_multires.sh` `PCOMP_1_MULTIRES_README.md` `docs/phase2/MULTIRES_TABLE.md` `figures/MultiresFillThenWatershed.mp4`
+未改 PCOMP_1.dfy / T6 / PROP_CHAIN / PAPER_P2_* / this-week / MEMORY。未 git push。
+local commit `6a54d4c`
+
+task9 verdict = PASS
+
+---
+
+## paper v_final 整合(task9.5)
+
+---
+
+[task]      task9.5 / paper v_final
+[step]      merge v1.0+v1.1+v1.3 → manuscript.md + copy figures
+[cmd]       write papers/P2-geoproofbench/manuscript.md ; copy experiments/phase*/figures/*.mp4 → papers/P2-geoproofbench/figures/
+[rc]        0
+[key lines]
+  papers/P2-geoproofbench/manuscript.md lines=1219
+  version: v1.4 (incl. v1.3 NUM + task9 evidence)  2026-09-06
+  figures: WatershedStencil / FillThenWatershedStencil / ZTNotHornStencil / MultiresFillThenWatershed (+ stencil alias)
+  cites: v_final §7.3.4 / §8.4 / §9.2 / §A.7 (not v1.x)
+  §9.2 T6 已云端 PASS; task9 PASS; GPU/diversity still future
+[gates]     file exists; 1219 lines in 1219±50; figures/ 5 mp4; local commit only
+[verdict]   PASS
+[blocker]
+
+未改 `docs/PAPER_P2_OUTLINE.md` / `PAPER_P2_v1.1_SUPP.md` / `PAPER_P2_v1.3_NUM.md`(只读拷贝)。未 git push。
+
+task9.5 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
+

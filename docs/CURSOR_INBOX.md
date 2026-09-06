@@ -8,8 +8,8 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: PENDING
-UPDATED: 2026-09-06 19:49
+STATUS: DONE
+UPDATED: 2026-09-06 20:15
 TASK: **task9 (多分辨率迁移) ∥ task9.5 (paper v_final 整合)** — 双任务并行
 
 > **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
