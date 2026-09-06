@@ -55,12 +55,91 @@ flat 环反例)。
 | 2 | `experiments/phase2/p_comp_1.wl` | 鸽笼在 4^k 网格上穷举终态 |
 | 3 | `experiments/phase2/p_comp_1_manim.py` | 左:不填洼 → flat 环;右:填洼后 → 唯一出口动画 |
 | 4 | `experiments/phase2/run_p_comp_1.sh` | 云端驱动,`GPB-021 ENTRY: PASS` 收尾 |
-| 5 | `formal/dafny/PCOMP_1.dfy` | (i)~(v) 全 Lean 翻译 |
+| 5 | `formal/dafny/PCOMP_1.dfy` | (i)~(v) 全 Dafny 翻译 |
 | 6 | `formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean` | import P-002/P-005/P-006,**不翻译 Dafny** |
 | 7 | `formal/dafny/PCOMP_1_README.md` | 组合策略图 + "没证什么" |
 
 **这条组合证明本身就是 Phase 2 的方法论成果**:写法示范给"二阶命题如何机器证明",
 后续 P-COMP-2..5 都是模板复用。
+
+### 2.4 可执行规格(Cursor pre-spec;2026-09-06 17:55 洛书补)
+
+#### P-COMP-1 import 接口面(不动 P-002/P-005/P-006 源)
+
+```dafny
+// 假定 P-002 已提供:
+module P002 = PitFilling2D  // pitFill2D : DEM -> DEmFilled
+// 假定 P-005 已提供:
+module P005 = D8Flow         // D8 : Win -> Flow(Dir ∪ {NoFlow})
+// 假定 P-006 已提供:
+module P006 = Watershed      // BasinUnique、stepN、OrbitDeterministic
+```
+
+P-COMP-1 内部只声明以下谓词(骨架不动 P-002/P-005/P-006):
+
+| 类型 | 签名 | 物理意义 |
+|---|---|---|
+| `lemma NoPitImpliesDescent` | `(h : DEmFilled) (c : Cell) (n : D8) :: D8Step h c n ≤ c` | (i): 填洼后每格邻接 ≤ 中心 |
+| `lemma D8PreservesDescent` | `(h : DEmFilled) (c : Cell) :: ordOf(d8(h,c)) < ordOf(c)` | (ii): 与 P-005 一起 ⇒ 严格下降 |
+| `lemma OrbitLengthBound` | `(h : DEmFilled) (c : Cell) :: ∃ n ≤ n*m, isFix(stepN(succ, c, n))` | (iii): 鸽笼上界 |
+| `lemma BoundaryNonEmpty` | `(h : DEmFilled) :: ∃ c : Cell, d8(h, c) = NoFlow` | (iv): 矩形边界至少一格不动 |
+| `theorem FillThenWatershed` | `(h : DEM) (c : Cell) :: ∃! o, basin(pitFill2D(h), c) = o` | (v): 主定理 |
+
+P-COMP-1 允许的引用:
+- `P002.PitFilled`(`DEM` → `DEmFilled`)
+- `P005.D8` 流向函数
+- `P006.BasinUnique`(主复)
+
+严禁:**新加 Flow 类型 / 复制 Rate-of-Ascent 比较**。任何重复造轮子 OUTBOX 即报 BLOCKED。
+
+#### Lean 端规格
+
+```lean
+import VeriGIS.PitFilling2D
+import VeriGIS.D8
+import VeriGIS.Watershed
+namespace VeriGIS.Composition
+
+theorem pit_fill_then_watershed (h : DEM) (c : Cell) :
+    ∃! o, Watershed.basin (PitFilling2D.pitFill2D h) c = o := ...
+
+-- § 2.4 (i)+(ii) 论证视情况独立写
+end VeriGIS.Composition
+```
+
+注意 Lean 文件路径是 `formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean`
+(`Composition` 是 VeriGIS 子目录,要 `mkdir` + `VeriGIS.lean` 加 import)。
+
+#### Python driver(p_comp_1.py)
+
+```python
+from experiments.phase1.p005_d8 import DIRS, d8_at, plane_grid
+from experiments.phase1.p006_watershed import follow_d8, RING, ...
+from experiments.phase1.p002_pit_filling_2d import pitFill2D  # 待 P-002 公开
+```
+
+门控:
+- (i) **NoPitImpliesDescent**:对每个 pit-fill 后的 DEM,任何邻接 vs 中心 ≤ 中心
+- (ii) **StrictDescent**:平面 σ=0,每个 step 中心 d8 后继高程 ≤ 中心 - 1(快速衰减)
+- (iii) **TerminatesUnderStrictDescent**:对 5×5 平面,所有 interior 轨道 ≤ 50 步终止
+
+#### 第 6 条 `TerminatesUnderStrictDescent` 单独条款
+
+独立 8 件套(可与 P-COMP-1 同次 session):
+
+| 路径 | 类型 | 要点 |
+|---|---|---|
+| `formal/dafny/P006_terminate_under_strict.dfy` | Dafny 模块 | `decreases` chain 对 n 归纳 |
+| `formal/lean4/VeriGIS/P006Terminate.lean` | Lean 模块 | mathlib `WellFounded`/`Nat.lt_wfRel` |
+| `formal/dafny/P006_terminate_under_strict_README.md` | 台账 | 引用 P-COMP-1 §2.4 step (iii) 作为二次使用 |
+
+如果第 6 条通过,**P-COMP-1 的 §2.4 step (iii) 改为 P006_terminate.bound(succ, c)`**,
+否则保持 §2.3 step (iii) 的鸽笼证明不动。
+
+#### 论文对接点(理顺 Outline)
+
+`docs/PAPER_P2_OUTLINE.md` §7.4 把 P-COMP-1 当主案例,§9 Discussion 引用本节 §2.4 接口面
+表 说明"组合命题的可机器证明性"。
 
 ---
 
@@ -105,4 +184,4 @@ flat 环反例)。
 
 ---
 
-_Phase 2 v0.1 占位 · 2026-09-06 · 待 PI 审定_
+_Phase 2 v0.2 executable pre-spec · 2026-09-06 17:55 · §2.4 新增可执行接口面;Luoshu pre-spec for Cursor._
