@@ -1,0 +1,77 @@
+{
+  "id": "GPB-027",
+  "slug": "copernicus",
+  "name": "Copernicus GLO-30 N32E110",
+  "utc": "2026-09-06T15:29:08Z",
+  "elapsed_s": 0.455,
+  "shape": [
+    256,
+    256
+  ],
+  "n_cells": 65536,
+  "n_pit": 626,
+  "n_pit_after": 0,
+  "n_term": 64516,
+  "uniq_out": 4981,
+  "longest": 77,
+  "max_steps": 65536,
+  "min_drop": 0.000396728515625,
+  "sink_count": 626,
+  "ridgeline_frac": 0.317998635997272,
+  "drainage_density_per_m": 0.006850795355481852,
+  "n_ridge": 20516,
+  "n_channel": 12573,
+  "meta": {
+    "source": "Copernicus DEM GLO-30 (DSM COG 10, tile N32E110)",
+    "fetch": "AWS eu-central-1 /vsicurl/ + GDAL Translate srcWin",
+    "url": "https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/Copernicus_DSM_COG_10_N32_00_E110_00_DEM/Copernicus_DSM_COG_10_N32_00_E110_00_DEM.tif",
+    "cache": "E:\\AI for Math\u4e0eDEM\u7a7a\u95f4\u7f51\u683c\u4ea4\u53c9\u7814\u7a76\\verifiable-geocomputation\\data\\cache\\gpb027_copernicus.tif",
+    "cell_m": 28.446607970538697,
+    "srcWin": [
+      1600,
+      1600,
+      256,
+      256
+    ],
+    "geotransform": [
+      110.44430555555556,
+      0.0002777777777777778,
+      0.0,
+      32.55569444444445,
+      0.0,
+      -0.0002777777777777778
+    ],
+    "shape": [
+      256,
+      256
+    ],
+    "zmin": 244.0,
+    "zmax": 1026.6246337890625,
+    "synthetic": false
+  },
+  "panel_png": "E:\\AI for Math\u4e0eDEM\u7a7a\u95f4\u7f51\u683c\u4ea4\u53c9\u7814\u7a76\\verifiable-geocomputation\\experiments\\phase2\\results\\gpb027_realworld\\copernicus\\panel.png",
+  "gates": [
+    {
+      "name": "NoPitImpliesDescent after W&L fill",
+      "pass": true,
+      "detail": "interior_checked=64516 pits=0 (boundary_localmin=20)"
+    },
+    {
+      "name": "flowing D8 steps strictly descend (drop>=0)",
+      "pass": true,
+      "detail": "n_flow=60525 min_drop=0.0004"
+    },
+    {
+      "name": "TerminatesUnderStrictDescent interior",
+      "pass": true,
+      "detail": "n=64516 term=64516 longest=77 uniq_out=4981 bound=65536"
+    },
+    {
+      "name": "unfilled flat 4-ring does not terminate (P-006b contrast)",
+      "pass": true,
+      "detail": "ring_terminated=False"
+    }
+  ],
+  "entry": "PASS",
+  "caption": "Real-world DEM diversity (paper \u00a77.7): USGS 3DEP LiDAR 1 m / Alaska IFSAR 5 m / Copernicus GLO-30. Same P-COMP-1 fill then D8."
+}

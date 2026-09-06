@@ -1,0 +1,65 @@
+{
+  "id": "GPB-027",
+  "utc": "2026-09-06T15:29:08Z",
+  "elapsed_s": 15.713,
+  "n": 256,
+  "cases": [
+    {
+      "slug": "lidar",
+      "entry": "PASS",
+      "n_pit": 88,
+      "n_term": 64516,
+      "uniq_out": 234,
+      "longest": 157,
+      "sink_count": 88,
+      "ridgeline_frac": 0.12503875007750015,
+      "drainage_density_per_m": 0.1062992125984252,
+      "zmin": 217.98550415039062,
+      "zmax": 367.1937561035156,
+      "cell_m": 1.0,
+      "source": "USGS 3DEP 1 m LiDAR-derived DEM, Griffith Park / Los Angeles (CA_LosAngeles_B23 family; ImageServer window ~256 m x 256 m)",
+      "synthetic": false
+    },
+    {
+      "slug": "ifsar",
+      "entry": "PASS",
+      "n_pit": 270,
+      "n_term": 64516,
+      "uniq_out": 253,
+      "longest": 142,
+      "sink_count": 270,
+      "ridgeline_frac": 0.22493644987289974,
+      "drainage_density_per_m": 0.036297972595945194,
+      "zmin": 175.73985290527344,
+      "zmax": 364.7264099121094,
+      "cell_m": 5.0,
+      "source": "USGS 3DEP 5 m Alaska IFSAR DEM, Fairbanks-area window (AK_IFSAR_2010 family; ImageServer window ~1.28 km x 1.28 km)",
+      "synthetic": false
+    },
+    {
+      "slug": "copernicus",
+      "entry": "PASS",
+      "n_pit": 626,
+      "n_term": 64516,
+      "uniq_out": 4981,
+      "longest": 77,
+      "sink_count": 626,
+      "ridgeline_frac": 0.317998635997272,
+      "drainage_density_per_m": 0.006850795355481852,
+      "zmin": 244.0,
+      "zmax": 1026.6246337890625,
+      "cell_m": 28.446607970538697,
+      "source": "Copernicus DEM GLO-30 (DSM COG 10, tile N32E110)",
+      "synthetic": false
+    }
+  ],
+  "manim": {
+    "rendered": true,
+    "returncode": 0,
+    "figure": "experiments/phase2/figures/RealWorldDiversity.mp4",
+    "bytes": 148437
+  },
+  "caption": "Figure: RealWorldDiversity.mp4 \u2014 three public DEMs, same P-COMP-1 fill then D8. Panels report ridgeline fraction, drainage density, and sink count (paper \u00a77.7).",
+  "entry": "PASS",
+  "note": "task13: real products only. LiDAR/IFSAR = 3DEP ImageServer windows after staged S3 COG vsicurl failed (502/timeout). Copernicus = GLO-30 COG N32E110. No synthetic stand-ins."
+}

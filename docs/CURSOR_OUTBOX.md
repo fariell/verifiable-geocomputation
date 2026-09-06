@@ -742,6 +742,38 @@ task12 verdict = PASS
 
 ---
 
+## 真实 DEM 多样性(task13)
+
+---
+
+[task]      task13 / 真实 DEM 多样性
+[step]      本机拉取 3 套公开 DEM 窗口 + P-COMP-1 四闸 + manim 三面板
+[cmd]       & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_realworld.py ; manim -ql experiments/phase2/p_comp_realworld_manim.py RealWorldDiversity
+[rc]        0
+[key lines]
+  staged COG vsicurl: prd-tnm S3 CONNECT 502 / 直连 timeout
+  fallback: USGS 3DEP ImageServer exportImage (LiDAR+IFSAR) + Copernicus GLO-30 eu-central-1 COG
+  lidar  256² 1 m  Griffith Park  z=218–367  pits=88  term=64516/64516  longest=157  uniq_out=234  ridge=0.125  Dd=0.106/m
+  ifsar  256² 5 m  Fairbanks      z=176–365  pits=270 term=64516/64516  longest=142  uniq_out=253  ridge=0.225  Dd=0.0363/m
+  copernicus 256² 28.4 m N32E110  z=244–1027 pits=626 term=64516/64516  longest=77   uniq_out=4981 ridge=0.318  Dd=0.00685/m
+  GPB-027 ENTRY: PASS
+  manim -> experiments/phase2/figures/RealWorldDiversity.mp4 (148437 bytes) caption paper §7.7
+  synthetic=false ×3 (非 task9 stand-in)
+[gates]     lidar 4/4 PASS; ifsar 4/4 PASS; copernicus 4/4 PASS; manim 3-panel PASS; 3/3 real public products
+[verdict]   PASS
+[blocker]
+
+改了什么:
+- 新: `experiments/phase2/p_comp_realworld.py` (3DEP ImageServer 1 m/5 m 窗 + GLO-30 /vsicurl/; 复用 p_comp_1_multires 核)
+- 新: `experiments/phase2/p_comp_realworld_manim.py` (三面板 + §7.7 caption)
+- 新: `experiments/phase2/figures/RealWorldDiversity.mp4`
+- 新: `experiments/phase2/results/gpb027_realworld/{lidar,ifsar,copernicus}/metrics.json` (+ 汇总 metrics.json; results/ 在 .gitignore, force-add json)
+未改 PROP_CHAIN / this-week / MEMORY / PAPER_P2_*。未 git push。无新 .dfy/.lean。无 AutoDL(本机段)。
+
+task13 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

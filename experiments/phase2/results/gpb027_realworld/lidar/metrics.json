@@ -1,0 +1,83 @@
+{
+  "id": "GPB-027",
+  "slug": "lidar",
+  "name": "USGS-LiDAR 1m Griffith Park",
+  "utc": "2026-09-06T15:29:07Z",
+  "elapsed_s": 0.736,
+  "shape": [
+    256,
+    256
+  ],
+  "n_cells": 65536,
+  "n_pit": 88,
+  "n_pit_after": 0,
+  "n_term": 64516,
+  "uniq_out": 234,
+  "longest": 157,
+  "max_steps": 65536,
+  "min_drop": 0.000762939453125,
+  "sink_count": 88,
+  "ridgeline_frac": 0.12503875007750015,
+  "drainage_density_per_m": 0.1062992125984252,
+  "n_ridge": 8067,
+  "n_channel": 6858,
+  "meta": {
+    "source": "USGS 3DEP 1 m LiDAR-derived DEM, Griffith Park / Los Angeles (CA_LosAngeles_B23 family; ImageServer window ~256 m x 256 m)",
+    "fetch": "USGS 3DEP ImageServer exportImage (nearest)",
+    "url": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage?bbox=-118.2964,34.1348,-118.29362459177698,34.137107869845465&bboxSR=4326&size=256,256&imageSR=4326&format=tiff&pixelType=F32&interpolation=RSP_NearestNeighbor&f=image",
+    "staged_cog_tried": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/CA_LosAngeles_B23/TIFF/USGS_1M_11_x37y377_CA_LosAngeles_B23.tif",
+    "staged_cog_note": "prd-tnm S3 vsicurl: CONNECT 502 via proxy, timeout without proxy",
+    "cache": "E:\\AI for Math\u4e0eDEM\u7a7a\u95f4\u7f51\u683c\u4ea4\u53c9\u7814\u7a76\\verifiable-geocomputation\\data\\cache\\gpb027_lidar.tif",
+    "cell_m": 1.0,
+    "pixel_m_approx": [
+      1.0,
+      1.203
+    ],
+    "bbox_wgs84": [
+      -118.2964,
+      34.1348,
+      -118.29362459177698,
+      34.137107869845465
+    ],
+    "geotransform": [
+      -118.2964,
+      1.0841438371211876e-05,
+      0.0,
+      34.13734163903425,
+      0.0,
+      -1.0841438371211876e-05
+    ],
+    "shape": [
+      256,
+      256
+    ],
+    "zmin": 217.98550415039062,
+    "zmax": 367.1937561035156,
+    "synthetic": false
+  },
+  "panel_png": "E:\\AI for Math\u4e0eDEM\u7a7a\u95f4\u7f51\u683c\u4ea4\u53c9\u7814\u7a76\\verifiable-geocomputation\\experiments\\phase2\\results\\gpb027_realworld\\lidar\\panel.png",
+  "gates": [
+    {
+      "name": "NoPitImpliesDescent after W&L fill",
+      "pass": true,
+      "detail": "interior_checked=64516 pits=0 (boundary_localmin=11)"
+    },
+    {
+      "name": "flowing D8 steps strictly descend (drop>=0)",
+      "pass": true,
+      "detail": "n_flow=65302 min_drop=0.0008"
+    },
+    {
+      "name": "TerminatesUnderStrictDescent interior",
+      "pass": true,
+      "detail": "n=64516 term=64516 longest=157 uniq_out=234 bound=65536"
+    },
+    {
+      "name": "unfilled flat 4-ring does not terminate (P-006b contrast)",
+      "pass": true,
+      "detail": "ring_terminated=False"
+    }
+  ],
+  "entry": "PASS",
+  "caption": "Real-world DEM diversity (paper \u00a77.7): USGS 3DEP LiDAR 1 m / Alaska IFSAR 5 m / Copernicus GLO-30. Same P-COMP-1 fill then D8."
+}
