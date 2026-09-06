@@ -8,8 +8,8 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: PENDING
-UPDATED: 2026-09-06 18:20
+STATUS: DONE
+UPDATED: 2026-09-06 18:42
 TASK: **task7.5 → task8A**(串行,内含并行起草)
 
 ### A.0 主任务链(必跑)

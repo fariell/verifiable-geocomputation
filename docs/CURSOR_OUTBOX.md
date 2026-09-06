@@ -251,5 +251,199 @@ P-COMP-1 + T6 verdict = BLOCKED
 
 ---
 
+## P-COMP-1 + T6 云端复核(task7.5)
+
+云端当时没有 task7 文件(PCOMP_1.dfy / T6 均 No such file)。先 overlay 15 个已 commit 文件到 `/root/verigis/repo`,再跑 4 条复核命令。首次 dafny 因 T6 `forall x: nat` 不可编译失败,改 `ghost predicate` / `ghost function Bound` 后重跑。Lean `d8_preserves_descent_plane_west` 的 `simp` 已关目标,`norm_num` 报 no goals,删掉后 lake 过。
+
+---
+
+[task]      task7.5 / P-COMP-1 + T6 云端复核
+[step]      overlay(SFTP,非 git push)
+[cmd]       python ~/.autodl_run.py --upload-list ~/.autodl_pcomp1_upload.txt
+[rc]        0
+[key lines]
+[autodl_run] uploaded 15 files
+ls 初检: PCOMP_1.dfy / P006_terminate_under_strict.dfy 原先不在云端
+[gates]     overlay P-COMP-1 + T6 源码: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task7.5 / P-COMP-1 + T6 云端复核
+[step]      云端 dafny T6
+[cmd]       source /etc/network_turbo && source ~/.elan/env && export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH" && cd /root/verigis/repo && python3 scripts/autodl/jupyter_progress.py 'dafny verify formal/dafny/P006_terminate_under_strict.dfy'
+[rc]        0
+[key lines]
+🚀  START @ 18:30:48   elapsed 0:00:00
+   $  dafny verify formal/dafny/P006_terminate_under_strict.dfy
+   log → /root/.workbuddy/jobs/20260906_183048.log
+   18:30:50  +    0:01  Dafny program verifier finished with 12 verified, 0 errors   ✅ VERIFY:12 verified / 0 errors
+✅  END @ 18:30:50  rc=0  elapsed=0:02  log=/root/.workbuddy/jobs/20260906_183048.log
+[gates]     dafny verify P006_terminate_under_strict.dfy: PASS (12 verified / 0 errors)
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task7.5 / P-COMP-1 + T6 云端复核
+[step]      云端 dafny P-COMP-1
+[cmd]       source /etc/network_turbo && source ~/.elan/env && export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH" && cd /root/verigis/repo && python3 scripts/autodl/jupyter_progress.py 'dafny verify formal/dafny/PCOMP_1.dfy'
+[rc]        0
+[key lines]
+🚀  START @ 18:31:09   elapsed 0:00:00
+   $  dafny verify formal/dafny/PCOMP_1.dfy
+   log → /root/.workbuddy/jobs/20260906_183109.log
+   18:31:11  +    0:02  Dafny program verifier finished with 17 verified, 0 errors   ✅ VERIFY:17 verified / 0 errors
+✅  END @ 18:31:11  rc=0  elapsed=0:02  log=/root/.workbuddy/jobs/20260906_183109.log
+[gates]     dafny verify PCOMP_1.dfy: PASS (17 verified / 0 errors)
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task7.5 / P-COMP-1 + T6 云端复核
+[step]      云端 lean
+[cmd]       source /etc/network_turbo && source ~/.elan/env && export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH" && cd /root/verigis/repo/formal/lean4 && lake build
+[rc]        0
+[key lines]
+⣾ [2758/2760] Running VeriGIS.Composition.PitFillingThenWatershed (+ 0 more)
+⣷ [2759/2760] Running VeriGIS (+ 0 more)
+Build completed successfully.
+[gates]     lake build VeriGIS.P006Terminate + VeriGIS.Composition.PitFillingThenWatershed: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task7.5 / P-COMP-1 + T6 云端复核
+[step]      云端 numpy
+[cmd]       cd /root/verigis/repo && chmod +x experiments/phase2/run_p_comp_1.sh && bash experiments/phase2/run_p_comp_1.sh
+[rc]        0
+[key lines]
+  [PASS] NoPitImpliesDescent after W&L fill  (checked=25 pits=0)
+  [PASS] StrictDescent plane A=1 each step drop>=1  (n=9 min_drop=1.0000)
+  [PASS] TerminatesUnderStrictDescent 5x5 interior <=50  (n=9 term=9 longest=3 uniq_out=3)
+  [PASS] unfilled flat 4-ring does not terminate (P-006b contrast)  (ring_terminated=False)
+  [SKIP] wolfram (not a fail; AutoDL has no wolframscript)
+GPB-021 ENTRY: PASS
+[gates]     四条数值门控 PASS; wolfram SKIP(云端无 wolframscript,本机 task7 已过)
+[verdict]   PASS
+[blocker]
+
+P006_README「没证什么」第 6 条已从 VERIFY PENDING 改为云端 PASS(12/0 + lake OK)。
+
+task7.5 verdict = PASS
+
+---
+
+## P-COMP-3 反例素材(task8A)
+
+---
+
+[task]      task8A / P-COMP-3
+[step]      本地 numpy + wolfram
+[cmd]       & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_3.py
+[rc]        0
+[key lines]
+  ZT signedmax Hxx=1.41e-2  Horn |Dx|=0.2100
+  ZT signedmax Hxx=6.97e-2  Horn |Dx|=0.0700
+  wolframscript rc=0
+  wolfram foundDiff: True
+  wolfram nDiff: 251
+  wolfram alongStreamZero: True
+  [PASS] zt_curv_signedmax vs horn_d2_compress on grid-A  (ZT 1.41e-2, Horn 0.21)
+  [PASS] zt_curv_signedmax vs horn_d2_compress on grid-B  (ZT 6.97e-2, Horn 0.07)
+  [PASS] geometric_persistence:both-sides drop to 0 along stream direction  (zt_Hyy=0.000e+00 horn_Dy=0.000e+00)
+GPB-023 ENTRY: NEGATIVE-RESULT PASS
+[gates]     grid-A ZT≠Horn: PASS; grid-B ZT≠Horn: PASS; along-stream both 0: PASS; wolfram 4^4 nDiff=251: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task8A / P-COMP-3
+[step]      本地 manim
+[cmd]       $env:PCOMP3_MANIM='1'; & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_3.py
+[rc]        0
+[key lines]
+  manim rc=0
+  manim copied -> experiments/phase2/figures/ZTNotHornStencil.mp4
+GPB-023 ENTRY: NEGATIVE-RESULT PASS
+[gates]     manim ZTNotHornStencil: PASS; copied 166888 bytes
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task8A / P-COMP-3
+[step]      本地 dafny
+[cmd]       dafny verify formal/dafny/PCOMP_3.dfy
+[rc]        n/a
+[key lines]
+  本机 Windows PATH 无 dafny;改走 AutoDL
+[gates]     本机 dafny: SKIP
+[verdict]   BLOCKED
+[blocker]   本机无 dafny;云端闸见下一步
+
+---
+
+[task]      task8A / P-COMP-3
+[step]      云端 dafny
+[cmd]       source /etc/network_turbo && source ~/.elan/env && export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH" && cd /root/verigis/repo && python3 scripts/autodl/jupyter_progress.py 'dafny verify formal/dafny/PCOMP_3.dfy'
+[rc]        0
+[key lines]
+🚀  START @ 18:38:47   elapsed 0:00:00
+   $  dafny verify formal/dafny/PCOMP_3.dfy
+   log → /root/.workbuddy/jobs/20260906_183847.log
+   18:38:49  +    0:01  Dafny program verifier finished with 5 verified, 0 errors   ✅ VERIFY:5 verified / 0 errors
+✅  END @ 18:38:49  rc=0  elapsed=0:01  log=/root/.workbuddy/jobs/20260906_183847.log
+[gates]     dafny verify PCOMP_3.dfy: PASS (5 verified / 0 errors)
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task8A / P-COMP-3
+[step]      云端 lean
+[cmd]       source /etc/network_turbo && source ~/.elan/env && export PATH="/usr/local/bin:/opt/dafny:$HOME/.elan/bin:$PATH" && cd /root/verigis/repo/formal/lean4 && lake build
+[rc]        0
+[key lines]
+⣾ [2759/2761] Running VeriGIS.Composition.ZTNotImpliesHorn (+ 0 more)
+⣷ [2760/2761] Running VeriGIS (+ 0 more)
+Build completed successfully.
+[gates]     lake build VeriGIS.Composition.ZTNotImpliesHorn: PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+## 改了什么(给洛书沉淀)
+
+task7.5 云端修补(本机无 dafny/lake,复核才暴露):
+- `P006_terminate_under_strict.dfy` `StrictDescent`/`Bound` → ghost(unbounded `forall x: nat` 不可编译)
+- `PitFillingThenWatershed.lean` `d8_preserves_descent_plane_west` 删掉多余 `norm_num`(simp 已关目标)
+- `P006_README.md` 第 6 条 VERIFY PENDING → 云端 PASS 12/0
+
+task8A 新文件:
+- `experiments/phase2/p_comp_3.py` — import P-003 `numeric_zt` / P-004 `horn_dzdx`;grid-A/B + stream
+- `experiments/phase2/p_comp_3.wl` — 4^4 穷举,nDiff=251;stream Hyy=Horn Dy=0
+- `experiments/phase2/p_comp_3_manim.py` + `figures/ZTNotHornStencil.mp4`
+- `experiments/phase2/run_p_comp_3.sh` — `GPB-023 ENTRY: NEGATIVE-RESULT PASS`
+- `experiments/phase2/p_comp_3_README.md` — 「没证什么」开篇
+- `formal/dafny/PCOMP_3.dfy` — include P-003+P-004;`Witness`/`ztNotHorn`/`negResult`(不 include P-001:文件级 `Main` 冲突)
+- `formal/lean4/VeriGIS/Composition/ZTNotImpliesHorn.lean` — `plane_hessian_zero` + `quadratic_exact_dx`;`noncomputable section`
+- `formal/dafny/PCOMP_3_README.md` — 「它不是 bug,是 feature」
+
+改文件:
+- `formal/lean4/VeriGIS.lean` 加 `import VeriGIS.Composition.ZTNotImpliesHorn`
+
+未改:`docs/phase2/PROP_CHAIN.md` / `this-week.md` / `MEMORY.md` / 仓根 README。未复制 P-003/P-004 核。未 git push。凭据未下地。
+
+task7.5 verdict = PASS
+task8A verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。

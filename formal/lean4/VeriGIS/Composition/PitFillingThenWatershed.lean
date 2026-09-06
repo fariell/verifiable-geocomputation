@@ -40,7 +40,6 @@ theorem fill_strip_west_le (left y : ℤ) :
 theorem d8_preserves_descent_plane_west :
     nbr Dir.W (planeWin 1 0 0 1) < (planeWin 1 0 0 1).e := by
   simp [nbr, planeWin]
-  norm_num
 
 theorem d8_plane_west_is_west :
     d8 (planeWin 1 0 0 1) = Flow.to Dir.W :=

@@ -16,13 +16,13 @@ module TerminateUnderStrict {
 
   import W = Watershed
 
-  predicate StrictDescent(succ: nat -> nat)
+  ghost predicate StrictDescent(succ: nat -> nat)
   {
     forall x: nat :: succ(x) <= x
   }
 
   // 到达不动点的步数上界。succ(c)>=c 在 StrictDescent 下即卡住。
-  function Bound(succ: nat -> nat, c: nat): nat
+  ghost function Bound(succ: nat -> nat, c: nat): nat
     requires StrictDescent(succ)
     decreases c
   {

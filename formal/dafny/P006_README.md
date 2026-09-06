@@ -34,10 +34,12 @@ P-005 的 `FlowDescent` 保证**一旦选出方向,邻格严格低于中心**。
 - **P-006b 是科学资产。** 未填洼、又允许「等高也可走」的 naive 路由时,flat 上可以转圈;
   形式化里用 4-环后继作 witness。P-005 的 D8 要求 `drop>0`,它自己不会在真平坦上选方向
   (全 `NoFlow`),环来自**另一条**平坦路由,用来钉住「无条件终止」为假。
-- **第 6 条 `TerminatesUnderStrictDescent` = 已起草,形式化 VERIFY PENDING。** 高程嵌进
-  `nat` 良基关系(`decreases c` / Lean `Nat.lt_wfRel`)。见 `P006_terminate_under_strict.dfy`
-  与 `VeriGIS.P006Terminate`;P-COMP-1 §2.4 (iii) 引用 `Bound`。本机无 dafny/lake,云端
-  `verify_all.sh` 闸已加。坐标后继(如 `ChainSucc`)不必下降,那种轨道仍走鸽笼。
+- **第 6 条 `TerminatesUnderStrictDescent` = 云端 PASS(2026-09-06 18:30)。**
+  `dafny verify P006_terminate_under_strict.dfy` → 12 verified / 0 errors;
+  `lake build` → `VeriGIS.P006Terminate` + `VeriGIS.Composition.PitFillingThenWatershed` OK。
+  高程嵌进 `nat` 良基(`ghost predicate` + `decreases c` / Lean `Nat.lt_wfRel`)。
+  见 `P006_terminate_under_strict.dfy` 与 `VeriGIS.P006Terminate`;P-COMP-1 §2.4 (iii)
+  引用 `Bound`。坐标后继(如 `ChainSucc`)不必下降,那种轨道仍走鸽笼。
 - 一般符号 DEM、任意大小格网、多出口竞争的算法实现(优先队列填洼等)都不在范围内。
 
 ## 跑
