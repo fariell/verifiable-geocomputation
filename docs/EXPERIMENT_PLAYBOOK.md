@@ -226,7 +226,7 @@ GPB-001/002/019 (P-001)、005/006/020 (P-002 + bis)、003 (P-003)、
      ':(exclude)CURSOR_HANDOFF.md' \
      ':(exclude).cursorrules' \
      ':(exclude)docs/EXPERIMENT_PLAYBOOK.md' \
-     | grep -cE '<your-autoDL-password>|connect\.bjb2\.seetacloud\.com|<your-autoDL-port>'
+     | grep -cE '<your-autoDL-password>|<your-autoDL-host>|<your-autoDL-port>'
    ```
    返回 0 才能 commit。
    (真值只在仓外的 `autoDL登录信息.txt`,`.gitignore` 已拦)

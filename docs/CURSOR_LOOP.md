@@ -12,26 +12,31 @@ _2026-09-06 16:2x · PI 拍板的新分工_
 
 **一句话**:Cursor 动手,洛书动脑 + 管仓库。
 
+> **2026-09-06 16:3x 起:洛书与 Cursor 直连,去掉人工中转。** 洛书把指令写进
+> `docs/CURSOR_INBOX.md`(STATUS=PENDING),Cursor 读它执行、把结果写回
+> `docs/CURSOR_OUTBOX.md` 并改 INBOX 为 DONE;洛书直接读 OUTBOX 判定。
+> 任何人都不复制粘贴。详见 `.cursorrules` 的 `[mailbox]` 规则。
+
 ## 二、一个 task 的标准循环
 
 ```
- ① 洛书发指令(docs/TASK<n>_BRIEF.md)
+ ① 洛书写 docs/CURSOR_INBOX.md(指令正文 + STATUS=PENDING)
         ↓
- ② Cursor 在本机实现 + 本地验证
+ ② Cursor 读 INBOX,在本机实现 + 本地验证
         ↓
- ③ Cursor 回传【原始输出,不摘要】
+ ③ Cursor 把结果写 docs/CURSOR_OUTBOX.md(§三 格式),并把 INBOX 改 DONE
         ↓
- ④ 洛书判定 ──FAIL──→ ⑤ 洛书回传「报错原文 + 相关代码 + 定位提示」
-        │                        ↓
-        │                  ⑥ Cursor 修 → 回到 ③
+ ④ 洛书读 OUTBOX 判定 ──FAIL──→ ⑤ 洛书回传「报错原文 + 相关代码 + 定位提示」
+        │                             ↓
+        │                       ⑥ Cursor 修 → 洛书把 INBOX 改为新指令(PENDING)→ 回到 ②
         │
       PASS
         ↓
  ⑦ 洛书 commit + push + 告知 overlay
         ↓
- ⑧ Cursor 在 AutoDL 跑云端复核 → 回传
+ ⑧ Cursor 在 AutoDL 跑云端复核 → 写 OUTBOX
         ↓
- ⑨ 洛书结算状态(把 VERIFY PENDING 改成 verified)
+ ⑨ 洛书读 OUTBOX 结算状态(把 VERIFY PENDING 改成 verified)
 ```
 
 **关键:本地先验证,再上 AutoDL。** 云端只做最终权威复核,不当调试器。

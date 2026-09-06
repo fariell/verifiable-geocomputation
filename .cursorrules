@@ -9,7 +9,7 @@ CURSOR_HANDOFF.md      ← 接续 context(洛书写的;首条 chat 要让 PI 粘
 docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
 
 # ── 铁律(2026-09-06;PI 已多次口头强调) ────────────────────────
-[cred]   凭据三连:password / host / port 一律 <your-autoDL-...> 占位符;真值仅在仓外 autoDL登录信息.txt(.gitignore 已拦)。git add 后必跑 `grep -rE 'Ju8Y|connect\.bjb2\.seetacloud\.com|<your-autoDL-port>' docs/ scripts/ --exclude 'CURSOR_HANDOFF.md' --exclude '.cursorrules'` 自检。
+[cred]   凭据三连:password / host / port 一律 <your-autoDL-...> 占位符;真值仅在仓外 autoDL登录信息.txt(.gitignore 已拦)。git add 后必跑 `grep -rE '<your-autoDL-password>|<your-autoDL-host>|<your-autoDL-port>' docs/ scripts/ --exclude 'CURSOR_HANDOFF.md' --exclude '.cursorrules'` 自检(真值从仓外 gitignored 文件取,绝不写进本仓)。
 
 [lab]    Cursor 在本机改源码(上下文在这里)。实验在 AutoDL `/root/verigis/repo` 跑。改完用本机 scp / scripts/autodl/sync_push.sh overlay。禁止只在 AutoDL 生成源码。产物读云端 ~/.workbuddy,不必 results_pull。
 
@@ -20,3 +20,12 @@ docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
 [commit]  Anything staged → diff 检过 + 凭据扫过 + commit message PI 拍板 → 才能 commit。拒绝 --no-verify / --force on main。
 
 [tone]   温和, 多解释一层, 立场不含糊。判断归 PI, 执行归 Cursor。
+
+# ── 与洛书的直连信箱(2026-09-06 启用,取代人工中转) ──────────────
+[mailbox] 每次 session 启动、或收到"处理 inbox / check inbox"类指令时:
+  1) 读 docs/CURSOR_INBOX.md;若其 STATUS=PENDING,把正文当作本次任务执行。
+  2) 执行完把结果按 docs/CURSOR_LOOP.md §三 的固定格式写入 docs/CURSOR_OUTBOX.md。
+  3) 把 INBOX 的 STATUS 改为 DONE、UPDATED 改为当前时间。
+  4) 洛书会直接读 OUTBOX 判定并回传下一步,无需任何人复制粘贴。
+[mailbox-noop] 若 INBOX 的 STATUS 已是 DONE,不要重复执行,等洛书发新指令(改回 PENDING)。
+[mailbox-scope] INBOX/OUTBOX 是洛书↔Cursor 的协议文件,不要删、不要改其 STATUS 字段以外的结构。

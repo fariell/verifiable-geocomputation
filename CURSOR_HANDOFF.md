@@ -85,14 +85,14 @@ cdde5a6  feat(formal): GeoProofBench P-002 — Wang & Liu 填洼算子的三条�
 **AutoDL SSH 密码、host、port 三件全部进占位符**:
 ```bash
 <your-autoDL-password>
-<your-autoDL-host>          # 实际是 root@<your-autoDL-host>(每次开实例会变)
-<your-autoDL-port>          # 实际是 <your-autoDL-port>(端口每次动态分配)
+<your-autoDL-host>          # 形如 root@connect.<region>.seetacloud.com(每次开实例会变)
+<your-autoDL-port>          # 形如 1xxxx(端口每次动态分配)
 ```
 真值仅存于**仓外的 `autoDL登录信息.txt`**(.gitignore 已拦)。
 **每次 `git add` 后,写 commit 前必跑**——注意:`--exclude` 必须排除本文档自身
 (里面写了"教学示例",否则会假阳性命中):
 ```bash
-grep -rE 'Ju8Y|connect\.bjb2\.seetacloud\.com|<your-autoDL-port>' \
+grep -rE '<your-autoDL-password>|<your-autoDL-host>|<your-autoDL-port>' \  # 真值从仓外 gitignored 文件取,绝不进仓
   docs/ scripts/ \
   --exclude 'CURSOR_HANDOFF.md' --exclude '.cursorrules' \
   2>/dev/null
