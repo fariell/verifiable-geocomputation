@@ -8,11 +8,13 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: DONE
-UPDATED: 2026-09-06 23:45
-TASK: **task10.5–task14 串行链 · 投稿版纸锁形态前的最后冲刺**
-       (10.5 P-COMP-2 全平面 → 11 P-COMP-4 重采样同伦 → 12 P-COMP-5 元一致
-        → 13 真实 DEM 多样性 → 14 v1.4 NUM 升级 §7.6)
+STATUS: DONE-LOCKED
+UPDATED: 2026-09-06 23:40
+TASK: **task10.5–task14 串行链(全 PASS,paper v1.5 = 形态锁)**
+LOCK: **v1.5 = FORM LOCK** (PI 23:40 拍板)
+      → FINAL-FORM push gate 第一触发器点亮;
+        第二触发器(D 投稿 / 接受 / 公开 任一)待 PI 操作,
+        任一出现 + 本锁 = push gate 解锁 1 次
 
 > **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
 > 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。
@@ -539,6 +541,70 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 
 ---
 
+### A.10 paper 形态锁协议(PI 23:40 拍 v1.5 = FORM LOCK)
+
+**锁生效**:2026-09-06 23:40 CST,PI 拍板「v1.5 = 形态锁」。
+
+**触发器矩阵(FINAL-FORM push gate)**:
+
+```
+                    ┌──────────────────────┐
+                    │  FIRST  (已点亮 23:40)│
+                    │  paper v_final 形态锁 │
+                    └──────────┬───────────┘
+                               │ AND (同时)
+                    ┌──────────▼───────────┐
+                    │  SECOND (待 PI 操作) │
+                    │  SciDA 投稿 / 接受   │
+                    │  / 公开 任一          │
+                    └──────────┬───────────┘
+                               │ 两触发器都点
+                    ┌──────────▼───────────┐
+                    │  push gate 解锁 1 次 │
+                    │  (一次性,PI 拍板 push) │
+                    └──────────────────────┘
+```
+
+**锁定后铁律**(forms lock protocol,违反则 red flag):
+
+1. **paper v1.5 内容不再改**:
+   - `papers/P2/manuscript.md` / `papers/P2-geoproofbench/manuscript.md` 形态封顶
+   - 引用 / 段标题 / § 号 / 表格 / 图表 caption / 末行版本签名不动
+   - 唯一允许:错别字 / 排版微调 ≤ 5 字 / 段(由 task15 proofread R3 处理)
+   - 大动 → unlock 流程:PI 显式撤销形态锁 → INBOX §A.10 LOCK-NOTE 反拍
+   
+2. **不放心的数字不加**(Honesty Protocol):
+   - 任何数字必须能溯源到 `experiments/*/results/gpb*/metrics.json`
+   - synthetic 数据(如 §7.6.1 SRTM/LiDAR synthetic)必须保留 caveat
+   - FAIL-TOLERANCE 反例(如 §7.6.3 4/12)必须保留,不可洗白
+
+3. **段 B Zenodo DOI**:
+   - 现为 BLOCKED(PI 未上传 zip 拿 DOI)
+   - task15 即可解锁:PI 上传 → Cursor 改 §A.5 + cover letter §5 挂真 DOI
+   - DOI 是 **不在** 形态锁内(可挂;格式 + place 不变即合规)
+
+4. **第二触发器触发方式**:
+   - 投稿:PI 把 manuscript 投到 SciDA editorial system 后回报 INBOX
+   - 接受:期刊发 acceptance letter,PI 拍板"接受"
+   - 公开:PI 拍"公开"(repo / arXiv / Zenodo 任一公开发)
+   - 任一发生 → 秘书监控 push gate 即可解锁 → 一次性 `git push origin main`
+
+5. **unlock 流程**(若必须改 paper):
+   - PI 拍 "unlock v1.5 → v1.6" 或指明改什么
+   - 改 → 末行签 v1.6 → 重新 Lock → push 重新触发矩阵
+
+**Cursor 接到本 INBOX 当前 STATUS=DONE-LOCKED**:
+- [mailbox-noop] 规则触发 → 不要重复执行 task10.5..14
+- 等 INBOX §A status 改回 PENDING 由 PI 触发新任务(典型:task15 DOI 补挂 / task16 proofread R3)
+- 错进 OUTBOX 不动
+
+**Workbuddy 监控钩子**:
+- 每 round:grep `STATUS: DONE-LOCKED` 在 INBOX §A
+- 同步检查 LOCK:行存在;若消失 → red flag,提醒 PI
+- push gate + 形态锁双条件 = 解锁 1 次
+
+---
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
@@ -567,7 +633,7 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 - **task11(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = P-COMP-4 重采样同伦 resolution×rotation 12 cells
 - **task12(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = P-COMP-5 元一致 Python↔Lean↔Dafny hash 一致
 - **task13(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = 真实 DEM 多样性 USGS-LiDAR + IFSAR + Copernicus 3/3
-- **task14(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = v1.5 NUM 升级:task9/10.5/11/12/13 写 paper §7.6
+- **task14(2026-09-06 20:39-23:45,STATUS=LOCKED)** = v1.5 NUM 升级:task9/10.5/11/12/13 写 paper §7.6;PI 23:40 拍 v1.5 = FORM LOCK 触发第一触发器
 
 ### B.3 触发器(`.cursorrules` `[mailbox]` 规则契约)
 - Cursor session 启动时自动 `Read` 本文件

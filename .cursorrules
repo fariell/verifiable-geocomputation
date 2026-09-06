@@ -38,3 +38,15 @@ docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
   4) 洛书会直接读 OUTBOX 判定并回传下一步,无需任何人复制粘贴。
 [mailbox-noop] 若 INBOX 的 STATUS 已是 DONE,不要重复执行,等洛书发新指令(改回 PENDING)。
 [mailbox-scope] INBOX/OUTBOX 是洛书↔Cursor 的协议文件,不要删、不要改其 STATUS 字段以外的结构。
+
+[form-lock]   # 2026-09-06 23:40 CST · PI 拍 paper v1.5 = FORM LOCK
+  - paper 形态锁:**v1.5 = FORM LOCK**。papers/P2/manuscript.md + papers/P2-geoproofbench/manuscript.md 内容封顶。
+  - **不要改 paper**(除非 PI 显式 unlock 重签 v1.6)。
+  - 允许:Cursor 自纠错别字 / 排版 ≤ 5 字 / 段。
+  - 不允许:新增 / 修改 数字 / 引用 / 段标题 / § 号 / 表格行 / 图题 / 末行版本签。
+  - 段 B Zenodo DOI(task15 段)除外 — DOI 挂入不算改 paper,格式 place 不动即合规。
+  - INBOX §A 当前 STATUS=DONE-LOCKED → 不要执行 task10.5..14;等 PI 触发新任务(task15 / task16 等)。
+  - 触发矩阵(详情见 INBOX §A.10):
+    第一触发器 = FORM LOCK(已点亮 23:40)
+    第二触发器 = SciDA 投稿 / 期刊接受 / 公开 任一(待 PI 操作)
+    两触发器 AND → push gate 解锁 1 次(一次性)
