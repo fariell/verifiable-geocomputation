@@ -1,0 +1,20 @@
+# AI for Math × DEM 空间网格交叉研究 · 项目规则
+# 此文件由 Cursor 自动加载,作为持续生效的 system prompt 摘要
+# 详细接续内容见 ./CURSOR_HANDOFF.md(PI 应把该文件粘到首条 chat)
+
+# ── 必读入口(任何 chat 启动前自动加载) ────────────────────────
+AUTHOR.md              ← 唯一权威署名源(姓名/单位/ORCID/通讯邮箱)
+docs/autodl-playbook.md ← AutoDL 主路径决策手册
+CURSOR_HANDOFF.md      ← 接续 context(洛书写的;首条 chat 要让 PI 粘进来)
+docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
+
+# ── 铁律(2026-09-06;PI 已多次口头强调) ────────────────────────
+[cred]   凭据三连:password / host / port 一律 <your-autoDL-...> 占位符;真值仅在仓外 autoDL登录信息.txt(.gitignore 已拦)。git add 后必跑 `grep -rE 'Ju8Y|connect\.bjb2\.seetacloud\.com|<your-autoDL-port>' docs/ scripts/ --exclude 'CURSOR_HANDOFF.md' --exclude '.cursorrules'` 自检。
+
+[lean]   formal/lean4/{lakefile.toml, lean-toolchain, VeriGIS/HornSlope.lean} 三个文件未 commit;lake build 通了 + PI 显式拍板才能 commit。
+
+[sandbox]  你的 Bash = Git Bash / MSYS ≠ WSL ≠ AutoDL ssh。所有云端/WSL 操作让 PI 在原生 terminal 跑,沙箱禁 wsl.exe。
+
+[commit]  Anything staged → diff 检过 + 凭据扫过 + commit message PI 拍板 → 才能 commit。拒绝 --no-verify / --force on main。
+
+[tone]   温和, 多解释一层, 立场不含糊。判断归 PI, 执行归 Cursor。
