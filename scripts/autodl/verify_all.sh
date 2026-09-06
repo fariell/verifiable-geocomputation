@@ -113,6 +113,12 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-COMP-1 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
+    if [ -f "$REPO/formal/dafny/PCOMP_2.dfy" ]; then
+        echo "[dafny] P-COMP-2 (full-plane closure)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/PCOMP_2.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-COMP-2 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
 else
     echo "[dafny] ⏭  未装,跳过" | tee -a "$SUMMARY"
 fi
@@ -180,7 +186,7 @@ else
     echo "[gpb015] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
 fi
 
-echo "==[9/9] GPB-021 / P-COMP-1 =="
+echo "==[9/10] GPB-021 / P-COMP-1 =="
 if [ -f "$REPO/experiments/phase2/run_p_comp_1.sh" ]; then
     echo "[gpb021] 跑实验中" | tee -a "$SUMMARY"
     bash "$REPO/experiments/phase2/run_p_comp_1.sh" 2>&1 \
@@ -188,6 +194,16 @@ if [ -f "$REPO/experiments/phase2/run_p_comp_1.sh" ]; then
         echo "  ⚠️ GPB-021 失败" | tee -a "$SUMMARY"
 else
     echo "[gpb021] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
+fi
+
+echo "==[10/10] GPB-022 / P-COMP-2 =="
+if [ -f "$REPO/experiments/phase2/run_p_comp_2.sh" ]; then
+    echo "[gpb022] 跑实验中" | tee -a "$SUMMARY"
+    bash "$REPO/experiments/phase2/run_p_comp_2.sh" 2>&1 \
+        | tail -20 | tee -a "$LOG" "$SUMMARY" || \
+        echo "  ⚠️ GPB-022 失败" | tee -a "$SUMMARY"
+else
+    echo "[gpb022] ⏭  实验脚本未就位,跳过" | tee -a "$SUMMARY"
 fi
 
 echo "============================================================"

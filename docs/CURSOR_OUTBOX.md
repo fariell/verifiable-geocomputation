@@ -580,6 +580,63 @@ task10 verdict = BLOCKED (段 A PASS / 段 B DOI 未铸造 / 段 C PASS)
 
 ---
 
+## P-COMP-2 全平面闭包(task10.5)
+
+---
+
+[task]      task10.5 / P-COMP-2 全平面闭包
+[step]      本地 numpy 256² PLANE + ROW ε∈{1e-6,1e-4} + wolfram
+[cmd]       & "C:\ProgramData\anaconda3\python.exe" experiments/phase2/p_comp_2.py
+[rc]        0
+[key lines]
+  PLANE 256²  fill pits=0  dir=NoFlow n=64516 uniq=1  term=65536/65536 longest=0 uniq_out=65536 visited=65536
+  ROW_1e-6     fill pits=0  dir=N n=64516 uniq=1  term=65536/65536 longest=255 uniq_out=256 visited=8421376  min_drop=1.00e-6
+  ROW_1e-4     fill pits=0  dir=N n=64516 uniq=1  term=65536/65536 longest=255 uniq_out=256 visited=8421376  min_drop=1.00e-4
+  wolframscript rc=0
+  wolfram pigeon=True descentAllFix=True ringFixed=False chain256=True plane16x16=True
+  visited_cells=16908288
+  GPB-022 ENTRY: PASS
+  metrics -> experiments/phase2/results/gpb024_pcomp2/gpb024_metrics.json
+[gates]     PLANE 4/4 PASS; ROW_1e-6 4/4 PASS; ROW_1e-4 4/4 PASS; wolfram parsed=true pigeon+descent+chain256+16x16 PASS
+[verdict]   PASS
+[blocker]
+
+---
+
+[task]      task10.5 / P-COMP-2 全平面闭包
+[step]      overlay(SFTP,非 git push) + 云端 dafny PCOMP_2/PCOMP_1/T6 + lake
+[cmd]       python %USERPROFILE%\.autodl_run.py --upload-list %USERPROFILE%\.autodl_pcomp2_upload.txt ; python %USERPROFILE%\.autodl_run.py --cmd-file %USERPROFILE%\.autodl_cmd_task105_verify.sh --timeout 420
+[rc]        0
+[key lines]
+  [autodl_run] uploaded 8 files (then 3 more after BoundEq)
+🚀  START @ 20:52:09   $  dafny verify formal/dafny/PCOMP_2.dfy
+   20:52:11  Dafny program verifier finished with 25 verified, 0 errors
+🚀  START @ 20:50:49   $  dafny verify formal/dafny/PCOMP_1.dfy
+   20:50:51  Dafny program verifier finished with 17 verified, 0 errors
+🚀  START @ 20:50:51   $  dafny verify formal/dafny/P006_terminate_under_strict.dfy
+   20:50:53  Dafny program verifier finished with 12 verified, 0 errors
+   lake: [2760/2762] Running VeriGIS.Composition.PitFillingThenWatershedPlane
+         [2761/2762] Running VeriGIS
+         Build completed successfully.
+   log=/root/.workbuddy/jobs/20260906_205209.log + 20260906_205049.log + 20260906_205051.log
+[gates]     dafny PCOMP_2: PASS 25/0 (inbox 预期 24/0,实得 25); dafny PCOMP_1: PASS 17/0; dafny T6: PASS 12/0; lake: PASS 2762 modules 0 errors
+[verdict]   PASS
+[blocker]
+
+改了什么:
+- 新: `formal/dafny/PCOMP_2.dfy` (include P-002-bis + T6; 0 起伏 NoFlow / PlaneConstant / FillFixpoint / HeightSucc 256-cell / BasinUnique; 不复制核)
+- 新: `formal/dafny/PCOMP_2_README.md`
+- 新: `formal/lean4/VeriGIS/Composition/PitFillingThenWatershedPlane.lean` (独立重述)
+- 新: `experiments/phase2/{p_comp_2.py,p_comp_2.wl,run_p_comp_2.sh}`
+- 改: `formal/lean4/VeriGIS.lean` 加 `import VeriGIS.Composition.PitFillingThenWatershedPlane`
+- 改: `scripts/autodl/verify_all.sh` 加 PCOMP_2 dafny 闸 + `run_p_comp_2.sh`
+未改 `docs/phase2/PROP_CHAIN.md` / `this-week.md` / `MEMORY.md` / `PAPER_P2_*`。未 git push。凭据未下地。
+数值 256² 不进形式化(定理对任意 c:nat)。inbox 占位 e=4.5M 是低估:两套行扰动 visited=8.42M×2 + 平面 65k = 16.9M。
+
+task10.5 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 
