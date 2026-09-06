@@ -71,6 +71,12 @@ if command -v dafny >/dev/null 2>&1; then
             | tail -10 | tee -a "$LOG" "$SUMMARY" || \
             echo "  ⚠️ P-002 verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
     fi
+    if [ -f "$REPO/formal/dafny/P002_pit_filling_2d.dfy" ]; then
+        echo "[dafny] P-002-bis (2D RaiseNbr)" | tee -a "$SUMMARY"
+        timeout 300 dafny verify "$REPO/formal/dafny/P002_pit_filling_2d.dfy" 2>&1 \
+            | tail -10 | tee -a "$LOG" "$SUMMARY" || \
+            echo "  ⚠️ P-002-bis verify 超时或失败,详见 $LOG" | tee -a "$SUMMARY"
+    fi
     if [ -f "$REPO/formal/dafny/P003_curvature.dfy" ]; then
         echo "[dafny] P-003 (ZT Hessian)" | tee -a "$SUMMARY"
         timeout 300 dafny verify "$REPO/formal/dafny/P003_curvature.dfy" 2>&1 \

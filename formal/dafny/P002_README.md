@@ -60,8 +60,7 @@ ensures NonDecreasing(a) || NonDecreasing(Raise(a, i))   // 假
 
 ## 没有做的(留给 P-002-bis / P-003 / P-005)
 
-- **2D 终止性**:严格证明 W&L 2D 算法在 `O(n log n)` 步内达到不动点。
-  需要 Dijkstra-style 不变量——单独文件 `P002_pit_filling_2d.dfy`。
+- **2D 局部堆不变量**:`P002_pit_filling_2d.dfy`(GPB-024/025/026)。AutoDL 12:54 · 19 verified / 0 errors。不证 Dijkstra 弹出即终态。
 - **曲率**:Evans / Zevenbergen–Thorne,对应种子集 GPB-005/006/007/020 → **P-003**。
 - **浮点精度边界**:实现用 float,本文件用 int。float32 下 Raise
   的舍入误差会不会破坏 SpillFixpoint?需要加 `requires abs ≤ ε`

@@ -2,6 +2,7 @@
 
 > 对偶:`../lean4/VeriGIS/Curvature.lean`
 > 实验:`../../experiments/phase1/p003_curvature.py`(numpy 门控;可选 `wolframscript` + Manim)
+> 状态:AutoDL 2026-09-06 12:43 · Dafny **52 verified / 0 errors**;Lean 11:45 `Built VeriGIS.Curvature`;GPB-003 ENTRY PASS
 
 ## 证了什么
 

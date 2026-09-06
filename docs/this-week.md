@@ -1,12 +1,13 @@
 # 本周执行清单 · This Week (2026-09-06)
 
 > **源码在本机 Cursor,实验在 AutoDL。** 改完 overlay。禁止只在 AutoDL 生成源码。
-> 云端工作目录:`/root/verigis/repo`。日志:`~/.workbuddy/`。
+> 云端工作目录:`/root/verigis/repo` → `/root/autodl-tmp/verigis/repo`(软链)。日志:`~/.workbuddy/`。
 
 W1:Dafny P-001 19 / P-002 24 verified 0 errors;Lean P-001 lake build success。
 W2 Lean P-002:10:29 `Built VeriGIS.PitFilling`。
 W3 GPB-019:10:41 AutoDL **ENTRY: PASS**(rc=0)。
-P-003 实验 AutoDL 11:36 **GPB-003 ENTRY: PASS**;Lean 11:45 `Built VeriGIS.Curvature`。Dafny 从 18 errors 收到 1(`DivTwice` 外层 `/w`),末修已纳入本提交。
+P-003 闭环:Dafny 12:43 **52 verified / 0 errors**;Lean 11:45;GPB-003 ENTRY PASS。
+P-002-bis 闭环:Dafny 12:54 **19 verified / 0 errors**;Lean 12:53 `Built VeriGIS.PitFilling2D`。
 
 ---
 
@@ -52,9 +53,10 @@ python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 
 ## 等你拍板 / 下一步
 
-1. **防销毁** — 是否把仓迁到 `/root/autodl-tmp/verigis/repo`。
-2. **Dafny P-003** — overlay 后若还未跑 DivTwice 末修,补一次 `dafny verify formal/dafny/P003_curvature.dfy`。
+P-003 与 P-002-bis 均已 0 errors。说 **commit** 即可(含 P-003 52/0 与 P-002-bis 19/0)。
+
+下一刀未开:路线图上是 P-004(`w→0` 相容性,需实分析)或 P-005(D8)。不证完整 2D W&L 堆终止。
 
 ---
 
-_v0.9 · 2026-09-06 · P-003 入库(Lean + GPB-003 PASS)_
+_v1.2 · 2026-09-06 · P-002-bis Dafny 19/0 + Lean build_

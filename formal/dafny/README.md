@@ -12,7 +12,8 @@
 |---|---|---|---|---|
 | `P001_horn_slope.dfy` | GPB-001 / GPB-002 / GPB-019(一阶部分) | Horn 3×3 坡度 | 7 | ✅ 本机 WSL 19 verified / 0 errors |
 | `P002_pit_filling.dfy` | GPB-021 / GPB-022 / GPB-023 | Wang & Liu 填洼(1D 特化) | 见 `P002_README.md` | ✅ AutoDL 2026-09-06 · 24 verified / 0 errors |
-| `P003_curvature.dfy` | GPB-007 / GPB-005 核 / Phase1 模板诊断 | ZT 3×3 Hessian | 见 `P003_README.md` | Lean `lake build` 11:45 success; GPB-003 ENTRY PASS; Dafny 末修 DivTwice |
+| `P003_curvature.dfy` | GPB-007 / GPB-005 核 / Phase1 模板诊断 | ZT 3×3 Hessian | 见 `P003_README.md` | ✅ AutoDL 12:43 · 52 verified / 0 errors;Lean 11:45 |
+| `P002_pit_filling_2d.dfy` | GPB-024 / 025 / 026 | W&L 2D 邻域抬升 | 见 `P002_2d_README.md` | ✅ AutoDL 12:54 · 19 verified / 0 errors;Lean 12:53 |
 
 ### P-001 · Horn 坡度算子的基本性质
 
@@ -89,11 +90,11 @@ slope >= 0  ⟺  slopeSq >= 0   (slope 定义为 sqrt 时恒非负)
 
 - [x] P-001 Horn 坡度 — 已起草;本机 WSL 19 verified / 0 errors;云端作一致性锚
 - [x] P-002 Wang & Liu 填洼 1D 特化 — Dafny 24 verified / 0 errors;Lean `VeriGIS.PitFilling` lake build 2026-09-06 10:29
-- [x] P-003 ZT Hessian — Lean `Built VeriGIS.Curvature` 11:45; GPB-003 ENTRY PASS 11:36; Dafny 二次 `/w` + DivTwice
-- [ ] P-002-bis 填洼 2D + 堆不变量
+- [x] P-003 ZT Hessian — Dafny 52 verified / 0 errors(12:43);Lean `Built VeriGIS.Curvature`;GPB-003 PASS
+- [x] P-002-bis 2D 邻域抬升(GPB-024/025/026)— Dafny 19 verified / 0 errors(12:54);Lean `Built VeriGIS.PitFilling2D` 12:53
 - [ ] P-004 坡度算子在 `w → 0` 下的相容性(GPB-019 完整版,需实分析)
 - [ ] P-005 D8 流向的确定性与闭合性(GPB-010/011)
 
 ---
 
-_最后更新:2026-09-06 · P-003 曲率开战;GPB-020 不当第一引理_
+_最后更新:2026-09-06 · P-002-bis Dafny 19/0;Lean 12:53_

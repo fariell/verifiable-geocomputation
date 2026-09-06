@@ -27,7 +27,7 @@ python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 
 产物读 `~/.workbuddy/summary_*.txt` 和 `~/.workbuddy/jobs/*.log`。
 
-**销毁实例会丢系统盘。** 长活数据放到 `/root/autodl-tmp/`。仓仍在 `~/verigis/repo`。
+**销毁实例会丢系统盘。** 长活数据放到 `/root/autodl-tmp/`。仓在 `/root/autodl-tmp/verigis/repo`,`/root/verigis/repo` 为软链。
 
 ---
 
@@ -215,7 +215,8 @@ WSL 不再试图装"完整工具链"——**已装好的不删**(dafny 还在),
 | 4 | Lean P-001 `lake build` | autoDL | 1 min | ✅ 2026-09-06 10:07 success |
 | 5 | Lean P-002 `PitFilling.lean` | autoDL | 增量 | ✅ 2026-09-06 10:29 lake build success |
 | 6 | GPB-019 入口 | autoDL | <1 s | ✅ 2026-09-06 10:41 ENTRY PASS |
-| 7 | P-003 曲率 | 本机写 → autoDL 验 | — | Lean ✅ 11:45; GPB-003 PASS; Dafny DivTwice 末修 |
+| 7 | P-003 曲率 | 本机写 → autoDL 验 | — | ✅ Dafny 12:43 · 52 verified / 0 errors; Lean 11:45; GPB-003 PASS |
+| 8 | P-002-bis 2D 邻域抬升 | 本机写 → autoDL 验 | — | ✅ Dafny 12:54 · 19 verified / 0 errors; Lean 12:53 `Built VeriGIS.PitFilling2D` |
 
 ---
 
