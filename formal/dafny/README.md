@@ -87,7 +87,7 @@ slope >= 0  ⟺  slopeSq >= 0   (slope 定义为 sqrt 时恒非负)
 ## 路线图
 
 - [x] P-001 Horn 坡度 — 已起草;本机 WSL 19 verified / 0 errors;云端作一致性锚
-- [x] P-002 Wang & Liu 填洼 1D 特化 — GPB-021/022/023,AutoDL 24 verified / 0 errors
+- [x] P-002 Wang & Liu 填洼 1D 特化 — Dafny 24 verified / 0 errors;Lean `VeriGIS.PitFilling` lake build 2026-09-06 10:29
 - [ ] P-002-bis 填洼 2D + 堆不变量
 - [ ] P-003 曲率算子(Evans / Zevenbergen–Thorne)— 对应 GPB-005/006/007/020,
       这是 Phase 1 `corr = 0.157` 的正面战场

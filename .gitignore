@@ -56,6 +56,9 @@ htmlcov/
 *.local
 data/raw/
 data/cache/
+experiments/phase1/results/gpb019/
+experiments/phase1/results/gpb003/
+media/
 
 # OS
 Thumbs.db

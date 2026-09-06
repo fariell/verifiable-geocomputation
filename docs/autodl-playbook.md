@@ -1,36 +1,43 @@
 # AutoDL 作战手册 · Verifiable Geocomputation 云端工作流
 
-> **决策(2026-09-06 10:09,PI)**:W1 闭环已在云端打上之后,**实验室 = AutoDL**。
-> 不再本机跑实验,不再 `sync_push` / `results_pull` 来回 overlay。
-> 工作目录:`/root/verigis/repo`。日志:`~/.workbuddy/`。
+> **决策(2026-09-06,PI)**:源码在本机 Cursor 写(上下文),实验在 AutoDL 跑。
+> 改完用本机 `sync_push.sh` / `scp` overlay 到 `/root/verigis/repo`。
+> **禁止只在 AutoDL 生成源码**——Cursor 挂不上上下文,会和本机分叉。
+> 结果留在 `~/.workbuddy/`,不必 results_pull。
 > 硬件与预算见 [`autodl-rental.md`](autodl-rental.md)。
 
 ## 〇、一句话
 
-日常只在 AutoDL bash(或 JupyterLab **Terminal**,不要把 Python 贴进 bash):
+本机改完 overlay:
+
+```powershell
+cd "E:\AI for Math与DEM空间网格交叉研究\verifiable-geocomputation"
+bash scripts/autodl/sync_push.sh
+```
+
+然后 AutoDL 跑:
 
 ```bash
-source /etc/network_turbo          # GitHub 学术加速;elan/mathlib/release 都要
-source ~/.elan/env                 # lean / lake
-export PATH="/usr/local/bin:$PATH" # dafny
-
+source /etc/network_turbo
+source ~/.elan/env
+export PATH="/usr/local/bin:$PATH"
 cd /root/verigis/repo
 python3 scripts/autodl/jupyter_progress.py 'bash scripts/autodl/verify_all.sh'
 ```
 
-产物不要往本机拉。读 `~/.workbuddy/summary_*.txt` 和 `~/.workbuddy/jobs/*.log`。
+产物读 `~/.workbuddy/summary_*.txt` 和 `~/.workbuddy/jobs/*.log`。
 
-**销毁实例会丢系统盘。** 长活数据(mathlib 缓存、日后 DEM、本仓)放到 `/root/autodl-tmp/`。
-当前仓库仍在 `~/verigis/repo`;W2 起若要防销毁,把仓迁到数据盘(你点头后再搬)。
+**销毁实例会丢系统盘。** 长活数据放到 `/root/autodl-tmp/`。仓仍在 `~/verigis/repo`。
 
 ---
 
-## 一、本机 overlay 已停用
+## 一、本机 overlay(源码同步)
 
-`scripts/autodl/sync_push.sh` 与 `results_pull.sh` **冻结**,只留档。
-W1 曾用它们把本机修改 overlay 到云端;那条路结束了。
+`scripts/autodl/sync_push.sh` 把本机 `formal/`、`scripts/autodl/`、`experiments/phase1/*.py|*.sh` overlay 到云端。
+凭据走 `autodl.env`(gitignore)+ `~/.autodl_pwd`,不进仓库。
+单文件也可用本机 `scp -P <port> 本地文件 root@host:云端路径`。
 
-凭据仍不进仓库。AutoDL 上也不要存放 `autoDL登录信息.txt`。
+`results_pull.sh` 仍不作为日常:结果留云端,贴回 chat 即可。
 
 ---
 
@@ -201,17 +208,14 @@ WSL 不再试图装"完整工具链"——**已装好的不删**(dafny 还在),
 
 | # | 任务 | 跑在哪 | 预估时间 | 状态 |
 | --- | --- | --- | --- | --- |
-| 0 | `sync_push.sh` overlay | 已冻结 | — | ⏹ 2026-09-06 PI:不再本机同步 |
+| 0 | `sync_push.sh` overlay 本机源码 | 本机 → autoDL | 1 min | ✅ 日常入口(Cursor 改完就 overlay) |
 | 1 | 首次 `setup.sh` | autoDL | 10–20 min | ✅ 2026-09-06 09:59 · Lean 4.18 / Dafny 4.11 |
 | 2 | `lake build` 暖通 mathlib | autoDL | 30–60 min | ✅ mathlib 已暖;增量 2 秒过 |
 | 3 | Dafny P-001 + P-002 | autoDL | 2 min | ✅ 19 + 24 verified, 0 errors |
 | 4 | Lean P-001 `lake build` | autoDL | 1 min | ✅ 2026-09-06 10:07 success |
-| 5 | 后续实验(GPB-019 / Lean P-002 / P-003) | **只在 autoDL** | — | ⏳ W2 |
-| 1 | 首次 `setup.sh` 把工具链装好 | autoDL | 10–20 min | ✅ 2026-09-06 09:59 · Lean 4.18 / Dafny 4.11 |
-| 2 | `lake build` 暖通 mathlib | autoDL | 30–60 min | ✅ mathlib 已暖;增量 2 秒过 |
-| 3 | Dafny P-001 + P-002 | autoDL | 2 min | ✅ 19 + 24 verified, 0 errors |
-| 4 | Lean P-001 `lake build` | autoDL | 1 min | ✅ 2026-09-06 10:07 success |
-| 5 | GPB-019 DEM 噪声实验入口脚本 | autoDL + 本仓 | 30 min | ⏳ W2/W3 候选 |
+| 5 | Lean P-002 `PitFilling.lean` | autoDL | 增量 | ✅ 2026-09-06 10:29 lake build success |
+| 6 | GPB-019 入口 | autoDL | <1 s | ✅ 2026-09-06 10:41 ENTRY PASS |
+| 7 | P-003 曲率 / P-002-bis | autoDL | — | ⏳ 等 PI 选下一题 |
 
 ---
 
@@ -253,8 +257,8 @@ WSL 不再试图装"完整工具链"——**已装好的不删**(dafny 还在),
 | 重启/休眠对链路的影响 | Windows 重启 = 工具链可能丢 | 实例状态独立 |
 | 本机 CPU 占用 | 影响写代码体验 | 零 |
 
-唯一不能迁的是**写代码**——依然在本机,在 VS Code 里改 `.dfy` / `.lean`,
-然后 `bash scripts/autodl/results_pull.sh` 一条龙验证。
+唯一不能迁的是**写代码**——依然在本机 Cursor 改 `.dfy` / `.lean` / 实验脚本,
+然后 `bash scripts/autodl/sync_push.sh` overlay,在 AutoDL 跑。结果读 `~/.workbuddy/`。
 
 ---
 

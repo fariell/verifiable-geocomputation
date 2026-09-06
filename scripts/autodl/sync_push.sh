@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # scripts/autodl/sync_push.sh
 # -----------------------------------------------------------------------------
-# 冻结(2026-09-06 PI):不再本机 overlay。实验只在 AutoDL /root/verigis/repo。
-# 本文件留档,不要作为日常入口。
+# 本机 formal/ + scripts/autodl/ → AutoDL ~/verigis/repo/
+# Cursor 改完源码后 overlay;实验仍在云端跑。
 # -----------------------------------------------------------------------------
 
 set -uo pipefail
@@ -27,10 +27,10 @@ fi
 set -e
 
 ROOT="$(cd "$_AD_DIR/../.." && pwd)"
-echo "==[sync_push] $ROOT/{formal,scripts/autodl} → $HOST:$REMOTE_REPO =="
+echo "==[sync_push] $ROOT/{formal,scripts/autodl,experiments/phase1} → $HOST:$REMOTE_REPO =="
 
 autodl_ssh "$HOST" \
-    "mkdir -p '$REMOTE_REPO/formal/dafny' '$REMOTE_REPO/formal/lean4/VeriGIS' '$REMOTE_REPO/scripts/autodl'"
+    "mkdir -p '$REMOTE_REPO/formal/dafny' '$REMOTE_REPO/formal/lean4/VeriGIS' '$REMOTE_REPO/scripts/autodl' '$REMOTE_REPO/experiments/phase1'"
 
 autodl_scp \
     "$ROOT/formal/dafny/"*.dfy \
@@ -52,4 +52,9 @@ autodl_scp \
     "$ROOT/scripts/autodl/"*.py \
     "$HOST:$REMOTE_REPO/scripts/autodl/"
 
-echo "==[done] overlay 完成。下一步在 JupyterLab 跑 verify_all.sh =="
+autodl_scp \
+    "$ROOT/experiments/phase1/"*.py \
+    "$ROOT/experiments/phase1/"*.sh \
+    "$HOST:$REMOTE_REPO/experiments/phase1/"
+
+echo "==[done] overlay 完成。下一步在 AutoDL 跑实验 =="

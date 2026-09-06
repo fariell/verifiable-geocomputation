@@ -18,11 +18,25 @@
 | 文件 | 作用 |
 |---|---|
 | `experiment.py`  | 合成 DEM + 数值/解析对比实验，输出 `results/phase1_metrics.json` 与对比图 |
+| `gpb019_consistency.py` | **GPB-019 入口**:扫网格间距 w + 高程噪声,Horn 坡度 vs 曲率对照 |
+| `run_benchmark.sh` | AutoDL / `verify_all.sh` 调用的 GPB-019 驱动 |
 | `propositions.py` | 生成 20 条 GeoProofBench 候选命题（json/csv/md） |
 | `run_experiment.sh` | 实验驱动（激活 venv 后运行上述两个 py） |
 | `bootstrap.sh` | 远程一键装机：装系统依赖 → 建 venv → 装包 → 跑实验 → 装 Lean → 构建 |
 | `lean4_proj/` | Lean 4 骨架工程（Phase 1 仅做冒烟测试，未引入 mathlib） |
 | `deploy.py` | 本机部署器：读登录信息 → SFTP 上传 → 后台启动 bootstrap |
+
+## GPB-019(只在 AutoDL 跑)
+
+```bash
+source ~/verigis/venv/bin/activate
+bash /root/verigis/repo/experiments/phase1/run_benchmark.sh
+```
+
+通过标准写在脚本末尾 `GPB-019 ENTRY: PASS`:`dx=1` 坡度 corr≥0.999;细网格 RMSE 低于粗网格;曲率 corr 仍 <0.5(对照,不是 Horn 的失败)。
+产出:`experiments/phase1/results/gpb019/` 与 `~/.workbuddy/gpb019/`。
+
+**实跑(AutoDL 2026-09-06 10:41)**:`GPB-019 ENTRY: PASS`,rc=0。dx=1 slope_r=0.999936;dx=0.5 RMSE < dx=4;曲率 corr(dx=1)=0.1566。日志 `~/.workbuddy/jobs/20260906_104126.log`。
 
 ## 本地部署（需要能 SSH 到远程的环境）
 

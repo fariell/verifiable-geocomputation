@@ -18,8 +18,9 @@
 研究方向。PI 现职 **Northwest Institute of Nuclear Technology, Xi'an 710024, China**,
 英文署名、单位、ORCID **以 `AUTHOR.md` 为唯一权威源**——开干之前先读。
 
-**主战场**:AutoDL JupyterLab(云端 GPU/CPU 实例,Y0-Y2 所有长实验都跑这里)。
-**降级**:本机 WSL(轻量级 lint 改完后立刻验);**已不再试图装完整工具链**。
+**写代码**:本机 Cursor(上下文在这里)。**禁止只在 AutoDL 生成源码**。
+**跑实验**:AutoDL JupyterLab(`/root/verigis/repo`)。改完本机 `sync_push.sh` overlay。
+**降级**:本机 WSL 只做轻量 lint;**已不再试图装完整工具链**。
 
 **当前时间**:2026-09-06(快照)。本文件生成之后的事项,git log 比本文件更可信。
 
