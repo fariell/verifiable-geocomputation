@@ -141,6 +141,78 @@ from experiments.phase1.p002_pit_filling_2d import pitFill2D  # 待 P-002 公开
 `docs/PAPER_P2_OUTLINE.md` §7.4 把 P-COMP-1 当主案例,§9 Discussion 引用本节 §2.4 接口面
 表 说明"组合命题的可机器证明性"。
 
+### 2.5 P-COMP-3 反例素材 pre-spec(2026-09-06 18:20 洛书补)
+
+P-COMP-3 是矩阵中**唯一反例/否定式组合命题**。Sci Data 期刊诉求" 阴性结果有素材
+价值",为论文 §7.4 提供"组合命题边界案例"对照。
+
+#### 命题陈述(自然语言)
+
+> **同一 DEM 上,P-003 的 Zernike-Torrance 剖面曲率与 P-004 的 Horn 二次精度
+> 拟合不是同一函数族 — 二者没有可形式化的互推关系。** 反例不是 bug,是 feature。
+
+#### 形式化接口面
+
+| 类型 | 签名 | 物理意义 |
+|---|---|---|
+| `datatype ZT2HornWitness` | `(A : Matrix, qz : ZTResult, qh : HornResult)` | 同一 DEM 上两侧输出 |
+| `lemma zt_not_horn` | `(w : ZT2HornWitness) :: qz ≠ qh` | 反例成立 |
+| `lemma both_have_slope_ge_zero` | `(A : Matrix) :: P001.slope(A) ≥ 0` | 二者共享 P-001 根 |
+
+允许引用:`P003.ZT2Profile`、`P004.HornQuad`。**严禁**:复用 ZT 或 Horn 的内核
+计算;只引用公共谓词。
+
+#### Dafny / Lean 模块签名(占位,TODO 由 Cursor 填)
+
+```dafny
+include "P003_d8.dfy"      // P-003 模块
+include "P004_horn.dfy"    // P-004 模块
+module Composition {
+  datatype ZT2HornWitness = ...
+  lemma ztNotHorn(w : ZT2HornWitness) ...
+}
+```
+
+```lean
+import VeriGIS.ZT2D8
+import VeriGIS.Horn
+namespace VeriGIS.Composition
+theorem zt_not_horn : ∃ w : ZT2HornWitness, w.qz ≠ w.qh := ...
+end VeriGIS.Composition
+```
+
+#### Python driver 三门控
+
+```
+[PASS] zt_curv_signedmax vs horn_d2_compress on grid-A
+       (ZT 1.41e-2, Horn 0.21)  -- 同一 DEM,两侧分歧显著
+[PASS] zt_curv_signedmax vs horn_d2_compress on grid-B
+       (ZT 6.97e-02, Horn 0.07)  -- 反向偏差,反例健壮
+[PASS] geometric_persistence : both-sides drop to 0 along stream direction
+       -- 反例不是失效数据导致,是几何上独立度量
+GPB-023 ENTRY: NEGATIVE-RESULT PASS
+```
+
+**注意 `NEGATIVE-RESULT PASS` 而非 FAIL**:平台接受"成功找出反例"verdict。
+
+#### 7 件套文件清单(已附 INBOX §A.3;此处只列 §3 矩阵对应行)
+
+- `experiments/phase2/{p_comp_3.py, p_comp_3.wl, p_comp_3_manim.py, run_p_comp_3.sh}`
+- `formal/dafny/{PCOMP_3.dfy, PCOMP_3_README.md}`
+- `formal/lean4/VeriGIS/Composition/ZTNotImpliesHorn.lean`
+
+#### 论文对接点
+
+- §7.4 Composition(已引 P-COMP-1)加 *Sub-section 7.4.2 Counter-examples*;
+  P-COMP-3 是该子节主案例
+- §9 Discussion 加 "可证组合与不可证组合的并存是科学诚实" 一段,引 P-COMP-3
+
+#### 节奏
+
+- 11 月计划已在 §3 矩阵标
+- task8A = 当前 Cursor session 优先 t7.5 → t8A
+- "并联起草"时机:task7.5 跑云端 verify 5-15 min 时隙
+
 ---
 
 ## 3. 候选组合矩阵(Phase 2 全景)
@@ -184,4 +256,4 @@ from experiments.phase1.p002_pit_filling_2d import pitFill2D  # 待 P-002 公开
 
 ---
 
-_Phase 2 v0.2 executable pre-spec · 2026-09-06 17:55 · §2.4 新增可执行接口面;Luoshu pre-spec for Cursor._
+_Phase 2 v0.3 executable pre-spec · 2026-09-06 18:21 · §2.5 新增 P-COMP-3 反例素材 pre-spec;Cursor pre-spec._
