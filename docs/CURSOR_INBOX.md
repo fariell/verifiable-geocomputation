@@ -8,13 +8,18 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: DONE-LOCKED
-UPDATED: 2026-09-06 23:40
-TASK: **task10.5–task14 串行链(全 PASS,paper v1.5 = 形态锁)**
-LOCK: **v1.5 = FORM LOCK** (PI 23:40 拍板)
-      → FINAL-FORM push gate 第一触发器点亮;
-        第二触发器(D 投稿 / 接受 / 公开 任一)待 PI 操作,
-        任一出现 + 本锁 = push gate 解锁 1 次
+STATUS: PENDING
+UPDATED: 2026-09-09 01:50
+TASK: **task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」W1 设计**
+      (PI 01:43 拍板选题 A;9 周日程 W1 设计 → W2 基建 → W3–W5 主实验
+       → W6–W7 撰写 → W8–W9 投稿 11/10)
+
+> **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。
+> 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:
+> INBOX 的 STATUS 只要是非 DONE 状态,watcher 自动调起 Cursor 执行本文件 §A 的任务,
+> 执行日志落 `_autorun/logs/`,Cursor 写 OUTBOX 自报 + commit。
+> **你的唯一职责**:做完一段 → 把 §A 的 STATUS 改成下一段的 `PENDING`(见 §A.11.6 自推进链),
+> watcher 会自动接上下一段。全程 PI 零点击。
 
 > **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
 > 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。
@@ -605,6 +610,123 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 
 ---
 
+### A.11 task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」(PI 2026-09-09 01:43 拍板)
+
+**A.11.0 立项**
+
+- **选题 A**:LLM 能否把地理算法规约自动转成可机器检验的 Dafny/Lean 规约?失败模式是什么?
+- **闭环叙事**:P1「建基准」→ P2「用基准首次系统评测 AI 形式化能力边界」
+- **AI for Math 硬标签**:差异化在**地理算法特有结构**(网格遍历 / 浮点比较 / 拓扑不变式 / 终止性度量),
+  miniF2F / ProofNet 是纯数学,无人系统做过这块
+- **目标期刊**:主 NeurIPS Datasets & Benchmarks / ICLR;备 JGSA / IJGIS
+- **投稿 DDL**:2026-11-10(W9)
+
+**A.11.1 本轮只做 W1(9/9–9/15)—— 设计 + 任务包,不跑模型**
+
+交付物(4 项,缺一不可):
+
+| # | 产物 | 验收 |
+|---|---|---|
+| 1 | `docs/P2_AIMATH/DESIGN.md` | ≥ 300 行:任务定义、模型清单、prompt 策略、指标、失败模式 taxonomy、统计方法、威胁有效性 |
+| 2 | `experiments/p2_llm/tasks/` | ≥ 21 个任务项 YAML(L1 单算子 + L2 组合 + L3 反例),从 `formal/` 现有命题抽取 |
+| 3 | `experiments/p2_llm/prompts/` | 3 档 prompt 模板:zero-shot / few-shot / repair |
+| 4 | `docs/P2_AIMATH/RISKS.md` | API 成本、额度、可复现性、P1 返修撞期的对策 |
+
+**A.11.2 任务包 schema**(每个任务项)
+
+```yaml
+id: GPB-xxx                    # 沿用 GPB 编号
+difficulty: L1 | L2 | L3
+target: dafny | lean
+natural_spec: |                # 喂给 LLM 的输入 ①
+  <命题的自然语言规约,从 docs/phase2/PROP_CHAIN.md / formal 文件注释抽取>
+reference_impl: experiments/phase1/xxx.py   # 喂给 LLM 的输入 ②
+gold_formal: formal/dafny/xxx.dfy           # ★ 不喂给 LLM,仅作评测基线
+expected_verdict: PASS | NEG                # NEG = 反例类命题(应证伪)
+```
+
+**A.11.3 难度分层**(本 benchmark 的核心设计,把 B 的科学问题装进 A 的实验)
+
+| 层 | 内容 | 题量 | 预期 |
+|---|---|---|---|
+| **L1** | 单算子 P-001..P-006(已 verify) | ~13 | 高通过率 |
+| **L2** | 组合 P-COMP-1/2/4/5 | ~5 | 中 |
+| **L3** | 反例 / neg-result(P-COMP-3、ring_terminated=False、45° FAIL-TOL) | ~3 | 低,且最易语义漂移 |
+
+**A.11.4 模型清单(4 个,固定版本 + temperature=0 + k=5)**
+
+建议 4 档覆盖:1 个强推理(Claude Opus/Sonnet 5 系)、1 个 GPT-5.x、1 个 Gemini 3.x、
+1 个国产低价(DeepSeek-V3 / Qwen-Max)。**成本优先**:优先用 Cursor Pro 已有额度 + 低价 API,控制 k=5。
+DESIGN.md 里写清每个模型的确切版本串与调用日期。
+
+**A.11.5 prompt 策略(3 档对比)**
+
+- **P0 zero-shot**:仅 natural_spec
+- **P1 few-shot**:natural_spec + 1 个**非同命题**的已验证 .dfy 样例
+- **P2 iterative repair**:把编译器/验证器报错喂回,最多 3 轮
+
+**A.11.6 指标(6 个,主指标 2 个)**
+
+| 指标 | 定义 |
+|---|---|
+| compile@1 | 生成代码能否被 `dafny /compile:0` 解析 / `lake env lean` 解析 |
+| **verify@1** ★主 | 一次生成即通过机器检验的比例 |
+| **verify@3** ★主 | repair ≤3 轮后通过比例 |
+| repair gain | verify@3 − verify@1 |
+| **semantic fidelity** ★杀手锏 | 生成规约与 gold_formal 语义一致率;**单独报告 "verified but drifted"**(通过了验证但证明的不是原命题)比例 |
+| failure taxonomy | F1–F8 分布 |
+
+> **semantic fidelity 是本 benchmark 与 miniF2F/ProofNet 最大的差异化**:
+> 形式化验证通过 ≠ 证明对了命题。这是地理算法(浮点、网格、拓扑)最易翻车处。
+
+**A.11.7 失败模式分类学 v0**(Cursor 可扩充,但不得删类)
+
+| 码 | 类别 |
+|---|---|
+| F1 | 语法 / 解析错误 |
+| F2 | 类型 / 签名错误 |
+| F3 | 前置条件缺失或弱化 |
+| F4 | 循环不变式缺失 |
+| F5 | 终止性度量(variant / decreases)缺失 |
+| F6 | 浮点 / 数值语义错配 |
+| **F7** | **语义漂移(通过验证但证明错命题)** |
+| F8 | 过度强化前提(把真命题证成平凡命题) |
+
+**A.11.8 诚实协议**(继承 P1 惯例,不可破)
+
+- **不编造结果**:跑不通记 FAIL,不给模型"擦屁股"
+- 记录模型版本串 / 调用日期 / temperature / prompt 模板 hash
+- 全部 raw 输出落 `experiments/p2_llm/results/raw/`,可复现
+- 已有反例资产(P-006b 4-环、ZT vs Horn、45° FAIL-TOL)**不可洗白**
+
+**A.11.9 自推进链(自动化核心,PI 01:43 要求"全程零点击")**
+
+```
+W1/PENDING ──完成──▶ Cursor 自改 STATUS: W2/PENDING ──watcher 自动调起──▶ W2 …
+                                    ……
+W9/PENDING ──完成──▶ STATUS: DONE
+```
+
+- **Cursor 职责**:每段做完 → 自己把 §A 的 `STATUS:` 改成下一段 `W<n+1>/PENDING`
+  → 写 OUTBOX 新段 → `git commit`(local,**不 push**)
+- **watcher 职责**:本机计划任务每 5 分钟扫 STATUS,非 DONE 且无 agent 在跑 → 自动调起 Cursor
+- **PI 职责**:零。只在周报/异常时看一眼
+- **push gate**:P2 形态锁 + P2 投稿 双触发器齐备才解锁;**W1–W9 期间一律不 push**
+
+**A.11.10 汇报格式**(继承 §A.4)
+
+```
+## <段名>(task16-W<n>)
+[task]      ...
+[step]      ...
+[cmd]       ...
+[rc]        ...
+[verdict]   PASS / FAIL / BLOCKED
+[blocker]   (仅 BLOCKED/FAIL 时填)
+```
+
+---
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
@@ -634,6 +756,8 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 - **task12(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = P-COMP-5 元一致 Python↔Lean↔Dafny hash 一致
 - **task13(2026-09-06 20:39-PENDING,STATUS=ACTIVE)** = 真实 DEM 多样性 USGS-LiDAR + IFSAR + Copernicus 3/3
 - **task14(2026-09-06 20:39-23:45,STATUS=LOCKED)** = v1.5 NUM 升级:task9/10.5/11/12/13 写 paper §7.6;PI 23:40 拍 v1.5 = FORM LOCK 触发第一触发器
+- **task15(2026-09-09 01:37,STATUS=CLOSED)** = 28 commits 一次性 push(d6bcaae..c2a5000),FINAL-FORM 双触发器已消费,远端 GitHub 同步完成
+- **task16(2026-09-09 01:43-PENDING,STATUS=ACTIVE)** = 第二篇 P2「LLM 自动形式化 GPB 基准评测」;W1 设计 → W9 投稿 11/10;**本机自动化已部署**(Cursor headless CLI + INBOX watcher + 计划任务每 5 min),PI 零点击
 
 ### B.3 触发器(`.cursorrules` `[mailbox]` 规则契约)
 - Cursor session 启动时自动 `Read` 本文件
