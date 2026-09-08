@@ -1,0 +1,14 @@
+id: GPB-025-pcomp4
+difficulty: L2
+target: dafny
+prop_family: P-COMP-4
+expected_verdict: PASS
+natural_spec: |
+  P-COMP-4 resampling homotopy: define R_alpha(w)=alpha*w with alpha>0,w>0. On
+  planar/quadratic samples, Horn DzDx/DzDy and axis-aligned D8 direction are invariant in
+  the appropriate sense under positive rescaling of grid spacing. Do not claim 45-degree
+  rotation invariance in this task.
+reference_impl: experiments/phase2/p_comp_4.py
+gold_formal: formal/dafny/PCOMP_4_homotopy.dfy
+lemma_hint: HomotopyPlanarDx / Resample R_alpha
+schema_version: p2_llm_task_v1

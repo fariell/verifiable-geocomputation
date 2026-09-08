@@ -1,0 +1,13 @@
+id: GPB-001-flat
+difficulty: L1
+target: dafny
+prop_family: P-001
+expected_verdict: PASS
+natural_spec: |
+  On any 3x3 elevation window with finite values, if all nine cells share the same
+  elevation, the Horn (1981) slope magnitude (equivalently its square SlopeSq) is
+  identically zero. Grid spacing w must be positive.
+reference_impl: experiments/phase1/gpb019_consistency.py
+gold_formal: formal/dafny/P001_horn_slope.dfy
+lemma_hint: FlatSlopeZero
+schema_version: p2_llm_task_v1

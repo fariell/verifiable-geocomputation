@@ -1,0 +1,14 @@
+id: GPB-022-pcomp2-lean
+difficulty: L2
+target: lean
+prop_family: P-COMP-2
+expected_verdict: PASS
+natural_spec: |
+  P-COMP-2 full-plane closure: on a constant (zero-relief) plane and on a plane with tiny
+  row-wise epsilon noise, fill-then-watershed still terminates with unique outlets. The
+  formal statement should be size-parameterized (not hard-coding one grid dimension in the
+  theorem statement).
+reference_impl: experiments/phase2/p_comp_2.py
+gold_formal: formal/lean4/VeriGIS/Composition/PitFillingThenWatershedPlane.lean
+lemma_hint: plane_closure
+schema_version: p2_llm_task_v1

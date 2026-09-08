@@ -1,0 +1,15 @@
+id: GPB-021-pcomp1
+difficulty: L2
+target: dafny
+prop_family: P-COMP-1
+expected_verdict: PASS
+natural_spec: |
+  Composition P-COMP-1: after pit filling (P-002), D8 routing yields unique basin outlets
+  (reuse P-006 BasinUnique). Prove the bridge lemmas: filled DEM has a non-ascent neighbor
+  relation; under strict descent orbits are length-bounded; do not re-copy Fill/D8
+  kernels—include existing modules.
+reference_impl: experiments/phase2/p_comp_1.py
+gold_formal: formal/dafny/PCOMP_1.dfy
+lemma_hint: FillThenWatershed / NoPitImpliesDescent
+notes: Phase2 GPB-021 composition id; not P-002 seed GPB-021.
+schema_version: p2_llm_task_v1

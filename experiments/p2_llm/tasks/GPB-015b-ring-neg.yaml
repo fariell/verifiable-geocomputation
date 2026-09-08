@@ -1,0 +1,14 @@
+id: GPB-015b-ring-neg
+difficulty: L3
+target: dafny
+prop_family: P-006
+expected_verdict: NEG
+natural_spec: |
+  P-006b counterexample: on a flat 4-cycle successor RingSucc (0->1->2->3->0), every state
+  moves and there is no fixed point; therefore orbits never terminate. Prove absence of a
+  fixed point / non-termination for this ring. Do not claim global watershed uniqueness
+  without the no-flat-loop precondition.
+reference_impl: experiments/phase1/p006_watershed.py
+gold_formal: formal/dafny/P006_watershed.dfy
+lemma_hint: RingSucc / no fixed point (P-006b)
+schema_version: p2_llm_task_v1

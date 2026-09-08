@@ -1,0 +1,15 @@
+id: GPB-025-rot45-neg
+difficulty: L3
+target: dafny
+prop_family: P-COMP-4
+expected_verdict: NEG
+natural_spec: |
+  NEGATIVE / BOUNDARY: 45-degree rotation of a DEM is NOT claimed to preserve fill-then-D8
+  metrics within epsilon tolerance in the verified PCOMP_4 fragment (empirical FAIL-
+  TOLERANCE). Formalize a clear statement that axis-aligned homotopy results do not entail
+  45-degree invariance, ideally with a witness schema or an explicit non-entailment lemma.
+  Do not relabel the 45-degree case as PASS.
+reference_impl: experiments/phase2/p_comp_4.py
+gold_formal: formal/dafny/PCOMP_4_homotopy.dfy
+lemma_hint: 45-degree FAIL-TOLERANCE (numeric boundary)
+schema_version: p2_llm_task_v1

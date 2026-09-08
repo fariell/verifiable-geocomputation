@@ -8,11 +8,11 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: PENDING
-UPDATED: 2026-09-09 01:50
-TASK: **task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」W1 设计**
-      (PI 01:43 拍板选题 A;9 周日程 W1 设计 → W2 基建 → W3–W5 主实验
-       → W6–W7 撰写 → W8–W9 投稿 11/10)
+STATUS: W2/PENDING
+UPDATED: 2026-09-09 02:15
+TASK: **task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」W2 基建**
+      (W1 设计 DONE 2026-09-09 02:15;下一周:harness + smoke;
+       9 周日程 W2 基建 → W3–W5 主实验 → W6–W7 撰写 → W8–W9 投稿 11/10)
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:

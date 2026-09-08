@@ -1,0 +1,13 @@
+id: GPB-026-pcomp5
+difficulty: L2
+target: dafny
+prop_family: P-COMP-5
+expected_verdict: PASS
+natural_spec: |
+  P-COMP-5 metaproperty: Fill is idempotent (Fill(Fill(a))=Fill(a)) and schedule/order
+  variants that implement the same 1D left-outlet scan agree on outputs for the recorded
+  hash instances. Prefer importing P-002 rather than redefining Fill.
+reference_impl: experiments/phase2/p_comp_5.py
+gold_formal: formal/dafny/PCOMP_5_idempotent.dfy
+lemma_hint: FillIdempotent metaproperty
+schema_version: p2_llm_task_v1

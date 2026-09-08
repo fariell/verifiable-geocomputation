@@ -1,0 +1,12 @@
+id: GPB-005-lap-lean
+difficulty: L1
+target: lean
+prop_family: P-003
+expected_verdict: PASS
+natural_spec: |
+  If the center cell of a 3x3 window is a discrete local maximum (center elevation >= each
+  of the four orthogonal neighbors), then the discrete Laplacian at the center is <= 0.
+reference_impl: experiments/phase1/p003_curvature.py
+gold_formal: formal/lean4/VeriGIS/Curvature.lean
+lemma_hint: laplacian_at_discrete_max
+schema_version: p2_llm_task_v1

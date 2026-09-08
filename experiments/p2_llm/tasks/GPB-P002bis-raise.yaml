@@ -1,0 +1,13 @@
+id: GPB-P002bis-raise
+difficulty: L1
+target: dafny
+prop_family: P-002-bis
+expected_verdict: PASS
+natural_spec: |
+  In the 2D local raise step RaiseNbr, raising a 4-neighbor from an already-processed cell
+  never decreases any cell elevation, and the neighbor is lifted at least to max(original
+  neighbor, processed cell fill).
+reference_impl: experiments/phase2/p_comp_1.py
+gold_formal: formal/dafny/P002_pit_filling_2d.dfy
+lemma_hint: RaiseNbrMonotone
+schema_version: p2_llm_task_v1

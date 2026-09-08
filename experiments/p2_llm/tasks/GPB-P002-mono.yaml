@@ -1,0 +1,14 @@
+id: GPB-P002-mono
+difficulty: L1
+target: dafny
+prop_family: P-002
+expected_verdict: PASS
+natural_spec: |
+  Consider the 1D Wang-Liu pit-filling specialization Fill with left outlet:
+  Fill[0]=orig[0], Fill[i]=max(orig[i], Fill[i-1]). Each raise is monotone: no cell
+  elevation decreases. After a full scan the profile is nondecreasing.
+reference_impl: experiments/phase2/p_comp_1.py
+gold_formal: formal/dafny/P002_pit_filling.dfy
+lemma_hint: Monotone / FillCorrect
+notes: Historical seed IDs GPB-021/022/023 for fill; disambiguated as GPB-P002-*.
+schema_version: p2_llm_task_v1

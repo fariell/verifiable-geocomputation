@@ -1,0 +1,12 @@
+id: GPB-007-hessian
+difficulty: L1
+target: dafny
+prop_family: P-003
+expected_verdict: PASS
+natural_spec: |
+  On a quadratic surface z = A x^2 + B y^2 + C xy + Dx + Ey + F sampled on a 3x3 window
+  with spacing w>0, the Zevenbergen-Thorne discrete Hessian recovers (2A, 2B, C) exactly.
+reference_impl: experiments/phase1/p003_curvature.py
+gold_formal: formal/dafny/P003_curvature.dfy
+lemma_hint: QuadraticExact
+schema_version: p2_llm_task_v1

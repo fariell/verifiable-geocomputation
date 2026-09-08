@@ -804,6 +804,39 @@ task14 verdict = PASS
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W1 设计(task16-W1)
+
+```
+[task]      task16-W1 / P2_AIMATH 设计+任务包
+[step]      本机交付 DESIGN.md + 22 YAML tasks + 3 prompts + RISKS.md;不跑模型
+[cmd]       Write docs/P2_AIMATH/{DESIGN,RISKS}.md ; Write experiments/p2_llm/prompts/P{0,1,2}_*.md ; python _autorun/_gen_p2_tasks.py → experiments/p2_llm/tasks/*.yaml ; (Get-Content DESIGN.md).Count
+[rc]        0
+[key lines]
+  docs/P2_AIMATH/DESIGN.md  379 lines (>=300)
+  docs/P2_AIMATH/RISKS.md   74 lines
+  experiments/p2_llm/tasks/ 22 YAML (L1=14 L2=5 L3=3)
+  experiments/p2_llm/prompts/{P0_zero_shot,P1_few_shot,P2_repair}.md
+  experiments/p2_llm/results/raw/.gitkeep
+  model candidates (W1, lock at W3 first call): claude-sonnet-4-20250514 / gpt-5-2025-08-07 / gemini-2.5-pro / deepseek-chat
+  NO verify@ numbers fabricated; NO model API calls this week
+[gates]     DESIGN>=300 PASS; tasks>=21 PASS; prompts×3 PASS; RISKS PASS; honesty(no fake metrics) PASS
+[verdict]   PASS
+[blocker]
+```
+
+改了什么:
+- 新: `docs/P2_AIMATH/DESIGN.md` (任务定义/分层/模型/prompt/指标/F1–F8/威胁/日程)
+- 新: `docs/P2_AIMATH/RISKS.md` (API 成本/额度/可复现/P1 撞期/熔断)
+- 新: `experiments/p2_llm/tasks/*.yaml` ×22(含 L3 NEG: ZT⇏Horn / 4-环 / 45° FAIL-TOL)
+- 新: `experiments/p2_llm/prompts/P0_zero_shot.md` `P1_few_shot.md` `P2_repair.md`
+- 新: `experiments/p2_llm/results/raw/.gitkeep`
+- 改: INBOX §A `STATUS: W2/PENDING` (自推进链 A.11.9)
+未改 papers/P2 manuscript(FORM LOCK)。未跑模型。未 git push。
+
+task16-W1 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

@@ -1,0 +1,12 @@
+id: GPB-P002-idem
+difficulty: L1
+target: dafny
+prop_family: P-002
+expected_verdict: PASS
+natural_spec: |
+  Pit filling is idempotent on the 1D left-outlet specialization: Fill(Fill(a)) = Fill(a).
+  Cells that already do not spill to the left are fixed points of Raise.
+reference_impl: experiments/phase2/p_comp_5.py
+gold_formal: formal/dafny/P002_pit_filling.dfy
+lemma_hint: FillIdempotent
+schema_version: p2_llm_task_v1

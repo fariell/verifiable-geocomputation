@@ -1,0 +1,13 @@
+id: GPB-019-quad
+difficulty: L1
+target: dafny
+prop_family: P-004
+expected_verdict: PASS
+natural_spec: |
+  Horn slope is exact on quadratic surfaces: DzDx and DzDy recover the true planar
+  gradient coefficients (A,B) identically. Separately, on z = G x^3 the DzDx remainder at
+  the origin equals G w^2 (order O(w^2)).
+reference_impl: experiments/phase1/p004_consistency.py
+gold_formal: formal/dafny/P004_consistency.dfy
+lemma_hint: QuadraticExact
+schema_version: p2_llm_task_v1

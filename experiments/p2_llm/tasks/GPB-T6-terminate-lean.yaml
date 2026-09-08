@@ -1,0 +1,12 @@
+id: GPB-T6-terminate-lean
+difficulty: L1
+target: lean
+prop_family: P-006
+expected_verdict: PASS
+natural_spec: |
+  Under a strict descent successor on a finite cell set, every orbit terminates at a fixed
+  point; give a well-founded / decreases-style argument (Nat measure).
+reference_impl: experiments/phase1/p006_watershed.py
+gold_formal: formal/lean4/VeriGIS/P006Terminate.lean
+lemma_hint: terminates_under_strict_descent
+schema_version: p2_llm_task_v1

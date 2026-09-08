@@ -1,0 +1,15 @@
+id: GPB-023-pcomp3-neg
+difficulty: L3
+target: dafny
+prop_family: P-COMP-3
+expected_verdict: NEG
+natural_spec: |
+  NEGATIVE RESULT (feature, not bug): Zernike-Torrance / ZT profile curvature and Horn
+  quadratic slope are not the same function family; there is no formal entailment either
+  way on all DEMs. Construct an explicit witness DEM where the two operators disagree, and
+  prove they are not equal on that witness. Do not wash this into a positive universal
+  equivalence.
+reference_impl: experiments/phase2/p_comp_3.py
+gold_formal: formal/dafny/PCOMP_3.dfy
+lemma_hint: ztNotHorn / ZT2HornWitness
+schema_version: p2_llm_task_v1

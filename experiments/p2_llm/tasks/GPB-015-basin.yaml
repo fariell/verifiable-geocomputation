@@ -1,0 +1,14 @@
+id: GPB-015-basin
+difficulty: L1
+target: dafny
+prop_family: P-006
+expected_verdict: PASS
+natural_spec: |
+  Layer A watershed uniqueness: if a deterministic successor function reaches an outlet
+  (fixed point) from the same start cell in any two finite step counts, those outlets are
+  equal. Formalize via bounded iterate stepN without searching for fixed points by SMT
+  recursion.
+reference_impl: experiments/phase1/p006_watershed.py
+gold_formal: formal/dafny/P006_watershed.dfy
+lemma_hint: BasinUnique
+schema_version: p2_llm_task_v1

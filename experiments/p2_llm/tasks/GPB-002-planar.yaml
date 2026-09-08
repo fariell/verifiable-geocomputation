@@ -1,0 +1,13 @@
+id: GPB-002-planar
+difficulty: L1
+target: dafny
+prop_family: P-001
+expected_verdict: PASS
+natural_spec: |
+  On a planar surface z = A*x + B*y + C sampled on a regular grid with spacing w>0, the
+  Horn finite-difference estimates DzDx and DzDy recover A and B exactly (identity, not
+  merely asymptotically).
+reference_impl: experiments/phase1/gpb019_consistency.py
+gold_formal: formal/dafny/P001_horn_slope.dfy
+lemma_hint: PlanarExact
+schema_version: p2_llm_task_v1

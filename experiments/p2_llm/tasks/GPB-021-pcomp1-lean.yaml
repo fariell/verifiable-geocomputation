@@ -1,0 +1,13 @@
+id: GPB-021-pcomp1-lean
+difficulty: L2
+target: lean
+prop_family: P-COMP-1
+expected_verdict: PASS
+natural_spec: |
+  Lean restatement of P-COMP-1: for a DEM h and cell c, the basin outlet after pitFill2D
+  is unique. Import VeriGIS.PitFilling2D / D8 / Watershed; do not translate Dafny proof
+  text verbatim as untyped comments.
+reference_impl: experiments/phase2/p_comp_1.py
+gold_formal: formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean
+lemma_hint: pit_fill_then_watershed
+schema_version: p2_llm_task_v1

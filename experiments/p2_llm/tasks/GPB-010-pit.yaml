@@ -1,0 +1,12 @@
+id: GPB-010-pit
+difficulty: L1
+target: dafny
+prop_family: P-005
+expected_verdict: PASS
+natural_spec: |
+  Under D8 steepest-descent routing, if none of the eight neighbors is strictly lower than
+  the center, the flow direction is NoFlow (undefined / pit).
+reference_impl: experiments/phase1/p005_d8.py
+gold_formal: formal/dafny/P005_d8.dfy
+lemma_hint: PitNoFlow
+schema_version: p2_llm_task_v1
