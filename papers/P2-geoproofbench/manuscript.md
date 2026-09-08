@@ -16,7 +16,7 @@
 arXiv:       (待 EarthArXiv / arXiv 挂,先于期刊投稿)
 许可证:      CC-BY-4.0 (data) + MIT (code)
 代码仓库:    https://github.com/fariell/verifiable-geocomputation
-Zenodo:      DOI not yet minted (package: papers/P2-geoproofbench/zenodo/; https://zenodo.org/deposit/new)
+Zenodo:      ScienceDB DOI https://doi.org/10.57760/sciencedb.011r9 ; CSTR 31253.11.sciencedb.011r9
 ```
 
 ---
@@ -690,16 +690,14 @@ contributions to GPB-007..GPB-050 (the open slots in
 
 ```
 The GeoProofBench proposition set, Lean 4 / Dafny specifications,
-sample DEMs, and reproduction scripts will be released at
-https://github.com/fariell/verifiable-geocomputation under the MIT
-License (code) and CC-BY-4.0 (data), upon acceptance.
-
-Zenodo deposit (preferred for Scientific Data citation):
-  package: papers/P2-geoproofbench/zenodo/
-  mint URL: https://zenodo.org/deposit/new
-  DOI: not yet minted (requires corresponding-author Zenodo login;
-       do not cite a fabricated 10.5281/zenodo.* identifier).
-  After minting, replace this paragraph with https://doi.org/10.5281/zenodo.XXXXXXX
+sample DEMs, and reproduction scripts are deposited at Science Data Bank
+(V1): https://doi.org/10.57760/sciencedb.011r9
+(CSTR https://cstr.cn/31253.11.sciencedb.011r9 ; 31253.11.sciencedb.011r9).
+File access is restricted until journal acceptance; reviewers use the
+DOI/CSTR landing page. After acceptance the GitHub mirror
+https://github.com/fariell/verifiable-geocomputation will open under
+MIT (code) and CC-BY-4.0 (data). Cite: Guo, Y. GeoProofBench v0.1.
+Science Data Bank https://doi.org/10.57760/sciencedb.011r9 (2026).
 ```
 
 ---
@@ -809,10 +807,11 @@ Horn 二阶拟合:同一中心,拟合系数 `b = -1e-4`(数量级差异)。
 ### A.5 Data availability and formalization inventory
 
 **Data availability.** GeoProofBench v0.1 data (CC-BY-4.0) and code (MIT)
-are prepared for Zenodo at `papers/P2-geoproofbench/zenodo/`.
-Mint: https://zenodo.org/deposit/new
-DOI: *not yet minted* (corresponding-author login required).
-GitHub mirror after acceptance: https://github.com/fariell/verifiable-geocomputation
+are at Science Data Bank, V1:
+https://doi.org/10.57760/sciencedb.011r9
+(CSTR https://cstr.cn/31253.11.sciencedb.011r9 ; 31253.11.sciencedb.011r9).
+Restricted until journal acceptance. GitHub mirror after acceptance:
+https://github.com/fariell/verifiable-geocomputation
 Author: Yinggang Guo / 郭迎钢; ORCID 0000-0002-8207-9941;
 Northwest Institute of Nuclear Technology, Xi'an 710024;
 email fariel_gyg@163.com.

@@ -21,11 +21,17 @@
       "Dafny",
       "Lean 4"
     ],
-    "notes": "Companion Data Descriptor: GeoProofBench: A Machine-Checked Proposition Set for Digital Elevation Model Analysis, submitted to Scientific Data. Related identifier (GitHub) to be filled after the repository is made public: https://github.com/fariell/verifiable-geocomputation",
+    "notes": "Companion Data Descriptor submitted to Scientific Data. ScienceDB V1: https://doi.org/10.57760/sciencedb.011r9 ; CSTR 31253.11.sciencedb.011r9. GitHub after public push: https://github.com/fariell/verifiable-geocomputation",
     "license": "cc-by-4.0",
     "access_right": "restricted",
     "language": "eng",
     "communities": [],
-    "related_identifiers": []
+    "related_identifiers": [
+      {
+        "identifier": "10.57760/sciencedb.011r9",
+        "relation": "isIdenticalTo",
+        "scheme": "doi"
+      }
+    ]
   }
 }

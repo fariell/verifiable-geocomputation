@@ -1,15 +1,13 @@
-# Zenodo deposit — GeoProofBench v0.1
+# Zenodo / ScienceDB deposit — GeoProofBench v0.1
 
-**Status (2026-09-06):** package ready; **DOI not minted**.  
-Minting requires the corresponding author to log in at
-<https://zenodo.org/deposit/new> (no `ZENODO_TOKEN` in this environment).
+**Status (2026-09-07):** Science Data Bank V1 minted.
 
-Do not invent a `10.5281/zenodo.*` identifier. After Zenodo returns a
-real DOI, paste it into:
+- DOI: <https://doi.org/10.57760/sciencedb.011r9>
+- CSTR: <https://cstr.cn/31253.11.sciencedb.011r9> (`31253.11.sciencedb.011r9`)
 
-1. `papers/P2-geoproofbench/manuscript.md` §11 and §A.5
-2. `papers/P2-geoproofbench/cover_letter.md` § Data availability
-3. `papers/P2/cover_letter.md` (copy)
+Citation (GB/T): 郭迎钢. 面向数字高程模型分析的机器可检验命题集 GeoProofBench v0.1[DS/OL]. V1. Science Data Bank, 2026[2026-09-07]. https://cstr.cn/31253.11.sciencedb.011r9. CSTR:31253.11.sciencedb.011r9.
+
+Files remain restricted until Scientific Data acceptance. Do not mint a second, invented Zenodo DOI unless a mirror is later required.
 
 ## Form (copy into zenodo.org/deposit/new)
 

@@ -1,0 +1,122 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{xurl}
+\urlstyle{same}
+\onehalfspacing
+\pagestyle{empty}
+\begin{document}
+
+\noindent
+Yinggang Guo\\
+Northwest Institute of Nuclear Technology\\
+Xi'an 710024, China\\
+\url{fariel_gyg@163.com}\\
+ORCID: 0000-0002-8207-9941
+
+\vspace{1.0em}
+\noindent
+Dr Guy Jones\\
+Chief Editor\\
+\textit{Scientific Data}
+
+\vspace{0.8em}
+\noindent
+Dear Dr Jones,
+
+\vspace{0.4em}
+I am submitting a Data Descriptor entitled
+\textbf{A machine-checked proposition set for digital elevation model analysis}
+(article type: Data Descriptor; sole author).
+The Descriptor deposits GeoProofBench v0.1, a versioned catalogue of
+machine-checkable claims about digital elevation model (DEM) operators.
+It does not propose a new interpolator.
+Each concrete claim is archived as a data record: a stable identifier,
+a one-sentence property, independent Dafny and Lean~4 specifications,
+numerical gates, rasters or witnesses, and a recorded verdict.
+Custom code is supplied only to regenerate those verdicts.
+
+The release contains \textbf{six} concrete first-order propositions
+(GPB-001 to 005 and GPB-015; GPB-002b is the two-dimensional companion of 002),
+\textbf{five} composition or counter-example records
+(P-COMP-1 to 5; P-COMP-1b is the unfilled-ring companion of 1),
+and \textbf{forty-four} stubbed identifiers
+(GPB-006 to 014 and GPB-016 to 050) reserved for later entries.
+Stubbed names are not implemented claims.
+
+Independent Dafny and Lean files do not share a kernel.
+An AutoDL cloud re-run, without the workstation verifier cache, reports
+17 verified / 0 errors on \texttt{PCOMP\_1.dfy},
+12 / 0 on \texttt{P006\_terminate\_under\_strict.dfy},
+25 / 0 on \texttt{PCOMP\_2.dfy},
+20 / 0 on \texttt{PCOMP\_4\_homotopy.dfy},
+and 15 / 0 on \texttt{PCOMP\_5\_idempotent.dfy}.
+These integers are verifier-reported members for each compilation unit
+(the named file plus its includes), not lemma counts of GeoProofBench as a
+whole. \texttt{PCOMP\_1.dfy} itself states 11 lemmas (five for the
+Fig.~1c chain, plus variants, wrappers, and an example).
+Lean \texttt{lake build} of the deposited VeriGIS library against locked mathlib
+completes with 0 errors: the library builds.
+The lockfile imports 2764 mathlib modules; that number is a toolchain size,
+not a GeoProofBench lemma count, and is not used as evidence that the
+propositions hold.
+
+Counter-examples are retained as records (\texttt{NEGATIVE-RESULT PASS}).
+An unfilled four-cell ring is a condition-boundary witness:
+without filling, D8 does not terminate, so P-COMP-1 does not apply.
+Two small grids show that Zevenbergen--Thorne profile curvature and Horn's
+second-order slope coefficient are not interchangeable
+(P-COMP-3).
+P-COMP-4 records 8 PASS cells and 4 \texttt{FAIL-TOLERANCE} cells;
+all four tolerance cells are $45^{\circ}$ resampling and are not relabelled PASS.
+P-COMP-5 records 12/12 hash agreement across Python, Dafny, and Lean,
+and 4/4 two-dimensional fill idempotence.
+
+Input rasters include a $5\times5$ unit plane, a $256^{2}$ synthetic terrain,
+and two labelled same-size synthetic stand-ins
+(SRTM-scale $3601^{2}$ and lidar-down $256^{2}$);
+the stand-ins are not product-accuracy claims.
+Three public $256^{2}$ windows (USGS 3DEP 1~m lidar, USGS 3DEP 5~m Alaska IFSAR,
+Copernicus GLO-30) all PASS P-COMP-1.
+Those products are cited as data:
+\url{https://doi.org/10.5066/P13LJKFS},
+\url{https://doi.org/10.5066/P9C064CO},
+and \url{https://doi.org/10.5270/ESA-c5d3d65}.
+Exact window parameters are in the article Data Availability section
+(reviewers do not see this letter).
+
+The GeoProofBench v0.1 dataset is openly available at Science Data Bank, V1:
+\url{https://doi.org/10.57760/sciencedb.011r9}
+(CSTR \url{https://cstr.cn/31253.11.sciencedb.011r9}).
+Science Data Bank is the national generalist repository of the Chinese Academy
+of Sciences; it issues a DOI and a CSTR, and this version is unrestricted
+under CC-BY-4.0. Software is MIT.
+Reviewers may download the zip from that DOI without a private link or
+embargo: Scientific Data is not double-blind, the Descriptor names the
+author, and the deposit is already open. The laboratory development tree is
+the public GitHub copy of the same files
+\url{https://github.com/fariell/verifiable-geocomputation};
+an anonymous.4open.science mirror is not supplied because it would hide
+nothing that the article and the DOI do not already disclose.
+
+No previous paper has published this proposition set.
+A related article (Guo, Liu, Rong, Shi \& Tang,
+\textit{Remote Sens.} \textbf{17}, 3662 (2025),
+\url{https://doi.org/10.3390/rs17223662})
+concerns hyperspectral semantic segmentation and does not share data with this deposit.
+Nothing related is under consideration elsewhere.
+This research received no external funding and has no grant number;
+it was supported by the author's institutional time.
+The author declares no competing interests.
+The work uses synthetic and public elevation rasters only.
+
+\vspace{1.0em}
+\noindent
+Yours sincerely,\\[0.7em]
+Yinggang Guo
+
+\end{document}
