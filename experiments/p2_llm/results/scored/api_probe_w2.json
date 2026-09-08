@@ -1,0 +1,16 @@
+{
+  "attempts": [
+    {
+      "url": "https://code.newcli.com/claude/v1/messages",
+      "dt": 40.04,
+      "error": "ConnectTimeout: timed out"
+    },
+    {
+      "url": "https://api.anthropic.com/v1/messages",
+      "dt": 0.72,
+      "status": 403,
+      "body": "{\n  \"error\": {\n    \"type\": \"forbidden\",\n    \"message\": \"Request not allowed\"\n  }\n}"
+    }
+  ],
+  "live_api_ok": false
+}

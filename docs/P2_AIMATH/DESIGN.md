@@ -425,8 +425,10 @@ P2 论文将是**第二篇**独立稿件（目录 `docs/P2_AIMATH/` + 未来 `pa
 - [x] `experiments/p2_llm/tasks/` ≥ 21 YAML
 - [x] `experiments/p2_llm/prompts/` 含 P0/P1/P2
 - [x] `docs/P2_AIMATH/RISKS.md`
-- [ ] 模型 API 实测（留给 W2/W3）
-- [ ] 任何 verify@ 数字（W1 **禁止编造**）
+- [x] W2 harness scaffolding (`run_generate` / `run_verify` / `score_semantic` + schema)
+- [x] W2 smoke path (fixture offline; live API blocked on this host — see `results/scored/api_probe_w2.json`)
+- [ ] 模型 API 实测主实验（留给 W3；本机需可达 endpoint / 非 403 key）
+- [ ] 任何 verify@ 数字（W1/W2 **禁止编造**；W2 未声称 verify@）
 
 ---
 
@@ -493,7 +495,8 @@ cd formal/lean4 && lake build
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-09-09 | W1.0 | 初稿：任务定义、分层、模型、prompt、指标、F1–F8、威胁、日程 |
+| 2026-09-09 | W2.0 | harness + schema；smoke=GPB-001-flat×fixture（live API BLOCKED） |
 
 ---
 
-*End of DESIGN.md (W1). Next: STATUS → W2/PENDING for harness scaffolding.*
+*End of DESIGN.md (W2 harness landed). Next: STATUS → W3/PENDING for L1 main experiment (needs live API).*

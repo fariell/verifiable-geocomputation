@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "p2_llm_task_v1",
+  "title": "P2_AIMATH task YAML",
+  "type": "object",
+  "required": [
+    "id",
+    "difficulty",
+    "target",
+    "natural_spec",
+    "reference_impl",
+    "gold_formal",
+    "expected_verdict",
+    "schema_version"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": { "type": "string", "minLength": 3 },
+    "difficulty": { "type": "string", "enum": ["L1", "L2", "L3"] },
+    "target": { "type": "string", "enum": ["dafny", "lean"] },
+    "natural_spec": { "type": "string", "minLength": 20 },
+    "reference_impl": { "type": "string", "minLength": 3 },
+    "gold_formal": { "type": "string", "minLength": 3 },
+    "expected_verdict": { "type": "string", "enum": ["PASS", "NEG"] },
+    "prop_family": { "type": "string" },
+    "lemma_hint": { "type": "string" },
+    "notes": { "type": "string" },
+    "schema_version": { "type": "string", "const": "p2_llm_task_v1" }
+  }
+}

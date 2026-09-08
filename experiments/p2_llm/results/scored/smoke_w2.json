@@ -1,0 +1,103 @@
+{
+  "smoke": "task16-W2",
+  "steps": [
+    {
+      "step": "validate_tasks",
+      "n_tasks": 22,
+      "n_ok": 22,
+      "failed": []
+    },
+    {
+      "step": "generate",
+      "status": "GENERATED_FIXTURE",
+      "backend": "fixture",
+      "model": "fixture-offline-w2",
+      "prompt_id": "P0",
+      "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+      "raw_json": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__fixture-offline-w2__P0__k0__r0.json",
+      "raw_source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__fixture-offline-w2__P0__k0__r0.dfy",
+      "raw_text_chars": 643,
+      "api_usage": null,
+      "api_error": null,
+      "note": "Offline fixture used for harness path smoke. NOT a live LLM sample; do not report as verify@ / model metric."
+    },
+    {
+      "step": "verify",
+      "status": "TOOLCHAIN_MISSING",
+      "compile_rc": null,
+      "verify_rc": null,
+      "note": "dafny not on PATH (local). Authority verify is AutoDL per playbook.",
+      "out": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\scored\\GPB-001-flat__fixture-offline-w2__P0__k0__r0.verify.json"
+    },
+    {
+      "step": "score_semantic",
+      "out": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\scored\\GPB-001-flat__fixture-offline-w2__P0__k0__r0.semantic.json",
+      "task_id": "GPB-001-flat",
+      "expected_verdict": "PASS",
+      "compile_rc": null,
+      "verify_rc": null,
+      "name_overlap": [
+        "FlatSlopeZero",
+        "SlopeSq"
+      ],
+      "n_gen_names": 3,
+      "n_gold_names": 12,
+      "keyword_hits": {
+        "keywords": [
+          "cells",
+          "elevation",
+          "equivalently",
+          "finite",
+          "grid",
+          "horn",
+          "identically",
+          "magnitude",
+          "nine",
+          "positive",
+          "share",
+          "slope",
+          "slopesq",
+          "spacing",
+          "square",
+          "values",
+          "window",
+          "zero"
+        ],
+        "hit": [
+          "horn",
+          "slope",
+          "slopesq",
+          "zero"
+        ],
+        "miss": [
+          "cells",
+          "elevation",
+          "equivalently",
+          "finite",
+          "grid",
+          "identically",
+          "magnitude",
+          "nine",
+          "positive",
+          "share",
+          "spacing",
+          "square",
+          "values",
+          "window"
+        ],
+        "hit_ratio": 0.2222
+      },
+      "trivial_assume": false,
+      "drift_suspect": false,
+      "fidelity_label": "VERIFY_SKIPPED",
+      "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+    }
+  ],
+  "verdict": "PASS",
+  "note": "backend=fixture; generate_status=GENERATED_FIXTURE; verify_status=TOOLCHAIN_MISSING; local_toolchain=MISSING (no fabricated verify@; AutoDL later); NO model metrics — fixture only",
+  "api_probe": {
+    "live_api_ok": false,
+    "detail_file": "experiments/p2_llm/results/scored/api_probe_w2.json",
+    "summary": "code.newcli.com ConnectTimeout; api.anthropic.com HTTP 403 Request not allowed"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "fixture-offline-w2",
+  "call_date": "2026-09-08",
+  "temperature": null,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "fixture",
+  "status": "GENERATED_FIXTURE",
+  "note": "Offline fixture used for harness path smoke. NOT a live LLM sample; do not report as verify@ / model metric.",
+  "raw_text": "// P2_AIMATH W2 offline fixture — NOT gold_formal, NOT a paper metric.\n// Purpose: exercise harness generate→verify→score path when external LLM API is unreachable.\n// Intentional gaps: definitions are stubs; lemma body empty → expected compile/verify fail or skip.\nmodule HornSlopeSmokeFixture {\n  function SlopeSq(a: real, b: real, c: real, d: real, f: real,\n                   g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    0.0  // stub: deliberately wrong / incomplete vs Horn formula\n  }\n\n  lemma FlatSlopeZero(C: real, w: real)\n    requires w > 0.0\n    ensures SlopeSq(C, C, C, C, C, C, C, C, w) == 0.0\n  {\n  }\n}\n",
+  "verify_status": "TOOLCHAIN_MISSING"
+}

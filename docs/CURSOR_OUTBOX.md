@@ -837,6 +837,39 @@ task16-W1 verdict = PASS
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W2 基建(task16-W2)
+
+```
+[task]      task16-W2 / harness + smoke
+[step]      本机交付 harness(run_generate/run_verify/score_semantic+schema) + smoke(GPB-001-flat×fixture); live API 探测失败如实记录
+[cmd]       python experiments/p2_llm/harness/smoke_w2.py --dry-run ; python -c api_probe ; python experiments/p2_llm/harness/smoke_w2.py --task GPB-001-flat --backend fixture --prompt P0
+[rc]        0 (smoke_w2); api_probe live_api_ok=false
+[key lines]
+  experiments/p2_llm/harness/{common,run_generate,run_verify,score_semantic,smoke_w2}.py + schema_task.json
+  validate_tasks: 22/22 OK
+  prompt_template_sha256(P0)=44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc
+  api_probe: code.newcli.com ConnectTimeout; api.anthropic.com HTTP 403 Request not allowed
+  generate: status=GENERATED_FIXTURE model=fixture-offline-w2 raw_text_chars=643
+  verify: status=TOOLCHAIN_MISSING compile_rc=null verify_rc=null (本机无 dafny;未编造 verify@)
+  score: fidelity_label=VERIFY_SKIPPED name_overlap=[FlatSlopeZero,SlopeSq]
+  results: experiments/p2_llm/results/scored/smoke_w2.json + api_probe_w2.json
+[gates]     schema 22/22 PASS; gold-leak assert on prompt PASS; write-guard(formal/papers forbidden) PASS; honesty(no fake verify@) PASS; live_model_api BLOCKED→fixture
+[verdict]   PASS
+[blocker]   (非 blocker,记给 W3) live Anthropic 出口不可用: gateway timeout + api.anthropic.com 403; W3 主实验需 PI 提供可达 API/代理或改在 AutoDL 出口跑 generate
+```
+
+改了什么:
+- 新: `experiments/p2_llm/harness/` 全套(含 fixtures/smoke_GPB-001-flat.dfy)
+- 新: `experiments/p2_llm/results/scored/` smoke + probe + semantic/verify JSON
+- 新: `experiments/p2_llm/results/raw/GPB-001-flat__fixture-offline-w2__P0__k0__r0.{json,dfy}`
+- 改: `docs/P2_AIMATH/DESIGN.md` W2 checklist/changelog; `docs/P2_AIMATH/RISKS.md` API 连通条目
+- 改: INBOX §A `STATUS: W3/PENDING` (自推进链 A.11.9)
+未改 papers/P2 manuscript(FORM LOCK)。未编造任何 verify@ 数字。未 git push。
+
+task16-W2 verdict = PASS
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 
