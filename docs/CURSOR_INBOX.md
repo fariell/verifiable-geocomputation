@@ -8,12 +8,12 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/BLOCKED
-UPDATED: 2026-09-09 02:30
-TASK: **task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」W3 主实验 L1**
-      (W3 batch runner READY 2026-09-09；live API BLOCKED — gateway timeout + anthropic 403;
-       PI 解阻:可达 ANTHROPIC_BASE_URL/key 或 AutoDL 出口后改回 W3/PENDING;
-       9 周日程 W2 基建 → W3–W5 主实验 → W6–W7 撰写 → W8–W9 投稿 11/10)
+STATUS: W3.5/PENDING
+UPDATED: 2026-09-09 02:52
+TASK: **task16-W3.5 · 解阻双线**(PI 02:50 拍板,见 §A.12)
+      线 1: LLM API 端点可达性实测 → 出可达性矩阵 + 推荐方案(只报实测,不臆测)
+      线 2: 离线基建(不依赖 API)—— 评分单测 / 结果表骨架 / 失败模式标注手册 / figure 脚本
+      (W3 batch runner 已 READY;schema 22/22、prompt dry 28/28 已过;唯一缺口 = live API)
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:
@@ -725,6 +725,84 @@ W9/PENDING ──完成──▶ STATUS: DONE
 [verdict]   PASS / FAIL / BLOCKED
 [blocker]   (仅 BLOCKED/FAIL 时填)
 ```
+
+---
+
+### A.12 · task16-W3.5 解阻双线(PI 2026-09-09 02:50 拍板)
+
+**背景**:W2/W3 卡在同一个点 —— 本机出口访问不到 live LLM API:
+```
+code.newcli.com    → ConnectTimeout ~42s
+api.anthropic.com  → HTTP 403 "Request not allowed"   ← 注意是 403(通了但被拒),不是网络不通
+```
+W3 的离线部分已全过(schema 22/22、L1 14 题、prompt dry-validate 28/28),
+`run_l1_batch.py --require-live` 是唯一缺口。**未编造任何 verify@ 数字,诚实协议保持。**
+
+#### A.12.1 线 1 · LLM API 端点可达性实测(先做,最高优先级)
+
+**铁律:只报实测数字,不许臆测、不许凭印象下结论。**
+
+对每个候选端点做四层探测,逐项记录:
+
+| 层 | 检查 | 记录字段 |
+|---|---|---|
+| L1 | DNS 解析 | resolve_ok / resolve_ip / resolve_ms |
+| L2 | TCP 连接 | tcp_ok / tcp_ms |
+| L3 | TLS 握手 | tls_ok / tls_ms / cert_cn |
+| L4 | HTTP 探针 | http_status / http_ms / err_class(DNS/TCP/TLS/HTTP-403/HTTP-401/timeout/other) |
+
+**候选端点清单**(逐个实测,一个不落):
+
+| # | 端点 | 说明 |
+|---|---|---|
+| 1 | `https://api.anthropic.com/v1/messages` | 官方,当前 403 |
+| 2 | `https://openrouter.ai/api/v1/chat/completions` | 聚合,OpenAI 兼容,一个 key 通吃 Claude/GPT/Gemini |
+| 3 | `https://api.siliconflow.cn/v1/chat/completions` | 硅基流动,国内直连,OpenAI 兼容 |
+| 4 | `https://api.deepseek.com/chat/completions` | DeepSeek,国内直连 |
+| 5 | `https://open.bigmodel.cn/api/paas/v4/chat/completions` | 智谱 GLM |
+| 6 | `https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions` | 通义千问,OpenAI 兼容模式 |
+| 7 | `https://api.moonshot.cn/v1/chat/completions` | Moonshot/Kimi |
+| 8 | 环境变量代理探测 | 检查 `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` 是否已设;若已设,再测一次 #1 看是否解阻 |
+
+**无 key 时的处理**:不要因为没 key 就跳过。**先做 L1–L3**(DNS/TCP/TLS 不需要 key),
+再加一次**无 key 的 L4 探针** —— 401/403 恰恰证明"可达"(被拒 ≠ 不通),而 timeout/DNS 失败
+证明"不可达"。这两类必须区分清楚,这是本次探测的核心价值。
+
+**产物**:
+- `experiments/p2_llm/results/api_reachability.json` — 机器可读,每端点 4 层字段全记录
+- `docs/P2_AIMATH/API_REACHABILITY.md` — 人读矩阵表 + **推荐方案**(分级:
+  推荐 / 可用 / 不可用),并明确写出"需要 PI 提供什么"(key / 代理 / 账号)
+
+**门禁**:`rc=0` 即 PASS(探测本身成功即达标,**不要求任何端点真的可用**)。
+探测出"全部不可达"也是有效结果,如实报。
+
+#### A.12.2 线 2 · 离线基建(不依赖 API,与线 1 并行/串行均可)
+
+目的:等 API 一通就能直接灌数据,不浪费等待窗口。
+
+| # | 交付物 | 验收 |
+|---|---|---|
+| 1 | `tests/test_scoring.py` — `score_semantic.py` 单元测试 | 覆盖:编译失败 / verify 失败 / verify 通过但语义漂移(F7)/ 超时 / 空输出,≥ 8 case 全过 |
+| 2 | `docs/P2_AIMATH/RESULT_SCHEMAS.md` — 结果表骨架 | 主表(4 模型 × 3 prompt × 21 题 × k=5)列名 + 每列口径 + 空表 markdown 模板 |
+| 3 | `docs/P2_AIMATH/ANNOTATION_MANUAL.md` — 失败模式标注手册 | F1–F8 每类给 ≥1 个真实 GPB 示例 + 判定规则 + 边界情况(多人标注一致性怎么保证) |
+| 4 | `experiments/p2_llm/harness/make_figures.py` — 图生成脚本 | 输入结果 JSON,输出 4 图:难度分层柱图 / 模型对比 / repair gain 曲线 / 失败模式分布 |
+| 5 | `experiments/p2_llm/harness/run_all_offline.py` — 一键离线自检 | 跑 fixture → 评分 → 出图,全链路不碰网络,rc=0 |
+
+**门禁**:5 项全交付 + 离线自检 rc=0 = PASS。
+
+#### A.12.3 自推进与回报
+
+- 双线做完 → 把 §A STATUS 改成 `W3/PENDING`(**不是 W4**),让 watcher 重跑 W3 主实验;
+  若线 1 探测到可用端点且环境里有 key,则**直接用该端点试跑 1 个 cell**(GPB-001-flat, P0, k=1),
+  拿到真实 API 响应后 STATUS 改 `W3/PENDING` 并说明"已验证通路"。
+- 若线 1 全不可达 → STATUS 保持 `W3/BLOCKED-PI`,并在 OUTBOX 明确列出**需要 PI 提供的三选一**:
+  (a) 可用 base_url + key / (b) 代理地址 / (c) 改用某国产模型的决定。
+- OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3.5 解阻(task16-W3.5)`,
+  含 `[task]/[step]/[cmd]/[rc]/[key lines]/[gates]/[verdict]/[blocker]`。
+- 两段独立 commit:`feat(p2_llm): task16-W3.5a API 可达性实测` / `feat(p2_llm): task16-W3.5b 离线基建`。
+
+**绝对禁止**:编造任何 `verify@` / `compile@` 数字;把 fixture 结果当真实模型结果上报;
+修改 `papers/` 下任何内容(P1 形态锁);git push。
 
 ---
 
