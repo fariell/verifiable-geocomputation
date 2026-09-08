@@ -79,3 +79,7 @@ autoDL登录信息.txt
 *登录信息*.txt
 autodl.env
 scripts/autodl/autodl.env
+
+# autorun (Cursor headless watcher) — logs + concurrency lock
+_autorun/logs/
+_autorun/.running

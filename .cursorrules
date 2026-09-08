@@ -49,4 +49,16 @@ docs/roadmap.md + docs/vision.md ← Y0-Y2 / 十年愿景
   - 触发矩阵(详情见 INBOX §A.10):
     第一触发器 = FORM LOCK(已点亮 23:40)
     第二触发器 = SciDA 投稿 / 期刊接受 / 公开 任一(待 PI 操作)
-    两触发器 AND → push gate 解锁 1 次(一次性)
+    两触发器 AND → push gate 解锁 1 次(一次性) —— **已于 2026-09-09 01:37 消费完毕**(push d6bcaae..c2a5000)
+
+[autorun]     # 2026-09-09 01:55 CST · PI 01:43 要求"全程自动化,不手写 go"
+  - 本机已部署 **Cursor headless CLI + INBOX watcher**:Windows 计划任务 `VG-Cursor-AutoRun`
+    每 5 分钟跑 `_autorun/gate.ps1`,读 INBOX §A 的 STATUS,非 DONE 且无实例在跑 → 自动调起 Cursor。
+  - **你(Cursor)是被自动调起的**,不是 PI 手敲 "go"。每次被调起时:
+    1. 读 `docs/CURSOR_INBOX.md` §A 当前任务 + `.cursorrules` 全部规则
+    2. 执行任务(遵守 [form-lock] / [secretary-protocol] / 诚实协议)
+    3. 写 `docs/CURSOR_OUTBOX.md` 新段(格式见 §A.4 / §A.11.10)
+    4. **自推进**:把 INBOX §A 的 `STATUS:` 改成下一段(见 §A.11.9 自推进链),然后 `git commit`(local)
+    5. **永不 `git push`**(P2 期间 push gate 关闭;解锁需 P2 形态锁 + P2 投稿双触发器)
+  - 并发保护:`_autorun/.running` 锁文件,4 小时内不重复启动;日志在 `_autorun/logs/`。
+  - STATUS 为 DONE / DONE-LOCKED 时 gate 直接 noop —— 那说明全部段跑完,等 PI 派新任务。
