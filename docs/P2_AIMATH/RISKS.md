@@ -61,7 +61,7 @@
 | YAML schema 漂移 | W2 加 jsonschema 校验 |
 | Windows 路径 / PowerShell | harness 用 pathlib；云端 bash |
 | manim / wolfram 与本评测无关 | 不依赖；reference 只用 .py/.dfy/.lean |
-| `ANTHROPIC_BASE_URL` (code.newcli.com) ConnectTimeout | W2 已实测；fallback `api.anthropic.com` 仍 403；W3 需 PI 提供可达 key/代理或 AutoDL 出口 |
+| `ANTHROPIC_BASE_URL` (code.newcli.com) ConnectTimeout | W2+W3 复测同败；fallback `api.anthropic.com` 仍 403；**W3 STATUS=W3/BLOCKED** 等 PI 可达 key/代理或 AutoDL 出口；gate.ps1 对 BLOCKED noop 防烧 token |
 
 ## 7. 法律与伦理
 

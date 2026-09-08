@@ -28,6 +28,8 @@ Log "STATUS line: $status"
 
 if (-not $status) { Log "ERROR: no STATUS line"; exit 1 }
 if ($status -match 'DONE') { Log "noop (STATUS is DONE)"; exit 0 }
+# BLOCKED = waiting on PI (e.g. live API egress). Do not burn Cursor tokens every 5 min.
+if ($status -match 'BLOCKED') { Log "noop (STATUS is BLOCKED; waiting on PI)"; exit 0 }
 
 # concurrency guard: skip if an agent run is already in flight
 if (Test-Path $lock) {

@@ -8,10 +8,11 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/PENDING
-UPDATED: 2026-09-09 02:25
+STATUS: W3/BLOCKED
+UPDATED: 2026-09-09 02:30
 TASK: **task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」W3 主实验 L1**
-      (W2 基建 DONE 2026-09-09 02:25;下一周:L1 主实验需 live API;
+      (W3 batch runner READY 2026-09-09；live API BLOCKED — gateway timeout + anthropic 403;
+       PI 解阻:可达 ANTHROPIC_BASE_URL/key 或 AutoDL 出口后改回 W3/PENDING;
        9 周日程 W2 基建 → W3–W5 主实验 → W6–W7 撰写 → W8–W9 投稿 11/10)
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。

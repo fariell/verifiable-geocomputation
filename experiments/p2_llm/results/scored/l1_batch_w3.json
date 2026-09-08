@@ -1,0 +1,50 @@
+{
+  "batch": "task16-W3-L1",
+  "call_date": "2026-09-08",
+  "model_requested": "claude-sonnet-4-20250514",
+  "prompts": [
+    "P0",
+    "P1"
+  ],
+  "k": 1,
+  "backend": "anthropic",
+  "steps": [
+    {
+      "step": "validate_tasks",
+      "n_tasks": 22,
+      "n_ok": 22
+    },
+    {
+      "step": "dry_validate_prompts",
+      "n": 28,
+      "n_ok": 28,
+      "failed": []
+    },
+    {
+      "step": "api_probe",
+      "live_api_ok": false,
+      "error": "all Anthropic endpoints failed: https://code.newcli.com/claude/v1/messages: ConnectTimeout: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。 | https://api.anthropic.com/v1/messages: HTTP 403: {\n  \"error\": {\n    \"type\": \"forbidden\",\n    \"message\": \"Request not allowed\"\n  }\n}",
+      "call_date": "2026-09-08"
+    }
+  ],
+  "n_l1": 14,
+  "l1_ids": [
+    "GPB-001-flat",
+    "GPB-001-nonneg-lean",
+    "GPB-002-planar",
+    "GPB-005-lap-lean",
+    "GPB-007-hessian",
+    "GPB-010-pit",
+    "GPB-011-plane-lean",
+    "GPB-015-basin",
+    "GPB-019-quad",
+    "GPB-P002-idem",
+    "GPB-P002-mono",
+    "GPB-P002-nd-lean",
+    "GPB-P002bis-raise",
+    "GPB-T6-terminate-lean"
+  ],
+  "verdict": "BLOCKED",
+  "blocker": "live Anthropic unreachable on this host (error=all Anthropic endpoints failed: https://code.newcli.com/claude/v1/messages: ConnectTimeout: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。 | https://api.anthropic.com/v1/messages: HTTP 403: {\n  ). Need reachable ANTHROPIC_BASE_URL / key or AutoDL egress. No verify@ numbers fabricated.",
+  "cells": []
+}

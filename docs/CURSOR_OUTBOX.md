@@ -870,6 +870,38 @@ task16-W2 verdict = PASS
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 主实验 L1(task16-W3)
+
+```
+[task]      task16-W3 / L1 主实验启动
+[step]      本机:修 P1 gold-leak 误报 + run_l1_batch + dry-validate 28/28 + require-live probe
+[cmd]       python experiments/p2_llm/harness/run_l1_batch.py --dry-run-prompts --prompts P0,P1 ; python experiments/p2_llm/harness/run_l1_batch.py --require-live --prompts P0,P1 --k 1 --model claude-sonnet-4-20250514
+[rc]        0 (dry-run); 2 (require-live = BLOCKED)
+[key lines]
+  validate_tasks: 22/22 OK
+  L1 ids: 14 (GPB-001-flat … GPB-T6-terminate-lean)
+  dry_validate_prompts P0+P1: 28/28 OK (after leak-scan fix)
+  api_probe_w3: code.newcli.com ConnectTimeout ~42s; api.anthropic.com HTTP 403 Request not allowed
+  live_api_ok=false ; cells=[] ; NO verify@ claimed
+  gate.ps1: noop on STATUS matching BLOCKED (stop token burn)
+[gates]     schema PASS; L1 prompt dry PASS; live generate BLOCKED; honesty(no fake verify@) PASS
+[verdict]   BLOCKED
+[blocker]   live Anthropic 出口不可用(同 W2)。PI 解阻后把 INBOX §A STATUS 改回 W3/PENDING → watcher 重跑 run_l1_batch
+```
+
+改了什么:
+- 新: `experiments/p2_llm/harness/run_l1_batch.py` (resume-safe; --require-live; fixture 不进 metric)
+- 改: `experiments/p2_llm/harness/common.py` (P1 few-shot 从 leak 扫描排除; 忽略装饰 banner)
+- 新: `experiments/p2_llm/results/scored/{api_probe_w3,l1_batch_w3}.json`
+- 改: `docs/P2_AIMATH/{DESIGN,RISKS}.md` W3 checklist/changelog/熔断说明
+- 改: `_autorun/gate.ps1` BLOCKED → noop
+- 改: INBOX §A `STATUS: W3/BLOCKED` (**不**进 W4;等 live API)
+未改 papers/P2 manuscript(FORM LOCK)。未编造任何 verify@。未 git push。
+
+task16-W3 verdict = BLOCKED
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

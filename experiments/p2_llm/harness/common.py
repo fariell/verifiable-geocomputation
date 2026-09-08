@@ -197,15 +197,31 @@ def render_prompt(
     }
     for k, v in replacements.items():
         filled = filled.replace(k, v)
-    assert_no_gold_leak(filled, task)
+    # Exclude intentional few-shot body from leak scan (shared helpers / banners OK there).
+    assert_no_gold_leak(filled, task, ignore_substrings=[fewshot_excerpt] if fewshot_excerpt else None)
     return filled
 
 
-def assert_no_gold_leak(prompt_text: str, task: dict[str, Any]) -> None:
-    """Hard gate: prompt must not contain gold_formal body (RISKS §8 #3)."""
+def _is_decorative_chunk(chunk: str) -> bool:
+    """Banner / rule lines are shared across many formal files — not a gold leak signal."""
+    alnum = sum(ch.isalnum() for ch in chunk)
+    return alnum < 8
+
+
+def assert_no_gold_leak(
+    prompt_text: str,
+    task: dict[str, Any],
+    *,
+    ignore_substrings: list[str] | None = None,
+) -> None:
+    """Hard gate: prompt must not contain this task's gold_formal body (RISKS §8 #3)."""
     gold_path = REPO_ROOT / task["gold_formal"]
     if not gold_path.is_file():
         return
+    check_text = prompt_text
+    for sub in ignore_substrings or []:
+        if sub:
+            check_text = check_text.replace(sub, "\n/* fewshot omitted from leak scan */\n")
     gold = gold_path.read_text(encoding="utf-8", errors="replace")
     # Strip comments/headers; require a distinctive non-trivial contiguous chunk
     body_lines = [
@@ -216,9 +232,13 @@ def assert_no_gold_leak(prompt_text: str, task: dict[str, Any]) -> None:
         and not ln.strip().startswith("--")
         and not ln.strip().startswith("/-")
     ]
-    chunks = [ln.strip() for ln in body_lines if len(ln.strip()) >= 40]
+    chunks = [
+        ln.strip()
+        for ln in body_lines
+        if len(ln.strip()) >= 40 and not _is_decorative_chunk(ln.strip())
+    ]
     for chunk in chunks[:30]:
-        if chunk in prompt_text:
+        if chunk in check_text:
             raise RuntimeError(
                 f"GOLD LEAK: prompt contains gold_formal body chunk from {task['gold_formal']!r}"
             )
