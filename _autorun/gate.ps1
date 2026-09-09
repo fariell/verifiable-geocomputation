@@ -63,12 +63,22 @@ if ($status -match 'BLOCKED') {
 # concurrency guard: skip if an agent run is already in flight
 if (Test-Path $lock) {
     $age = (Get-Date) - (Get-Item $lock).LastWriteTime
-    if ($age.TotalMinutes -lt 240) {
+    # A lock only counts as real while a cursor-agent node process is actually alive.
+    # If the scheduler (or a crash) kills gate.ps1 mid-run, finally{} never executes and
+    # the lock is orphaned -> every later tick skips and the chain stalls forever.
+    # Seen 2026-09-09 23:37: agent died with an empty log, lock blocked the chain 45+ min.
+    $alive = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |
+             Where-Object { $_.CommandLine -match 'cursor-agent' }
+    if (-not $alive) {
+        Log "orphan lock ($([int]$age.TotalMinutes) min old, no live cursor-agent node) - removing"
+        Remove-Item $lock -Force
+    } elseif ($age.TotalMinutes -lt 240) {
         Log "skip: another run in flight ($([int]$age.TotalMinutes) min old)"
         exit 0
+    } else {
+        Log "stale lock ($([int]$age.TotalMinutes) min) - removing"
+        Remove-Item $lock -Force
     }
-    Log "stale lock ($([int]$age.TotalMinutes) min) - removing"
-    Remove-Item $lock -Force
 }
 
 # locate newest cursor-agent version dir
@@ -97,9 +107,12 @@ New-Item -ItemType File -Path $lock -Force | Out-Null
 $alog = Join-Path $logDir "agent-$stamp.log"
 try {
     Log "launching agent (ver $($ver.Name))"
-    $out = & $node $idx -p --trust --force --output-format text $prompt 2>&1 | Out-String
-    $out | Out-File -FilePath $alog -Encoding UTF8
-    Log "agent finished, log: $alog"
+    # Stream to disk line by line. Buffering everything in memory and writing once at
+    # the end means a killed agent leaves a 0-byte log with zero diagnostics.
+    "agent started $((Get-Date).ToString('s')) pid=$PID" | Out-File -FilePath $alog -Encoding UTF8
+    & $node $idx -p --trust --force --output-format text $prompt 2>&1 |
+        Tee-Object -FilePath $alog -Append | Out-Null
+    Log "agent finished, exit=$LASTEXITCODE, log: $alog"
 } catch {
     Log "ERROR: agent invocation failed - $_"
 } finally {
