@@ -902,6 +902,50 @@ task16-W3 verdict = BLOCKED
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3.5 解阻(task16-W3.5)
+
+```
+[task]      task16-W3.5 / 解阻双线
+[step]      线1: L1–L4 实测 8 端点 → api_reachability.json + API_REACHABILITY.md; 用已有 ANTHROPIC_AUTH_TOKEN 试 1 cell
+            线2: test_scoring + RESULT_SCHEMAS + ANNOTATION_MANUAL + make_figures + run_all_offline
+[cmd]       python experiments/p2_llm/harness/probe_api_reachability.py --timeout 25
+            python -c call_messages_api(PONG)  # live cell
+            python -m pytest tests/test_scoring.py -v
+            python experiments/p2_llm/harness/run_all_offline.py
+[rc]        probe=0; live_cell=fail(403/timeout); pytest=0 (10 passed); offline=0
+[key lines]
+  api_reachability: n_usable=7 n_unusable=1 recommended_id=siliconflow
+  anthropic L4=403 Request not allowed (DNS/TCP/TLS all ok; 685.5ms)
+  openrouter/siliconflow/deepseek/zhipu/dashscope/moonshot L4=401 (reachable, no matching key)
+  proxy env: none; ANTHROPIC_AUTH_TOKEN=true; other provider keys=false
+  live cell: code.newcli.com ConnectTimeout; api.anthropic.com HTTP 403 (with token)
+  pytest: 10/10 PASS (empty/compile-fail/verify-fail/drift-F7/timeout/skip/…)
+  offline_selfcheck: schema_ok=true figures_n=4 n_live=0
+  docs: API_REACHABILITY.md / RESULT_SCHEMAS.md / ANNOTATION_MANUAL.md
+[gates]     线1 probe rc=0 PASS; 线2 5 交付+offline rc=0 PASS; live generate FAIL(缺匹配 key/Anthropic 403); honesty(no fake verify@) PASS
+[verdict]   PASS (双线基建) + BLOCKED-PI (live 通路未打通)
+[blocker]   需 PI 三选一: (a) SILICONFLOW_API_KEY 或 DEEPSEEK/DASHSCOPE key
+            (b) HTTPS_PROXY 解 Anthropic 403
+            (c) OPENROUTER_API_KEY 或拍板改用国产模型-only
+            解阻后把 STATUS 改 W3/PENDING → watcher 重跑 require-live
+```
+
+改了什么:
+- 新: `experiments/p2_llm/harness/probe_api_reachability.py`
+- 新: `experiments/p2_llm/results/api_reachability.json` + `scored/w35_live_cell_probe.json`
+- 新: `docs/P2_AIMATH/API_REACHABILITY.md`
+- 新: `tests/test_scoring.py` (10 cases)
+- 新: `docs/P2_AIMATH/{RESULT_SCHEMAS,ANNOTATION_MANUAL}.md`
+- 新: `experiments/p2_llm/harness/{make_figures,run_all_offline}.py`
+- 新: `experiments/p2_llm/results/figures/fig_*.png` ×4 + offline_selfcheck_w35.json
+- 改: `score_semantic.py` 增加 `timed_out` → `TIMEOUT` 标签
+- 改: INBOX §A `STATUS: W3/BLOCKED-PI` (非 W4;等 PI key/代理;gate 对 BLOCKED noop 防烧 token)
+未改 papers/P2 manuscript(FORM LOCK)。未编造任何 verify@。未 git push。
+
+task16-W3.5 verdict = PASS (基建) / live = BLOCKED-PI
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

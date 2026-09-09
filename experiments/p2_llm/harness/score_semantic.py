@@ -76,6 +76,7 @@ def score_pair(
     generated_text: str,
     verify_rc: int | None,
     compile_rc: int | None,
+    timed_out: bool = False,
 ) -> dict[str, Any]:
     gold_path = REPO_ROOT / task["gold_formal"]
     gold_text = (
@@ -87,8 +88,8 @@ def score_pair(
     kw = keyword_hits(str(task.get("natural_spec", "")), generated_text)
 
     # Flags — never claim PASS verify without toolchain rc
-    verified = verify_rc == 0
-    compile_ok = compile_rc == 0
+    verified = verify_rc == 0 and not timed_out
+    compile_ok = compile_rc == 0 and not timed_out
     trivial_assume = bool(re.search(r"\bassume\b", generated_text, re.I))
     emptyish = len(generated_text.strip()) < 40
 
@@ -101,7 +102,9 @@ def score_pair(
         drift_suspect = True
 
     fidelity_label = "UNKNOWN"
-    if emptyish:
+    if timed_out:
+        fidelity_label = "TIMEOUT"
+    elif emptyish:
         fidelity_label = "EMPTY"
     elif not compile_ok and compile_rc is not None:
         fidelity_label = "UNCOMPILED"
@@ -123,6 +126,7 @@ def score_pair(
         "expected_verdict": task.get("expected_verdict"),
         "compile_rc": compile_rc,
         "verify_rc": verify_rc,
+        "timed_out": timed_out,
         "name_overlap": name_overlap,
         "n_gen_names": len(gen_names),
         "n_gold_names": len(gold_names),

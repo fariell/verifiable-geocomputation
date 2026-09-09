@@ -1,0 +1,96 @@
+{
+  "schema_version": "p2_llm_offline_selfcheck_v1",
+  "call_date": "2026-09-09",
+  "honesty": "fixture/demo only; n_live must be 0; no verify@ claimed",
+  "validate_tasks": {
+    "n_tasks": 22,
+    "n_ok": 22
+  },
+  "score_cases": [
+    {
+      "fidelity_label": "EMPTY",
+      "drift_suspect": false
+    },
+    {
+      "fidelity_label": "UNCOMPILED",
+      "drift_suspect": false
+    },
+    {
+      "fidelity_label": "VERIFY_SKIPPED",
+      "drift_suspect": false
+    },
+    {
+      "fidelity_label": "TIMEOUT",
+      "drift_suspect": false
+    },
+    {
+      "fidelity_label": "EMPTY",
+      "drift_suspect": true
+    }
+  ],
+  "cells": [
+    {
+      "task_id": "GPB-001-flat",
+      "difficulty": "L1",
+      "model": "fixture-offline-w35",
+      "prompt_id": "P0",
+      "verify_ok": false,
+      "compile_ok": false,
+      "repair_round": 0,
+      "failure_codes": [
+        "F1"
+      ],
+      "status": "GENERATED_FIXTURE"
+    },
+    {
+      "task_id": "demo-L2",
+      "difficulty": "L2",
+      "model": "fixture-offline-w35",
+      "prompt_id": "P0",
+      "verify_ok": false,
+      "compile_ok": true,
+      "repair_round": 1,
+      "failure_codes": [
+        "F5"
+      ],
+      "status": "GENERATED_FIXTURE"
+    },
+    {
+      "task_id": "demo-L3",
+      "difficulty": "L3",
+      "model": "fixture-offline-w35",
+      "prompt_id": "P2",
+      "verify_ok": false,
+      "compile_ok": true,
+      "repair_round": 2,
+      "failure_codes": [
+        "F7"
+      ],
+      "status": "GENERATED_FIXTURE"
+    }
+  ],
+  "aggregates": {
+    "n_cells_total": 3,
+    "n_live": 0,
+    "n_fixture_excluded": 3,
+    "verify_by_difficulty": {},
+    "n_by_difficulty": {},
+    "verify_by_model": {},
+    "n_by_model": {},
+    "verify_by_repair_round": {},
+    "failure_counts": {},
+    "note": "Rates are 0 when n_live=0; not paper metrics."
+  },
+  "figure_paths": [
+    "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\figures\\fig_difficulty_bars.png",
+    "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\figures\\fig_model_compare.png",
+    "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\figures\\fig_repair_gain.png",
+    "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\figures\\fig_failure_taxonomy.png"
+  ],
+  "gates": {
+    "schema_ok": true,
+    "score_cases_n": 5,
+    "figures_n": 4,
+    "n_live": 0
+  }
+}

@@ -8,12 +8,12 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3.5/PENDING
-UPDATED: 2026-09-09 02:52
-TASK: **task16-W3.5 · 解阻双线**(PI 02:50 拍板,见 §A.12)
-      线 1: LLM API 端点可达性实测 → 出可达性矩阵 + 推荐方案(只报实测,不臆测)
-      线 2: 离线基建(不依赖 API)—— 评分单测 / 结果表骨架 / 失败模式标注手册 / figure 脚本
-      (W3 batch runner 已 READY;schema 22/22、prompt dry 28/28 已过;唯一缺口 = live API)
+STATUS: W3/BLOCKED-PI
+UPDATED: 2026-09-09 14:06
+TASK: **task16-W3 · L1 主实验**(等 PI 解阻后重跑 `--require-live`)
+      W3.5 双线已完成:7/8 端点网络可达;推荐 siliconflow/deepseek 但缺匹配 key;
+      Anthropic 有 `ANTHROPIC_AUTH_TOKEN` 仍 HTTP 403。见 OUTBOX W3.5 + API_REACHABILITY.md。
+      PI 三选一:(a) SILICONFLOW/DEEPSEEK/DASHSCOPE key (b) HTTPS_PROXY (c) OpenRouter/改模型决定
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:
