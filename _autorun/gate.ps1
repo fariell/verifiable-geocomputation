@@ -33,11 +33,15 @@ if ($status -match 'DONE') { Log "noop (STATUS is DONE)"; exit 0 }
 # PI stores keys as User/Machine env vars (never in git). Read them straight from the
 # registry so a fresh scheduler process sees them, and inject into this process so that
 # the agent and any python child inherit them.
+# Only OpenAI-compatible endpoints unblock the run: harness/openai_compat.py speaks the
+# OpenAI protocol, so an Anthropic key is useless here. On 2026-09-09 23:37 the gate
+# auto-unblocked on ANTHROPIC_AUTH_TOKEN alone and burned a 50-minute agent run that
+# produced nothing. Anthropic keys are still injected for tooling, never used as a signal.
 $providerKeys = @(
     'SILICONFLOW_API_KEY','DEEPSEEK_API_KEY','DASHSCOPE_API_KEY',
-    'ZHIPU_API_KEY','MOONSHOT_API_KEY','OPENROUTER_API_KEY',
-    'ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN'
+    'ZHIPU_API_KEY','MOONSHOT_API_KEY','OPENROUTER_API_KEY'
 )
+$injectOnly = @('ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN')
 $present = @()
 foreach ($k in $providerKeys) {
     $v = [Environment]::GetEnvironmentVariable($k, 'User')
@@ -47,7 +51,13 @@ foreach ($k in $providerKeys) {
         Set-Item -Path "env:$k" -Value $v
     }
 }
-Log "provider keys present: $([string]::Join(',', $present))"
+foreach ($k in $injectOnly) {
+    $v = [Environment]::GetEnvironmentVariable($k, 'User')
+    if (-not $v) { $v = [Environment]::GetEnvironmentVariable($k, 'Machine') }
+    if ($v) { Set-Item -Path "env:$k" -Value $v }
+}
+Log "provider keys present (OpenAI-compat, unblock signal): $([string]::Join(',', $present))"
+if ($present.Count -eq 0) { Log "WARN: no OpenAI-compat key; harness cannot run live" }
 
 # BLOCKED = waiting on PI (e.g. missing API key). Do not burn Cursor tokens every 5 min.
 # Exception: BLOCKED-PI auto-unblocks the moment a provider key shows up, so PI needs
