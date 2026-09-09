@@ -1,0 +1,348 @@
+{
+  "schema_version": "p2_llm_api_reachability_v1",
+  "call_date": "2026-09-09",
+  "probed_at_utc": "2026-09-09T06:01:49.418858+00:00",
+  "timeout_s": 25.0,
+  "proxy_env": {
+    "proxy_keys_set": [],
+    "proxy_redacted": {
+      "HTTPS_PROXY": null,
+      "HTTP_PROXY": null,
+      "ALL_PROXY": null,
+      "https_proxy": null,
+      "http_proxy": null,
+      "all_proxy": null
+    }
+  },
+  "api_keys_present": {
+    "ANTHROPIC_API_KEY": false,
+    "ANTHROPIC_AUTH_TOKEN": true,
+    "OPENROUTER_API_KEY": false,
+    "OPENAI_API_KEY": false,
+    "DEEPSEEK_API_KEY": false,
+    "SILICONFLOW_API_KEY": false,
+    "ZHIPU_API_KEY": false,
+    "DASHSCOPE_API_KEY": false,
+    "MOONSHOT_API_KEY": false
+  },
+  "endpoints": [
+    {
+      "id": "anthropic_official",
+      "url": "https://api.anthropic.com/v1/messages",
+      "note": "official Anthropic; historically HTTP 403 from this host",
+      "host": "api.anthropic.com",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "160.79.104.10",
+        "resolve_ips": [
+          "160.79.104.10",
+          "2607:6bc0::10"
+        ],
+        "resolve_ms": 23.0,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 231.6,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 545.4,
+        "cert_cn": "api.anthropic.com",
+        "tls_version": "TLSv1.3",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 403,
+        "http_ms": 685.5,
+        "err_class": "HTTP-403",
+        "body_excerpt": "{   \"error\": {     \"type\": \"forbidden\",     \"message\": \"Request not allowed\"   } }",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "openrouter",
+      "url": "https://openrouter.ai/api/v1/chat/completions",
+      "note": "aggregator OpenAI-compatible",
+      "host": "openrouter.ai",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "104.18.2.115",
+        "resolve_ips": [
+          "104.18.2.115",
+          "104.18.3.115",
+          "2606:4700::6812:273",
+          "2606:4700::6812:373"
+        ],
+        "resolve_ms": 21.3,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 331.7,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 474.7,
+        "cert_cn": "openrouter.ai",
+        "tls_version": "TLSv1.3",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 401,
+        "http_ms": 966.6,
+        "err_class": "HTTP-401",
+        "body_excerpt": "{\"error\":{\"message\":\"No cookie auth credentials found\",\"code\":401}}",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "siliconflow",
+      "url": "https://api.siliconflow.cn/v1/chat/completions",
+      "note": "SiliconFlow CN OpenAI-compatible",
+      "host": "api.siliconflow.cn",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "101.132.62.140",
+        "resolve_ips": [
+          "101.132.62.140",
+          "139.196.152.242",
+          "47.102.215.139",
+          "47.102.37.23",
+          "47.103.87.49"
+        ],
+        "resolve_ms": 18.8,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 82.6,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 223.0,
+        "cert_cn": "*.siliconflow.cn",
+        "tls_version": "TLSv1.3",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 401,
+        "http_ms": 328.1,
+        "err_class": "HTTP-401",
+        "body_excerpt": "{\"code\":30014,\"data\":null,\"message\":\"Token is invalid.\"}",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "deepseek",
+      "url": "https://api.deepseek.com/chat/completions",
+      "note": "DeepSeek CN",
+      "host": "api.deepseek.com",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "119.188.175.46",
+        "resolve_ips": [
+          "119.188.175.46",
+          "221.204.163.76"
+        ],
+        "resolve_ms": 21.6,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 60.5,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 148.7,
+        "cert_cn": "api.deepseek.com",
+        "tls_version": "TLSv1.3",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 401,
+        "http_ms": 247.7,
+        "err_class": "HTTP-401",
+        "body_excerpt": "Authentication Fails (governor)",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "zhipu",
+      "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      "note": "Zhipu GLM",
+      "host": "open.bigmodel.cn",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "2408:4006:1129:6c00:6110:6295:21bf:f604",
+        "resolve_ips": [
+          "2408:4006:1129:6c00:6110:6295:21bf:f604",
+          "2408:4006:1129:6c01:20cc:3647:1793:5b2c",
+          "8.137.193.178",
+          "8.137.196.223"
+        ],
+        "resolve_ms": 20.4,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 61.5,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 159.4,
+        "cert_cn": "*.bigmodel.cn",
+        "tls_version": "TLSv1.3",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 401,
+        "http_ms": 278.9,
+        "err_class": "HTTP-401",
+        "body_excerpt": "{\"error\":{\"code\":\"1001\",\"message\":\"Header中未收到Authorization参数，无法进行身份验证。\"}}",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "dashscope",
+      "url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+      "note": "Qwen OpenAI-compatible mode",
+      "host": "dashscope.aliyuncs.com",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "2408:400a:3e:ef00:ce6f:bc78:1534:33d0",
+        "resolve_ips": [
+          "2408:400a:3e:ef00:ce6f:bc78:1534:33d0",
+          "2408:400a:3e:ef02:12f:bd95:e827:51d",
+          "39.96.198.249",
+          "39.96.213.166",
+          "8.140.217.18",
+          "8.152.159.24"
+        ],
+        "resolve_ms": 30.2,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 65.4,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 163.2,
+        "cert_cn": "*.aliyuncs.com",
+        "tls_version": "TLSv1.3",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 401,
+        "http_ms": 236.8,
+        "err_class": "HTTP-401",
+        "body_excerpt": "{\"error\":{\"message\":\"You didn't provide an API key. You need to provide your API key in an Authorization header using Bearer auth (i.e. Authorization: Bearer YOUR_KEY). \",\"type\":\"invalid_request_error\",\"param\":null,\"code\":null},\"request_id\"",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "moonshot",
+      "url": "https://api.moonshot.cn/v1/chat/completions",
+      "note": "Moonshot/Kimi",
+      "host": "api.moonshot.cn",
+      "L1": {
+        "resolve_ok": true,
+        "resolve_ip": "8.147.223.37",
+        "resolve_ips": [
+          "8.147.223.37"
+        ],
+        "resolve_ms": 17.1,
+        "err": null
+      },
+      "L2": {
+        "tcp_ok": true,
+        "tcp_ms": 63.1,
+        "err": null
+      },
+      "L3": {
+        "tls_ok": true,
+        "tls_ms": 228.0,
+        "cert_cn": "*.moonshot.cn",
+        "tls_version": "TLSv1.2",
+        "err": null
+      },
+      "L4": {
+        "http_ok": true,
+        "http_status": 401,
+        "http_ms": 357.2,
+        "err_class": "HTTP-401",
+        "body_excerpt": "{\"error\":{\"message\":\"Incorrect API key provided\",\"type\":\"incorrect_api_key_error\"}}",
+        "err": null
+      },
+      "tier": "可用"
+    },
+    {
+      "id": "anthropic_via_proxy",
+      "url": "https://api.anthropic.com/v1/messages",
+      "note": "proxy re-probe skipped — no proxy env",
+      "host": "api.anthropic.com",
+      "L1": {
+        "resolve_ok": null,
+        "resolve_ip": null,
+        "resolve_ms": null,
+        "err": "skipped"
+      },
+      "L2": {
+        "tcp_ok": null,
+        "tcp_ms": null,
+        "err": "skipped"
+      },
+      "L3": {
+        "tls_ok": null,
+        "tls_ms": null,
+        "cert_cn": null,
+        "err": "skipped"
+      },
+      "L4": {
+        "http_ok": false,
+        "http_status": null,
+        "http_ms": null,
+        "err_class": "skipped-no-proxy",
+        "body_excerpt": null,
+        "err": "no proxy env"
+      },
+      "tier": "不可用",
+      "skipped": true
+    }
+  ],
+  "summary": {
+    "n_probed": 8,
+    "n_usable": 7,
+    "n_unusable": 1,
+    "usable_ids": [
+      "anthropic_official",
+      "openrouter",
+      "siliconflow",
+      "deepseek",
+      "zhipu",
+      "dashscope",
+      "moonshot"
+    ],
+    "recommended_id": "siliconflow",
+    "any_key_present": true
+  }
+}
