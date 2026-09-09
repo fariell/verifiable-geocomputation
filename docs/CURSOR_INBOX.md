@@ -1068,6 +1068,15 @@ API 确实通了(DeepSeek-V3.2,prompt 260 / completion 740 tokens,`est_spend_usd
 **后果**:这一轮跑完只能出 compile@1,**出不了 verify@1 / verify@3 / semantic fidelity**。
 semantic fidelity 是 §A.15.2 定的头条卖点,没有它 KBS 版本就没有核心贡献。不可接受。
 
+#### 假阳性警告(00:55 实测,别被它骗了)
+jsonl 里出现过 1 条 `metric_eligible: true`,但它是 **`"status": "SKIP_EXISTING"`**
+(复用了旧文件、直接跳过),其 `compile_rc` / `verify_rc` **均为 null**,
+`verify_status` 仍是 `TOOLCHAIN_MISSING`。**这不是验证通过,是判定逻辑的漏洞。**
+同一时刻的真实分布:19 条 `TOOLCHAIN_MISSING`,**0 条真实 verify**。
+→ 必须修 `metric_eligible` 的判定:只有 `verify_status` 为真实验证结果
+(非 `TOOLCHAIN_MISSING` / 非 SKIP 类)、且 `compile_rc` 与 `verify_rc` 均非 null
+时才允许置 true。**在真实验证数转 positive 之前,不许宣布 W3 完成。**
+
 ### A.16.2 立即执行(按优先级)
 1. **修好 Dafny 工具链,不许用 TOOLCHAIN_MISSING 糊过去**:
    - 先探测 `dafny /version`;Windows 本机没有或路径错 → 用 **WSL2 Ubuntu 的
