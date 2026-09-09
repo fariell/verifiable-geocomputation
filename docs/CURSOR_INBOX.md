@@ -1054,6 +1054,42 @@ KBS 是 AI 期刊,不是 GIS 期刊。审稿人默认问的是"这对我理解/�
    写一行进度(已完成/总数 + 当前真实数字片段)。
 4. 任何时刻被中断:已落盘数据不得丢失、不得重跑、不得编造补齐。
 
+## §A.16 · 紧急:verify 工具链缺失,主实验核心指标正在空转(2026-09-10 00:5x)
+
+### A.16.1 观察到的硬事实(秘书巡检实测,非推测)
+`experiments/p2_llm/results/raw/l1_full_w3_live.jsonl` 每一条都是:
+```
+"verify_status": "TOOLCHAIN_MISSING", "compile_rc": null, "verify_rc": null,
+"semantic": "VERIFY_SKIPPED", "metric_eligible": false
+```
+API 确实通了(DeepSeek-V3.2,prompt 260 / completion 740 tokens,`est_spend_usd_cum`
+在涨),但生成的 `.dfy` **一个都没被验证**。
+
+**后果**:这一轮跑完只能出 compile@1,**出不了 verify@1 / verify@3 / semantic fidelity**。
+semantic fidelity 是 §A.15.2 定的头条卖点,没有它 KBS 版本就没有核心贡献。不可接受。
+
+### A.16.2 立即执行(按优先级)
+1. **修好 Dafny 工具链,不许用 TOOLCHAIN_MISSING 糊过去**:
+   - 先探测 `dafny /version`;Windows 本机没有或路径错 → 用 **WSL2 Ubuntu 的
+     Dafny 4.11**(已验证可用),经 `wsl -- bash -lc "dafny ..."` 调用。
+   - 修完必须给**证据**:贴一条真实 `dafny verify` 命令 + 完整输出 + exit code。
+2. **不要停掉正在进行的生成**:已落盘的 `.dfy` 是资产,继续生成不影响后续补验。
+3. **加"离线补验"通道(关键)**:写 `harness/verify_backfill.py`,扫描
+   `results/raw/*.dfy`,对未 verify 的逐条跑 `dafny verify`,把 `compile_rc /
+   verify_rc / verify_status / semantic` 回填进 `l1_full_w3_live.jsonl`,
+   `metric_eligible` 置 true。**补验不调用 LLM,不花钱。**
+4. **分批 + 超时保护**:单次 agent 调用不要超过约 3 小时(计划任务硬上限 4H,
+   超时被杀会留孤儿锁);按 (model × prompt_level) 分批,每批结束在 OUTBOX 写进度行。
+   若可行,对同一 cell 的 k 个样本并发请求以缩短总时长。
+5. WSL 也不可用 → 走 AutoDL(见 `docs/autodl-playbook.md`):打包 `.dfy` 上传,
+   云端批量 verify 后取回。**任何情况下不许跳过 verify。**
+
+### A.16.3 诚实红线
+- 不许把 `TOOLCHAIN_MISSING` 计入通过;不许在论文里写任何未经真实 verify 的
+  verify@ / semantic fidelity 数字。
+- 若最终确有子集无法验证,必须在 OUTBOX 明确列出"哪些子集有真实 verify、哪些没有",
+  论文只报有真实结果的部分并声明限制。
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
