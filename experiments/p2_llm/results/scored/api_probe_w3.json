@@ -1,5 +1,7 @@
 {
   "live_api_ok": false,
-  "error": "all Anthropic endpoints failed: https://code.newcli.com/claude/v1/messages: ConnectTimeout: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。 | https://api.anthropic.com/v1/messages: HTTP 403: {\n  \"error\": {\n    \"type\": \"forbidden\",\n    \"message\": \"Request not allowed\"\n  }\n}",
-  "call_date": "2026-09-08"
+  "error": "no OpenAI-compatible key in env. Set exactly one of: DASHSCOPE_API_KEY, DEEPSEEK_API_KEY, MOONSHOT_API_KEY, OPENROUTER_API_KEY, SILICONFLOW_API_KEY, ZHIPU_API_KEY",
+  "error_class": "missing-key",
+  "provider": null,
+  "model_locked": null
 }

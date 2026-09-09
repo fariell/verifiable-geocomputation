@@ -9,11 +9,12 @@
 ## §A · 当前活跃任务(读这个)
 
 STATUS: W3/BLOCKED-PI
-UPDATED: 2026-09-09 14:06
-TASK: **task16-W3 · L1 主实验**(等 PI 解阻后重跑 `--require-live`)
-      W3.5 双线已完成:7/8 端点网络可达;推荐 siliconflow/deepseek 但缺匹配 key;
-      Anthropic 有 `ANTHROPIC_AUTH_TOKEN` 仍 HTTP 403。见 OUTBOX W3.5 + API_REACHABILITY.md。
-      PI 三选一:(a) SILICONFLOW/DEEPSEEK/DASHSCOPE key (b) HTTPS_PROXY (c) OpenRouter/改模型决定
+UPDATED: 2026-09-09 23:34
+TASK: **task16-W3 · L1 主实验**(等 PI 设 `SILICONFLOW_API_KEY` User env 后 gate 自动解阻)
+      A.13 路径已收窄:provider=siliconflow; openai_compat 已就位; Anthropic/代理路径关闭。
+      2026-09-09 23:34 重测:`--backend openai --require-live` → missing-key, cells=[], 无 verify@。
+      PI 只需:`[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")`
+      gate.ps1 读到 key 后自动解除 BLOCKED-PI 并全量跑 L1(见 §A.13)。
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:

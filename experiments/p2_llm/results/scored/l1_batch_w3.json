@@ -1,13 +1,13 @@
 {
   "batch": "task16-W3-L1",
-  "call_date": "2026-09-08",
+  "call_date": "2026-09-09",
   "model_requested": "claude-sonnet-4-20250514",
   "prompts": [
     "P0",
     "P1"
   ],
   "k": 1,
-  "backend": "anthropic",
+  "backend": "openai",
   "steps": [
     {
       "step": "validate_tasks",
@@ -23,8 +23,10 @@
     {
       "step": "api_probe",
       "live_api_ok": false,
-      "error": "all Anthropic endpoints failed: https://code.newcli.com/claude/v1/messages: ConnectTimeout: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。 | https://api.anthropic.com/v1/messages: HTTP 403: {\n  \"error\": {\n    \"type\": \"forbidden\",\n    \"message\": \"Request not allowed\"\n  }\n}",
-      "call_date": "2026-09-08"
+      "error": "no OpenAI-compatible key in env. Set exactly one of: DASHSCOPE_API_KEY, DEEPSEEK_API_KEY, MOONSHOT_API_KEY, OPENROUTER_API_KEY, SILICONFLOW_API_KEY, ZHIPU_API_KEY",
+      "error_class": "missing-key",
+      "provider": null,
+      "model_locked": null
     }
   ],
   "n_l1": 14,
@@ -45,6 +47,6 @@
     "GPB-T6-terminate-lean"
   ],
   "verdict": "BLOCKED",
-  "blocker": "live Anthropic unreachable on this host (error=all Anthropic endpoints failed: https://code.newcli.com/claude/v1/messages: ConnectTimeout: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。 | https://api.anthropic.com/v1/messages: HTTP 403: {\n  ). Need reachable ANTHROPIC_BASE_URL / key or AutoDL egress. No verify@ numbers fabricated.",
+  "blocker": "live openai endpoint unreachable on this host (error=no OpenAI-compatible key in env. Set exactly one of: DASHSCOPE_API_KEY, DEEPSEEK_API_KEY, MOONSHOT_API_KEY, OPENROUTER_API_KEY, SILICONFLOW_API_KEY, ZHIPU_API_KEY). Need a reachable base_url + key, or AutoDL egress. No verify@ numbers fabricated.",
   "cells": []
 }

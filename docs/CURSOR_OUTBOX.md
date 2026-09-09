@@ -946,6 +946,41 @@ task16-W3.5 verdict = PASS (基建) / live = BLOCKED-PI
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live) · 仍 BLOCKED-PI
+
+```
+[task]      task16-W3-live / L1 全量主实验(A.13 siliconflow 路径)
+[step]      读 §A STATUS=W3/BLOCKED-PI → 查 User/Machine/Process 全 provider key →
+            确认无 SILICONFLOW_* → 跑 --backend openai --require-live 取 fresh 证据 →
+            按 A.13.5 保持 BLOCKED-PI(不进 W4;不编造 verify@)
+[cmd]       PowerShell: GetEnvironmentVariable(*_API_KEY, User|Machine|Process)
+            python experiments/p2_llm/harness/run_l1_batch.py --backend openai --require-live --prompts P0,P1 --k 1
+[rc]        require-live = 2 (BLOCKED)
+[key lines]
+  SILICONFLOW/DEEPSEEK/DASHSCOPE/OPENROUTER/MOONSHOT/ZHIPU: User=F Machine=F Process=F
+  ANTHROPIC_AUTH_TOKEN: User=F Machine=? Process=T (已知官方 403; A.13 已关闭该路径)
+  validate_tasks: 22/22 OK; dry_validate_prompts P0+P1: 28/28 OK; n_l1=14
+  api_probe: live_api_ok=false error_class=missing-key provider=null
+  cells=[] ; NO compile@ / verify@ / semantic-fidelity claimed
+  written: experiments/p2_llm/results/scored/l1_batch_w3.json (verdict=BLOCKED)
+[gates]     schema PASS; prompt dry PASS; live generate BLOCKED(missing-key); honesty PASS
+[verdict]   BLOCKED
+[blocker]   缺 SILICONFLOW_API_KEY(PI 已拍 provider=siliconflow)。解阻一条命令:
+            [Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")
+            之后无需改 STATUS: gate.ps1 每 5 min 读到 key → auto-unblock → 全量 L1。
+            勿设 ANTHROPIC_* 当解阻信号(官方仍 403; openai_compat 不吃 Anthropic key)。
+```
+
+改了什么:
+- 改: `docs/CURSOR_INBOX.md` §A UPDATED→23:34; TASK 文案对齐 A.13(保持 `STATUS: W3/BLOCKED-PI`)
+- 改: `experiments/p2_llm/results/scored/l1_batch_w3.json` 本次 openai/missing-key 探针结果
+- 新: 本 OUTBOX 段
+未改 papers/、formal/、harness 源码。未编造任何 verify@。未 git push。
+
+task16-W3-live verdict = BLOCKED-PI (await SILICONFLOW_API_KEY)
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 
