@@ -23,6 +23,8 @@ from common import (
     write_json,
 )
 
+from openai_compat import call_chat_api  # noqa: E402  (domestic-endpoint backend)
+
 DEFAULT_MODEL = "claude-sonnet-4-20250514"
 DEFAULT_MAX_TOKENS = 4096
 
@@ -183,6 +185,30 @@ def generate_one(
             meta["api_error"] = api_error
             meta["backend"] = "fixture"
 
+    elif backend == "openai":
+        try:
+            api_response = call_chat_api(
+                prompt=tmpl,
+                model=model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                provider=os.environ.get("P2_LLM_PROVIDER"),
+            )
+            raw_text = extract_text(api_response)
+            cleaned = strip_code_fences(raw_text)
+            locked_model = api_response.get("model") or model
+            meta["model"] = locked_model
+            meta["api_usage"] = api_response.get("usage")
+            meta["api_id"] = api_response.get("id")
+            meta["api_base"] = api_response.get("_resolved_base")
+            meta["provider"] = api_response.get("_provider")
+            meta["status"] = "GENERATED"
+        except Exception as exc:
+            api_error = str(exc)
+            backend = "fixture"
+            meta["api_error"] = api_error
+            meta["backend"] = "fixture"
+
     if backend == "fixture":
         fix = _fixture_path_for(task)
         if not fix.is_file():
@@ -226,7 +252,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--temperature", type=float, default=0.0)
     p.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
     p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--backend", default="anthropic", choices=["anthropic", "fixture"])
+    p.add_argument(
+        "--backend",
+        default="anthropic",
+        choices=["anthropic", "openai", "fixture"],
+        help="openai=any OpenAI-compatible domestic endpoint (see openai_compat.PROVIDERS)",
+    )
     p.add_argument("--previous-source", default="")
     p.add_argument("--verifier-stderr", default="")
     args = p.parse_args(argv)
@@ -240,11 +271,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"task not found: {task_path}", file=sys.stderr)
             return 2
 
+    # With --backend openai, an untouched --model default is a Claude id that the
+    # domestic provider cannot serve; blank it so the provider default applies.
+    model = args.model
+    if args.backend == "openai" and model == DEFAULT_MODEL:
+        model = ""
+
     try:
         meta = generate_one(
             task_path,
             prompt_id=args.prompt,
-            model=args.model,
+            model=model,
             sample_index=args.sample_index,
             repair_round=args.repair_round,
             temperature=args.temperature,

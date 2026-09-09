@@ -23,6 +23,7 @@ from common import (
 from run_generate import DEFAULT_MODEL, generate_one
 from run_verify import verify_dafny, verify_lean
 from score_semantic import score_pair
+from openai_compat import probe_live_api_openai  # noqa: E402  (domestic-endpoint backend)
 
 
 def list_l1_tasks() -> list[Path]:
@@ -197,8 +198,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument(
         "--backend",
         default="anthropic",
-        choices=["anthropic", "fixture"],
-        help="anthropic=live; fixture=NOT for metrics",
+        choices=["anthropic", "openai", "fixture"],
+        help=(
+            "anthropic=live Anthropic; openai=live OpenAI-compatible "
+            "(provider from P2_LLM_PROVIDER or auto-detect); fixture=NOT for metrics"
+        ),
     )
     p.add_argument("--skip-verify", action="store_true")
     p.add_argument("--limit", type=int, default=0, help="max L1 tasks (0=all)")
@@ -264,16 +268,19 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
 
-    if args.backend == "anthropic":
+    if args.backend == "openai":
+        probe = probe_live_api_openai(args.model)
+    elif args.backend == "anthropic":
         probe = probe_live_api(args.model)
+    if args.backend in ("anthropic", "openai"):
         report["steps"].append({"step": "api_probe", **probe})
         write_json(RESULTS_SCORED / "api_probe_w3.json", probe)
         if not probe.get("live_api_ok"):
             report["verdict"] = "BLOCKED"
             report["blocker"] = (
-                "live Anthropic unreachable on this host "
+                f"live {args.backend} endpoint unreachable on this host "
                 f"(error={probe.get('error', '')[:200]}). "
-                "Need reachable ANTHROPIC_BASE_URL / key or AutoDL egress. "
+                "Need a reachable base_url + key, or AutoDL egress. "
                 "No verify@ numbers fabricated."
             )
             report["cells"] = []
