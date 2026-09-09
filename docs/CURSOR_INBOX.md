@@ -1,37 +1,41 @@
 # CURSOR_INBOX — 洛书 → Cursor 指令信箱
 
-> 这是洛书与 Cursor 的**直连通道**,取代人工中转。洛书把指令写在这里(STATUS=PENDING),
-> Cursor 读它执行,把结果写回 `docs/CURSOR_OUTBOX.md`,再把本文件 STATUS 改成 DONE。
+> 这是洛书与 Cursor 的**直连通道**,取代人工中转。洛书把指令写在这里(STATUS=PENDING),  
+> Cursor 读它执行,把结果写回 `docs/CURSOR_OUTBOX.md`,再把本文件 STATUS 改成 DONE。  
 > 任何人都不需要复制粘贴这段文字。
 
 ---
 
+
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/BLOCKED-PI
-UPDATED: 2026-09-09 23:34
-TASK: **task16-W3 · L1 主实验**(等 PI 设 `SILICONFLOW_API_KEY` User env 后 gate 自动解阻)
-      A.13 路径已收窄:provider=siliconflow; openai_compat 已就位; Anthropic/代理路径关闭。
-      2026-09-09 23:34 重测:`--backend openai --require-live` → missing-key, cells=[], 无 verify@。
-      PI 只需:`[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")`
-      gate.ps1 读到 key 后自动解除 BLOCKED-PI 并全量跑 L1(见 §A.13)。
+STATUS: W3/BLOCKED-PI  
+UPDATED: 2026-09-09 23:34  
+TASK: **task16-W3 · L1 主实验**(等 PI 设 `SILICONFLOW_API_KEY` User env 后 gate 自动解阻)  
+A.13 路径已收窄:provider=siliconflow; openai_compat 已就位; Anthropic/代理路径关闭。  
+2026-09-09 23:34 重测:`--backend openai --require-live` → missing-key, cells=[], 无 verify@。  
+PI 只需:`[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")`  
+gate.ps1 读到 key 后自动解除 BLOCKED-PI 并全量跑 L1(见 §A.13)。
 
-> **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。
-> 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:
-> INBOX 的 STATUS 只要是非 DONE 状态,watcher 自动调起 Cursor 执行本文件 §A 的任务,
-> 执行日志落 `_autorun/logs/`,Cursor 写 OUTBOX 自报 + commit。
-> **你的唯一职责**:做完一段 → 把 §A 的 STATUS 改成下一段的 `PENDING`(见 §A.11.6 自推进链),
+> **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。  
+> 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:  
+> INBOX 的 STATUS 只要是非 DONE 状态,watcher 自动调起 Cursor 执行本文件 §A 的任务,  
+> 执行日志落 `_autorun/logs/`,Cursor 写 OUTBOX 自报 + commit。  
+> **你的唯一职责**:做完一段 → 把 §A 的 STATUS 改成下一段的 `PENDING`(见 §A.11.6 自推进链),  
 > watcher 会自动接上下一段。全程 PI 零点击。
 
-> **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —
-> 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。
-> 写论文 + 跑实验 + commit code 全归 Cursor (Pro 会员)。Workbuddy 读本 INBOX 后派
+
+
+> **19:49 秘书默契生效**(PI 决定):Workbuddy token 预算紧,改 pure-secretary 模式 —  
+> 不再写 paper / 改代码 / 跑实验,只负责 dispatch + monitor + 反馈。  
+> 写论文 + 跑实验 + commit code 全归 Cursor (Pro 会员)。Workbuddy 读本 INBOX 后派  
 > 任务给 Cursor,Cursor 写 OUTBOX 自报,Workbuddy 监督 push gate 与 token 节流。
 >
-> **20:39 PI 二次拍板**(本次):"先把 task10.5 至 task14 做完,先不考虑上传 github,
-> 等最终确定文章最终形态了再上传" → push gate 升级到 **FINAL-FORM 触发**:
-> SciDA 投稿/期刊接收/公开 **任一** + paper v_final 形态锁 **同时** = push 1 次解锁。
+> **20:39 PI 二次拍板**(本次):"先把 task10.5 至 task14 做完,先不考虑上传 github,  
+> 等最终确定文章最终形态了再上传" → push gate 升级到 **FINAL-FORM 触发**:  
+> SciDA 投稿/期刊接收/公开 **任一** + paper v_final 形态锁 **同时** = push 1 次解锁。  
 > 仅"任务完成"不再 = push 触发;**全部 paper 形态定稿 + 提交动作** 才解锁。
+
 
 ### A.0 主任务链(单任务,但含 3 子段,可由 Cursor 并发处理)
 
@@ -74,6 +78,7 @@ bash experiments/phase2/run_p_comp_1.sh
 OUTBOX 段名:**## P-COMP-1 + T6 云端复核(task7.5)**,续 task7 段之后。5 闸每闸按 CURSOR_LOOP §三 格式(`[task] / [step] / [cmd] / [rc] / [key lines] / [gates] / [verdict] / [blocker]`)。
 
 #### task7.5 严令
+
 - **不重写代码**(task7 已 commit 2fe6a3a,本次只复核)
 - **不动 README / PROP_CHAIN / this-week / MEMORY**
 - **不 git push**(PI 17:21 stop 还在)
@@ -85,35 +90,38 @@ OUTBOX 段名:**## P-COMP-1 + T6 云端复核(task7.5)**,续 task7 段之后。5
 
 ### A.2 task7.5 间隙(task7.5 跑的时候起草 task8A 模型,不做 verify)
 
-在 5-15 分钟云端 verify 等待期间,**起草 task8A 的非验证文件**(代码骨架,wolfram 穷举,dafny/lean 头注释 + lemma 框架,manim 动画骨架)。**不执行**任何 verify / lake build / run_*.sh。理由:任务期间只能 1 个 Bash 会话,verdict 期间留 CPU 给云端 verify。
+在 5-15 分钟云端 verify 等待期间,**起草 task8A 的非验证文件**(代码骨架,wolfram 穷举,dafny/lean 头注释 + lemma 框架,manim 动画骨架)。**不执行**任何 verify / lake build / run\_*.sh。理由:任务期间只能 1 个 Bash 会话,verdict 期间留 CPU 给云端 verify。
 
 task8A 起草文件清单(写到对应路径即可,verify 留给 task7.5 收尾后):
 
-| 路径 | 内容 |
-|---|---|
-| `experiments/phase2/p_comp_3.py` | 数值对比 ZT 曲率 vs Horn 拟合斜率的 2 反例 |
-| `experiments/phase2/p_comp_3.wl` | 穷举小格网,ZT 与 Horn 输出差异实例 |
-| `experiments/phase2/p_comp_3_README.md` | 反例叙事(§"没证什么"开篇)<br>任务 8A 的目标/边界/产物清单 |
-| `formal/dafny/PCOMP_3.dfy` | 反例 witness 占位 + lemma 框架(留 TODO 字段)|
-| `formal/lean4/VeriGIS/Composition/ZTNotImpliesHorn.lean` | 反例 witness 占位(留 TODO) |
+| 路径                                                       | 内容                                  |
+| -------------------------------------------------------- | ----------------------------------- |
+| `experiments/phase2/p_comp_3.py`                         | 数值对比 ZT 曲率 vs Horn 拟合斜率的 2 反例       |
+| `experiments/phase2/p_comp_3.wl`                         | 穷举小格网,ZT 与 Horn 输出差异实例              |
+| `experiments/phase2/p_comp_3_README.md`                  | 反例叙事(§"没证什么"开篇)  
+任务 8A 的目标/边界/产物清单 |
+| `formal/dafny/PCOMP_3.dfy`                               | 反例 witness 占位 + lemma 框架(留 TODO 字段) |
+| `formal/lean4/VeriGIS/Composition/ZTNotImpliesHorn.lean` | 反例 witness 占位(留 TODO)               |
+
 
 ### A.3 task8A · P-COMP-3 反例素材(主任务二,本机完整闸)
 
 **命题(PROP_CHAIN.md §3):**
-> P-003 ZT 剖面曲率(基于张量)与 P-004 Horn 二次(单方向拟合)不是同一函数族;
+
+> P-003 ZT 剖面曲率(基于张量)与 P-004 Horn 二次(单方向拟合)不是同一函数族;  
 > 二者无可形式化的互推关系 **— 这是命题 P-COMP-3 的否定式,作为"组合命题的边界案例"入库**。
 
 #### 7 件套
 
-| # | 路径 | 类型 | 要点 |
-|---|---|---|---|
-| 1 | `experiments/phase2/p_comp_3.py` | driver | 2 反例场景 + ZT vs Horn 数值对比图 + 1 致 P-001(slope≥0)的反向约束 demo |
-| 2 | `experiments/phase2/p_comp_3.wl` | Wolfram | 穷举 4^k 格网(同 P-COMP-1)找 ZT 与 Horn 输出差异的最小实例 |
-| 3 | `experiments/phase2/p_comp_3_manim.py` | manim | 左:ZT 曲率热图;右:Horn 拟合曲面;并排箭头标"不可互推" |
-| 4 | `experiments/phase2/run_p_comp_3.sh` | shell | `GPB-023 ENTRY: NEGATIVE-RESULT PASS` 收尾(NEGATIVE 不是 FAIL)|
-| 5 | `formal/dafny/PCOMP_3.dfy` | Dafny | include P-003 + P-004;`NonEntailed : Witness` 类型;`negResult` 引理(找反例 instance)|
-| 6 | `formal/lean4/VeriGIS/Composition/ZTNotImpliesHorn.lean` | Lean | 同 Dafny 独立重述;`Examples : zt ≠ horn` |
-| 7 | `formal/dafny/PCOMP_3_README.md` | 台账 | 关键:**"它不是 bug,是 feature — 展示了组合命题的边界"** |
+| # | 路径                                                       | 类型      | 要点                                                                            |
+| - | -------------------------------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| 1 | `experiments/phase2/p_comp_3.py`                         | driver  | 2 反例场景 + ZT vs Horn 数值对比图 + 1 致 P-001(slope≥0)的反向约束 demo                      |
+| 2 | `experiments/phase2/p_comp_3.wl`                         | Wolfram | 穷举 4^k 格网(同 P-COMP-1)找 ZT 与 Horn 输出差异的最小实例                                    |
+| 3 | `experiments/phase2/p_comp_3_manim.py`                   | manim   | 左:ZT 曲率热图;右:Horn 拟合曲面;并排箭头标"不可互推"                                             |
+| 4 | `experiments/phase2/run_p_comp_3.sh`                     | shell   | `GPB-023 ENTRY: NEGATIVE-RESULT PASS` 收尾(NEGATIVE 不是 FAIL)                    |
+| 5 | `formal/dafny/PCOMP_3.dfy`                               | Dafny   | include P-003 + P-004;`NonEntailed : Witness` 类型;`negResult` 引理(找反例 instance) |
+| 6 | `formal/lean4/VeriGIS/Composition/ZTNotImpliesHorn.lean` | Lean    | 同 Dafny 独立重述;`Examples : zt ≠ horn`                                           |
+| 7 | `formal/dafny/PCOMP_3_README.md`                         | 台账      | 关键:**"它不是 bug,是 feature — 展示了组合命题的边界"**                                       |
 
 #### Python driver 三门控(本机跑)
 
@@ -125,10 +133,12 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 ```
 
 门控解释:
+
 - 同一组高程上,Zernike-Torrance 曲率与 Horn 二次精度差异显著 → 反例成立
 - 二者都能消出"几何上"稳定的梯度结构 → 不是个别坏数据导致
 
 #### 严令(同 task7.5 习惯)
+
 - 不复制 P-003/P-004 核:`include` / `import` 不写,只引用
 - 不动 README / PROP_CHAIN / this-week / MEMORY
 - 不 git push
@@ -152,13 +162,15 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 ```
 
 ### A.5 别忘了
+
 - 本机 `python3 scripts/autodl/jupyter_progress.py '...'` 自动捕获 elapsed 与 log
 - 云端缺 wolfram 时直接 SKIP,不报错
 
+
 ### A.6 task9 · 多分辨率迁移(主任务三,本机 + AutoDL 双端)
 
-> **范围**:从 `plane-5m` 5×5 扩到 `terrain-A` 256² → `SRTM-30m` 3601² → LiDAR 点云降采样栅格。
-> 目标:**同一算法 + 同一形式化**在 4 套 DEM 上全部 PASS,从而支撑 v1.4 / 顶级期刊(TGIS / JGSA)。
+> **范围**:从 `plane-5m` 5×5 扩到 `terrain-A` 256² → `SRTM-30m` 3601² → LiDAR 点云降采样栅格。  
+> 目标:**同一算法 + 同一形式化**在 4 套 DEM 上全部 PASS,从而支撑 v1.4 / 顶级期刊(TGIS / JGSA)。  
 > **不阻塞 SciDA 投稿**(2026-11-15)— paper v_final 仍按 v1.3 NUM 走。
 
 #### 任务清单(逐项给阶段)
@@ -203,15 +215,15 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 
 #### 验收标准(全部 PASS = task9 verdict=PASS)
 
-| 闸 | 期待 | 备注 |
-|---|---|---|
-| 4 门控 PASS(每套 DEM) | 全 4 PASS | 形式化同算法,预期不变 |
-| dafny PCOMP_1.dfy | 17/0 verify | 同 task7.5 数 |
-| dafny P006_terminate_under_strict.dfy | 12/0 verify | 同 task7.5 数 |
-| lake build | 2760 modules / 0 errors | 增量秒过 |
-| wolfram 多分辨率 | pigeon=True descent=True fixed=False | 不依赖分辨率 |
-| manim | 4 子图 mp4 渲染 | 166+ KB 套 |
-| README / MULTIRES_TABLE | commit 上 | 给 v1.4 升级 |
+| 闸                                     | 期待                                   | 备注          |
+| ------------------------------------- | ------------------------------------ | ----------- |
+| 4 门控 PASS(每套 DEM)                     | 全 4 PASS                             | 形式化同算法,预期不变 |
+| dafny PCOMP_1.dfy                     | 17/0 verify                          | 同 task7.5 数 |
+| dafny P006_terminate_under_strict.dfy | 12/0 verify                          | 同 task7.5 数 |
+| lake build                            | 2760 modules / 0 errors              | 增量秒过        |
+| wolfram 多分辨率                          | pigeon=True descent=True fixed=False | 不依赖分辨率      |
+| manim                                 | 4 子图 mp4 渲染                          | 166+ KB 套   |
+| README / MULTIRES_TABLE               | commit 上                             | 给 v1.4 升级   |
 
 #### 任务边界(严禁)
 
@@ -229,9 +241,10 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - git commit `feat(phase2): task9 多分辨率迁移 PASS (<expected metrics>)`(local only)
 - OUTBOX 新增一段 `## 多分辨率迁移(task9)`
 
+
 ### A.7 task9.5 · paper v_final 整合(全归 Cursor)
 
-> 19:49 PI 重定义角色:Workbuddy token 紧,写论文全归 Cursor (Pro 会员)。
+> 19:49 PI 重定义角色:Workbuddy token 紧,写论文全归 Cursor (Pro 会员)。  
 > Workbuddy 只 dispatch + monitor。本任务 Cursor 接手,Workbuddy 不下场。
 
 #### 整合目标
@@ -240,11 +253,11 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 
 #### 三源模板
 
-| 源 | 行数 | 处理 |
-|---|---|---|
-| `docs/PAPER_P2_OUTLINE.md`(v1.0) | 469 | 主体 §1-§6,§7 (原版骨架),§9.2 limitations,§A.1 intro |
-| `docs/PAPER_P2_v1.1_SUPP.md` | 368 | §7.5 worked example 骨架,§8.5 反例库,§9.4 honest pending,§A.5 行数表 |
-| `docs/PAPER_P2_v1.3_NUM.md` | 176 | §7.5.4 实测数值,§A.6 profiling,§B.3 整合路径说明 |
+| 源                                | 行数  | 处理                                                           |
+| -------------------------------- | --- | ------------------------------------------------------------ |
+| `docs/PAPER_P2_OUTLINE.md`(v1.0) | 469 | 主体 §1-§6,§7 (原版骨架),§9.2 limitations,§A.1 intro               |
+| `docs/PAPER_P2_v1.1_SUPP.md`     | 368 | §7.5 worked example 骨架,§8.5 反例库,§9.4 honest pending,§A.5 行数表 |
+| `docs/PAPER_P2_v1.3_NUM.md`      | 176 | §7.5.4 实测数值,§A.6 profiling,§B.3 整合路径说明                       |
 
 #### 操作清单(Cursor 执行)
 
@@ -278,7 +291,7 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
   2. 长度 ≈ 1219 ± 50 行
   3. commit hash 进日志
   4. push gate 守住(local only)
-- 错误反馈到 OUTBOX 第 4 段 (`## paper v_final 整合(task9.5)`)
+- 错误反馈到 OUTBOX 第 4 段 (`## paper v_final 整合(task9.5)`)  
   Cursor 看到后再修;Workbuddy 不直接动文件
 
 #### 完成后
@@ -288,9 +301,10 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 - git commit `docs(manuscript): v_final 整合 (v1.0+v1.1+v1.3 → papers/P2/manuscript.md)` (local only)
 - OUTBOX 新增一段 `## paper v_final 整合(task9.5)`
 
+
 ### A.8 task10 · SciDA 投稿冲刺(本机段,主任务)
 
-> 目标:Scientific Data 2026-11-15 投稿窗口。3 子段并发,由 Cursor 处理,
+> 目标:Scientific Data 2026-11-15 投稿窗口。3 子段并发,由 Cursor 处理,  
 > Workbuddy 不下场(token 节流)。
 
 #### 段 A:cover letter(papers/P2/cover_letter.md)
@@ -300,6 +314,7 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 ```
 
 结构:
+
 - 第 1 段:研究意义(空间计算结果是否可机器证明 / benchmark / dataset 作为 reference software)
 - 第 2 段:novel contribution(5 项,与 §A.0 一致)
 - 第 3 段:数据描述(6 算子 + 3 组合 + 4 反例 + 5 noise + 4 套 DEM 全栈)
@@ -313,6 +328,7 @@ GPB-023 ENTRY: NEGATIVE-RESULT PASS
 #### 段 B:Zenodo deposit
 
 Zenodo 上传清单(估重):
+
 ```
 experiments/phase1/results/        — gpb003..006 + phase1_metrics.json  ~30 MB
 experiments/phase2/results/        — gpb021/023 + task9 多分辨率 metrics  ~50 MB
@@ -329,6 +345,7 @@ papers/P2/figures/                 — 含 task9 manim, ~600 KB
 ```
 
 DOI 申请:
+
 ```
 访问 https://zenodo.org/deposit/new
 填表:
@@ -342,6 +359,7 @@ DOI 申请:
 ```
 
 **生成 DOI 后**:
+
 - 把 DOI 链接(如 `https://doi.org/10.5281/zenodo.XXXXXXX`)挂到 `papers/P2/manuscript.md` §A.5 (Data availability)
 - 把 DOI 链接也写到 cover letter §5
 
@@ -369,11 +387,11 @@ DOI 申请:
 
 #### 验收标准(task10 verdict)
 
-| 段 | 文件 | 期望 |
-|---|---|---|
-| 段 A | papers/P2/cover_letter.md | ~800-1000 词,7 段结构完整 |
-| 段 B | Zenodo deposit + DOI | DOI 链接挂进 manuscript §A.5 + cover letter §5 |
-| 段 C | papers/P2/manuscript.md | 引用统一 / 末行签 v1.4 / 5 处一致性 PASS |
+| 段   | 文件                        | 期望                                         |
+| --- | ------------------------- | ------------------------------------------ |
+| 段 A | papers/P2/cover_letter.md | ~800-1000 词,7 段结构完整                        |
+| 段 B | Zenodo deposit + DOI      | DOI 链接挂进 manuscript §A.5 + cover letter §5 |
+| 段 C | papers/P2/manuscript.md   | 引用统一 / 末行签 v1.4 / 5 处一致性 PASS              |
 
 #### 严令(secretary-protocol)
 
@@ -395,17 +413,18 @@ DOI 申请:
   - `docs(proofrd): v1.4 终稿(任务 C)`
 - OUTBOX 新增一段 `## SciDA 投稿冲刺(task10)`
 
-**push gate 解锁说明**:SciDA 投稿 *即将* 解锁 push gate 第一次,但**投稿后** PI 拍板才 push。
+**push gate 解锁说明**:SciDA 投稿 *即将* 解锁 push gate 第一次,但**投稿后** PI 拍板才 push。  
 不投稿 = 不 push。投稿 = 解除一次 push。
 
-**20:39 升级**:push gate 触发点扩为 "FINAL-FORM" —— SciDA 投稿/期刊接收/公开
+**20:39 升级**:push gate 触发点扩为 "FINAL-FORM" —— SciDA 投稿/期刊接收/公开  
 任一 + paper v_final 形态锁同时 = 解锁 1 次 push。仅任务完成不 = push。
 
 ---
 
+
 ### A.9 task10.5–task14 串行链 · 主任务(本轮起跑)
 
-**PI 20:39 二次拍板**:"先把 10.5 至 14 做完,先不考虑 github,等最终形态定再上传"
+**PI 20:39 二次拍板**:"先把 10.5 至 14 做完,先不考虑 github,等最终形态定再上传"  
 → 5 任务串行投递,Cursor 可派子任务并发(段 A/B/C 风格),每段独立 commit。
 
 #### A.9.0 总体节奏(建议,Cursor 可调整)
@@ -428,103 +447,103 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 
 #### A.9.1 task10.5 · P-COMP-2 全平面闭包
 
-[step] 填洼 ⇒ 流域 在 **256² 全平面**(整张图纯平面 0 起伏)与 **256² 行扰动**(沿行
-       加 ε ∈ {1e-6, 1e-4} 噪声)上验证 4 门控 + Wolfram 穷举全 256 cell
-[端]   本机(主)+ AutoDL(重 verify PCOMP_2.dfy 24/0 同 PCOMP_1 17/0 同 P006_T6 12/0)
-[新文件]
-       formal/dafny/PCOMP_2.dfy
-       formal/lean4/VeriGIS/Composition/PitFillingThenWatershedPlane.lean
-       experiments/phase2/p_comp_2.py (256² 全平面 + 256² 行扰动)
-       experiments/phase2/results/gpb024_pcomp2_*/{metrics,wolfram,verify}.{json,txt,log}
-[产出]  4 门控 PASS ×2 套 + Wolfram 256² 穷举都收敛 + dafny 24/0 + lake 不依赖网格尺寸
-[验收]  gpb024_metrics.json gates 4 全 PASS;wolfram parsed=true
+[step] 填洼 ⇒ 流域 在 **256² 全平面**(整张图纯平面 0 起伏)与 **256² 行扰动**(沿行  
+加 ε ∈ {1e-6, 1e-4} 噪声)上验证 4 门控 + Wolfram 穷举全 256 cell  
+[端]   本机(主)+ AutoDL(重 verify PCOMP_2.dfy 24/0 同 PCOMP_1 17/0 同 P006_T6 12/0)  
+[新文件]  
+formal/dafny/PCOMP_2.dfy  
+formal/lean4/VeriGIS/Composition/PitFillingThenWatershedPlane.lean  
+experiments/phase2/p_comp_2.py (256² 全平面 + 256² 行扰动)  
+experiments/phase2/results/gpb024_pcomp2\_*/{metrics,wolfram,verify}.{json,txt,log}  
+[产出]  4 门控 PASS ×2 套 + Wolfram 256² 穷举都收敛 + dafny 24/0 + lake 不依赖网格尺寸  
+[验收]  gpb024_metrics.json gates 4 全 PASS;wolfram parsed=true  
 [commit] feat(phase2): task10.5 P-COMP-2 全平面闭包 PASS (plane=256²/256² d=1e-6 → 收敛 e=4.5M cells, descent+fixed 双 True)
 
 ---
 
 #### A.9.2 task11 · P-COMP-4 重采样同伦 (upscale / downscale / 旋转)
 
-[step] 同一 DEM 在 resolution 倍率 {0.5×, 1×, 2×, 4×} + 旋转 {0°, 45°, 90°} 下
-       跑 P-COMP-1:验证"算子在重采样/旋转下与原图结果差 ≤ ε_tol"(同伦性 homomorphism)
-[端]   本机(主)+ AutoDL(可选,dafny 不依赖分辨率)
-[新文件]
-       formal/dafny/PCOMP_4_homotopy.dfy  (新增 — 证明同伦不变量)
-       experiments/phase2/p_comp_4.py
-       experiments/phase2/results/gpb025_pcomp4_*/{metrics,wolfram,verify}.{json,txt,log}
-[产出]  resolution×rotation 矩阵 (4×3 = 12 cells) 全 OK
-       dafny PCOMP_4 — 17/0(引入"重采样算子 R_α : DEM → DEM"作为参数化算子)
-[验收]  gpb025 row 12 cells 11 PASS + 1 cells FAIL-TOLERANCE 详记
+[step] 同一 DEM 在 resolution 倍率 {0.5×, 1×, 2×, 4×} + 旋转 {0°, 45°, 90°} 下  
+跑 P-COMP-1:验证"算子在重采样/旋转下与原图结果差 ≤ ε_tol"(同伦性 homomorphism)  
+[端]   本机(主)+ AutoDL(可选,dafny 不依赖分辨率)  
+[新文件]  
+formal/dafny/PCOMP_4_homotopy.dfy  (新增 — 证明同伦不变量)  
+experiments/phase2/p_comp_4.py  
+experiments/phase2/results/gpb025_pcomp4\_*/{metrics,wolfram,verify}.{json,txt,log}  
+[产出]  resolution×rotation 矩阵 (4×3 = 12 cells) 全 OK  
+dafny PCOMP_4 — 17/0(引入"重采样算子 R_α : DEM → DEM"作为参数化算子)  
+[验收]  gpb025 row 12 cells 11 PASS + 1 cells FAIL-TOLERANCE 详记  
 [commit] feat(phase2): task11 P-COMP-4 重采样同伦 PASS (plane 重采样+旋转 12/12 (σ ≤ 1e-6))
 
 ---
 
 #### A.9.3 task12 · P-COMP-5 元一致 (metaproperty consistency)
 
-[step] "同一输入 P-COMP-1 跑 N 次结果相同(until floating-point order)" — 元性质:
-       - 幂等性 idempotent: f(f(DEM)) == f(DEM) (在 ℤ 域上严格,ℝ 容差 ε_tol)
-       - 输入顺序无关: 不同 tile/worker 调度结果差 ≤ ε_tol
-       - 同输入同输出跨语言: Python(numpy) ↔ Lean(合乐) ↔ Dafny(SMT) 三码 hash 一致
-[端]   本机(主)+ AutoDL(重 verify Python↔Lean↔Dafny 一致性 hash)
-[新文件]
-       formal/dafny/PCOMP_5_idempotent.dfy
-       formal/lean4/VeriGIS/Composition/PitFillingIdempotent.lean
-       experiments/phase2/p_comp_5.py
-       experiments/phase2/results/gpb026_pcomp5_*/{metrics,verify}.{json,log}
-[产出]
-       Python/Lean/Dafny 三码 hash 一致表 (rows: 4 DEM × 3 code)
-       dafny 15/0(幂等性 + 输入无关性)
-       lake build 0 errors (P006_T6 idempotent variant)
-[验收]  gpb026 hash 三码一致 + idempotent×inputs 矩阵全 PASS
+[step] "同一输入 P-COMP-1 跑 N 次结果相同(until floating-point order)" — 元性质:  
+\- 幂等性 idempotent: f(f(DEM)) == f(DEM) (在 ℤ 域上严格,ℝ 容差 ε_tol)  
+\- 输入顺序无关: 不同 tile/worker 调度结果差 ≤ ε_tol  
+\- 同输入同输出跨语言: Python(numpy) ↔ Lean(合乐) ↔ Dafny(SMT) 三码 hash 一致  
+[端]   本机(主)+ AutoDL(重 verify Python↔Lean↔Dafny 一致性 hash)  
+[新文件]  
+formal/dafny/PCOMP_5_idempotent.dfy  
+formal/lean4/VeriGIS/Composition/PitFillingIdempotent.lean  
+experiments/phase2/p_comp_5.py  
+experiments/phase2/results/gpb026_pcomp5\_*/{metrics,verify}.{json,log}  
+[产出]  
+Python/Lean/Dafny 三码 hash 一致表 (rows: 4 DEM × 3 code)  
+dafny 15/0(幂等性 + 输入无关性)  
+lake build 0 errors (P006_T6 idempotent variant)  
+[验收]  gpb026 hash 三码一致 + idempotent×inputs 矩阵全 PASS  
 [commit] feat(phase2): task12 P-COMP-5 元一致 PASS (Python↔Lean↔Dafny hash 12/12 一致, idempotent 4/4)
 
 ---
 
 #### A.9.4 task13 · 真实 DEM 多样性(LiDAR / IFSAR / 3 套)
 
-[step] 拿 3 套真实公开 DEM(至少 1 套 LiDAR + 1 套 IFSAR + 1 套公开 aerial photogrammetry):
-       - USGS 3DEP LiDAR(如 N34W119 LA, ~1m,1km²)
-       - IFSAR(如 Alaska SAR, 5m, 100km²)
-       - Copernicus DEM GLO-30(全球 1°×1° 切,30m,公开)
-[端]   本机(下载 + 预处理 + 跑 P-COMP-1 + manim 对比)
-[新文件]
-       experiments/phase2/p_comp_realworld.py
-       experiments/phase2/results/gpb027_realworld/{lidar,ifsar,copernicus}/metrics.json
-       experiments/phase2/figures/RealWorldDiversity.mp4
-[产出]  3 套真实 DEM P-COMP-1 跑通,3 mp4 子图对比(ridgeline/drainage density/sink count)
-[验收]  3 metrics 全 PASS + mp4 渲染 3 子图 + figure caption 引 paper §7.7
+[step] 拿 3 套真实公开 DEM(至少 1 套 LiDAR + 1 套 IFSAR + 1 套公开 aerial photogrammetry):  
+\- USGS 3DEP LiDAR(如 N34W119 LA, ~1m,1km²)  
+\- IFSAR(如 Alaska SAR, 5m, 100km²)  
+\- Copernicus DEM GLO-30(全球 1°×1° 切,30m,公开)  
+[端]   本机(下载 + 预处理 + 跑 P-COMP-1 + manim 对比)  
+[新文件]  
+experiments/phase2/p_comp_realworld.py  
+experiments/phase2/results/gpb027_realworld/{lidar,ifsar,copernicus}/metrics.json  
+experiments/phase2/figures/RealWorldDiversity.mp4  
+[产出]  3 套真实 DEM P-COMP-1 跑通,3 mp4 子图对比(ridgeline/drainage density/sink count)  
+[验收]  3 metrics 全 PASS + mp4 渲染 3 子图 + figure caption 引 paper §7.7  
 [commit] feat(phase2): task13 真实 DEM 多样性 PASS (USGS-LiDAR / IFSAR-AK / Copernicus 3/3)
 
 ---
 
 #### A.9.5 task14 · v1.4 NUM 升级:task9/10.5/11/12/13 写进 paper §7.6
 
-[step] 把 task9 多分辨率 + 10.5 全平面 + 11 同伦 + 12 元一致 + 13 真实数据
-       **写进** papers/P2/manuscript.md 的 §7.6 multires + diversity + metaprop 段
-[端]   Workbuddy 不下场;Cursor 全责(PI 决定)
-[新文件]
-       docs/PAPER_P2_v1.4_NUM.md  (SUPP 模式,同 v1.3 NUM)
-       papers/P2/manuscript.md 改写 §7.6
-[产出]
-       §7.6.1 task9 多分辨率(plane 9/3/3 / terrain-A 64516/98/351 / SRTM 12.95M/6.03M/28 / LiDAR 64516/20137/13)
-       §7.6.2 task10.5 全平面闭包 + 噪声扰动
-       §7.6.3 task11 重采样同伦 12 cells σ ≤ 1e-6
-       §7.6.4 task12 元一致 Python↔Lean↔Dafny hash 12/12
-       §7.6.5 task13 真实 DEM 多样性 3/3 (USGS-LiDAR / IFSAR-AK / Copernicus)
-[验收]  paper §7.6.1-7.6.5 全有真实 data;末行签 v1.5
+[step] 把 task9 多分辨率 + 10.5 全平面 + 11 同伦 + 12 元一致 + 13 真实数据  
+**写进** papers/P2/manuscript.md 的 §7.6 multires + diversity + metaprop 段  
+[端]   Workbuddy 不下场;Cursor 全责(PI 决定)  
+[新文件]  
+docs/PAPER_P2_v1.4_NUM.md  (SUPP 模式,同 v1.3 NUM)  
+papers/P2/manuscript.md 改写 §7.6  
+[产出]  
+§7.6.1 task9 多分辨率(plane 9/3/3 / terrain-A 64516/98/351 / SRTM 12.95M/6.03M/28 / LiDAR 64516/20137/13)  
+§7.6.2 task10.5 全平面闭包 + 噪声扰动  
+§7.6.3 task11 重采样同伦 12 cells σ ≤ 1e-6  
+§7.6.4 task12 元一致 Python↔Lean↔Dafny hash 12/12  
+§7.6.5 task13 真实 DEM 多样性 3/3 (USGS-LiDAR / IFSAR-AK / Copernicus)  
+[验收]  paper §7.6.1-7.6.5 全有真实 data;末行签 v1.5  
 [commit] docs(manuscript): v1.5 NUM 升级 (§7.6 multires+diversity 真实数据 5 段)
 
 ---
 
 #### A.9.6 串行链约束(本轮铁律)
 
-- **5 任务串行,不允许并发派**:任务链顺序约束 10.5 → 11 → 12 → 13 → 14
+- **5 任务串行,不允许并发派**:任务链顺序约束 10.5 → 11 → 12 → 13 → 14  
   (理由:11 同伦用 10.5 全平面基线;12 元一致用 10.5/11 数据;14 整合 11/12/13)
-- **每个 task 必须独立 commit**:每跑完一段 → `INBOX §A STATUS = SEG<n>/PENDING` →
+- **每个 task 必须独立 commit**:每跑完一段 → `INBOX §A STATUS = SEG<n>/PENDING` →  
   Cursor 写 OUTBOX 该段 + git commit → 下一段才能起跑
-- **不阻塞 SciDA 11-15 投稿**:本轮 4 任务跑完 → task14 写进 §7.6 → paper v_final 形态锁
+- **不阻塞 SciDA 11-15 投稿**:本轮 4 任务跑完 → task14 写进 §7.6 → paper v_final 形态锁  
   → 解锁 push。**paper 投稿不依赖 4 任务**;投完可继续在 revision 里加 task14 段
 - **段 B Zenodo DOI** 从 task10 BLOCKED 状态继续等 PI 操作(不阻链)
-- **Workbuddy 不下场**:不写 paper / 不改 .dfy / .lean / .py / .md 实质内容;
+- **Workbuddy 不下场**:不写 paper / 不改 .dfy / .lean / .py / .md 实质内容;  
   只动 INBOX/OUTBOX/cursorrules 三个协议文件 + 归档 commit
 
 ---
@@ -542,11 +561,12 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 [blocker]   (仅 BLOCKED/FAIL 时填)具体阻塞点 + PI 拍板项
 ```
 
-段 PASS → commit + INBOX §A STATUS=SEG<n+1>/PENDING;全段 PASS 后 STATUS=DONE。
-段 BLOCKED → 不 commit,Cursor OUTBOX 自报阻塞点,Workbuddy 通知 PI。
+段 PASS → commit + INBOX §A STATUS=SEG<n+1>/PENDING;全段 PASS 后 STATUS=DONE。  
+段 BLOCKED → 不 commit,Cursor OUTBOX 自报阻塞点,Workbuddy 通知 PI。  
 段 FAIL → Cursor 不自纠(Workbuddy 看后帮派,或 PI 拍板换路径)。
 
 ---
+
 
 ### A.10 paper 形态锁协议(PI 23:40 拍 v1.5 = FORM LOCK)
 
@@ -579,38 +599,37 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
    - 引用 / 段标题 / § 号 / 表格 / 图表 caption / 末行版本签名不动
    - 唯一允许:错别字 / 排版微调 ≤ 5 字 / 段(由 task15 proofread R3 处理)
    - 大动 → unlock 流程:PI 显式撤销形态锁 → INBOX §A.10 LOCK-NOTE 反拍
-   
 2. **不放心的数字不加**(Honesty Protocol):
    - 任何数字必须能溯源到 `experiments/*/results/gpb*/metrics.json`
    - synthetic 数据(如 §7.6.1 SRTM/LiDAR synthetic)必须保留 caveat
    - FAIL-TOLERANCE 反例(如 §7.6.3 4/12)必须保留,不可洗白
-
 3. **段 B Zenodo DOI**:
    - 现为 BLOCKED(PI 未上传 zip 拿 DOI)
    - task15 即可解锁:PI 上传 → Cursor 改 §A.5 + cover letter §5 挂真 DOI
    - DOI 是 **不在** 形态锁内(可挂;格式 + place 不变即合规)
-
 4. **第二触发器触发方式**:
    - 投稿:PI 把 manuscript 投到 SciDA editorial system 后回报 INBOX
    - 接受:期刊发 acceptance letter,PI 拍板"接受"
    - 公开:PI 拍"公开"(repo / arXiv / Zenodo 任一公开发)
    - 任一发生 → 秘书监控 push gate 即可解锁 → 一次性 `git push origin main`
-
 5. **unlock 流程**(若必须改 paper):
    - PI 拍 "unlock v1.5 → v1.6" 或指明改什么
    - 改 → 末行签 v1.6 → 重新 Lock → push 重新触发矩阵
 
 **Cursor 接到本 INBOX 当前 STATUS=DONE-LOCKED**:
+
 - [mailbox-noop] 规则触发 → 不要重复执行 task10.5..14
 - 等 INBOX §A status 改回 PENDING 由 PI 触发新任务(典型:task15 DOI 补挂 / task16 proofread R3)
 - 错进 OUTBOX 不动
 
 **Workbuddy 监控钩子**:
+
 - 每 round:grep `STATUS: DONE-LOCKED` 在 INBOX §A
 - 同步检查 LOCK:行存在;若消失 → red flag,提醒 PI
 - push gate + 形态锁双条件 = 解锁 1 次
 
 ---
+
 
 ### A.11 task16 · 第二篇 P2「LLM 自动形式化 GPB 基准评测」(PI 2026-09-09 01:43 拍板)
 
@@ -618,7 +637,7 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 
 - **选题 A**:LLM 能否把地理算法规约自动转成可机器检验的 Dafny/Lean 规约?失败模式是什么?
 - **闭环叙事**:P1「建基准」→ P2「用基准首次系统评测 AI 形式化能力边界」
-- **AI for Math 硬标签**:差异化在**地理算法特有结构**(网格遍历 / 浮点比较 / 拓扑不变式 / 终止性度量),
+- **AI for Math 硬标签**:差异化在**地理算法特有结构**(网格遍历 / 浮点比较 / 拓扑不变式 / 终止性度量),  
   miniF2F / ProofNet 是纯数学,无人系统做过这块
 - **目标期刊**:主 NeurIPS Datasets & Benchmarks / ICLR;备 JGSA / IJGIS
 - **投稿 DDL**:2026-11-10(W9)
@@ -627,12 +646,12 @@ task14   (~1-2 天)   v1.4 NUM 升级:task9/10.5/11/12/13 数据写进 §7.6 mul
 
 交付物(4 项,缺一不可):
 
-| # | 产物 | 验收 |
-|---|---|---|
-| 1 | `docs/P2_AIMATH/DESIGN.md` | ≥ 300 行:任务定义、模型清单、prompt 策略、指标、失败模式 taxonomy、统计方法、威胁有效性 |
-| 2 | `experiments/p2_llm/tasks/` | ≥ 21 个任务项 YAML(L1 单算子 + L2 组合 + L3 反例),从 `formal/` 现有命题抽取 |
-| 3 | `experiments/p2_llm/prompts/` | 3 档 prompt 模板:zero-shot / few-shot / repair |
-| 4 | `docs/P2_AIMATH/RISKS.md` | API 成本、额度、可复现性、P1 返修撞期的对策 |
+| # | 产物                            | 验收                                                        |
+| - | ----------------------------- | --------------------------------------------------------- |
+| 1 | `docs/P2_AIMATH/DESIGN.md`    | ≥ 300 行:任务定义、模型清单、prompt 策略、指标、失败模式 taxonomy、统计方法、威胁有效性   |
+| 2 | `experiments/p2_llm/tasks/`   | ≥ 21 个任务项 YAML(L1 单算子 + L2 组合 + L3 反例),从 `formal/` 现有命题抽取 |
+| 3 | `experiments/p2_llm/prompts/` | 3 档 prompt 模板:zero-shot / few-shot / repair               |
+| 4 | `docs/P2_AIMATH/RISKS.md`     | API 成本、额度、可复现性、P1 返修撞期的对策                                 |
 
 **A.11.2 任务包 schema**(每个任务项)
 
@@ -649,16 +668,16 @@ expected_verdict: PASS | NEG                # NEG = 反例类命题(应证伪)
 
 **A.11.3 难度分层**(本 benchmark 的核心设计,把 B 的科学问题装进 A 的实验)
 
-| 层 | 内容 | 题量 | 预期 |
-|---|---|---|---|
-| **L1** | 单算子 P-001..P-006(已 verify) | ~13 | 高通过率 |
-| **L2** | 组合 P-COMP-1/2/4/5 | ~5 | 中 |
-| **L3** | 反例 / neg-result(P-COMP-3、ring_terminated=False、45° FAIL-TOL) | ~3 | 低,且最易语义漂移 |
+| 层      | 内容                                                           | 题量  | 预期        |
+| ------ | ------------------------------------------------------------ | --- | --------- |
+| **L1** | 单算子 P-001..P-006(已 verify)                                   | ~13 | 高通过率      |
+| **L2** | 组合 P-COMP-1/2/4/5                                            | ~5  | 中         |
+| **L3** | 反例 / neg-result(P-COMP-3、ring_terminated=False、45° FAIL-TOL) | ~3  | 低,且最易语义漂移 |
 
 **A.11.4 模型清单(4 个,固定版本 + temperature=0 + k=5)**
 
-建议 4 档覆盖:1 个强推理(Claude Opus/Sonnet 5 系)、1 个 GPT-5.x、1 个 Gemini 3.x、
-1 个国产低价(DeepSeek-V3 / Qwen-Max)。**成本优先**:优先用 Cursor Pro 已有额度 + 低价 API,控制 k=5。
+建议 4 档覆盖:1 个强推理(Claude Opus/Sonnet 5 系)、1 个 GPT-5.x、1 个 Gemini 3.x、  
+1 个国产低价(DeepSeek-V3 / Qwen-Max)。**成本优先**:优先用 Cursor Pro 已有额度 + 低价 API,控制 k=5。  
 DESIGN.md 里写清每个模型的确切版本串与调用日期。
 
 **A.11.5 prompt 策略(3 档对比)**
@@ -669,30 +688,30 @@ DESIGN.md 里写清每个模型的确切版本串与调用日期。
 
 **A.11.6 指标(6 个,主指标 2 个)**
 
-| 指标 | 定义 |
-|---|---|
-| compile@1 | 生成代码能否被 `dafny /compile:0` 解析 / `lake env lean` 解析 |
-| **verify@1** ★主 | 一次生成即通过机器检验的比例 |
-| **verify@3** ★主 | repair ≤3 轮后通过比例 |
-| repair gain | verify@3 − verify@1 |
+| 指标                         | 定义                                                                        |
+| -------------------------- | ------------------------------------------------------------------------- |
+| compile@1                  | 生成代码能否被 `dafny /compile:0` 解析 / `lake env lean` 解析                        |
+| **verify@1** ★主            | 一次生成即通过机器检验的比例                                                            |
+| **verify@3** ★主            | repair ≤3 轮后通过比例                                                          |
+| repair gain                | verify@3 − verify@1                                                       |
 | **semantic fidelity** ★杀手锏 | 生成规约与 gold_formal 语义一致率;**单独报告 "verified but drifted"**(通过了验证但证明的不是原命题)比例 |
-| failure taxonomy | F1–F8 分布 |
+| failure taxonomy           | F1–F8 分布                                                                  |
 
-> **semantic fidelity 是本 benchmark 与 miniF2F/ProofNet 最大的差异化**:
+> **semantic fidelity 是本 benchmark 与 miniF2F/ProofNet 最大的差异化**:  
 > 形式化验证通过 ≠ 证明对了命题。这是地理算法(浮点、网格、拓扑)最易翻车处。
 
 **A.11.7 失败模式分类学 v0**(Cursor 可扩充,但不得删类)
 
-| 码 | 类别 |
-|---|---|
-| F1 | 语法 / 解析错误 |
-| F2 | 类型 / 签名错误 |
-| F3 | 前置条件缺失或弱化 |
-| F4 | 循环不变式缺失 |
-| F5 | 终止性度量(variant / decreases)缺失 |
-| F6 | 浮点 / 数值语义错配 |
-| **F7** | **语义漂移(通过验证但证明错命题)** |
-| F8 | 过度强化前提(把真命题证成平凡命题) |
+| 码      | 类别                           |
+| ------ | ---------------------------- |
+| F1     | 语法 / 解析错误                    |
+| F2     | 类型 / 签名错误                    |
+| F3     | 前置条件缺失或弱化                    |
+| F4     | 循环不变式缺失                      |
+| F5     | 终止性度量(variant / decreases)缺失 |
+| F6     | 浮点 / 数值语义错配                  |
+| **F7** | **语义漂移(通过验证但证明错命题)**         |
+| F8     | 过度强化前提(把真命题证成平凡命题)           |
 
 **A.11.8 诚实协议**(继承 P1 惯例,不可破)
 
@@ -709,7 +728,7 @@ W1/PENDING ──完成──▶ Cursor 自改 STATUS: W2/PENDING ──watcher 
 W9/PENDING ──完成──▶ STATUS: DONE
 ```
 
-- **Cursor 职责**:每段做完 → 自己把 §A 的 `STATUS:` 改成下一段 `W<n+1>/PENDING`
+- **Cursor 职责**:每段做完 → 自己把 §A 的 `STATUS:` 改成下一段 `W<n+1>/PENDING`  
   → 写 OUTBOX 新段 → `git commit`(local,**不 push**)
 - **watcher 职责**:本机计划任务每 5 分钟扫 STATUS,非 DONE 且无 agent 在跑 → 自动调起 Cursor
 - **PI 职责**:零。只在周报/异常时看一眼
@@ -729,14 +748,17 @@ W9/PENDING ──完成──▶ STATUS: DONE
 
 ---
 
+
 ### A.12 · task16-W3.5 解阻双线(PI 2026-09-09 02:50 拍板)
 
 **背景**:W2/W3 卡在同一个点 —— 本机出口访问不到 live LLM API:
+
 ```
 code.newcli.com    → ConnectTimeout ~42s
 api.anthropic.com  → HTTP 403 "Request not allowed"   ← 注意是 403(通了但被拒),不是网络不通
 ```
-W3 的离线部分已全过(schema 22/22、L1 14 题、prompt dry-validate 28/28),
+
+W3 的离线部分已全过(schema 22/22、L1 14 题、prompt dry-validate 28/28),  
 `run_l1_batch.py --require-live` 是唯一缺口。**未编造任何 verify@ 数字,诚实协议保持。**
 
 #### A.12.1 线 1 · LLM API 端点可达性实测(先做,最高优先级)
@@ -745,87 +767,89 @@ W3 的离线部分已全过(schema 22/22、L1 14 题、prompt dry-validate 28/28
 
 对每个候选端点做四层探测,逐项记录:
 
-| 层 | 检查 | 记录字段 |
-|---|---|---|
-| L1 | DNS 解析 | resolve_ok / resolve_ip / resolve_ms |
-| L2 | TCP 连接 | tcp_ok / tcp_ms |
-| L3 | TLS 握手 | tls_ok / tls_ms / cert_cn |
+| 层  | 检查      | 记录字段                                                                           |
+| -- | ------- | ------------------------------------------------------------------------------ |
+| L1 | DNS 解析  | resolve_ok / resolve_ip / resolve_ms                                           |
+| L2 | TCP 连接  | tcp_ok / tcp_ms                                                                |
+| L3 | TLS 握手  | tls_ok / tls_ms / cert_cn                                                      |
 | L4 | HTTP 探针 | http_status / http_ms / err_class(DNS/TCP/TLS/HTTP-403/HTTP-401/timeout/other) |
 
 **候选端点清单**(逐个实测,一个不落):
 
-| # | 端点 | 说明 |
-|---|---|---|
-| 1 | `https://api.anthropic.com/v1/messages` | 官方,当前 403 |
-| 2 | `https://openrouter.ai/api/v1/chat/completions` | 聚合,OpenAI 兼容,一个 key 通吃 Claude/GPT/Gemini |
-| 3 | `https://api.siliconflow.cn/v1/chat/completions` | 硅基流动,国内直连,OpenAI 兼容 |
-| 4 | `https://api.deepseek.com/chat/completions` | DeepSeek,国内直连 |
-| 5 | `https://open.bigmodel.cn/api/paas/v4/chat/completions` | 智谱 GLM |
-| 6 | `https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions` | 通义千问,OpenAI 兼容模式 |
-| 7 | `https://api.moonshot.cn/v1/chat/completions` | Moonshot/Kimi |
-| 8 | 环境变量代理探测 | 检查 `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` 是否已设;若已设,再测一次 #1 看是否解阻 |
+| # | 端点                                                                   | 说明                                                                   |
+| - | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 1 | `https://api.anthropic.com/v1/messages`                              | 官方,当前 403                                                            |
+| 2 | `https://openrouter.ai/api/v1/chat/completions`                      | 聚合,OpenAI 兼容,一个 key 通吃 Claude/GPT/Gemini                             |
+| 3 | `https://api.siliconflow.cn/v1/chat/completions`                     | 硅基流动,国内直连,OpenAI 兼容                                                  |
+| 4 | `https://api.deepseek.com/chat/completions`                          | DeepSeek,国内直连                                                        |
+| 5 | `https://open.bigmodel.cn/api/paas/v4/chat/completions`              | 智谱 GLM                                                               |
+| 6 | `https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions` | 通义千问,OpenAI 兼容模式                                                     |
+| 7 | `https://api.moonshot.cn/v1/chat/completions`                        | Moonshot/Kimi                                                        |
+| 8 | 环境变量代理探测                                                             | 检查 `HTTPS_PROXY` / `HTTP_PROXY` / `ALL_PROXY` 是否已设;若已设,再测一次 #1 看是否解阻 |
 
-**无 key 时的处理**:不要因为没 key 就跳过。**先做 L1–L3**(DNS/TCP/TLS 不需要 key),
-再加一次**无 key 的 L4 探针** —— 401/403 恰恰证明"可达"(被拒 ≠ 不通),而 timeout/DNS 失败
+**无 key 时的处理**:不要因为没 key 就跳过。**先做 L1–L3**(DNS/TCP/TLS 不需要 key),  
+再加一次**无 key 的 L4 探针** —— 401/403 恰恰证明"可达"(被拒 ≠ 不通),而 timeout/DNS 失败  
 证明"不可达"。这两类必须区分清楚,这是本次探测的核心价值。
 
 **产物**:
+
 - `experiments/p2_llm/results/api_reachability.json` — 机器可读,每端点 4 层字段全记录
-- `docs/P2_AIMATH/API_REACHABILITY.md` — 人读矩阵表 + **推荐方案**(分级:
+- `docs/P2_AIMATH/API_REACHABILITY.md` — 人读矩阵表 + **推荐方案**(分级:  
   推荐 / 可用 / 不可用),并明确写出"需要 PI 提供什么"(key / 代理 / 账号)
 
-**门禁**:`rc=0` 即 PASS(探测本身成功即达标,**不要求任何端点真的可用**)。
+**门禁**:`rc=0` 即 PASS(探测本身成功即达标,**不要求任何端点真的可用**)。  
 探测出"全部不可达"也是有效结果,如实报。
 
 #### A.12.2 线 2 · 离线基建(不依赖 API,与线 1 并行/串行均可)
 
 目的:等 API 一通就能直接灌数据,不浪费等待窗口。
 
-| # | 交付物 | 验收 |
-|---|---|---|
-| 1 | `tests/test_scoring.py` — `score_semantic.py` 单元测试 | 覆盖:编译失败 / verify 失败 / verify 通过但语义漂移(F7)/ 超时 / 空输出,≥ 8 case 全过 |
-| 2 | `docs/P2_AIMATH/RESULT_SCHEMAS.md` — 结果表骨架 | 主表(4 模型 × 3 prompt × 21 题 × k=5)列名 + 每列口径 + 空表 markdown 模板 |
-| 3 | `docs/P2_AIMATH/ANNOTATION_MANUAL.md` — 失败模式标注手册 | F1–F8 每类给 ≥1 个真实 GPB 示例 + 判定规则 + 边界情况(多人标注一致性怎么保证) |
-| 4 | `experiments/p2_llm/harness/make_figures.py` — 图生成脚本 | 输入结果 JSON,输出 4 图:难度分层柱图 / 模型对比 / repair gain 曲线 / 失败模式分布 |
-| 5 | `experiments/p2_llm/harness/run_all_offline.py` — 一键离线自检 | 跑 fixture → 评分 → 出图,全链路不碰网络,rc=0 |
+| # | 交付物                                                      | 验收                                                             |
+| - | -------------------------------------------------------- | -------------------------------------------------------------- |
+| 1 | `tests/test_scoring.py` — `score_semantic.py` 单元测试       | 覆盖:编译失败 / verify 失败 / verify 通过但语义漂移(F7)/ 超时 / 空输出,≥ 8 case 全过 |
+| 2 | `docs/P2_AIMATH/RESULT_SCHEMAS.md` — 结果表骨架               | 主表(4 模型 × 3 prompt × 21 题 × k=5)列名 + 每列口径 + 空表 markdown 模板     |
+| 3 | `docs/P2_AIMATH/ANNOTATION_MANUAL.md` — 失败模式标注手册         | F1–F8 每类给 ≥1 个真实 GPB 示例 + 判定规则 + 边界情况(多人标注一致性怎么保证)             |
+| 4 | `experiments/p2_llm/harness/make_figures.py` — 图生成脚本     | 输入结果 JSON,输出 4 图:难度分层柱图 / 模型对比 / repair gain 曲线 / 失败模式分布       |
+| 5 | `experiments/p2_llm/harness/run_all_offline.py` — 一键离线自检 | 跑 fixture → 评分 → 出图,全链路不碰网络,rc=0                               |
 
 **门禁**:5 项全交付 + 离线自检 rc=0 = PASS。
 
 #### A.12.3 自推进与回报
 
-- 双线做完 → 把 §A STATUS 改成 `W3/PENDING`(**不是 W4**),让 watcher 重跑 W3 主实验;
-  若线 1 探测到可用端点且环境里有 key,则**直接用该端点试跑 1 个 cell**(GPB-001-flat, P0, k=1),
+- 双线做完 → 把 §A STATUS 改成 `W3/PENDING`(**不是 W4**),让 watcher 重跑 W3 主实验;  
+  若线 1 探测到可用端点且环境里有 key,则**直接用该端点试跑 1 个 cell**(GPB-001-flat, P0, k=1),  
   拿到真实 API 响应后 STATUS 改 `W3/PENDING` 并说明"已验证通路"。
-- 若线 1 全不可达 → STATUS 保持 `W3/BLOCKED-PI`,并在 OUTBOX 明确列出**需要 PI 提供的三选一**:
+- 若线 1 全不可达 → STATUS 保持 `W3/BLOCKED-PI`,并在 OUTBOX 明确列出**需要 PI 提供的三选一**:  
   (a) 可用 base_url + key / (b) 代理地址 / (c) 改用某国产模型的决定。
-- OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3.5 解阻(task16-W3.5)`,
+- OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3.5 解阻(task16-W3.5)`,  
   含 `[task]/[step]/[cmd]/[rc]/[key lines]/[gates]/[verdict]/[blocker]`。
 - 两段独立 commit:`feat(p2_llm): task16-W3.5a API 可达性实测` / `feat(p2_llm): task16-W3.5b 离线基建`。
 
-**绝对禁止**:编造任何 `verify@` / `compile@` 数字;把 fixture 结果当真实模型结果上报;
+**绝对禁止**:编造任何 `verify@` / `compile@` 数字;把 fixture 结果当真实模型结果上报;  
 修改 `papers/` 下任何内容(P1 形态锁);git push。
 
 ---
+
 
 ### A.13 · task16-W3 解阻路径收窄(洛书 2026-09-09 23:1x 实测)
 
 **实测补充(A.12.1 未覆盖 ANTHROPIC_BASE_URL)**:
 
-| 项 | 实测 |
-|---|---|
-| `ANTHROPIC_BASE_URL` | `https://code.newcli.com/claude`(Cursor 订阅网关) |
-| DNS | ok 18 ms → 118.193.240.41 |
-| TCP :443 | **timeout 30 s** → 网络层不可达 |
-| 公共 DoH(dns.google / cloudflare-dns) | 全被挡(timeout / RST)→ 换 DNS 绕不过 |
-| `api.anthropic.com` | 维持 **403** → 业务层拒绝,非网络故障 |
+| 项                                   | 实测                                            |
+| ----------------------------------- | --------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                | `https://code.newcli.com/claude`(Cursor 订阅网关) |
+| DNS                                 | ok 18 ms → 118.193.240.41                     |
+| TCP :443                            | **timeout 30 s** → 网络层不可达                     |
+| 公共 DoH(dns.google / cloudflare-dns) | 全被挡(timeout / RST)→ 换 DNS 绕不过                 |
+| `api.anthropic.com`                 | 维持 **403** → 业务层拒绝,非网络故障                      |
 
-⇒ **A.12.1 的选项 (b)「配代理」无效**:网关是出口限制(不是代理缺失),
+⇒ **A.12.1 的选项 (b)「配代理」无效**:网关是出口限制(不是代理缺失),  
 官方是账号/区域策略(代理不改账号)。**实际只剩 (a) 国产 key / (c) OpenRouter 或改模型。**
 
 **新交付(已 commit)**:`experiments/p2_llm/harness/openai_compat.py`
 
-原 harness 只认 Anthropic `/v1/messages` + `x-api-key`,**给了国产 key 也跑不了**;
-现新增 `--backend openai`,支持 siliconflow / deepseek / dashscope / zhipu /
+原 harness 只认 Anthropic `/v1/messages` + `x-api-key`,**给了国产 key 也跑不了**;  
+现新增 `--backend openai`,支持 siliconflow / deepseek / dashscope / zhipu /  
 moonshot / openrouter 六个 OpenAI 兼容端点(`chat_url` 取自实测可达的 URL)。
 
 **PI 给 key 后的解阻命令(一条)**:
@@ -842,22 +866,23 @@ python run_l1_batch.py --backend openai --require-live --prompts P0,P1 --k 5
 
 拿到真实响应后按 A.12.3:STATUS 改 `W3/PENDING`(或直接推进 W4),OUTBOX 新开段回报。
 
-**当前自检(无 key 环境,非模型结果)**:离线自检 `schema_ok=true` / `figures_n=4` /
-`n_live=0`;dry-run 22/22 tasks + 2/2 prompts PASS;`--backend openai --require-live`
+**当前自检(无 key 环境,非模型结果)**:离线自检 `schema_ok=true` / `figures_n=4` /  
+`n_live=0`;dry-run 22/22 tasks + 2/2 prompts PASS;`--backend openai --require-live`  
 返回 BLOCKED 且 `cells=[]`。
 
-**依赖提示**:harness 需要 `httpx` / `pyyaml` / `jsonschema`。
+**依赖提示**:harness 需要 `httpx` / `pyyaml` / `jsonschema`。  
 **缺 `jsonschema` 会让 `schema_ok` 假性变 false**(不是任务 YAML 出错),排查时先查依赖。
 
 ---
+
 
 ### A.13 · task16-W3 解阻后全量跑指令(PI 2026-09-09 23:2x 拍板)
 
 **PI 两项决定**:(1) provider = **硅基流动 siliconflow**;(2) **直接全量跑**,不做单模型试跑。
 
-> **触发方式(PI 真正零点击)**:PI 只需执行一条命令设置 User 环境变量
-> `[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")`。
-> `gate.ps1` 每 5 分钟从注册表读 provider key,**一旦读到就自动解除 `BLOCKED-PI`**
+> **触发方式(PI 真正零点击)**:PI 只需执行一条命令设置 User 环境变量  
+> `[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")`。  
+> `gate.ps1` 每 5 分钟从注册表读 provider key,**一旦读到就自动解除 `BLOCKED-PI`**  
 > 并把 key 注入 agent 及其 python 子进程 —— PI 不需要改 STATUS、不需要告诉我、不需要开 Cursor。
 
 #### A.13.1 第一步:确认模型阵容(必做,别猜模型名)
@@ -870,12 +895,12 @@ curl -s https://api.siliconflow.cn/v1/models -H "Authorization: Bearer $SILICONF
 
 从返回里挑 **4 个**组成阵容,选型原则(写进回报,说明理由):
 
-| 槽位 | 要求 | 目的 |
-|---|---|---|
-| M1 | 当前最强通用开源(如 DeepSeek-V3 系) | 上界参照 |
-| M2 | 另一家主力(如 Qwen 系 72B+) | 跨系列对比 |
-| M3 | 中等规模(如 GLM-4 / 32B 档) | 规模效应 |
-| M4 | 带推理/长思维链(如 R1 系) | 检验"推理增强是否利于形式化" |
+| 槽位 | 要求                        | 目的              |
+| -- | ------------------------- | --------------- |
+| M1 | 当前最强通用开源(如 DeepSeek-V3 系) | 上界参照            |
+| M2 | 另一家主力(如 Qwen 系 72B+)      | 跨系列对比           |
+| M3 | 中等规模(如 GLM-4 / 32B 档)     | 规模效应            |
+| M4 | 带推理/长思维链(如 R1 系)          | 检验"推理增强是否利于形式化" |
 
 - 若某槽位在硅基流动上不可用 → 从实测清单里换,并在回报写明替换理由。
 - 模型名写进 `experiments/p2_llm/harness/openai_compat.py` 的 `default_model`(如已有则确认一致)。
@@ -890,19 +915,19 @@ python run_l1_batch.py --backend openai --require-live \
 ```
 
 - **规模**:L1 14 题 × 4 模型 × 3 prompt × k=5( repair 轮对失败项 ≤3 轮,按 DESIGN.md 口径)
-- **断点续跑**:`run_l1_batch.py` 已 resume-safe;中断后重跑同一条命令即可跳过已完成 cell,
+- **断点续跑**:`run_l1_batch.py` 已 resume-safe;中断后重跑同一条命令即可跳过已完成 cell,  
   **不要清 results 目录重来**
-- **原始输出全留存**:每个 cell 的原始 LLM 响应必须落 `experiments/p2_llm/results/raw/`,
+- **原始输出全留存**:每个 cell 的原始 LLM 响应必须落 `experiments/p2_llm/results/raw/`,  
   一条不删 —— 这是可复现性与"失败模式标注"的唯一依据
 
 #### A.13.3 熔断(必设,别把额度烧穿)
 
-| 条件 | 动作 |
-|---|---|
-| 单模型连续 10 次 HTTP 非 2xx | 停该模型,记 `PROVIDER_ERROR`,继续其余模型 |
-| 累计花费超预算上限(你先按单价估一个,写进回报) | 停跑并回报,等 PI 拍板 |
+| 条件                                | 动作                                    |
+| --------------------------------- | ------------------------------------- |
+| 单模型连续 10 次 HTTP 非 2xx             | 停该模型,记 `PROVIDER_ERROR`,继续其余模型        |
+| 累计花费超预算上限(你先按单价估一个,写进回报)          | 停跑并回报,等 PI 拍板                         |
 | 某模型 compile@1 = 0 且连续 20 cell 全失败 | 停该模型,判定为"该模型不具备本任务能力"(这是**有效结论**,如实写) |
-| 跑完 ≥ 80% cells | 允许以部分数据出中间报告,标注 `partial` |
+| 跑完 ≥ 80% cells                    | 允许以部分数据出中间报告,标注 `partial`             |
 
 #### A.13.4 第三步:验证 + 评分(不依赖 API)
 
@@ -912,94 +937,143 @@ python score_semantic.py --all      # 含 F7 语义漂移判定
 python make_figures.py              # 出 4 图
 ```
 
-**核心指标口径**(一个都不能省,尤其是最后一个):
-`compile@1` / `verify@1` / `verify@3` / `repair gain` / **semantic fidelity**
+**核心指标口径**(一个都不能省,尤其是最后一个):  
+`compile@1` / `verify@1` / `verify@3` / `repair gain` / **semantic fidelity**  
 (**单独统计 "verified but drifted"** —— 机器检验通过了但证明的不是原命题,这是本 benchmark 的差异化指标)
 
 #### A.13.5 自推进与回报
 
-- L1 全量 + 验证 + 评分全部完成 → STATUS 改 `W3.6/PENDING`(**写作为先**,见 §A.14;
+- L1 全量 + 验证 + 评分全部完成 → STATUS 改 `W3.6/PENDING`(**写作为先**,见 §A.14;  
   W4 组合层实验押后 —— ICLR 摘要 9/18 是硬 deadline,实验可以后补)
 - 若 key 仍不可用 → STATUS 保持 `W3/BLOCKED-PI`,OUTBOX 写明缺什么
-- OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live)`,
+- OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live)`,  
   必须包含:**每个模型的真实 compile@1 / verify@1 / semantic fidelity 数字**(不是"跑通了")
 - commit:`feat(p2_llm): task16-W3 L1 live 全量主实验`
 
-**绝对禁止**:编造任何 `verify@` / `compile@`;把 fixture 或 dry-run 结果当真实模型结果;
+**绝对禁止**:编造任何 `verify@` / `compile@`;把 fixture 或 dry-run 结果当真实模型结果;  
 把 key 写进任何文件;修改 `papers/` 下内容(P1 形态锁);git push。
 
 ---
 
+
 ### A.14 · task16-W3.6 论文起草(PI 2026-09-10 00:1x 拍板 — 写作为先)
 
-> **⚠️ 关键背景修正**:秘书此前给的「11/10 投稿」是按 9 周倒推的,**未对齐真实 deadline,作废**。
-> **ICLR 2027 真实节点:Abstract 2026-09-18 AOE / Full paper 2026-09-25 AOE。**
+> **⚠️ 关键背景修正**:秘书此前给的「11/10 投稿」是按 9 周倒推的,**未对齐真实 deadline,作废**。  
+> **ICLR 2027 真实节点:Abstract 2026-09-18 AOE / Full paper 2026-09-25 AOE。**  
 > 今天 9/10 —— 摘要只剩 **8 天**,全文只剩 **15 天**。
 
 #### A.14.1 路线(PI 拍板:先冲摘要,数据不够就转期刊)
 
-| 时点 | 动作 |
-|---|---|
-| 现在 | 起草 §1–§4(不依赖数据) |
+| 时点       | 动作                                                                         |
+| -------- | -------------------------------------------------------------------------- |
+| 现在       | 起草 §1–§4(不依赖数据)                                                            |
 | **9/16** | **决策点**:检查 W3 真实数据是否到位 → 够就写 abstract 投 ICLR;不够就转期刊路线(TGIS/IJGIS),不再赌 ICLR |
-| 9/18 | 若继续:交 ICLR abstract |
-| 9/25 | 若继续:交 ICLR full paper |
-| 10 月中 | **无论如何**:arXiv 预印本(锁定青C 所需的 preprint 状态) |
-| 11 月 | 若 ICLR 未投/被拒:投期刊 |
+| 9/18     | 若继续:交 ICLR abstract                                                        |
+| 9/25     | 若继续:交 ICLR full paper                                                      |
+| 10 月中    | **无论如何**:arXiv 预印本(锁定青C 所需的 preprint 状态)                                   |
+| 11 月     | 若 ICLR 未投/被拒:投期刊                                                           |
 
 #### A.14.2 现在就写(不依赖任何实验结果,材料已全部定稿)
 
 落 `papers/P2_aimath/`,LaTeX 优先(ICLR 模板),同步留一份 md:
 
-| 章 | 内容 | 素材来源(已定稿) |
-|---|---|---|
-| §1 Introduction | 动机:地理算法规约 → 机器可检验规约的自动化难题;为什么现有 benchmark(miniF2F/ProofNet)覆盖不到 | `docs/P2_AIMATH/DESIGN.md` |
-| §2 Related Work | 自动形式化 / 数学 benchmark / 程序合成的验证 / **差距:地理算法特有的浮点、网格遍历、拓扑不变式** | DESIGN.md §related |
-| §3 Benchmark Design | GPB 21 命题 + L1 单算子 / L2 组合 / L3 反例三层 + 任务包 schema + gold 规约为何 withholding | DESIGN.md + `experiments/p2_llm/tasks/` |
-| §4 Methodology | harness 架构 + 3 档 prompt(P0/P1/P2)+ 5 指标口径(**compile@1 / verify@1 / verify@3 / repair gain / semantic fidelity**)+ Dafny+Lean 双轨检验 | `experiments/p2_llm/harness/` + `RESULT_SCHEMAS.md` |
+| 章                   | 内容                                                                                                                                | 素材来源(已定稿)                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| §1 Introduction     | 动机:地理算法规约 → 机器可检验规约的自动化难题;为什么现有 benchmark(miniF2F/ProofNet)覆盖不到                                                                   | `docs/P2_AIMATH/DESIGN.md`                          |
+| §2 Related Work     | 自动形式化 / 数学 benchmark / 程序合成的验证 / **差距:地理算法特有的浮点、网格遍历、拓扑不变式**                                                                      | DESIGN.md §related                                  |
+| §3 Benchmark Design | GPB 21 命题 + L1 单算子 / L2 组合 / L3 反例三层 + 任务包 schema + gold 规约为何 withholding                                                         | DESIGN.md + `experiments/p2_llm/tasks/`             |
+| §4 Methodology      | harness 架构 + 3 档 prompt(P0/P1/P2)+ 5 指标口径(**compile@1 / verify@1 / verify@3 / repair gain / semantic fidelity**)+ Dafny+Lean 双轨检验 | `experiments/p2_llm/harness/` + `RESULT_SCHEMAS.md` |
 
 **§5 Results / §6 Failure Taxonomy / §7 Discussion 留占位**,等真实数据 —— 一个数字都不许编。
 
 #### A.14.3 ICLR 2027 硬性格式(必须遵守)
 
 - 主文 **≤ 9 页**(讨论期/camera-ready 放宽 10 页);参考文献与附录**不限页**
-- **双盲**:全文不得出现作者身份。引用本项目的 P1(Sci Data Data Descriptor)时
+- **双盲**:全文不得出现作者身份。引用本项目的 P1(Sci Data Data Descriptor)时  
   **必须第三人称**,如 "a concurrently submitted data descriptor [N]" —— 不得写 "our prior work"
-- **强制 AI use statement**(不计页数):如实说明 agent 参与了实现/实验执行/文稿起草;
+- **强制 AI use statement**(不计页数):如实说明 agent 参与了实现/实验执行/文稿起草;  
   作者对所有内容负全责。这一节本项目必须写,且要写得坦荡
 - 所有 submission(含被拒/撤稿)**永久公开署名**
-- 主题自查:ICLR 2027 含 "datasets and benchmarks" 与
+- 主题自查:ICLR 2027 含 "datasets and benchmarks" 与  
   "neurosymbolic & hybrid AI systems (logic & formal reasoning)" —— **与本题对口,要在 cover/intro 里点明**
 
 #### A.14.4 自推进
 
-- §1–§4 起草完成 → STATUS 改 `W3.7/PENDING`(等数据灌 §5),
+- §1–§4 起草完成 → STATUS 改 `W3.7/PENDING`(等数据灌 §5),  
   不要直接跳 W4 —— 等 9/16 决策点 PI 拍板
 - OUTBOX 新增段 `## P2 论文起草 §1–§4(task16-W3.6)`,说明每章多少行、用了哪些素材
 - commit:`docs(p2_aimath): task16-W3.6 draft sections 1-4 (methods, no results claimed)`
 
-**绝对禁止**:编造任何结果数字;在 §1–§4 里暗示已有实验结果;把 key 写进文件;
+**绝对禁止**:编造任何结果数字;在 §1–§4 里暗示已有实验结果;把 key 写进文件;  
 改 `papers/P2`(P1 形态锁);git push。
 
 ---
 
+## §A.15 · PI 拍板:投稿目标锁定 KBS(2026-09-10 00:2x)
+
+PI 决定:**第二篇唯一投稿目标 = Knowledge-Based Systems**(Elsevier)。不要再为其他
+期刊做 framing 变体。STATUS 与自推进链不变(W3 继续 → W3.6 写作)。
+
+### A.15.1 期刊事实与时间表
+- KBS:IF 8.0(2026 JCR);中科院大类**计算机科学 1 区 Top**;小类计算机:人工智能 2 区;
+  JCR Q1;**混合刊,订阅制免费**(Gold OA 可选,非必须)。年发文 ~1952。
+- 时间表:现在起草 → **10 月中发 arXiv**(锁定青C 需要的 preprint 状态)→ **11 月投 KBS**。
+- 兜底:若 KBS 在 2027-01 前被拒 → 转投 IEEE Access(约 4 周出结果,仍赶得上青C
+  2027-02/03 提交)。**期刊必须串行投,严禁同时多投**(学术不端)。
+- ICLR 2027(摘要 9/18 AOE、全文 9/25 AOE、决定 12/16)保留为**可选**:仅当 9/16 决策点
+  W3 数据确实漂亮时才投摘要,不为此牺牲 KBS 版本质量。
+
+### A.15.2 framing 硬约束(决定 KBS 成败,必须逐条遵守)
+KBS 是 AI 期刊,不是 GIS 期刊。审稿人默认问的是"这对我理解/改进 AI 系统有什么用"。
+1. **地理 = 测试床(testbed),不是卖点**。禁止写成"我们提出一个地理算法基准"。
+   正确 framing:可验证的形式化规约(verifiable formal specification)是一类
+   **被现有 autoformalization benchmark 系统性忽略的规约形态**——它同时要求数学正确性
+   与可执行/可机器检验性;我们用 DEM 地形分析算法作为采样域来实例化这一类。
+2. **核心卖点 = semantic fidelity**。"通过机器检验 ≠ 证明了原命题"是普适的 AI 结论,
+   对一切 autoformalization / code-generation 评测都成立。必须:单列指标、单列表格
+   ("verified but drifted" 单独统计)、abstract 与 conclusion 各点名一次。
+3. Related Work 必须覆盖三条线,缺一条会被判相关工作不足:
+   - LLM autoformalization(Lean/Coq/Isabelle、miniF2F、ProofNet、LLM 辅助 Dafny 验证)
+   - code generation benchmark 方法论(HumanEval/MBPP 与 pass@k;本文 compile@1 /
+     verify@1 / verify@3 是 pass@k 在"形式化"维度的类比,要显式点出这个谱系关系)
+   - 评测中的 specification gaming / reward hacking / test-passed-but-wrong 文献
+     (semantic fidelity 直接接这条线,这是它最有分量的落点)
+4. 引用 P1 数据集给 DOI **10.57760/sciencedb.011r9**;正文用第三人称(如
+   "Guo et al. [n]"),**不要写 "our prior work"**。
+
+### A.15.3 格式(由 Cursor 拉取 KBS 官方 Guide for Authors 核实,不许凭记忆写)
+必须亲自核实:页数/字数上限、模板(Elsevier 通用 elsarticle 还是 KBS 指定)、参考文献
+格式、图表与附录规则、是否需要 highlights / graphical abstract / CRediT 声明。
+若官方无硬页数限制,按 **正文 12–16 页(不含参考文献与附录)** 掌握。核实结果写进 OUTBOX。
+
+### A.15.4 W3 全量实验执行约束(针对 2026-09-09 23:37 agent 被杀、输出全丢的事故)
+1. **必须 checkpoint**:每完成一个 (model × prompt-level) 组合,立即把结果 append 到
+   `experiments/p2_llm/results/raw/l1_full_<ts>.jsonl`。**不要等全部跑完才落盘**。
+2. **断点续跑**:重启时先读已有 jsonl,跳过已完成 cell,不重复烧 token。
+3. **分批**:单次 agent 调用不要试图一次跑完 840 cells;按模型分批,每批结束在 OUTBOX
+   写一行进度(已完成/总数 + 当前真实数字片段)。
+4. 任何时刻被中断:已落盘数据不得丢失、不得重跑、不得编造补齐。
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
+
 - 17:21 PI 停 git 远端操作 → 本地 commit 仅本地不 push,实验完一次性上传
 - 17:24 PI 轮换 autoDL SSH 密码 → 新真值存 `autoDL登录信息.txt`(.gitignored,行 77)
 - 18:13 PI 提醒 Cursor 完工失声 → 已装 user-level sentinel skill
 - 18:18 PI 让"下一步干活" → task7.5(task7.5 已是 PENDING)+ task8A(P-COMP-3 反例)**并行链**
-- **18:22 PI 升级 push gate:** **实验完成 + 论文发出之前,任何 commit 不 push 到 GitHub**。
-  这是 17:21 决定的强化版 —— 原"本机 commit 不 push"现在是"一切 commit 不 push,直到论文终稿定型"。
-  论文 → 实验 → 公众号文章 → arXiv preprint → 期刊投稿 → 接收后才一次性同步 GitHub。
+- **18:22 PI 升级 push gate:** **实验完成 + 论文发出之前,任何 commit 不 push 到 GitHub**。  
+  这是 17:21 决定的强化版 —— 原"本机 commit 不 push"现在是"一切 commit 不 push,直到论文终稿定型"。  
+  论文 → 实验 → 公众号文章 → arXiv preprint → 期刊投稿 → 接收后才一次性同步 GitHub。  
   Cursor 由此可以毫无顾忌地调源码、不用在 push 上踩刹车。
 - **目标优先级(18:22 重申):** 尽快完成实验 → 写论文 → 发论文
   - 实验: P-001..P-006 / P-COMP-1..N / P-005..P-006 T6 云端复核(当前 task7.5 + task8A)
   - 论文: docs/PAPER_P2_OUTLINE.md v1.0+(洛书自管)+ 实验部分由 Cursor 提供原始数据
 - **不要把新密码写进仓库、脚本、OUTBOX 回传**
 
+
 ### B.2 任务历史(只读,以后每完成一段归档到这里)
+
 - **task6(2026-09-06 17:38-17:48,STATUS=CLOSED)** = P-005 云端复核 + P-006 流域唯一
 - **task7(2026-09-06 18:08-18:10,STATUS=CLOSED LOCAL)** = P-COMP-1 + 第 6 条 本机段
 - **task7.5(2026-09-06 18:15-18:30,STATUS=CLOSED LOCAL+云端)** = P-COMP-1 + T6 形式化云端复核
@@ -1016,6 +1090,7 @@ python make_figures.py              # 出 4 图
 - **task16(2026-09-09 01:43-PENDING,STATUS=ACTIVE)** = 第二篇 P2「LLM 自动形式化 GPB 基准评测」;W1 设计 → W9 投稿 11/10;**本机自动化已部署**(Cursor headless CLI + INBOX watcher + 计划任务每 5 min),PI 零点击
 
 ### B.3 触发器(`.cursorrules` `[mailbox]` 规则契约)
+
 - Cursor session 启动时自动 `Read` 本文件
 - STATUS=PENDING → 执行 §A
 - STATUS=DONE/CLOSED → 不动
