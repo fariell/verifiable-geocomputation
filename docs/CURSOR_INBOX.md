@@ -918,7 +918,8 @@ python make_figures.py              # 出 4 图
 
 #### A.13.5 自推进与回报
 
-- L1 全量 + 验证 + 评分全部完成 → STATUS 改 `W4/PENDING`(进 L2 组合层)
+- L1 全量 + 验证 + 评分全部完成 → STATUS 改 `W3.6/PENDING`(**写作为先**,见 §A.14;
+  W4 组合层实验押后 —— ICLR 摘要 9/18 是硬 deadline,实验可以后补)
 - 若 key 仍不可用 → STATUS 保持 `W3/BLOCKED-PI`,OUTBOX 写明缺什么
 - OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live)`,
   必须包含:**每个模型的真实 compile@1 / verify@1 / semantic fidelity 数字**(不是"跑通了")
@@ -926,6 +927,59 @@ python make_figures.py              # 出 4 图
 
 **绝对禁止**:编造任何 `verify@` / `compile@`;把 fixture 或 dry-run 结果当真实模型结果;
 把 key 写进任何文件;修改 `papers/` 下内容(P1 形态锁);git push。
+
+---
+
+### A.14 · task16-W3.6 论文起草(PI 2026-09-10 00:1x 拍板 — 写作为先)
+
+> **⚠️ 关键背景修正**:秘书此前给的「11/10 投稿」是按 9 周倒推的,**未对齐真实 deadline,作废**。
+> **ICLR 2027 真实节点:Abstract 2026-09-18 AOE / Full paper 2026-09-25 AOE。**
+> 今天 9/10 —— 摘要只剩 **8 天**,全文只剩 **15 天**。
+
+#### A.14.1 路线(PI 拍板:先冲摘要,数据不够就转期刊)
+
+| 时点 | 动作 |
+|---|---|
+| 现在 | 起草 §1–§4(不依赖数据) |
+| **9/16** | **决策点**:检查 W3 真实数据是否到位 → 够就写 abstract 投 ICLR;不够就转期刊路线(TGIS/IJGIS),不再赌 ICLR |
+| 9/18 | 若继续:交 ICLR abstract |
+| 9/25 | 若继续:交 ICLR full paper |
+| 10 月中 | **无论如何**:arXiv 预印本(锁定青C 所需的 preprint 状态) |
+| 11 月 | 若 ICLR 未投/被拒:投期刊 |
+
+#### A.14.2 现在就写(不依赖任何实验结果,材料已全部定稿)
+
+落 `papers/P2_aimath/`,LaTeX 优先(ICLR 模板),同步留一份 md:
+
+| 章 | 内容 | 素材来源(已定稿) |
+|---|---|---|
+| §1 Introduction | 动机:地理算法规约 → 机器可检验规约的自动化难题;为什么现有 benchmark(miniF2F/ProofNet)覆盖不到 | `docs/P2_AIMATH/DESIGN.md` |
+| §2 Related Work | 自动形式化 / 数学 benchmark / 程序合成的验证 / **差距:地理算法特有的浮点、网格遍历、拓扑不变式** | DESIGN.md §related |
+| §3 Benchmark Design | GPB 21 命题 + L1 单算子 / L2 组合 / L3 反例三层 + 任务包 schema + gold 规约为何 withholding | DESIGN.md + `experiments/p2_llm/tasks/` |
+| §4 Methodology | harness 架构 + 3 档 prompt(P0/P1/P2)+ 5 指标口径(**compile@1 / verify@1 / verify@3 / repair gain / semantic fidelity**)+ Dafny+Lean 双轨检验 | `experiments/p2_llm/harness/` + `RESULT_SCHEMAS.md` |
+
+**§5 Results / §6 Failure Taxonomy / §7 Discussion 留占位**,等真实数据 —— 一个数字都不许编。
+
+#### A.14.3 ICLR 2027 硬性格式(必须遵守)
+
+- 主文 **≤ 9 页**(讨论期/camera-ready 放宽 10 页);参考文献与附录**不限页**
+- **双盲**:全文不得出现作者身份。引用本项目的 P1(Sci Data Data Descriptor)时
+  **必须第三人称**,如 "a concurrently submitted data descriptor [N]" —— 不得写 "our prior work"
+- **强制 AI use statement**(不计页数):如实说明 agent 参与了实现/实验执行/文稿起草;
+  作者对所有内容负全责。这一节本项目必须写,且要写得坦荡
+- 所有 submission(含被拒/撤稿)**永久公开署名**
+- 主题自查:ICLR 2027 含 "datasets and benchmarks" 与
+  "neurosymbolic & hybrid AI systems (logic & formal reasoning)" —— **与本题对口,要在 cover/intro 里点明**
+
+#### A.14.4 自推进
+
+- §1–§4 起草完成 → STATUS 改 `W3.7/PENDING`(等数据灌 §5),
+  不要直接跳 W4 —— 等 9/16 决策点 PI 拍板
+- OUTBOX 新增段 `## P2 论文起草 §1–§4(task16-W3.6)`,说明每章多少行、用了哪些素材
+- commit:`docs(p2_aimath): task16-W3.6 draft sections 1-4 (methods, no results claimed)`
+
+**绝对禁止**:编造任何结果数字;在 §1–§4 里暗示已有实验结果;把 key 写进文件;
+改 `papers/P2`(P1 形态锁);git push。
 
 ---
 
