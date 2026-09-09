@@ -806,6 +806,50 @@ W3 的离线部分已全过(schema 22/22、L1 14 题、prompt dry-validate 28/28
 
 ---
 
+### A.13 · task16-W3 解阻路径收窄(洛书 2026-09-09 23:1x 实测)
+
+**实测补充(A.12.1 未覆盖 ANTHROPIC_BASE_URL)**:
+
+| 项 | 实测 |
+|---|---|
+| `ANTHROPIC_BASE_URL` | `https://code.newcli.com/claude`(Cursor 订阅网关) |
+| DNS | ok 18 ms → 118.193.240.41 |
+| TCP :443 | **timeout 30 s** → 网络层不可达 |
+| 公共 DoH(dns.google / cloudflare-dns) | 全被挡(timeout / RST)→ 换 DNS 绕不过 |
+| `api.anthropic.com` | 维持 **403** → 业务层拒绝,非网络故障 |
+
+⇒ **A.12.1 的选项 (b)「配代理」无效**:网关是出口限制(不是代理缺失),
+官方是账号/区域策略(代理不改账号)。**实际只剩 (a) 国产 key / (c) OpenRouter 或改模型。**
+
+**新交付(已 commit)**:`experiments/p2_llm/harness/openai_compat.py`
+
+原 harness 只认 Anthropic `/v1/messages` + `x-api-key`,**给了国产 key 也跑不了**;
+现新增 `--backend openai`,支持 siliconflow / deepseek / dashscope / zhipu /
+moonshot / openrouter 六个 OpenAI 兼容端点(`chat_url` 取自实测可达的 URL)。
+
+**PI 给 key 后的解阻命令(一条)**:
+
+```bash
+export SILICONFLOW_API_KEY=...      # 或 DEEPSEEK_API_KEY / DASHSCOPE_API_KEY / ...
+cd experiments/p2_llm/harness
+python run_l1_batch.py --backend openai --require-live --prompts P0,P1 --k 5
+```
+
+- provider 自动探测(有哪个 key 用哪个);指定用 `export P2_LLM_PROVIDER=deepseek`
+- 未显式给 `--model` 时自动套用该 provider 的 `default_model`
+- 无 key → 明确 BLOCKED、`cells=[]`,绝不编造 verify@
+
+拿到真实响应后按 A.12.3:STATUS 改 `W3/PENDING`(或直接推进 W4),OUTBOX 新开段回报。
+
+**当前自检(无 key 环境,非模型结果)**:离线自检 `schema_ok=true` / `figures_n=4` /
+`n_live=0`;dry-run 22/22 tasks + 2/2 prompts PASS;`--backend openai --require-live`
+返回 BLOCKED 且 `cells=[]`。
+
+**依赖提示**:harness 需要 `httpx` / `pyyaml` / `jsonschema`。
+**缺 `jsonschema` 会让 `schema_ok` 假性变 false**(不是任务 YAML 出错),排查时先查依赖。
+
+---
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况

@@ -98,3 +98,58 @@
 | 「出口访问不到 live LLM API」 | **部分修正**: 6+ 国产/聚合端点 **L1–L4 全通**（401），问题从「网络不通」精确为「**缺匹配 key / Anthropic 业务层 403**」 |
 
 未编造任何 `verify@` / `compile@` 数字。
+
+---
+
+## 6. 补充实测 · 2026-09-09 23:1x（网关与 DNS 排除）
+
+上一版候选表只查了 `*_PROXY`,漏了 `ANTHROPIC_BASE_URL`。本次补齐:
+
+| 项 | 实测 |
+|---|---|
+| `ANTHROPIC_BASE_URL` | `https://code.newcli.com/claude`（Cursor 订阅网关,**此前未覆盖**） |
+| DNS | ok,18 ms → `118.193.240.41` |
+| TCP :443 | **timeout 30 s**（不可达） |
+| 公共 DoH `dns.google` | timeout 48 s |
+| 公共 DoH `cloudflare-dns.com` | WinError 10054（RST） |
+
+**结论**:Anthropic 两条路全部排除 ——
+官方 `api.anthropic.com` 是**业务层 403**（网络通、账号拒）;
+订阅网关 `code.newcli.com` 是**网络层不可达**（DNS 能解析、TCP 连不上,
+且换公共 DNS 也绕不过）。
+
+因此 §4 的选项 **(b)「配代理」实际无效**:它既不解决网关的 TCP 超时
+（那是出口限制,不是代理缺失）,也不解决官方 403（那是账号/区域策略）。
+**实际只剩 (a) 国产 OpenAI 兼容 key / (c) OpenRouter 或改模型决定。**
+
+---
+
+## 7. harness 已支持 OpenAI 兼容端点（2026-09-09 23:1x）
+
+§4 选项 (a) 原标注「harness 需接 OpenAI-compatible backend(W3 重跑时加)」,
+**已实现**:新增 `experiments/p2_llm/harness/openai_compat.py`,注册 6 个 provider
+（`siliconflow` / `deepseek` / `dashscope` / `zhipu` / `moonshot` / `openrouter`）,
+`chat_url` 全部取自本文 §2 实测过的 URL。
+
+### 解阻命令（PI 给出 key 后一条即可）
+
+```bash
+export SILICONFLOW_API_KEY=...     # 或 DEEPSEEK_API_KEY / DASHSCOPE_API_KEY / ...
+cd experiments/p2_llm/harness
+python run_l1_batch.py --backend openai --require-live --prompts P0,P1 --k 5
+```
+
+- provider 自动探测（有哪个 key 用哪个）;要指定就 `export P2_LLM_PROVIDER=deepseek`
+- `--backend openai` 且未显式给 `--model` 时,自动套用该 provider 的 `default_model`
+- 无 key 时:**明确 BLOCKED**,`cells=[]`,不编造任何 verify@
+
+### 已验证（当前无 key 环境下的自检,非模型结果）
+
+| 检查 | 结果 |
+|---|---|
+| `run_all_offline.py` 回归 | `schema_ok=true` / `figures_n=4` / `n_live=0` |
+| `run_l1_batch.py --dry-run-prompts` | 22/22 tasks、2/2 prompts PASS |
+| `--backend openai --require-live` | verdict=BLOCKED;blocker 列出所需 key;`cells=[]` |
+| 依赖 | 需 `httpx` / `pyyaml` / `jsonschema`（缺 jsonschema 会让 schema_ok 假性 false） |
+
+未编造任何 `verify@` / `compile@` 数字。
