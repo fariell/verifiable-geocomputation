@@ -850,6 +850,84 @@ python run_l1_batch.py --backend openai --require-live --prompts P0,P1 --k 5
 
 ---
 
+### A.13 · task16-W3 解阻后全量跑指令(PI 2026-09-09 23:2x 拍板)
+
+**PI 两项决定**:(1) provider = **硅基流动 siliconflow**;(2) **直接全量跑**,不做单模型试跑。
+
+> **触发方式(PI 真正零点击)**:PI 只需执行一条命令设置 User 环境变量
+> `[Environment]::SetEnvironmentVariable("SILICONFLOW_API_KEY","sk-...","User")`。
+> `gate.ps1` 每 5 分钟从注册表读 provider key,**一旦读到就自动解除 `BLOCKED-PI`**
+> 并把 key 注入 agent 及其 python 子进程 —— PI 不需要改 STATUS、不需要告诉我、不需要开 Cursor。
+
+#### A.13.1 第一步:确认模型阵容(必做,别猜模型名)
+
+硅基流动一个 key 可调用多个开源模型。**先探测真实模型清单,不许凭记忆写模型名**:
+
+```bash
+curl -s https://api.siliconflow.cn/v1/models -H "Authorization: Bearer $SILICONFLOW_API_KEY"
+```
+
+从返回里挑 **4 个**组成阵容,选型原则(写进回报,说明理由):
+
+| 槽位 | 要求 | 目的 |
+|---|---|---|
+| M1 | 当前最强通用开源(如 DeepSeek-V3 系) | 上界参照 |
+| M2 | 另一家主力(如 Qwen 系 72B+) | 跨系列对比 |
+| M3 | 中等规模(如 GLM-4 / 32B 档) | 规模效应 |
+| M4 | 带推理/长思维链(如 R1 系) | 检验"推理增强是否利于形式化" |
+
+- 若某槽位在硅基流动上不可用 → 从实测清单里换,并在回报写明替换理由。
+- 模型名写进 `experiments/p2_llm/harness/openai_compat.py` 的 `default_model`(如已有则确认一致)。
+
+#### A.13.2 第二步:L1 全量跑
+
+```bash
+export P2_LLM_PROVIDER=siliconflow
+cd experiments/p2_llm/harness
+python run_l1_batch.py --backend openai --require-live \
+       --models M1,M2,M3,M4 --prompts P0,P1,P2 --k 5
+```
+
+- **规模**:L1 14 题 × 4 模型 × 3 prompt × k=5( repair 轮对失败项 ≤3 轮,按 DESIGN.md 口径)
+- **断点续跑**:`run_l1_batch.py` 已 resume-safe;中断后重跑同一条命令即可跳过已完成 cell,
+  **不要清 results 目录重来**
+- **原始输出全留存**:每个 cell 的原始 LLM 响应必须落 `experiments/p2_llm/results/raw/`,
+  一条不删 —— 这是可复现性与"失败模式标注"的唯一依据
+
+#### A.13.3 熔断(必设,别把额度烧穿)
+
+| 条件 | 动作 |
+|---|---|
+| 单模型连续 10 次 HTTP 非 2xx | 停该模型,记 `PROVIDER_ERROR`,继续其余模型 |
+| 累计花费超预算上限(你先按单价估一个,写进回报) | 停跑并回报,等 PI 拍板 |
+| 某模型 compile@1 = 0 且连续 20 cell 全失败 | 停该模型,判定为"该模型不具备本任务能力"(这是**有效结论**,如实写) |
+| 跑完 ≥ 80% cells | 允许以部分数据出中间报告,标注 `partial` |
+
+#### A.13.4 第三步:验证 + 评分(不依赖 API)
+
+```bash
+python run_verify.py --all          # dafny / lean 双轨机器检验
+python score_semantic.py --all      # 含 F7 语义漂移判定
+python make_figures.py              # 出 4 图
+```
+
+**核心指标口径**(一个都不能省,尤其是最后一个):
+`compile@1` / `verify@1` / `verify@3` / `repair gain` / **semantic fidelity**
+(**单独统计 "verified but drifted"** —— 机器检验通过了但证明的不是原命题,这是本 benchmark 的差异化指标)
+
+#### A.13.5 自推进与回报
+
+- L1 全量 + 验证 + 评分全部完成 → STATUS 改 `W4/PENDING`(进 L2 组合层)
+- 若 key 仍不可用 → STATUS 保持 `W3/BLOCKED-PI`,OUTBOX 写明缺什么
+- OUTBOX 新增段 `## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live)`,
+  必须包含:**每个模型的真实 compile@1 / verify@1 / semantic fidelity 数字**(不是"跑通了")
+- commit:`feat(p2_llm): task16-W3 L1 live 全量主实验`
+
+**绝对禁止**:编造任何 `verify@` / `compile@`;把 fixture 或 dry-run 结果当真实模型结果;
+把 key 写进任何文件;修改 `papers/` 下内容(P1 形态锁);git push。
+
+---
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
