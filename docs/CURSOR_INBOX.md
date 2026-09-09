@@ -1084,7 +1084,18 @@ semantic fidelity 是 §A.15.2 定的头条卖点,没有它 KBS 版本就没有�
 5. WSL 也不可用 → 走 AutoDL(见 `docs/autodl-playbook.md`):打包 `.dfy` 上传,
    云端批量 verify 后取回。**任何情况下不许跳过 verify。**
 
-### A.16.3 诚实红线
+### A.16.3 冷启动恢复(宿主 2026-09-10 00:5x 关机,agent 被强杀)
+明早开机后**先做这三步,再继续生成**——顺序不能反(否则继续空转烧 token):
+1. **修 verify 工具链**(A.16.2 第 1 条)——这是第一优先级,不是"有空再说"。
+   在 `metric_eligible` 能转 true 之前,**不要启动新的大批量生成**。
+2. **校验被中断的 jsonl**:`l1_full_w3_live.jsonl` 最后一行可能因强杀而残缺。
+   逐行 parse,截断到最后一条完整 JSON,不完整的另存 `*.jsonl.bak` 备份。
+3. **对账再续跑**:比对 `raw/*.dfy` 与 jsonl 的 `raw_source` 字段——
+   - 有 `.dfy` 但 jsonl 无记录 → 补登记,**不要重新生成**;
+   - 有记录但 `.dfy` 缺失或 0 字节 → 只重跑这一个 cell。
+   **严禁清空 results/ 重开**。已生成的 `.dfy` 是花钱买来的资产。
+
+### A.16.4 诚实红线
 - 不许把 `TOOLCHAIN_MISSING` 计入通过;不许在论文里写任何未经真实 verify 的
   verify@ / semantic fidelity 数字。
 - 若最终确有子集无法验证,必须在 OUTBOX 明确列出"哪些子集有真实 verify、哪些没有",
