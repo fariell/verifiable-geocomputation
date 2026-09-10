@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1613,
+    "completion_tokens": 1097,
+    "total_tokens": 2710,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1613
+  },
+  "api_id": "01a08707c3f4289e346002cafdd4bb85",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope magnitude on a 3×3 constant‑elevation window\n// Formalization of: \"On any 3x3 elevation window with finite values,\n// if all nine cells share the same elevation, the Horn (1981) slope magnitude\n// (equivalently its square SlopeSq) is identically zero. Grid spacing w must be positive.\"\n\nmodule HornSlopeConstantWindow {\n  // A 3×3 window of finite elevations\n  type Window = array3<int, 3, 3>\n\n  // Horn (1981) finite‑difference slope components\n  // Notation: window indices (row, col) with (0,0) at top‑left.\n  // The central cell is (1,1).\n  function HornSlopeX(w: Window, spacing: real): real\n    requires spacing > 0.0\n  {\n    // ∂z/∂x ≈ ( (z(0,2)+2*z(1,2)+z(2,2)) - (z(0,0)+2*z(1,0)+z(2,0)) ) / (8 * spacing)\n    let numerator :=\n      (w[0,2] + 2 * w[1,2] + w[2,2]) -\n      (w[0,0] + 2 * w[1,0] + w[2,0]);\n    numerator as real / (8.0 * spacing)\n  }\n\n  function HornSlopeY(w: Window, spacing: real): real\n    requires spacing > 0.0\n  {\n    // ∂z/∂y ≈ ( (z(2,0)+2*z(2,1)+z(2,2)) - (z(0,0)+2*z(0,1)+z(0,2)) ) / (8 * spacing)\n    let numerator :=\n      (w[2,0] + 2 * w[2,1] + w[2,2]) -\n      (w[0,0] + 2 * w[0,1] + w[0,2]);\n    numerator as real / (8.0 * spacing)\n  }\n\n  // Square of the slope magnitude (to avoid square‑root)\n  function HornSlopeSq(w: Window, spacing: real): real\n    requires spacing > 0.0\n  {\n    let sx := HornSlopeX(w, spacing);\n    let sy := HornSlopeY(w, spacing);\n    sx * sx + sy * sy\n  }\n\n  // Predicate: all nine cells have the same finite elevation value\n  predicate ConstantWindow(w: Window)\n  {\n    forall i, j :: 0 <= i < 3 && 0 <= j < 3 ==> w[i,j] == w[0,0]\n  }\n\n  // Main theorem: on a constant window, the Horn slope magnitude is zero.\n  theorem HornSlopeZeroOnConstant(w: Window, spacing: real)\n    requires spacing > 0.0\n    requires ConstantWindow(w)\n    ensures HornSlopeSq(w, spacing) == 0.0\n  {\n    // Because all cells are equal, each numerator in HornSlopeX and HornSlopeY is zero.\n    calc {\n      HornSlopeX(w, spacing);\n    ==\n      // Expand numerator\n      ((w[0,2] + 2 * w[1,2] + w[2,2]) - (w[0,0] + 2 * w[1,0] + w[2,0])) as real / (8.0 * spacing);\n    ==\n      // Since w[i,j] == w[0,0] for all i,j\n      ((w[0,0] + 2 * w[0,0] + w[0,0]) - (w[0,0] + 2 * w[0,0] + w[0,0])) as real / (8.0 * spacing);\n    ==\n      0.0 / (8.0 * spacing);\n    ==\n      0.0;\n    }\n\n    calc {\n      HornSlopeY(w, spacing);\n    ==\n      ((w[2,0] + 2 * w[2,1] + w[2,2]) - (w[0,0] + 2 * w[0,1] + w[0,2])) as real / (8.0 * spacing);\n    ==\n      ((w[0,0] + 2 * w[0,0] + w[0,0]) - (w[0,0] + 2 * w[0,0] + w[0,0])) as real / (8.0 * spacing);\n    ==\n      0.0 / (8.0 * spacing);\n    ==\n      0.0;\n    }\n\n    // Therefore the squared magnitude is zero.\n    assert HornSlopeSq(w, spacing) == 0.0 * 0.0 + 0.0 * 0.0 == 0.0;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

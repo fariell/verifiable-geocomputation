@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1686,
+    "completion_tokens": 1401,
+    "total_tokens": 3087,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1686
+  },
+  "api_id": "01a08a9b5df8b5da5e039a0510f8c211",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of D8 steepest-descent routing pit condition\n// Property: If no neighbor is strictly lower than the center, flow direction is NoFlow.\n\n// Grid dimensions are positive\npredicate ValidGridDimensions(rows: int, cols: int)\n  reads {}\n{\n  rows > 0 && cols > 0\n}\n\n// Valid grid coordinates\npredicate InGrid(rows: int, cols: int, r: int, c: int)\n  reads {}\n  requires ValidGridDimensions(rows, cols)\n{\n  0 <= r < rows && 0 <= c < cols\n}\n\n// D8 neighbor offsets: (dr, dc, distance^2)\ntype Dir = (name: string, dr: int, dc: int, dist2: int)\n\n// D8 neighbor directions in order: E, SE, S, SW, W, NW, N, NE\nconst DIRS: seq<Dir> := [\n  (\"E\",  0,  1, 1),\n  (\"SE\", 1,  1, 2),\n  (\"S\",  1,  0, 1),\n  (\"SW\", 1, -1, 2),\n  (\"W\",  0, -1, 1),\n  (\"NW\", -1, -1, 2),\n  (\"N\", -1,  0, 1),\n  (\"NE\", -1,  1, 2)\n];\n\n// Height grid as a 2D array\ntype Grid = array2<int>\n\n// Check if a neighbor is strictly lower than center\npredicate NeighborLower(grid: Grid, r: int, c: int, dr: int, dc: int)\n  reads grid\n  requires InGrid(grid.Length0, grid.Length1, r, c)\n  requires InGrid(grid.Length0, grid.Length1, r + dr, c + dc)\n{\n  grid[r + dr, c + dc] < grid[r, c]\n}\n\n// Check if any D8 neighbor is strictly lower\npredicate HasLowerNeighbor(grid: Grid, r: int, c: int)\n  reads grid\n  requires ValidGridDimensions(grid.Length0, grid.Length1)\n  requires InGrid(grid.Length0, grid.Length1, r, c)\n{\n  exists dr, dc :: \n    (dr, dc) in [(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)] &&\n    InGrid(grid.Length0, grid.Length1, r + dr, c + dc) &&\n    NeighborLower(grid, r, c, dr, dc)\n}\n\n// D8 flow direction result\ndatatype FlowResult = \n  | Direction(name: string, dr: int, dc: int)\n  | NoFlow\n\n// D8 steepest-descent routing function\nfunction D8Flow(grid: Grid, r: int, c: int): FlowResult\n  reads grid\n  requires ValidGridDimensions(grid.Length0, grid.Length1)\n  requires InGrid(grid.Length0, grid.Length1, r, c)\n{\n  var best: FlowResult := NoFlow;\n  var bestPower: int := 0;\n  \n  for dir in DIRS\n    invariant best == NoFlow || exists d :: d in DIRS && best == Direction(d.name, d.dr, d.dc)\n    invariant forall d :: d in DIRS && Direction(d.name, d.dr, d.dc) == best ==>\n              bestPower == ((grid[r, c] - grid[r + d.dr, c + d.dc])^2) / d.dist2\n  {\n    var rr := r + dir.dr;\n    var cc := c + dir.dc;\n    \n    if InGrid(grid.Length0, grid.Length1, rr, cc) && grid[rr, cc] < grid[r, c] {\n      var drop := grid[r, c] - grid[rr, cc];\n      var power := drop * drop / dir.dist2;\n      \n      if best == NoFlow || power > bestPower {\n        best := Direction(dir.name, dir.dr, dir.dc);\n        bestPower := power;\n      }\n    }\n  }\n  \n  best\n}\n\n// Main theorem: If no neighbor is strictly lower, result is NoFlow\ntheorem D8PitNoFlow(grid: Grid, r: int, c: int)\n  requires ValidGridDimensions(grid.Length0, grid.Length1)\n  requires InGrid(grid.Length0, grid.Length1, r, c)\n  requires !HasLowerNeighbor(grid, r, c)\n  ensures D8Flow(grid, r, c) == NoFlow\n{\n  // Expand the definition of HasLowerNeighbor\n  assert forall dr, dc :: \n    (dr, dc) in [(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)] &&\n    InGrid(grid.Length0, grid.Length1, r + dr, c + dc) ==>\n    !NeighborLower(grid, r, c, dr, dc);\n  \n  // Show that all D8 directions either are out of bounds or not strictly lower\n  forall dir: Dir | dir in DIRS\n    ensures !(InGrid(grid.Length0, grid.Length1, r + dir.dr, c + dir.dc) && \n              grid[r + dir.dr, c + dir.dc] < grid[r, c])\n  {\n    // This follows from the precondition and DIRS covering all 8 neighbors\n    assert (dir.dr, dir.dc) in [(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)];\n  }\n  \n  // Therefore, in D8Flow, no neighbor qualifies for the if-condition\n  // So best remains NoFlow throughout the loop\n  var result := D8Flow(grid, r, c);\n  assert result == NoFlow;\n}\n\n// Helper lemma: DIRS contains all 8 neighbor offsets\nlemma DIRSCoverage()\n  ensures forall dr, dc :: \n    (dr, dc) in [(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)] ==>\n    exists dir :: dir in DIRS && dir.dr == dr && dir.dc == dc\n{\n  // Verified by construction of DIRS\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 250,
+    "completion_tokens": 932,
+    "total_tokens": 1182,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 250
+  },
+  "api_id": "01a08ac2110661ca53878306f79bda0d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Tactic\n\nopen Matrix\n\n-- Represent a planar DEM: z = A x + B y + C\nstructure DEM : Type where\n  A : ℝ\n  B : ℝ\n  C : ℝ\n\n-- Grid cell coordinates\nstructure Cell : Type where\n  x : ℤ\n  y : ℤ\n\n-- D8 flow direction as an angle in degrees (simplified to integer for this example)\ninductive D8Direction : Type\n  | E : D8Direction\n  | NE : D8Direction\n  | N : D8Direction\n  | NW : D8Direction\n  | W : D8Direction\n  | SW : D8Direction\n  | S : D8Direction\n  | SE : D8Direction\nderiving DecidableEq\n\n-- Slope positivity condition: A > 0 and B > 0\ndef positive_slope (dem : DEM) : Prop := dem.A > 0 ∧ dem.B > 0\n\n-- Elevation at a cell for a given DEM\ndef elevation (dem : DEM) (cell : Cell) : ℝ :=\n  dem.A * (cell.x : ℝ) + dem.B * (cell.y : ℝ) + dem.C\n\n-- D8 flow direction from a cell to its steepest downward neighbor\n-- Simplified: compare elevations of the 8 neighboring cells\ndef d8_direction (dem : DEM) (cell : Cell) : D8Direction :=\n  let neighbors : List (Cell × D8Direction) :=\n    [ (Cell.mk (cell.x + 1) cell.y, D8Direction.E),\n      (Cell.mk (cell.x + 1) (cell.y + 1), D8Direction.NE),\n      (Cell.mk cell.x (cell.y + 1), D8Direction.N),\n      (Cell.mk (cell.x - 1) (cell.y + 1), D8Direction.NW),\n      (Cell.mk (cell.x - 1) cell.y, D8Direction.W),\n      (Cell.mk (cell.x - 1) (cell.y - 1), D8Direction.SW),\n      (Cell.mk cell.x (cell.y - 1), D8Direction.S),\n      (Cell.mk (cell.x + 1) (cell.y - 1), D8Direction.SE) ]\n  let current_z := elevation dem cell\n  let candidates := neighbors.filter (λ (nb, _) => elevation dem nb < current_z)\n  if candidates.isEmpty then D8Direction.E  -- default if no lower neighbor\n  else\n    let steepest := candidates.minimum? (λ (nb1, _) (nb2, _) =>\n      elevation dem nb1 ≤ elevation dem nb2)\n    match steepest with\n    | some (_, dir) => dir\n    | none => D8Direction.E\n\n-- Theorem: For a DEM with positive slope, D8 direction is invariant under translation of C\ntheorem d8_invariant_under_translation (dem : DEM) (hpos : positive_slope dem) (cell : Cell) :\n    ∀ (ΔC : ℝ), d8_direction { dem with C := dem.C + ΔC } cell = d8_direction dem cell := by\n  intro ΔC\n  unfold d8_direction\n  have h_elev_shift : ∀ (c : Cell), elevation { dem with C := dem.C + ΔC } c = elevation dem c + ΔC := by\n    intro c\n    unfold elevation\n    simp [add_assoc]\n  -- The shift adds ΔC to all elevations, so relative ordering between cells is unchanged\n  have h_rel_preserved : ∀ (c1 c2 : Cell),\n      elevation { dem with C := dem.C + ΔC } c1 < elevation { dem with C := dem.C + ΔC } c2 ↔\n      elevation dem c1 < elevation dem c2 := by\n    intro c1 c2\n    simp [h_elev_shift]\n    exact by\n      constructor\n      · intro h\n        linarith\n      · intro h\n        linarith\n  -- Therefore, the set of lower neighbors and the steepest one remain the same\n  simp [h_rel_preserved]\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

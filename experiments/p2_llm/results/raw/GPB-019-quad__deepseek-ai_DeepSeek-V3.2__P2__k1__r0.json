@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 266,
+    "completion_tokens": 691,
+    "total_tokens": 957,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 266
+  },
+  "api_id": "01a08aeac6210e8de36eba6ea3e6f793",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope exactness on quadratic surfaces\n// DzDx and DzDy recover true planar gradient coefficients (A,B) identically\n// On z = G x^3, DzDx remainder at origin equals G w^2 (order O(w^2))\n\nmethod QuadraticExactness(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w != 0.0\n  ensures DzDx == A && DzDy == B\n{\n  // Quadratic surface: z = A*x + B*y + C\n  // Horn's finite difference approximations:\n  // DzDx = (z(x+w,y) - z(x-w,y)) / (2w)\n  // DzDy = (z(x,y+w) - z(x,y-w)) / (2w)\n  \n  // Evaluate at origin (x=0, y=0)\n  var z00 := A*0.0 + B*0.0 + C;\n  var zpw0 := A*w + B*0.0 + C;\n  var zmw0 := A*(-w) + B*0.0 + C;\n  var z0pw := A*0.0 + B*w + C;\n  var z0mw := A*0.0 + B*(-w) + C;\n  \n  DzDx := (zpw0 - zmw0) / (2.0 * w);\n  DzDy := (z0pw - z0mw) / (2.0 * w);\n  \n  // Simplify algebraically\n  // DzDx = (A*w + C - (-A*w + C)) / (2w) = (2A*w) / (2w) = A\n  // DzDy = (B*w + C - (-B*w + C)) / (2w) = (2B*w) / (2w) = B\n}\n\nmethod CubicRemainder(G: real, w: real) \n  returns (remainder: real)\n  requires w != 0.0\n  ensures remainder == G * w * w\n{\n  // Cubic surface: z = G * x^3\n  // Horn's DzDx at origin:\n  // DzDx = (z(w,0) - z(-w,0)) / (2w)\n  \n  var zpw := G * w * w * w;\n  var zmw := G * (-w) * (-w) * (-w);\n  // zmw = G * (-w)^3 = G * (-w^3) = -G * w^3\n  \n  var DzDx := (zpw - zmw) / (2.0 * w);\n  // DzDx = (G*w^3 - (-G*w^3)) / (2w) = (2G*w^3) / (2w) = G*w^2\n  \n  // True derivative at origin: dz/dx = 3G*x^2 = 0 at x=0\n  // Remainder = DzDx - true_derivative = G*w^2 - 0 = G*w^2\n  remainder := DzDx;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

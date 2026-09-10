@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1591,
+    "completion_tokens": 1617,
+    "total_tokens": 3208,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1591
+  },
+  "api_id": "01a08b12616514ce56d776317cb9b6df",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of RaiseNbr property in Wang & Liu pit filling\n// The property: raising a 4-neighbor from an already-processed cell\n// never decreases any cell elevation, and the neighbor is lifted at least\n// to max(original neighbor, processed cell fill).\n\nmodule RaiseNbrProperty {\n  // Grid dimensions\n  const rows: int\n  const cols: int\n  ghost predicate ValidGrid() {\n    rows > 0 && cols > 0\n  }\n\n  // Elevation type (real numbers for DEM)\n  type Elevation = real\n\n  // Original DEM (immutable)\n  const original: array2<Elevation>\n\n  // Processed fill values (mutable during algorithm)\n  var fill: array2<Elevation>\n\n  // Track which cells have been processed\n  var processed: array2<bool>\n\n  // 4-neighbor directions\n  const NBR4: seq<(int, int)> := [(-1, 0), (1, 0), (0, -1), (0, 1)]\n  \n  // Grid bounds check\n  predicate InBounds(r: int, c: int) {\n    0 <= r < rows && 0 <= c < cols\n  }\n\n  // Valid neighbor relation\n  predicate Is4Neighbor(r1: int, c1: int, r2: int, c2: int) {\n    InBounds(r1, c1) && InBounds(r2, c2) &&\n    ((r2 == r1-1 && c2 == c1) ||\n     (r2 == r1+1 && c2 == c1) ||\n     (r2 == r1 && c2 == c1-1) ||\n     (r2 == r1 && c2 == c1+1))\n  }\n\n  // Invariant maintained throughout the algorithm\n  predicate FillInvariant() \n    reads this, fill, processed, original\n  {\n    (forall r, c :: InBounds(r, c) ==> fill[r, c] >= original[r, c]) &&\n    (forall r, c :: InBounds(r, c) && processed[r, c] ==> \n        (forall dr, dc :: (dr, dc) in NBR4 && InBounds(r+dr, c+dc) && processed[r+dr, c+dc] ==>\n            fill[r+dr, c+dc] >= fill[r, c]))\n  }\n\n  // The RaiseNbr operation\n  method RaiseNbr(r_processed: int, c_processed: int, r_neighbor: int, c_neighbor: int)\n    requires ValidGrid()\n    requires InBounds(r_processed, c_processed)\n    requires InBounds(r_neighbor, c_neighbor)\n    requires Is4Neighbor(r_processed, c_processed, r_neighbor, c_neighbor)\n    requires processed[r_processed, c_processed] == true\n    requires processed[r_neighbor, c_neighbor] == false\n    requires FillInvariant()\n    modifies fill, processed\n    ensures FillInvariant()\n    ensures processed[r_neighbor, c_neighbor] == true\n    // Property 1: neighbor elevation never decreases\n    ensures fill[r_neighbor, c_neighbor] >= old(fill)[r_neighbor, c_neighbor]\n    // Property 2: neighbor lifted to at least max(original[neighbor], fill[processed])\n    ensures fill[r_neighbor, c_neighbor] >= original[r_neighbor, c_neighbor]\n    ensures fill[r_neighbor, c_neighbor] >= old(fill)[r_processed, c_processed]\n  {\n    // The actual update rule from the specification\n    var newElevation := max(original[r_neighbor, c_neighbor], fill[r_processed, c_processed]);\n    \n    // Update neighbor's fill value\n    fill[r_neighbor, c_neighbor] := newElevation;\n    processed[r_neighbor, c_neighbor] := true;\n    \n    // Prove Property 1: newElevation >= old fill value\n    assert newElevation >= original[r_neighbor, c_neighbor] by {\n      // By definition of max\n    }\n    assert original[r_neighbor, c_neighbor] >= old(fill)[r_neighbor, c_neighbor] by {\n      // From FillInvariant on old state\n    }\n    assert newElevation >= old(fill)[r_neighbor, c_neighbor] by {\n      // Transitivity of >=\n    }\n    \n    // Prove Property 2: newElevation >= max(original[neighbor], old fill[processed])\n    assert newElevation >= original[r_neighbor, c_neighbor] by {\n      // Direct from max definition\n    }\n    assert newElevation >= old(fill)[r_processed, c_processed] by {\n      // Direct from max definition\n    }\n    \n    // Prove FillInvariant is maintained\n    // Part 1: all cells >= original\n    assert forall r, c :: InBounds(r, c) ==> fill[r, c] >= original[r, c] by {\n      // For the updated cell: newElevation >= original[neighbor] by max\n      // For other cells: unchanged from precondition\n    }\n    \n    // Part 2: processed neighbor relation\n    assert forall r, c :: InBounds(r, c) && processed[r, c] ==> \n        (forall dr, dc :: (dr, dc) in NBR4 && InBounds(r+dr, c+dc) && processed[r+dr, c+dc] ==>\n            fill[r+dr, c+dc] >= fill[r, c]) by {\n      // Need to check all processed cells and their processed neighbors\n      // The only new processed cell is (r_neighbor, c_neighbor)\n      // Its only processed neighbor is (r_processed, c_processed)\n      assert fill[r_processed, c_processed] >= fill[r_neighbor, c_neighbor] by {\n        // From the update rule: newElevation = max(original[neighbor], fill[processed])\n        // So fill[processed] <= newElevation = fill[neighbor]\n        // Actually wait, we need fill[neighbor] >= fill[processed], which is true\n        // because newElevation >= fill[processed] by max definition\n      }\n      \n      // For other neighbor relations, they remain true from precondition\n    }\n  }\n\n  // Helper lemma: max properties\n  lemma MaxProperties(a: Elevation, b: Elevation)\n    ensures max(a, b) >= a\n    ensures max(a, b) >= b\n  {\n    // Built-in properties of max\n  }\n\n  // Array2 type for 2D arrays\n  type array2<T> = array2<T>\n  function array2<T>(rows: int, cols: int): array2<T>\n  function [](a: array2<T>, r: int, c: int): T\n  function []=(a: array2<T>, r: int, c: int, v: T): array2<T>\n  axiom array2_bounds {\n    forall<T> a: array2<T>, r: int, c: int ::\n      0 <= r < a.Rows && 0 <= c < a.Cols ==> a[r, c] is T\n  }\n  \n  // Dummy definitions for compilation\n  const aRows: int\n  const aCols: int\n  function Rows(a: array2<T>): int { aRows }\n  function Cols(a: array2<T>): int { aCols }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

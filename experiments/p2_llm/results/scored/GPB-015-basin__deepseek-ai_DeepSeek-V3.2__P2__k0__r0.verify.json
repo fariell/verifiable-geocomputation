@@ -1,0 +1,29 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_dw5cofji/candidate.dfy\""
+    ],
+    "rc": 4,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_dw5cofji/candidate.dfy\",\"range\":{\"start\":{\"pos\":1715,\"line\":52,\"character\":38},\"end\":{\"pos\":1717,\"line\":52,\"character\":40}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"assertion might not hold\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_dw5cofji/candidate.dfy\",\"range\":{\"start\":{\"pos\":1814,\"line\":53,\"character\":38},\"end\":{\"pos\":1816,\"line\":53,\"character\":40}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"assertion might not hold\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_dw5cofji/candidate.dfy\",\"range\":{\"start\":{\"pos\":1990,\"line\":55,\"character\":38},\"end\":{\"pos\":1992,\"line\":55,\"character\":40}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"assertion might not hold\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_dw5cofji/candidate.dfy\",\"range\":{\"start\":{\"pos\":2062,\"line\":56,\"character\":38},\"end\":{\"pos\":2064,\"line\":56,\"character\":40}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"assertion might not hold\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 1 verified, 4 errors\\n\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "failure_code": "F3",
+  "interpret": {
+    "compile_rc": 0,
+    "verify_rc": 1,
+    "failure_code": "F3",
+    "interpreted_from": "verifier_finished",
+    "proc_rc": 4,
+    "n_verify_errors": 4
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

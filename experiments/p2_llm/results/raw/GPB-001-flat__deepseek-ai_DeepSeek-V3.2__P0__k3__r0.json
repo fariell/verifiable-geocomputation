@@ -1,0 +1,43 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1613,
+    "completion_tokens": 947,
+    "total_tokens": 2560,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1613
+  },
+  "api_id": "01a0870af7e0c57fac4c16f3b1676118",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope magnitude on a flat 3×3 window is zero\n// Formalization of: On any 3x3 elevation window with finite values,\n// if all nine cells share the same elevation, the Horn (1981) slope magnitude\n// (equivalently its square SlopeSq) is identically zero.\n// Grid spacing w must be positive.\n\n// Horn (1981) finite-difference slope components\n// Given a 3×3 window with elevations z₀..z₈ arranged as:\n//   z₀ z₁ z₂\n//   z₃ z₄ z₅\n//   z₆ z₇ z₈\n// and grid spacing w (cell size) in both x and y directions,\n// the slope components are:\n//   dz/dx = (z₂ + 2*z₅ + z₈ - z₀ - 2*z₃ - z₆) / (8*w)\n//   dz/dy = (z₆ + 2*z₇ + z₈ - z₀ - 2*z₁ - z₂) / (8*w)\n// Slope magnitude squared = (dz/dx)² + (dz/dy)²\n\n// We prove that if all z_i are equal, then dz/dx = dz/dy = 0, so slope² = 0.\n\n// Real numbers with usual arithmetic\ndatatype Real = Real(value: real)\n\nfunction HornSlopeSq(z0: Real, z1: Real, z2: Real,\n                     z3: Real, z4: Real, z5: Real,\n                     z6: Real, z7: Real, z8: Real, w: Real): Real\n  requires w.value > 0.0  // positive grid spacing\n{\n  // Compute dz/dx numerator\n  var numX := Real(z2.value + 2.0*z5.value + z8.value - z0.value - 2.0*z3.value - z6.value);\n  // Compute dz/dy numerator\n  var numY := Real(z6.value + 2.0*z7.value + z8.value - z0.value - 2.0*z1.value - z2.value);\n  // Common denominator 8*w\n  var denom := Real(8.0 * w.value);\n  // Slope components\n  var dzdx := Real(numX.value / denom.value);\n  var dzdy := Real(numY.value / denom.value);\n  // Slope magnitude squared\n  Real(dzdx.value*dzdx.value + dzdy.value*dzdy.value)\n}\n\n// Main theorem: if all elevations are equal, HornSlopeSq = 0\nlemma FlatWindowZeroSlope(z: Real, w: Real)\n  requires w.value > 0.0\n  ensures HornSlopeSq(z, z, z, z, z, z, z, z, z, w).value == 0.0\n{\n  // Expand HornSlopeSq with all arguments equal to z\n  var numX := Real(z.value + 2.0*z.value + z.value - z.value - 2.0*z.value - z.value);\n  // numX = (z + 2z + z) - (z + 2z + z) = 4z - 4z = 0\n  assert numX.value == 0.0;\n\n  var numY := Real(z.value + 2.0*z.value + z.value - z.value - 2.0*z.value - z.value);\n  // numY = (z + 2z + z) - (z + 2z + z) = 4z - 4z = 0\n  assert numY.value == 0.0;\n\n  var denom := Real(8.0 * w.value);\n  // dzdx = 0 / (8w) = 0\n  var dzdx := Real(numX.value / denom.value);\n  assert dzdx.value == 0.0;\n  // dzdy = 0 / (8w) = 0\n  var dzdy := Real(numY.value / denom.value);\n  assert dzdy.value == 0.0;\n\n  // SlopeSq = 0² + 0² = 0\n  assert dzdx.value*dzdx.value + dzdy.value*dzdy.value == 0.0;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null,
+  "semantic": "LIKELY_ALIGNED",
+  "fidelity_label": "LIKELY_ALIGNED",
+  "metric_eligible": true,
+  "backfill_ts_utc": "2026-09-10T07:54:58.791258+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1752,
+    "completion_tokens": 2312,
+    "total_tokens": 4064,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1752
+  },
+  "api_id": "01a08adeabfb5ffec8f5e5b1d06c1cbc",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P004: Horn slope exact on quadratic surfaces, cubic remainder O(w^2)\n// Formalization of the Horn gradient estimator's consistency properties.\n\n// Horn finite-difference gradient estimator for a 3×3 grid.\n// Grid points are labeled as:\n//   a b c\n//   d   f\n//   g h i\n// with spacing w in both x and y directions.\nfunction HornDzDx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n{\n  ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w)\n}\n\nfunction HornDzDy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n{\n  ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * w)\n}\n\n// A general quadratic surface: z = A x + B y + C + D x² + E x y + F y²\nfunction QuadraticSurface(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n{\n  A * x + B * y + C + D * x * x + E * x * y + F * y * y\n}\n\n// Sample the quadratic surface at the 8 neighbor points of a 3×3 grid centered at (0,0).\n// The grid spacing is w, and the center point (0,0) is omitted (not used by Horn).\nfunction QuadraticWindow(A: real, B: real, C: real, D: real, E: real, F: real, w: real): \n  (a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real)\n  requires w > 0.0\n{\n  var a := QuadraticSurface(A, B, C, D, E, F, -w, -w);\n  var b := QuadraticSurface(A, B, C, D, E, F,  0.0, -w);\n  var c := QuadraticSurface(A, B, C, D, E, F,  w, -w);\n  var d := QuadraticSurface(A, B, C, D, E, F, -w,  0.0);\n  var f := QuadraticSurface(A, B, C, D, E, F,  w,  0.0);\n  var g := QuadraticSurface(A, B, C, D, E, F, -w,  w);\n  var h := QuadraticSurface(A, B, C, D, E, F,  0.0, w);\n  var i := QuadraticSurface(A, B, C, D, E, F,  w,  w);\n  (a, b, c, d, f, g, h, i)\n}\n\n// Lemma: Horn gradient is exact for any quadratic surface.\n// The computed DzDx equals the true partial derivative ∂z/∂x = A + 2D x + E y at (0,0) = A.\n// Similarly, DzDy equals B.\nlemma HornExactOnQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures HornDzDx(QuadraticWindow(A, B, C, D, E, F, w), w) == A\n  ensures HornDzDy(QuadraticWindow(A, B, C, D, E, F, w), w) == B\n{\n  var (a, b, c, d, f, g, h, i) := QuadraticWindow(A, B, C, D, E, F, w);\n  // Expand each term according to the quadratic definition.\n  // Compute the numerator of DzDx: (c + 2f + i) - (a + 2d + g)\n  // Substitute the expressions and simplify.\n  // The following equalities are derived by algebraic simplification:\n  //   c = A*w + B*(-w) + C + D*w² + E*w*(-w) + F*(-w)²\n  //     = A*w - B*w + C + D*w² - E*w² + F*w²\n  //   f = A*w + B*0 + C + D*w² + E*w*0 + F*0² = A*w + C + D*w²\n  //   i = A*w + B*w + C + D*w² + E*w*w + F*w² = A*w + B*w + C + D*w² + E*w² + F*w²\n  //   a = A*(-w) + B*(-w) + C + D*(-w)² + E*(-w)*(-w) + F*(-w)²\n  //     = -A*w - B*w + C + D*w² + E*w² + F*w²\n  //   d = A*(-w) + B*0 + C + D*(-w)² + E*(-w)*0 + F*0² = -A*w + C + D*w²\n  //   g = A*(-w) + B*w + C + D*(-w)² + E*(-w)*w + F*w² = -A*w + B*w + C + D*w² - E*w² + F*w²\n  // Then compute the linear combination.\n  // The constant C and quadratic terms D, E, F cancel out.\n  // The remaining terms in the numerator are 8 * A * w.\n  // Division by 8*w gives A.\n  // Similarly for DzDy.\n  // Dafny can verify this by direct computation.\n  calc {\n    HornDzDx(a, b, c, d, f, g, h, i, w);\n    ==\n    ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w);\n    ==\n    A;\n  }\n  calc {\n    HornDzDy(a, b, c, d, f, g, h, i, w);\n    ==\n    ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * w);\n    ==\n    B;\n  }\n}\n\n// Cubic surface: z = G * x³ (no y dependence).\nfunction CubicSurface(G: real, x: real, y: real): real\n{\n  G * x * x * x\n}\n\n// Sample the cubic surface at the 8 neighbor points.\nfunction CubicWindow(G: real, w: real): \n  (a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real)\n  requires w > 0.0\n{\n  var a := CubicSurface(G, -w, -w);\n  var b := CubicSurface(G,  0.0, -w);\n  var c := CubicSurface(G,  w, -w);\n  var d := CubicSurface(G, -w,  0.0);\n  var f := CubicSurface(G,  w,  0.0);\n  var g := CubicSurface(G, -w,  w);\n  var h := CubicSurface(G,  0.0, w);\n  var i := CubicSurface(G,  w,  w);\n  (a, b, c, d, f, g, h, i)\n}\n\n// The true partial derivative at the origin for z = G x³ is 0.\nfunction TrueDzDxCubic(G: real): real\n{\n  0.0\n}\n\n// Lemma: The remainder (error) of HornDzDx on z = G x³ at the origin is exactly G * w².\nlemma CubicRemainderExact(G: real, w: real)\n  requires w > 0.0\n  ensures HornDzDx(CubicWindow(G, w), w) - TrueDzDxCubic(G) == G * w * w\n{\n  var (a, b, c, d, f, g, h, i) := CubicWindow(G, w);\n  // Expand each term:\n  //   a = G * (-w)³ = -G * w³\n  //   b = G * 0³ = 0\n  //   c = G * w³\n  //   d = G * (-w)³ = -G * w³\n  //   f = G * w³\n  //   g = G * (-w)³ = -G * w³\n  //   h = G * 0³ = 0\n  //   i = G * w³\n  // Compute numerator of DzDx: (c + 2f + i) - (a + 2d + g)\n  //   = (G w³ + 2 G w³ + G w³) - (-G w³ + 2(-G w³) + (-G w³))\n  //   = (4 G w³) - (-4 G w³) = 8 G w³\n  // Divide by 8w: G w².\n  // True derivative at origin is 0, so remainder = G w².\n  calc {\n    HornDzDx(a, b, c, d, f, g, h, i, w) - TrueDzDxCubic(G);\n    ==\n    ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w) - 0.0;\n    ==\n    G * w * w;\n  }\n}\n\n// Corollary: The remainder is O(w²) as w → 0.\n// Specifically, |remainder| ≤ |G| * w² for all w > 0.\nlemma CubicRemainderOrder(G: real, w: real)\n  requires w > 0.0\n  ensures |HornDzDx(CubicWindow(G, w), w) - TrueDzDxCubic(G)| <= |G| * w * w\n{\n  CubicRemainderExact(G, w);\n  // The exact equality implies the inequality.\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

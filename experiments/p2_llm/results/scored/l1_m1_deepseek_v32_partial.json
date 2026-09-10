@@ -1,0 +1,88 @@
+{
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "n_unique_cells": 210,
+  "n_generated": 174,
+  "n_skip_existing": 23,
+  "n_provider_error": 13,
+  "n_metric_eligible_RAN": 125,
+  "n_toolchain_missing": 70,
+  "compile_at_1": {
+    "num": 24,
+    "den": 125,
+    "rate": 0.192
+  },
+  "verify_at_1": {
+    "num": 18,
+    "den": 125,
+    "rate": 0.144
+  },
+  "semantic_on_RAN": {
+    "null": 1,
+    "UNCOMPILED": 100,
+    "LIKELY_ALIGNED": 10,
+    "VERIFIED_BUT_DRIFT_SUSPECT": 2,
+    "VERIFIED_NEEDS_HUMAN": 6,
+    "COMPILE_ONLY": 6
+  },
+  "verified_but_drifted": 2,
+  "by_prompt": {
+    "P0": {
+      "n": 41,
+      "c": 5,
+      "v": 5,
+      "drift": 0,
+      "compile_at_1": 0.122,
+      "verify_at_1": 0.122
+    },
+    "P1": {
+      "n": 39,
+      "c": 3,
+      "v": 3,
+      "drift": 1,
+      "compile_at_1": 0.0769,
+      "verify_at_1": 0.0769
+    },
+    "P2": {
+      "n": 45,
+      "c": 16,
+      "v": 10,
+      "drift": 1,
+      "compile_at_1": 0.3556,
+      "verify_at_1": 0.2222
+    }
+  },
+  "est_spend_usd_last": 0.1679,
+  "provider_errors_sample": [
+    [
+      "GPB-002-planar",
+      "P0",
+      2,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out"
+    ],
+    [
+      "GPB-002-planar",
+      "P1",
+      1,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out"
+    ],
+    [
+      "GPB-007-hessian",
+      "P0",
+      0,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out"
+    ],
+    [
+      "GPB-007-hessian",
+      "P0",
+      1,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out"
+    ],
+    [
+      "GPB-007-hessian",
+      "P1",
+      1,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out"
+    ]
+  ],
+  "note": "Lean cells remain TOOLCHAIN_MISSING (no lean/lake on Windows or WSL). Metrics above are Dafny RAN only."
+}

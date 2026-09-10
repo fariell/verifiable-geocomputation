@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 266,
+    "completion_tokens": 887,
+    "total_tokens": 1153,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 266
+  },
+  "api_id": "01a08aed26fc27a1aed644641dfaf433",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope exactness on quadratic surfaces\n// and cubic remainder analysis\n\nmethod QuadraticExactness(A: real, B: real, C: real, w: real)\n  requires w > 0.0\n  ensures exists dx: real, dy: real, z00: real, z10: real, z01: real, z11: real ::\n    dx == w && dy == w &&\n    z00 == C &&\n    z10 == A * w + C &&\n    z01 == B * w + C &&\n    z11 == A * w + B * w + C &&\n    // Horn slope computation\n    (let DzDx := (z10 - z00 + z11 - z01) / (2.0 * w) in\n     let DzDy := (z01 - z00 + z11 - z10) / (2.0 * w) in\n     DzDx == A && DzDy == B)\n{\n  // Construct the quadratic surface points\n  var dx := w;\n  var dy := w;\n  var z00 := C;\n  var z10 := A * w + C;\n  var z01 := B * w + C;\n  var z11 := A * w + B * w + C;\n\n  // Compute Horn slopes\n  var DzDx := (z10 - z00 + z11 - z01) / (2.0 * w);\n  var DzDy := (z01 - z00 + z11 - z10) / (2.0 * w);\n\n  // Verify exactness\n  calc {\n    DzDx;\n    ==\n    ((A * w + C) - C + (A * w + B * w + C) - (B * w + C)) / (2.0 * w);\n    ==\n    (A * w + A * w) / (2.0 * w);\n    ==\n    (2.0 * A * w) / (2.0 * w);\n    ==\n    A;\n  }\n  calc {\n    DzDy;\n    ==\n    ((B * w + C) - C + (A * w + B * w + C) - (A * w + C)) / (2.0 * w);\n    ==\n    (B * w + B * w) / (2.0 * w);\n    ==\n    (2.0 * B * w) / (2.0 * w);\n    ==\n    B;\n  }\n}\n\nmethod CubicRemainder(G: real, w: real)\n  requires w > 0.0\n  ensures exists dx: real, dy: real, z00: real, z10: real, z01: real, z11: real ::\n    dx == w && dy == w &&\n    z00 == 0.0 &&\n    z10 == G * w * w * w &&\n    z01 == 0.0 &&\n    z11 == G * w * w * w &&\n    // Horn slope remainder at origin\n    (let DzDx := (z10 - z00 + z11 - z01) / (2.0 * w) in\n     DzDx == G * w * w)\n{\n  // Construct cubic surface points (z = G * x^3)\n  var dx := w;\n  var dy := w;\n  var z00 := 0.0;\n  var z10 := G * w * w * w;\n  var z01 := 0.0;\n  var z11 := G * w * w * w;\n\n  // Compute Horn slope\n  var DzDx := (z10 - z00 + z11 - z01) / (2.0 * w);\n\n  // Verify remainder\n  calc {\n    DzDx;\n    ==\n    (G * w * w * w - 0.0 + G * w * w * w - 0.0) / (2.0 * w);\n    ==\n    (2.0 * G * w * w * w) / (2.0 * w);\n    ==\n    G * w * w;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

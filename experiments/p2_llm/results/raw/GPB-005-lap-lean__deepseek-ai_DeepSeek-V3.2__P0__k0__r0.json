@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1711,
+    "completion_tokens": 538,
+    "total_tokens": 2249,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1711
+  },
+  "api_id": "01a08a70d9720c8cd52db3a3665703dc",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Real.Basic\n\n/-\n  If the center cell of a 3x3 window is a discrete local maximum \n  (center elevation ≥ each of the four orthogonal neighbors), \n  then the discrete Laplacian at the center is ≤ 0.\n-/\n\nsection DiscreteMaximumLaplacian\n\nvariable {R : Type} [LinearOrderedRing R] [TopologicalRing R]\n\n/-- A 3×3 window of elevations. -/\nstructure Window3x3 (R : Type) where\n  a : R  -- NW\n  b : R  -- N\n  c : R  -- NE\n  d : R  -- W\n  e : R  -- center\n  f : R  -- E\n  g : R  -- SW\n  h : R  -- S\n  i : R  -- SE\n\nnamespace Window3x3\n\n/-- The four orthogonal neighbors of the center. -/\ndef orthogonal_neighbors (w : Window3x3 R) : R × R × R × R :=\n  (w.b, w.d, w.f, w.h)\n\n/-- Center is a discrete local maximum: ≥ each orthogonal neighbor. -/\ndef is_local_max (w : Window3x3 R) : Prop :=\n  w.e ≥ w.b ∧ w.e ≥ w.d ∧ w.e ≥ w.f ∧ w.e ≥ w.h\n\n/-- Discrete Laplacian (5-point stencil) at the center. -/\ndef laplacian (w : Window3x3 R) : R :=\n  (w.b + w.d + w.f + w.h) - 4 * w.e\n\ntheorem local_max_implies_nonpositive_laplacian (w : Window3x3 R) :\n    w.is_local_max → w.laplacian ≤ 0 := by\n  intro hmax\n  rcases hmax with ⟨hN, hW, hE, hS⟩\n  unfold laplacian\n  have h1 : w.b ≤ w.e := hN\n  have h2 : w.d ≤ w.e := hW\n  have h3 : w.f ≤ w.e := hE\n  have h4 : w.h ≤ w.e := hS\n  have sum_le : w.b + w.d + w.f + w.h ≤ 4 * w.e := by\n    linarith\n  linarith\n\nend Window3x3\n\nend DiscreteMaximumLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

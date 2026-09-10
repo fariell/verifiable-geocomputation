@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "ec578a84868b8b3f6cf5c26bc9fa5c9d78e46b6456451698e11daa292093e204",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 223,
+    "total_tokens": 491,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 268
+  },
+  "api_id": "01a08b0515ea8df2d838993df3c9e2f6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Fill(orig: array<int>) returns (Fill: array<int>)\n  requires orig != null\n  ensures Fill != null && Fill.Length == orig.Length\n  ensures forall i :: 0 <= i < Fill.Length ==> Fill[i] >= orig[i]\n  ensures forall i :: 0 < i < Fill.Length ==> Fill[i] >= Fill[i-1]\n{\n  Fill := new int[orig.Length];\n  if Fill.Length == 0 {\n    return;\n  }\n  Fill[0] := orig[0];\n  var i: int := 1;\n  while i < Fill.Length\n    invariant 1 <= i <= Fill.Length\n    invariant forall j :: 0 <= j < i ==> Fill[j] >= orig[j]\n    invariant forall j :: 0 < j < i ==> Fill[j] >= Fill[j-1]\n  {\n    Fill[i] := if orig[i] > Fill[i-1] then orig[i] else Fill[i-1];\n    i := i + 1;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

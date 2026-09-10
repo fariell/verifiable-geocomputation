@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2984,
+    "completion_tokens": 2162,
+    "total_tokens": 5146,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 2984
+  },
+  "api_id": "01a08b2886bc0e61434ee59426a2a1b0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : 严格下降 D8 后继下的轨道终止性\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明：在有限栅格上，若每个单元的后继严格下降（高程），则从任意单元出发的\n  D8 流动轨道必然终止于一个不动点（出口或坑）。证明使用良基论证：定义从单元到\n  剩余可访问单元数的度量，该度量在每一步严格递减。\n\n  注意：这里不假设 DEM 无坑（允许 NoFlow），只要求后继关系是严格下降的偏函数。\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Finset.Basic\n\nnamespace VeriGIS.Watershed\n\nnoncomputable section\n\n/-!\n  ## 基本定义\n  设 Cell 为有限类型（例如栅格坐标的有限集合）。\n  后继关系 `succ : Cell → Option Cell` 表示 D8 流动方向：\n    - `succ c = some c'` 表示 c 流向 c'（且高程严格下降）\n    - `succ c = none` 表示 c 是坑（NoFlow）\n  严格下降条件：若 `succ c = some c'`，则 `height c' < height c`。\n  这里我们直接将该条件作为假设引入。\n-/\n\nvariable {Cell : Type} [Fintype Cell] [DecidableEq Cell]\nvariable (height : Cell → ℕ)  -- 高程函数，取自然数以简化良基性\nvariable (succ : Cell → Option Cell)  -- D8 后继关系\n\n/-- 严格下降条件：若后继存在，则高程严格下降。 -/\ndef StrictDescent : Prop :=\n  ∀ c c', succ c = some c' → height c' < height c\n\n/-- 轨道：从起点出发，反复应用后继，直到遇到 none 或重复。 -/\ninductive Orbit : Cell → Cell → Prop where\n  | start (c : Cell) : Orbit c c\n  | step {c c' c'' : Cell} (hstep : succ c = some c') (horbit : Orbit c' c'') :\n      Orbit c c''\n\n/-- 不动点：单元是自身的后继，或无后继。 -/\ndef IsFixedPoint (c : Cell) : Prop :=\n  succ c = none ∨ ∃ c', succ c = some c' ∧ c' = c\n\n/-- 可达集：从 c 出发通过后继能到达的所有单元。 -/\ndef reachableSet (c : Cell) : Finset Cell :=\n  { c' | Orbit succ c c' }\n\n/-- 度量：剩余可访问单元数。 -/\ndef remainingSteps (c : Cell) : ℕ :=\n  (reachableSet succ c).card\n\n/-!\n  ## 主要定理：严格下降后继下的轨道终止性\n  证明思路：\n    1. 若轨道进入循环，则存在 c 使得 `Orbit succ c c` 且 `succ c = some c'`。\n    2. 由 StrictDescent，`height c' < height c`。\n    3. 但由 Orbit.step 和循环性，又有 `Orbit succ c' c`，故 `height c ≤ height c'`，\n       矛盾。\n    4. 因此轨道无循环，又因 Cell 有限，故必终止于不动点。\n  我们使用良基论证：定义度量 `remainingSteps`，证明每步严格递减。\n-/\n\ntheorem orbit_terminates_at_fixed_point (hdesc : StrictDescent height succ) :\n    ∀ (c : Cell), ∃ (fp : Cell), Orbit succ c fp ∧ IsFixedPoint succ fp := by\n  intro c\n  -- 定义度量函数\n  set μ := remainingSteps succ with hμ_def\n  have hμ_wf : WellFounded (InvImage (· < ·) μ) :=\n    InvImage.wf μ (Nat.lt_wfRel.wf)\n  refine WellFounded.induction hμ_wf c ?_\n  intro c ih\n  -- 情况分析：c 是否为不动点\n  by_cases hfp : IsFixedPoint succ c\n  · -- c 自身就是不动点\n    refine ⟨c, Orbit.start c, hfp⟩\n  · -- c 不是不动点，则必有严格下降的后继\n    rcases not_isFixedPoint_iff.mp hfp with ⟨c', hsucc, hne⟩\n    have hlt : height c' < height c := hdesc c c' hsucc\n    -- 递归调用：从 c' 出发的轨道终止于某个不动点 fp\n    rcases ih c' (by\n        -- 证明度量严格递减：c' 的可达集是 c 的可达集的真子集\n        have hsub : reachableSet succ c' ⊂ reachableSet succ c := by\n          refine Finset.ssubset_of_subset_of_not_subset ?_ ?_\n          · intro x hx\n            rcases hx with ⟨hx_orbit⟩\n            exact ⟨Orbit.step hsucc hx_orbit⟩\n          · intro h\n            have : c ∈ reachableSet succ c' := h ⟨Orbit.start c⟩\n            rcases this with ⟨h_orbit⟩\n            -- 由 Orbit 无循环（由 StrictDescent 保证）导出矛盾\n            have : height c < height c := by\n              apply lt_of_le_of_lt ?_ hlt\n              clear hlt\n              induction' h_orbit with d d _ d'' hstep' h_orbit' ih'\n              · rfl\n              · have := hdesc d d'' hstep'\n                exact le_of_lt (ih'.trans_lt this)\n            exact lt_irrefl _ this\n        simp [μ, remainingSteps, hμ_def]\n        exact Finset.card_lt_card hsub) with ⟨fp, h_orbit, h_fp⟩\n    -- 组合轨道：c → c' → ... → fp\n    refine ⟨fp, Orbit.step hsucc h_orbit, h_fp⟩\n\n/-- 辅助引理：非不动点的刻画。 -/\ntheorem not_isFixedPoint_iff {c : Cell} :\n    ¬ IsFixedPoint succ c ↔ ∃ c', succ c = some c' ∧ c' ≠ c := by\n  constructor\n  · intro h\n    simp [IsFixedPoint] at h\n    rcases em (succ c = none) with (hnone | hsome)\n    · exfalso; exact h (Or.inl hnone)\n    · rcases Option.ne_none_iff_exists'.mp hsome with ⟨c', hc'⟩\n      refine ⟨c', hc', ?_⟩\n      intro heq\n      subst heq\n      exact h (Or.inr ⟨c', hc', rfl⟩)\n  · rintro ⟨c', hsucc, hne⟩ ⟨hnone | ⟨c'', hsucc', heq⟩⟩\n    · rw [hsucc] at hnone; contradiction\n    · rw [hsucc] at hsucc'; injection hsucc' with heq'; subst heq'\n      exact hne rfl\n\n-- ==========================================================================\n-- 冒烟测试：在具体有限集上验证\n-- ==========================================================================\n\nsection SmokeTest\n\n-- 定义一个简单的 2×2 栅格\n@[derive [Fintype, DecidableEq]]\ninductive TestCell\n  | c00 | c01 | c10 | c11\n\nopen TestCell\n\ndef testHeight : TestCell → ℕ\n  | c00 => 3\n  | c01 => 2\n  | c10 => 1\n  | c11 => 0\n\ndef testSucc : TestCell → Option TestCell\n  | c00 => some c01\n  | c01 => some c11\n  | c10 => some c11\n  | c11 => none\n\ntheorem testStrictDescent : StrictDescent testHeight testSucc := by\n  intro c c' h\n  simp [testSucc] at h\n  repeat (cases c <;> try cases c' <;> try contradiction)\n  all_goals { simp [testHeight]; decide }\n\nexample : ∃ (fp : TestCell), Orbit testSucc c00 fp ∧ IsFixedPoint testSucc fp := by\n  have := orbit_terminates_at_fixed_point testHeight testSucc testStrictDescent c00\n  exact this\n\nend SmokeTest\n\n-- ==========================================================================\n-- 注记\n-- --------------------------------------------------------------------------\n-- 1. 本证明不依赖 DEM 的具体形状（平面、坑或人工平坦面），只要求严格下降条件。\n-- 2. 度量 `remainingSteps` 的递减性基于可达集真子集关系，这由 StrictDescent\n--    保证的无循环性推导得出。\n-- 3. 在 Lean 中，我们使用 `WellFounded` 和 `InvImage` 来包装自然数度量的良基性，\n--    这是处理有限集上终止性证明的标准方法。\n-- 4. 对比 Dafny 版本：Dafny 使用 `decreases` 子句和 SMT 自动证明终止；\n--    Lean 需要显式构造度量并证明其递减性，但推理更透明。\n-- ==========================================================================\n\nend -- noncomputable section\n\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

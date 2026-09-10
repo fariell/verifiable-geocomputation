@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3117,
+    "completion_tokens": 1217,
+    "total_tokens": 4334,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3117
+  },
+  "api_id": "01a08a746029031c5c76d1abc16b0e1f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-003 (discrete Laplacian sign at local maximum)\n   文件 : formal/lean4/VeriGIS/DiscreteLaplacian.lean\n   算子 : 3×3 窗口离散拉普拉斯 (中心二阶差分)\n   对偶 : formal/dafny/P003_curvature.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明: 若 3×3 窗口中心是离散局部极大值(中心高程 ≥ 四个正交邻居),\n  则中心点的离散拉普拉斯 ≤ 0.\n\n  离散拉普拉斯定义为:\n    Δe = (d + f + b + h - 4 * e) / w²\n  其中 w 是格网间距, d/f 是左右邻居, b/h 是上下邻居.\n\n  注意: 此处的\"局部极大值\"仅考虑正交方向(四邻域), 不考虑对角邻居.\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.DiscreteLaplacian\n\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定(行偏移向下为正)\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  离散拉普拉斯仅使用正交邻居 b, d, f, h 和中心 e.\n-/\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- 离散拉普拉斯的分子(尚未除以 w²) -/\ndef laplacianNum (b d e f h : ℝ) : ℝ := (d + f + b + h) - 4 * e\n\n/-- 离散拉普拉斯算子 -/\ndef discreteLaplacian (b d e f h w : ℝ) : ℝ := laplacianNum b d e f h / (w ^ 2)\n\n-- ==========================================================================\n-- 局部极大值条件\n-- ==========================================================================\n\n/-- 中心 e 是离散局部极大值(正交四邻域) -/\ndef isLocalMaxOrthogonal (b d e f h : ℝ) : Prop :=\n  e ≥ b ∧ e ≥ d ∧ e ≥ f ∧ e ≥ h\n\n-- ==========================================================================\n-- 主定理: 局部极大值处的离散拉普拉斯非正\n-- ==========================================================================\n\ntheorem laplacian_nonpos_at_local_max\n    (b d e f h w : ℝ)\n    (hpos : w ≠ 0)\n    (hmax : isLocalMaxOrthogonal b d e f h) :\n    discreteLaplacian b d e f h w ≤ 0 := by\n  -- 展开定义\n  unfold discreteLaplacian laplacianNum isLocalMaxOrthogonal at hmax ⊢\n  -- 分解局部极大值条件\n  rcases hmax with ⟨heb, hed, hef, heh⟩\n  -- 分子 ≤ 0 的证明\n  have hnum : (d + f + b + h) - 4 * e ≤ 0 := by\n    -- 将和式拆分为四个不等式\n    have h1 : d ≤ e := hed\n    have h2 : f ≤ e := hef\n    have h3 : b ≤ e := heb\n    have h4 : h ≤ e := heh\n    -- 求和\n    linarith\n  -- 除以正数 w² 保持不等号方向\n  have hw2_pos : 0 < w ^ 2 := pow_pos (abs_pos.mp (ne_iff_lt_or_gt.mp hpos).abs_lt_abs_iff.mpr ?_) 2\n  · exact div_nonpos_of_nonpos_of_nonneg hnum (by positivity)\n  -- 处理 w ≠ 0 的情况\n  cases' lt_or_gt_of_ne hpos with hlt hgt\n  · exact abs_pos_of_neg hlt\n  · exact abs_pos_of_pos hgt\n\n-- ==========================================================================\n-- 冒烟测试\n-- ==========================================================================\n\nexample : discreteLaplacian 1 1 2 1 1 1 = -2 := by\n  unfold discreteLaplacian laplacianNum\n  norm_num\n\nexample (w : ℝ) (hw : w ≠ 0) : discreteLaplacian 0 0 1 0 0 w ≤ 0 := by\n  apply laplacian_nonpos_at_local_max 0 0 1 0 0 w hw\n  unfold isLocalMaxOrthogonal\n  constructor <;> linarith\n  constructor <;> linarith\n  constructor <;> linarith\n  linarith\n\n-- ==========================================================================\n-- 注记\n-- --------------------------------------------------------------------------\n-- 1. 定理要求 w ≠ 0, 否则分母为零, 离散拉普拉斯无定义(在 ℝ 中除以零得零,\n--    但此时结果无地理意义).\n-- 2. 证明仅使用线性算术(linarith), 因为离散拉普拉斯是线性算子.\n-- 3. 此性质是连续拉普拉斯算子在离散情形下的类比: 局部极大值处二阶导非正.\n-- ==========================================================================\n\nend -- noncomputable section\n\nend VeriGIS.DiscreteLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 593,
+    "total_tokens": 861,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 268
+  },
+  "api_id": "01a08a9504859a0c79e27fa8e0ea3096",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Zevenbergen-Thorne Hessian on a quadratic surface\n// Theorem: On a quadratic surface z = A x^2 + B y^2 + C xy + Dx + Ey + F\n// sampled on a 3x3 window with spacing w>0,\n// the Zevenbergen-Thorne discrete Hessian recovers (2A, 2B, C) exactly.\n\nmethod ZTHessianTheorem(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n{\n  // Define the quadratic surface function\n  function f(x: real, y: real): real\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n\n  // Sample points on a 3x3 grid centered at (0,0) with spacing w\n  var z00 := f(-w, -w);\n  var z01 := f(-w, 0.0);\n  var z02 := f(-w, w);\n  var z10 := f(0.0, -w);\n  var z11 := f(0.0, 0.0);\n  var z12 := f(0.0, w);\n  var z20 := f(w, -w);\n  var z21 := f(w, 0.0);\n  var z22 := f(w, w);\n\n  // Zevenbergen-Thorne discrete Hessian formulas\n  // Hxx = (z20 - 2*z10 + z00) / (w^2)\n  // Hyy = (z02 - 2*z01 + z00) / (w^2)\n  // Hxy = (z22 - z20 - z02 + z00) / (4*w^2)\n  var Hxx := (z20 - 2.0*z10 + z00) / (w*w);\n  var Hyy := (z02 - 2.0*z01 + z00) / (w*w);\n  var Hxy := (z22 - z20 - z02 + z00) / (4.0*w*w);\n\n  // Expected continuous Hessian components for the quadratic surface:\n  // ∂²f/∂x² = 2A, ∂²f/∂y² = 2B, ∂²f/∂x∂y = C\n  var expected_Hxx := 2.0*A;\n  var expected_Hyy := 2.0*B;\n  var expected_Hxy := C;\n\n  // Prove the equality (within real arithmetic, no rounding)\n  assert Hxx == expected_Hxx;\n  assert Hyy == expected_Hyy;\n  assert Hxy == expected_Hxy;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 815,
+    "total_tokens": 2420,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a08ac68bfd1276ef20369988332817",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Deterministic successor function on a finite grid\nmodule WatershedUniqueness {\n  // Grid dimensions\n  const w: int\n  const h: int\n  predicate validCell(r: int, c: int) {\n    0 <= r < h && 0 <= c < w\n  }\n\n  // Deterministic successor function (D8 flow direction)\n  function succ(r: int, c: int): (nr: int, nc: int)\n    requires validCell(r, c)\n    ensures validCell(nr, nc)\n\n  // Fixed point predicate (outlet cell)\n  predicate isOutlet(r: int, c: int) {\n    validCell(r, c) && succ(r, c) == (r, c)\n  }\n\n  // Bounded iteration: stepN(s, n) = succ applied n times to start s\n  function stepN(r: int, c: int, n: nat): (nr: int, nc: int)\n    requires validCell(r, c)\n    ensures validCell(nr, nc)\n    decreases n\n  {\n    if n == 0 then (r, c) else\n      var (pr, pc) := stepN(r, c, n-1);\n      succ(pr, pc)\n  }\n\n  // Main theorem: if from the same start we reach a fixed point in two\n  // different finite step counts, those fixed points are equal.\n  theorem WatershedUniqueness(r: int, c: int, m: nat, n: nat)\n    requires validCell(r, c)\n    requires m != n\n    requires isOutlet(stepN(r, c, m).0, stepN(r, c, m).1)\n    requires isOutlet(stepN(r, c, n).0, stepN(r, c, n).1)\n    ensures stepN(r, c, m) == stepN(r, c, n)\n  {\n    // Without loss of generality, assume m < n\n    if m < n {\n      // Let k = n - m\n      var k: nat := n - m;\n      // Define the intermediate cell after m steps\n      var (rm, cm) := stepN(r, c, m);\n      // Since (rm, cm) is an outlet, succ(rm, cm) == (rm, cm)\n      assert succ(rm, cm) == (rm, cm);\n      // Then stepN(rm, cm, k) = (rm, cm) for any k\n      // Prove by induction on k\n      var (rn, cn) := stepN(r, c, n);\n      calc {\n        stepN(r, c, n);\n        == // definition of n = m + k\n        stepN(rm, cm, k);\n        == { LemmaOutletFixed(rm, cm, k); }\n        (rm, cm);\n        ==\n        stepN(r, c, m);\n      }\n    } else {\n      // Symmetric case when n < m\n      WatershedUniqueness(r, c, n, m);\n    }\n  }\n\n  // Helper lemma: once at an outlet, further steps stay there\n  lemma LemmaOutletFixed(r: int, c: int, k: nat)\n    requires validCell(r, c)\n    requires isOutlet(r, c)\n    ensures stepN(r, c, k) == (r, c)\n    decreases k\n  {\n    if k == 0 {\n      // base case\n    } else {\n      // inductive step\n      var (r1, c1) := stepN(r, c, k-1);\n      LemmaOutletFixed(r, c, k-1);\n      assert (r1, c1) == (r, c);\n      assert succ(r1, c1) == (r, c);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

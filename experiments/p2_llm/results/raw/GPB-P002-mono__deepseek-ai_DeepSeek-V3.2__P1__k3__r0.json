@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3090,
+    "completion_tokens": 1292,
+    "total_tokens": 4382,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 18
+  },
+  "api_id": "01a08b02b591013b8e80dac61181e715",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-002-bis (1D specialization)\n//  文件 : formal/dafny/P002_bis_1d_wang_liu_fill.dfy\n//  算子 : Wang & Liu (1996) 洼地填平算法的一维特化（左侧出口）\n//  覆盖 : GPB-021 的一维代数核心（单调性、非递减性）\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P002_bis_1d_wang_liu_fill.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条（科学动机）\n//  --------------------------\n//  Phase 2 的组合验证（P-COMP-1）需要洼地填平算法的形式化性质作为前提。\n//  二维 Wang & Liu 算法（4‑邻接泛洪）的核心递归规则是：\n//      fill[n] = max(orig[n], fill[p])  其中 p 是已填平的邻居\n//\n//  一维特化（左侧出口）是理解该规则单调性本质的最简模型：\n//      Fill[0] = orig[0]\n//      Fill[i] = max(orig[i], Fill[i-1])   for i > 0\n//\n//  本文件证明两条基本性质：\n//      (1) 单调性：每次填平只可能抬高，不会降低高程。\n//      (2) 非递减性：完整扫描后，填平后的剖面是非递减的。\n//\n//  这两条性质是后续证明“填平后无 4‑邻接洼地”的基础（见 GPB-021‑(i)）。\n// ===========================================================================\n\nmodule OneDWangLiuFill {\n\n  // ------------------------------------------------------------------\n  // 一维高程剖面（长度为 N 的实数序列）\n  // ------------------------------------------------------------------\n  type Profile = seq<real>\n\n  // ------------------------------------------------------------------\n  // 一维 Wang & Liu 填平（左侧出口）\n  // ------------------------------------------------------------------\n  function Fill(orig: Profile): Profile\n    requires |orig| > 0\n    ensures |Fill(orig)| == |orig|\n    ensures Fill(orig)[0] == orig[0]\n    ensures forall i | 1 <= i < |orig| ::\n      Fill(orig)[i] == max(orig[i], Fill(orig)[i-1])\n  {\n    if |orig| == 1 then [orig[0]]\n    else\n      var prev := Fill(orig[..|orig|-1]);\n      prev + [max(orig[|orig|-1], prev[|prev|-1])]\n  }\n\n  // ==================================================================\n  // 性质 1：单调性（填平不会降低原始高程）\n  // ==================================================================\n  lemma FillMonotone(orig: Profile, i: int)\n    requires |orig| > 0\n    requires 0 <= i < |orig|\n    ensures Fill(orig)[i] >= orig[i]\n  {\n    if i == 0 {\n      // 根据定义 Fill(orig)[0] == orig[0]\n    } else {\n      // 归纳步骤：Fill(orig)[i] == max(orig[i], Fill(orig)[i-1])\n      // 因此 Fill(orig)[i] >= orig[i]\n    }\n  }\n\n  // ==================================================================\n  // 性质 2：非递减性（填平后的剖面从左到右不下降）\n  // ==================================================================\n  lemma FillNonDecreasing(orig: Profile, i: int)\n    requires |orig| > 0\n    requires 0 <= i < |orig| - 1\n    ensures Fill(orig)[i] <= Fill(orig)[i+1]\n  {\n    // 根据定义 Fill(orig)[i+1] == max(orig[i+1], Fill(orig)[i])\n    // 因此 Fill(orig)[i+1] >= Fill(orig)[i]\n  }\n\n  // ==================================================================\n  // 辅助引理：递推关系的直接展开（用于外部组合证明）\n  // ==================================================================\n  lemma FillRecursive(orig: Profile, i: int)\n    requires |orig| > 0\n    requires 1 <= i < |orig|\n    ensures Fill(orig)[i] == max(orig[i], Fill(orig)[i-1])\n  {\n    // 由函数定义直接可得\n  }\n\n  // ==================================================================\n  // 验证示例（非证明必要，仅演示）\n  // ==================================================================\n  method Example() {\n    var orig: Profile := [3.0, 1.0, 4.0, 1.0, 5.0];\n    var filled := Fill(orig);\n    print \"原始剖面: \", orig, \"\\n\";\n    print \"填平后:   \", filled, \"\\n\";\n    // 验证单调性\n    for i := 0 to |orig|-1\n      invariant forall j | 0 <= j < i :: filled[j] >= orig[j]\n    {\n      assert filled[i] >= orig[i] by { FillMonotone(orig, i); }\n    }\n    // 验证非递减性\n    for i := 0 to |orig|-2\n      invariant forall j | 0 <= j < i :: filled[j] <= filled[j+1]\n    {\n      assert filled[i] <= filled[i+1] by { FillNonDecreasing(orig, i); }\n    }\n    print \"一维 Wang & Liu 填平验证通过。\\n\";\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-002-bis — 一维 Wang & Liu 洼地填平（左侧出口）\\n\";\n  print \"性质：单调性、非递减性\\n\";\n  print \"验证命令：dafny verify P002_bis_1d_wang_liu_fill.dfy\\n\";\n  OneDWangLiuFill.Example();\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1697,
+    "completion_tokens": 2041,
+    "total_tokens": 3738,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1697
+  },
+  "api_id": "01a08ab007fce01e871b7f90de4b3279",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Fin.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Tactic\n\nopen Matrix\n\n-- D8 flow directions as vectors (dx, dy)\ninductive D8Dir\n  | E  : D8Dir\n  | SE : D8Dir\n  | S  : D8Dir\n  | SW : D8Dir\n  | W  : D8Dir\n  | NW : D8Dir\n  | N  : D8Dir\n  | NE : D8Dir\n  | NoFlow : D8Dir\nderiving DecidableEq\n\nnamespace D8Dir\n\ndef toVec : D8Dir → ℤ × ℤ\n  | E    => (1, 0)\n  | SE   => (1, 1)\n  | S    => (0, 1)\n  | SW   => (-1, 1)\n  | W    => (-1, 0)\n  | NW   => (-1, -1)\n  | N    => (0, -1)\n  | NE   => (1, -1)\n  | NoFlow => (0, 0)\n\ndef distanceSq : D8Dir → ℕ\n  | E    => 1\n  | SE   => 2\n  | S    => 1\n  | SW   => 2\n  | W    => 1\n  | NW   => 2\n  | N    => 1\n  | NE   => 2\n  | NoFlow => 0\n\nend D8Dir\n\n-- Finite grid indexed by Fin m × Fin n\nstructure Grid (m n : ℕ) where\n  height : Fin m → Fin n → ℝ\n\n-- Planar DEM: z = A*x + B*y + C\ndef planarDEM (A B C : ℝ) (m n : ℕ) : Grid m n :=\n  { height := λ i j => A * (i.val : ℝ) + B * (j.val : ℝ) + C }\n\n-- Interior cell: not on boundary\ndef interior (m n : ℕ) (i : Fin m) (j : Fin n) : Prop :=\n  0 < i.val ∧ i.val < m - 1 ∧ 0 < j.val ∧ j.val < n - 1\n\n-- D8 flow computation for a cell\ndef D8_flow (h : Grid m n) (i : Fin m) (j : Fin n) : D8Dir :=\n  let e := h.height i j\n  let candidates : List D8Dir := [D8Dir.E, D8Dir.SE, D8Dir.S, D8Dir.SW,\n                                  D8Dir.W, D8Dir.NW, D8Dir.N, D8Dir.NE]\n  let valid (d : D8Dir) : Option ℝ :=\n    let (dx, dy) := d.toVec\n    let i' : ℤ := i.val + dy\n    let j' : ℤ := j.val + dx\n    if h : i' ≥ 0 ∧ i' < m ∧ j' ≥ 0 ∧ j' < n then\n      let i'' : Fin m := ⟨i'.toNat, by\n        have := h.1\n        have := h.2.1\n        simp [Fin.val, Int.toNat_of_nonneg (by omega)]⟩\n      let j'' : Fin n := ⟨j'.toNat, by\n        have := h.2.2.1\n        have := h.2.2.2\n        simp [Fin.val, Int.toNat_of_nonneg (by omega)]⟩\n      let e' := h.height i'' j''\n      let drop := e - e'\n      if drop > 0 then\n        some ((drop * drop) / (d.distanceSq : ℝ))\n      else none\n    else none\n  let best := candidates.foldl (λ (best : Option (D8Dir × ℝ)) d =>\n    match valid d, best with\n    | some p, none => some (d, p)\n    | some p, some (_, p') => if p > p' then some (d, p) else best\n    | none, _ => best\n    ) none\n  match best with\n  | some (d, _) => d\n  | none => D8Dir.NoFlow\n\n-- Main theorem: On a planar DEM with positive slope, D8 flow direction is constant\n-- across interior cells that share the same (A,B,w), and translating C doesn't change it.\ntheorem planar_D8_constant (A B : ℝ) (hA : A > 0) (hB : B ≥ 0) (m n : ℕ) (hm : m ≥ 3) (hn : n ≥ 3) :\n    let w := 1 -- cell width (positive)\n    let C1 C2 : ℝ := 0\n    let g1 := planarDEM A B C1 m n\n    let g2 := planarDEM A B C2 m n\n    ∀ i j i' j', interior m n i j → interior m n i' j' →\n      D8_flow g1 i j = D8_flow g1 i' j' ∧\n      D8_flow g1 i j = D8_flow g2 i j := by\n  intro w C1 C2 g1 g2 i j i' j' hi hi'\n  have pos_slope : A > 0 := hA\n  have nonneg_B : B ≥ 0 := hB\n  -- First show translation invariance\n  have translation_inv : D8_flow g1 i j = D8_flow g2 i j := by\n    simp [D8_flow, planarDEM, Grid.mk.injEq]\n    -- The key: elevation differences are unchanged when adding same constant to all cells\n    have : ∀ (d : D8Dir), (g1.height i j - g1.height _ _) = (g2.height i j - g2.height _ _) := by\n      intro d\n      simp [g1, g2, planarDEM]\n      ring\n    -- Therefore the argmax is identical\n    simp [this]\n  -- Now show constancy across interior cells\n  have constancy : D8_flow g1 i j = D8_flow g1 i' j' := by\n    -- For planar DEM z = A*x + B*y + C, the drop to neighbor (dx,dy) is A*dx + B*dy\n    -- The D8 power is (drop^2)/dist^2 = (A*dx + B*dy)^2 / dist^2\n    -- Since A>0 and B≥0, the maximum occurs at the same direction for all interior cells\n    -- because the expression doesn't depend on (i,j) or C\n    have dir_calc : ∀ (d : D8Dir), \n        let (dx, dy) := d.toVec\n        let drop := A * (dx : ℝ) + B * (dy : ℝ)\n        let power := (drop * drop) / (d.distanceSq : ℝ)\n        power = if d = D8Dir.W then A^2 else\n                if d = D8Dir.NW then ((A + B)^2)/2 else\n                if d = D8Dir.N then 0 else\n                if d = D8Dir.NE then ((A - B)^2)/2 else\n                if d = D8Dir.E then 0 else\n                if d = D8Dir.SE then ((A + B)^2)/2 else\n                if d = D8Dir.S then 0 else\n                ((A - B)^2)/2 := by\n      intro d\n      cases d <;> simp [D8Dir.toVec, D8Dir.distanceSq] <;> ring\n    -- With A>0, B≥0, the maximum is at W when B=0, and at NW when B>0\n    by_cases hB0 : B = 0\n    · -- Case B=0: all flow West\n      have : D8_flow g1 i j = D8Dir.W := by\n        simp [D8_flow, dir_calc, hB0, hA, show (0:ℝ) ≥ 0 from by norm_num]\n        decide\n      have : D8_flow g1 i' j' = D8Dir.W := by\n        simp [D8_flow, dir_calc, hB0, hA, show (0:ℝ) ≥ 0 from by norm_num]\n        decide\n      simp [this]\n    · -- Case B>0: all flow Northwest\n      have hBpos : B > 0 := lt_of_le_of_ne nonneg_B hB0.symm\n      have : D8_flow g1 i j = D8Dir.NW := by\n        simp [D8_flow, dir_calc, hA, hBpos]\n        nlinarith\n      have : D8_flow g1 i' j' = D8Dir.NW := by\n        simp [D8_flow, dir_calc, hA, hBpos]\n        nlinarith\n      simp [this]\n  exact ⟨constancy, translation_inv⟩\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

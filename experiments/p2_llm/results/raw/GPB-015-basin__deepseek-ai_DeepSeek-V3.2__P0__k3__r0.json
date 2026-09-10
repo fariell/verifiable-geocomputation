@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 1040,
+    "total_tokens": 2645,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a08ac96c03fc10f23d89c96a813f0c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of watershed uniqueness under deterministic successor function\n// Property: If a deterministic successor function reaches an outlet (fixed point)\n// from the same start cell in any two finite step counts, those outlets are equal.\n\nmodule P006_Watershed {\n  // Grid dimensions\n  const w: int\n  const h: int\n  predicate validGrid() { w > 0 && h > 0 }\n  \n  // Cell coordinates\n  type Cell = (int, int)\n  predicate validCell(c: Cell) {\n    validGrid() &&\n    0 <= c.0 && c.0 < h &&\n    0 <= c.1 && c.1 < w\n  }\n  \n  // Deterministic successor function (D8 flow direction)\n  function succ(c: Cell): Cell\n    requires validCell(c)\n    ensures validCell(succ(c))\n  \n  // Fixed point definition: cell is an outlet if it maps to itself\n  predicate isOutlet(c: Cell) {\n    validCell(c) && succ(c) == c\n  }\n  \n  // Bounded iteration without searching for fixed points\n  function stepN(c: Cell, n: nat): Cell\n    requires validCell(c)\n    ensures validCell(stepN(c, n))\n    decreases n\n  {\n    if n == 0 then c\n    else stepN(succ(c), n-1)\n  }\n  \n  // Main theorem: if we reach an outlet in two different step counts,\n  // the outlets must be the same\n  theorem WatershedUniqueness(c: Cell, m: nat, n: nat)\n    requires validCell(c)\n    requires m != n\n    requires isOutlet(stepN(c, m))\n    requires isOutlet(stepN(c, n))\n    ensures stepN(c, m) == stepN(c, n)\n  {\n    // Without loss of generality, assume m < n\n    if m < n {\n      WatershedUniquenessHelper(c, m, n);\n    } else {\n      WatershedUniquenessHelper(c, n, m);\n    }\n  }\n  \n  // Helper lemma for the case where m < n\n  lemma WatershedUniquenessHelper(c: Cell, m: nat, n: nat)\n    requires validCell(c)\n    requires m < n\n    requires isOutlet(stepN(c, m))\n    requires isOutlet(stepN(c, n))\n    ensures stepN(c, m) == stepN(c, n)\n    decreases n - m\n  {\n    // Let a = stepN(c, m) and b = stepN(c, n)\n    var a := stepN(c, m);\n    var b := stepN(c, n);\n    \n    // Since a is an outlet, succ(a) = a\n    assert succ(a) == a;\n    \n    // Show that stepN(a, k) = a for any k\n    assert forall k: nat :: stepN(a, k) == a by {\n      FixedPointIteration(a, k);\n    }\n    \n    // Express b in terms of a\n    // b = stepN(c, n) = stepN(stepN(c, m), n - m) = stepN(a, n - m)\n    calc {\n      stepN(c, n);\n      == // by definition of stepN\n      stepN(stepN(c, m), n - m);\n      == // a = stepN(c, m)\n      stepN(a, n - m);\n      == // from the lemma above\n      a;\n    }\n    \n    // Therefore b = a\n    assert b == a;\n  }\n  \n  // Lemma: Once at a fixed point, further iterations stay at the fixed point\n  lemma FixedPointIteration(c: Cell, n: nat)\n    requires validCell(c)\n    requires isOutlet(c)\n    ensures stepN(c, n) == c\n    decreases n\n  {\n    if n == 0 {\n      // base case\n    } else {\n      // Inductive step\n      FixedPointIteration(c, n-1);\n      // stepN(c, n) = stepN(succ(c), n-1) = stepN(c, n-1) = c\n    }\n  }\n  \n  // Additional property: if we reach an outlet at step m,\n  // then for all n >= m, stepN(c, n) equals that outlet\n  theorem OutletStability(c: Cell, m: nat, n: nat)\n    requires validCell(c)\n    requires m <= n\n    requires isOutlet(stepN(c, m))\n    ensures stepN(c, n) == stepN(c, m)\n  {\n    // Express stepN(c, n) as stepN(stepN(c, m), n - m)\n    // Then apply FixedPointIteration\n    FixedPointIteration(stepN(c, m), n - m);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

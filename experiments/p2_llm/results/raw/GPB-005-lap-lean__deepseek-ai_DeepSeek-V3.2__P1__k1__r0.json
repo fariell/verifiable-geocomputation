@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3117,
+    "completion_tokens": 1089,
+    "total_tokens": 4206,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3117
+  },
+  "api_id": "01a08a75dd94f20bb7843c130fa8c34c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-003 (discrete Laplacian sign at local maximum)\n   文件 : formal/lean4/VeriGIS/LocalMaxLaplacian.lean\n   命题 : 若 3×3 窗口中心为离散正交局部极大值，则其离散拉普拉斯 ≤ 0\n   对偶 : formal/dafny/P003_curvature.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本命题是曲率一致性讨论的引理：在离散局部极大值处，拉普拉斯算子（二阶差分）\n  的符号应为非正。这是 Evans / Zevenbergen–Thorne 曲率算子的一个特例，\n  但此处仅关注符号性质，不涉及具体曲率定义。\n\n  注意：离散拉普拉斯使用标准五点模板（中心与四个正交邻居）。\n  本文件不假设任何特定的高程单位或格网间距，因为拉普拉斯符号在尺度缩放下不变。\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.LocalMaxLaplacian\n\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定（行偏移向下为正）\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  中心元 e 在离散拉普拉斯中显式出现。\n-/\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- 离散拉普拉斯（五点模板，正交邻居） -/\ndef discreteLaplacian (b d e f h : ℝ) : ℝ := (b + d + f + h) - 4 * e\n\n/-- 中心元 e 是离散正交局部极大值：e ≥ 每个正交邻居 -/\ndef isOrthLocalMax (b d e f h : ℝ) : Prop :=\n  e ≥ b ∧ e ≥ d ∧ e ≥ f ∧ e ≥ h\n\n-- ==========================================================================\n-- 主定理：局部极大值处的拉普拉斯非正\n-- ==========================================================================\n\ntheorem laplacian_nonpos_at_local_max (b d e f h : ℝ) (hmax : isOrthLocalMax b d e f h) :\n    discreteLaplacian b d e f h ≤ 0 := by\n  -- 展开定义\n  unfold discreteLaplacian isOrthLocalMax at *\n  -- 分解局部极大条件\n  rcases hmax with ⟨heb, hed, hef, heh⟩\n  -- 将不等式转换为非负形式\n  have hb : b - e ≤ 0 := by linarith\n  have hd : d - e ≤ 0 := by linarith\n  have hf : f - e ≤ 0 := by linarith\n  have hh : h - e ≤ 0 := by linarith\n  -- 计算拉普拉斯\n  show (b + d + f + h) - 4 * e ≤ 0\n  -- 重组为 (b-e) + (d-e) + (f-e) + (h-e) ≤ 0\n  ring_nf\n  -- 四个非正项之和仍非正\n  nlinarith\n\n-- ==========================================================================\n-- 冒烟测试（验证算子定义与定理实例）\n-- ==========================================================================\n\nexample : discreteLaplacian 1 2 5 3 4 = -9 := by\n  unfold discreteLaplacian\n  norm_num\n\nexample (b d e f h : ℝ) (h1 : e ≥ b) (h2 : e ≥ d) (h3 : e ≥ f) (h4 : e ≥ h) :\n    discreteLaplacian b d e f h ≤ 0 := by\n  apply laplacian_nonpos_at_local_max\n  exact ⟨h1, h2, h3, h4⟩\n\n-- ==========================================================================\n-- 结构注记\n-- --------------------------------------------------------------------------\n-- 本定理是曲率一致性讨论的基石：在局部极大值处，拉普拉斯非正。\n-- 若实际计算出的拉普拉斯为正，则要么：\n--   1) 中心并非真正的局部极大值（噪声或采样问题），或\n--   2) 离散模板与连续定义不一致（需要更精细的误差分析）。\n--\n-- 在 GeoProofBench P-003 中，此引理用于解释为什么 Phase 1 中\n-- 曲率与实测地形相关性低（≈0.157）：错误的模板破坏了此基本符号性质，\n-- 导致即使在明显的局部凸起处，计算出的“曲率”也可能为正。\n-- ==========================================================================\n\nend -- noncomputable section\n\nend VeriGIS.LocalMaxLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

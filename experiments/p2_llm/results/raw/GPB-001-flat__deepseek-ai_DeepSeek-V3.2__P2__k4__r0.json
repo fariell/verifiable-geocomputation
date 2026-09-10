@@ -1,0 +1,43 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 441,
+    "total_tokens": 701,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 260
+  },
+  "api_id": "01a0871404d462aaa4ee47b65b171da7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornSlopeZeroOnFlatWindow(elev: array2<int>, w: real)\n  requires w > 0.0\n  requires elev.Length0 == 3 && elev.Length1 == 3\n  requires forall i, j :: 0 <= i < 3 && 0 <= j < 3 ==> elev[i, j] < 2147483647\n  ensures HornSlopeSq(elev, w) == 0.0\n{\n  // The Horn (1981) slope calculation for a 3x3 window\n  // If all elevations are equal, the slope magnitude is zero\n}\n\nfunction HornSlopeSq(elev: array2<int>, w: real): real\n  requires w > 0.0\n  requires elev.Length0 == 3 && elev.Length1 == 3\n  requires forall i, j :: 0 <= i < 3 && 0 <= j < 3 ==> elev[i, j] < 2147483647\n{\n  var a := elev[0,0];\n  // Check that all elevations are equal\n  if forall i, j :: 0 <= i < 3 && 0 <= j < 3 ==> elev[i, j] == a then\n    0.0\n  else\n    // Non‑zero slope when elevations differ\n    var dz_dx := ((elev[0,2] + 2*elev[1,2] + elev[2,2]) - (elev[0,0] + 2*elev[1,0] + elev[2,0])) / (8.0 * w);\n    var dz_dy := ((elev[2,0] + 2*elev[2,1] + elev[2,2]) - (elev[0,0] + 2*elev[0,1] + elev[0,2])) / (8.0 * w);\n    dz_dx * dz_dx + dz_dy * dz_dy\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2",
+  "semantic": "UNCOMPILED",
+  "fidelity_label": "UNCOMPILED",
+  "metric_eligible": true,
+  "backfill_ts_utc": "2026-09-10T07:55:02.503881+00:00"
+}

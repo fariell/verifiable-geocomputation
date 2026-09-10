@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 2372,
+    "total_tokens": 3983,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1611
+  },
+  "api_id": "01a08a568fd1df1fb952b8ae76ed5bf0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference slope operator exactness on a plane\n// Formalization of: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w>0, the Horn finite-difference estimates DzDx and DzDy recover A and B exactly.\n\nmodule HornPlaneExactness {\n  // Grid dimensions\n  ghost const N: int := 3  // minimal size for Horn operator (3x3 window)\n  ghost const M: int := 3\n\n  // Plane parameters\n  ghost const A: real\n  ghost const B: real\n  ghost const C: real\n\n  // Grid spacing\n  ghost const w: real\n  ghost predicate wPositive() { w > 0.0 }\n\n  // Grid coordinates: center cell is at (1,1) in a 0-based 3x3 window\n  function xCoord(i: int): real\n    requires 0 <= i < N\n  {\n    (i - 1) as real * w\n  }\n\n  function yCoord(j: int): real\n    requires 0 <= j < M\n  {\n    (j - 1) as real * w\n  }\n\n  // Elevation on the plane\n  function z(i: int, j: int): real\n    requires 0 <= i < N && 0 <= j < M\n  {\n    A * xCoord(i) + B * yCoord(j) + C\n  }\n\n  // Horn (1981) finite-difference slope operators\n  // For a 3x3 window centered at (i,j) = (1,1)\n  function hornDzDx(): real\n    requires wPositive()\n  {\n    // Coefficients from Horn (1981), Table 1, \"slope: first derivative\"\n    // ∂z/∂x ≈ (z(i+1,j-1) + 2*z(i+1,j) + z(i+1,j+1) - z(i-1,j-1) - 2*z(i-1,j) - z(i-1,j+1)) / (8*w)\n    (z(2,0) + 2.0*z(2,1) + z(2,2) - z(0,0) - 2.0*z(0,1) - z(0,2)) / (8.0 * w)\n  }\n\n  function hornDzDy(): real\n    requires wPositive()\n  {\n    // ∂z/∂y ≈ (z(i-1,j+1) + 2*z(i,j+1) + z(i+1,j+1) - z(i-1,j-1) - 2*z(i,j-1) - z(i+1,j-1)) / (8*w)\n    (z(0,2) + 2.0*z(1,2) + z(2,2) - z(0,0) - 2.0*z(1,0) - z(2,0)) / (8.0 * w)\n  }\n\n  // Lemma: Horn operators exactly recover A and B on a plane\n  lemma hornExactOnPlane()\n    requires wPositive()\n    ensures hornDzDx() == A\n    ensures hornDzDy() == B\n  {\n    // Expand z(i,j) = A*xCoord(i) + B*yCoord(j) + C\n    // For DzDx numerator:\n    // z(2,0) = A*xCoord(2) + B*yCoord(0) + C = A*w + B*(-w) + C = A*w - B*w + C\n    // z(2,1) = A*xCoord(2) + B*yCoord(1) + C = A*w + B*0 + C = A*w + C\n    // z(2,2) = A*xCoord(2) + B*yCoord(2) + C = A*w + B*w + C = A*w + B*w + C\n    // z(0,0) = A*xCoord(0) + B*yCoord(0) + C = A*(-w) + B*(-w) + C = -A*w - B*w + C\n    // z(0,1) = A*xCoord(0) + B*yCoord(1) + C = A*(-w) + B*0 + C = -A*w + C\n    // z(0,2) = A*xCoord(0) + B*yCoord(2) + C = A*(-w) + B*w + C = -A*w + B*w + C\n\n    // Compute numerator for DzDx:\n    // numDx = (A*w - B*w + C) + 2*(A*w + C) + (A*w + B*w + C)\n    //        - [(-A*w - B*w + C) + 2*(-A*w + C) + (-A*w + B*w + C)]\n    // Group A terms:\n    //   positive side: A*w + 2*A*w + A*w = 4*A*w\n    //   negative side: -(-A*w - 2*A*w - A*w) = -(-4*A*w) = 4*A*w\n    //   total A: 4*A*w + 4*A*w = 8*A*w\n    // Group B terms:\n    //   positive side: -B*w + B*w = 0\n    //   negative side: -(-B*w + B*w) = -0 = 0\n    //   total B: 0\n    // Group C terms:\n    //   positive side: C + 2*C + C = 4*C\n    //   negative side: -(C + 2*C + C) = -4*C\n    //   total C: 4*C - 4*C = 0\n    // So numDx = 8*A*w\n    // Then hornDzDx() = (8*A*w) / (8*w) = A\n\n    // Similarly for DzDy numerator:\n    // z(0,2) = -A*w + B*w + C\n    // z(1,2) = A*0 + B*w + C = B*w + C\n    // z(2,2) = A*w + B*w + C\n    // z(0,0) = -A*w - B*w + C\n    // z(1,0) = A*0 - B*w + C = -B*w + C\n    // z(2,0) = A*w - B*w + C\n    // numDy = (-A*w + B*w + C) + 2*(B*w + C) + (A*w + B*w + C)\n    //        - [(-A*w - B*w + C) + 2*(-B*w + C) + (A*w - B*w + C)]\n    // Group A terms:\n    //   positive side: -A*w + A*w = 0\n    //   negative side: -(-A*w + A*w) = -0 = 0\n    // Group B terms:\n    //   positive side: B*w + 2*B*w + B*w = 4*B*w\n    //   negative side: -(-B*w - 2*B*w - B*w) = -(-4*B*w) = 4*B*w\n    //   total B: 4*B*w + 4*B*w = 8*B*w\n    // Group C terms:\n    //   positive side: C + 2*C + C = 4*C\n    //   negative side: -(C + 2*C + C) = -4*C\n    //   total C: 0\n    // So numDy = 8*B*w\n    // Then hornDzDy() = (8*B*w) / (8*w) = B\n\n    // The above reasoning is encoded as a calculation:\n    calc {\n      hornDzDx();\n      ==\n      (z(2,0) + 2.0*z(2,1) + z(2,2) - z(0,0) - 2.0*z(0,1) - z(0,2)) / (8.0 * w);\n      ==\n      ( (A*w + B*(-w) + C) + 2.0*(A*w + B*0 + C) + (A*w + B*w + C)\n        - ((A*(-w) + B*(-w) + C) + 2.0*(A*(-w) + B*0 + C) + (A*(-w) + B*w + C))\n      ) / (8.0 * w);\n      ==\n      ( (A*w - B*w + C) + 2.0*(A*w + C) + (A*w + B*w + C)\n        - ((-A*w - B*w + C) + 2.0*(-A*w + C) + (-A*w + B*w + C))\n      ) / (8.0 * w);\n      ==\n      ( (4.0*A*w + 4.0*C) - (-4.0*A*w + 4.0*C) ) / (8.0 * w);\n      ==\n      (8.0 * A * w) / (8.0 * w);\n      ==\n      A;\n    }\n    calc {\n      hornDzDy();\n      ==\n      (z(0,2) + 2.0*z(1,2) + z(2,2) - z(0,0) - 2.0*z(1,0) - z(2,0)) / (8.0 * w);\n      ==\n      ( (A*(-w) + B*w + C) + 2.0*(A*0 + B*w + C) + (A*w + B*w + C)\n        - ((A*(-w) + B*(-w) + C) + 2.0*(A*0 + B*(-w) + C) + (A*w + B*(-w) + C))\n      ) / (8.0 * w);\n      ==\n      ( (-A*w + B*w + C) + 2.0*(B*w + C) + (A*w + B*w + C)\n        - ((-A*w - B*w + C) + 2.0*(-B*w + C) + (A*w - B*w + C))\n      ) / (8.0 * w);\n      ==\n      ( (4.0*B*w + 4.0*C) - (-4.0*B*w + 4.0*C) ) / (8.0 * w);\n      ==\n      (8.0 * B * w) / (8.0 * w);\n      ==\n      B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

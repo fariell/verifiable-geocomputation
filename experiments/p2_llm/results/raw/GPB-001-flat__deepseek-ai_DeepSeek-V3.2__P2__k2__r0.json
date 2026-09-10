@@ -1,0 +1,43 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 740,
+    "total_tokens": 1000,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 260
+  },
+  "api_id": "01a0871331ef4b8e4089d95bcd95d988",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn (1981) slope magnitude theorem for 3x3 window\n// Theorem: If all nine cells in a 3x3 window have the same elevation,\n//          then the Horn slope magnitude (and its square SlopeSq) is zero.\n// Grid spacing w must be positive.\n\nmethod HornSlopeZeroTheorem(w: real) returns (SlopeSq: real)\n  requires w > 0.0\n  ensures SlopeSq == 0.0\n{\n  // Assume a 3x3 elevation window with all cells equal to some constant e\n  var e: real := 0.0; // arbitrary constant elevation\n  var z: array2<int, real> := new int[3, 3] (_i, _j => e);\n\n  // Horn (1981) finite-difference slope components\n  var dzdx: real :=\n    (z[2,0] + 2.0*z[2,1] + z[2,2]) - (z[0,0] + 2.0*z[0,1] + z[0,2]);\n  var dzdy: real :=\n    (z[0,2] + 2.0*z[1,2] + z[2,2]) - (z[0,0] + 2.0*z[1,0] + z[2,0]);\n\n  // Scale by grid spacing (8*w for dzdx, 8*w for dzdy)\n  dzdx := dzdx / (8.0 * w);\n  dzdy := dzdy / (8.0 * w);\n\n  // Slope magnitude squared\n  SlopeSq := dzdx*dzdx + dzdy*dzdy;\n\n  // Proof that SlopeSq == 0 when all z[i,j] == e\n  // Since all z[i,j] are equal to e:\n  //   dzdx numerator = (e + 2e + e) - (e + 2e + e) = 4e - 4e = 0\n  //   dzdy numerator = (e + 2e + e) - (e + 2e + e) = 4e - 4e = 0\n  // Therefore dzdx = 0, dzdy = 0, and SlopeSq = 0.\n  assert dzdx == 0.0 && dzdy == 0.0 by {\n    calc {\n      (z[2,0] + 2.0*z[2,1] + z[2,2]) - (z[0,0] + 2.0*z[0,1] + z[0,2]);\n      == (e + 2.0*e + e) - (e + 2.0*e + e);\n      == 4.0*e - 4.0*e;\n      == 0.0;\n    }\n    calc {\n      (z[0,2] + 2.0*z[1,2] + z[2,2]) - (z[0,0] + 2.0*z[1,0] + z[2,0]);\n      == (e + 2.0*e + e) - (e + 2.0*e + e);\n      == 4.0*e - 4.0*e;\n      == 0.0;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1",
+  "semantic": "UNCOMPILED",
+  "fidelity_label": "UNCOMPILED",
+  "metric_eligible": true,
+  "backfill_ts_utc": "2026-09-10T07:55:01.583389+00:00"
+}

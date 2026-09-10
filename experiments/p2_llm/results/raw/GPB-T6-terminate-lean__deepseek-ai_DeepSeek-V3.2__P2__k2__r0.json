@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 233,
+    "completion_tokens": 431,
+    "total_tokens": 664,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 233
+  },
+  "api_id": "01a08b305250fa195ac7cc226a607db8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nvariable {Cell : Type} [Fintype Cell] [DecidableEq Cell]\nvariable (succ : Cell → Cell)\n\nstructure StrictDescent : Prop where\n  descent : ∀ c, succ c = c ∨ (succ c) ≠ c\n\ntheorem termination_of_strict_descent (h : StrictDescent succ) :\n    ∀ (c : Cell), ∃ (n : ℕ), (fun x => succ x)^[n] c = (fun x => succ x)^[n + 1] c := by\n  intro c\n  have : WellFounded (InvImage (· < ·) (fun (c : Cell) => Fintype.card Cell - Fintype.card {x | x = c})) :=\n    InvImage.wf (fun c => Fintype.card Cell - Fintype.card {x | x = c}) (by\n      apply Nat.lt_wfRel)\n  refine WellFounded.fix this (fun c ih => ?_) c\n  by_cases hc : succ c = c\n  · refine ⟨0, ?_⟩\n    simp [hc]\n  · have : Fintype.card Cell - Fintype.card {x | x = succ c} <\n          Fintype.card Cell - Fintype.card {x | x = c} := by\n      have hcard : Fintype.card {x | x = succ c} = 1 := by\n        simp [Fintype.card_subtype_compl, Fintype.card_finset]\n      have hcard' : Fintype.card {x | x = c} = 1 := by\n        simp [Fintype.card_subtype_compl, Fintype.card_finset]\n      simp [hcard, hcard']\n    rcases ih (succ c) this with ⟨n, hn⟩\n    refine ⟨n + 1, ?_⟩\n    simp [Function.iterate_succ_apply', hn]\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

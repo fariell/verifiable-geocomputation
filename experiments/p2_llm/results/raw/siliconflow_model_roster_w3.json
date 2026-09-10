@@ -1,0 +1,31 @@
+{
+  "provider": "siliconflow",
+  "probed_at": "2026-09-10",
+  "probe_cmd": "GET https://api.siliconflow.cn/v1/models",
+  "n_models_listed": 96,
+  "selection_principle": "A.13.1 slots from live /v1/models list (not memory)",
+  "roster": {
+    "M1": {
+      "id": "deepseek-ai/DeepSeek-V3.2",
+      "slot": "strongest general open-source upper bound",
+      "why": "Latest DeepSeek-V3-family general model on siliconflow; cheaper out than V3; V4-Pro skipped (cost circuit-breaker risk)"
+    },
+    "M2": {
+      "id": "Qwen/Qwen2.5-72B-Instruct",
+      "slot": "cross-family mainline (Qwen 72B+)",
+      "why": "Classic dense 72B Instruct present on probe list; cross-series vs DeepSeek"
+    },
+    "M3": {
+      "id": "THUDM/GLM-4-32B-0414",
+      "slot": "mid-scale GLM-4 / 32B",
+      "why": "Exact A.13.1 mid-scale example; present on probe list"
+    },
+    "M4": {
+      "id": "deepseek-ai/DeepSeek-R1",
+      "slot": "reasoning / long CoT",
+      "why": "R1-family reasoning model on probe list; tests whether reasoning helps formalization"
+    }
+  },
+  "budget_ceiling_usd": 50.0,
+  "budget_note": "A.13.3 soft stop; estimate ~840 cells × ~2k in+out; stop and report if usage tracking exceeds ceiling"
+}

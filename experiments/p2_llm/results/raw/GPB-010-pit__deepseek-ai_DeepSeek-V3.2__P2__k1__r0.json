@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5b1d80c9f558cecc7abebaec3f40a41e3aa5f66762cf489a62d60b5d8363feaf",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 239,
+    "completion_tokens": 766,
+    "total_tokens": 1005,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 239
+  },
+  "api_id": "01a08aaa70ae45be45aa4f7c5dc2c001",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P2: Iterative repair (verifier feedback)\n// Theorem: Under D8 steepest-descent routing, if none of the eight neighbors\n// is strictly lower than the center, the flow direction is NoFlow (pit).\n\n// Grid dimensions and types\ntype Cell = (int, int)\ntype Height = int\ntype Direction = NoFlow | N | NE | E | SE | S | SW | W | NW\n\n// Grid as a function from cell to height\nfunction Grid(c: Cell): Height\n\n// D8 neighbor offsets\nconst D8_Offsets: seq<Cell> :=\n  [(0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1)]\n\n// Predicate: Is neighbor cell within bounds?\npredicate InBounds(c: Cell, width: int, height: int)\n  requires 0 <= width && 0 <= height\n{\n  0 <= c.0 < width && 0 <= c.1 < height\n}\n\n// Predicate: Is neighbor strictly lower than center?\npredicate IsStrictlyLower(center: Cell, neighbor: Cell, width: int, height: int)\n  requires InBounds(center, width, height)\n{\n  InBounds(neighbor, width, height) &&\n  Grid(neighbor) < Grid(center)\n}\n\n// Main theorem: If no neighbor is strictly lower, flow direction is NoFlow\nlemma D8_PitCondition(center: Cell, width: int, height: int)\n  requires 0 <= width && 0 <= height\n  requires InBounds(center, width, height)\n  ensures (\n    (forall offset :: offset in D8_Offsets ==>\n      !IsStrictlyLower(center, (center.0 + offset.0, center.1 + offset.1), width, height))\n    ==> FlowDirection(center, width, height) == NoFlow\n  )\n{\n  // The lemma body is left to the verifier; the postcondition expresses the theorem.\n}\n\n// Function computing flow direction according to D8 steepest-descent\nfunction FlowDirection(center: Cell, width: int, height: int): Direction\n  requires InBounds(center, width, height)\n{\n  var bestDir := NoFlow;\n  var bestDrop := 0;\n  for offset in D8_Offsets\n    invariant bestDir == NoFlow || bestDrop > 0\n  {\n    var nb := (center.0 + offset.0, center.1 + offset.1);\n    if InBounds(nb, width, height) && Grid(nb) < Grid(center) {\n      var drop := Grid(center) - Grid(nb);\n      if bestDir == NoFlow || drop > bestDrop {\n        bestDrop := drop;\n        bestDir := OffsetToDirection(offset);\n      }\n    }\n  }\n  bestDir\n}\n\n// Helper: Convert offset to Direction\nfunction OffsetToDirection(offset: Cell): Direction\n{\n  match offset\n    case (0, -1) => N\n    case (1, -1) => NE\n    case (1, 0) => E\n    case (1, 1) => SE\n    case (0, 1) => S\n    case (-1, 1) => SW\n    case (-1, 0) => W\n    case (-1, -1) => NW\n    case _ => NoFlow  // should not happen for D8 offsets\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

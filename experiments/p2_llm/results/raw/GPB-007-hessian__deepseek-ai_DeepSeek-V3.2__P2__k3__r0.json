@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 811,
+    "total_tokens": 1079,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 268
+  },
+  "api_id": "01a08a961cb2f88b64bec55d0b4b661d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Zevenbergen-Thorne discrete Hessian on a quadratic surface\n// Theorem: For z = A x² + B y² + C xy + Dx + Ey + F sampled on a 3×3 window\n// with spacing w > 0, the discrete Hessian recovers (2A, 2B, C) exactly.\n\nmethod ZTHessianExactRecovery(A: real, B: real, C: real, D: real, E: real, F: real, w: real) \n  returns (Hxx: real, Hyy: real, Hxy: real)\n  requires w > 0.0\n  ensures Hxx == 2.0 * A\n  ensures Hyy == 2.0 * B\n  ensures Hxy == C\n{\n  // Define quadratic function\n  function z(x: real, y: real): real\n  {\n    A * x * x + B * y * y + C * x * y + D * x + E * y + F\n  }\n\n  // Sample points on a 3×3 grid centered at (0,0) with spacing w\n  // Indices: (i,j) where i,j ∈ {-1,0,1}\n  var z00 := z(0.0, 0.0);\n  var zp0 := z(w, 0.0);\n  var zm0 := z(-w, 0.0);\n  var z0p := z(0.0, w);\n  var z0m := z(0.0, -w);\n  var zpp := z(w, w);\n  var zpm := z(w, -w);\n  var zmp := z(-w, w);\n  var zmm := z(-w, -w);\n\n  // Zevenbergen-Thorne discrete Hessian formulas\n  // Hxx = (z10 - 2*z00 + z(-1)0) / w²\n  Hxx := (zp0 - 2.0 * z00 + zm0) / (w * w);\n  // Hyy = (z01 - 2*z00 + z0(-1)) / w²\n  Hyy := (z0p - 2.0 * z00 + z0m) / (w * w);\n  // Hxy = (z11 - z1(-1) - z(-1)1 + z(-1)(-1)) / (4*w²)\n  Hxy := (zpp - zpm - zmp + zmm) / (4.0 * w * w);\n\n  // Verification that the computed values equal 2A, 2B, C\n  // This is done by Dafny automatically via the postconditions.\n  // We add assertions to guide the proof.\n  assert zp0 == A * w * w + D * w + F;\n  assert zm0 == A * w * w - D * w + F;\n  assert z0p == B * w * w + E * w + F;\n  assert z0m == B * w * w - E * w + F;\n  assert zpp == A * w * w + B * w * w + C * w * w + D * w + E * w + F;\n  assert zpm == A * w * w + B * w * w - C * w * w + D * w - E * w + F;\n  assert zmp == A * w * w + B * w * w - C * w * w - D * w + E * w + F;\n  assert zmm == A * w * w + B * w * w + C * w * w - D * w - E * w + F;\n  assert z00 == F;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

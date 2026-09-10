@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 646,
+    "total_tokens": 906,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 260
+  },
+  "api_id": "01a08ad258e11f7f077af71fc8f7b7d9",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Deterministic flow iteration to outlet fixed point\n// Theorem: from same start cell, any two finite iteration lengths reach the same outlet\n\nmethod WatershedUniqueness<Cell>(successor: Cell -> Cell, start: Cell, n: nat, m: nat)\n  returns (outlet1: Cell, outlet2: Cell)\n  requires forall c :: successor(c) == c || successor(successor(c)) != successor(c) // deterministic step\n  ensures outlet1 == outlet2\n{\n  var i := 0;\n  var current1 := start;\n  while i < n\n    invariant 0 <= i <= n\n    invariant current1 == iterate(successor, start, i)\n    decreases n - i\n  {\n    current1 := successor(current1);\n    i := i + 1;\n  }\n  outlet1 := current1;\n\n  var j := 0;\n  var current2 := start;\n  while j < m\n    invariant 0 <= j <= m\n    invariant current2 == iterate(successor, start, j)\n    decreases m - j\n  {\n    current2 := successor(current2);\n    j := j + 1;\n  }\n  outlet2 := current2;\n\n  // Key lemma: if we iterate beyond both n and m to a common larger bound,\n  // both results equal the iterate at that bound\n  var k := if n < m then m else n;\n  var current := start;\n  var idx := 0;\n  while idx < k\n    invariant 0 <= idx <= k\n    invariant current == iterate(successor, start, idx)\n    decreases k - idx\n  {\n    current := successor(current);\n    idx := idx + 1;\n  }\n  // Now current == iterate(successor, start, k)\n  // By deterministic property, iterate(successor, start, n) == iterate(successor, start, k)\n  // and similarly for m, when n <= k and m <= k.\n  // This follows from the functional definition of iterate.\n  assert outlet1 == iterate(successor, start, n);\n  assert outlet2 == iterate(successor, start, m);\n  assert iterate(successor, start, n) == iterate(successor, iterate(successor, start, n), k - n);\n  assert iterate(successor, start, m) == iterate(successor, iterate(successor, start, m), k - m);\n  // Since iterate(successor, start, k) is uniquely defined, both equal it.\n  assert iterate(successor, start, n) == iterate(successor, start, k);\n  assert iterate(successor, start, m) == iterate(successor, start, k);\n}\n\n// Helper function for deterministic iteration\nfunction iterate<Cell>(step: Cell -> Cell, start: Cell, steps: nat): Cell\n  decreases steps\n{\n  if steps == 0 then start\n  else step(iterate(step, start, steps - 1))\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
+}

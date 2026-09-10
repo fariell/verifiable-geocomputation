@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3172,
+    "completion_tokens": 1956,
+    "total_tokens": 5128,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3172
+  },
+  "api_id": "01a08aa7ea750405334c7d0719f6d8c0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡坡度流向\n//  覆盖 : GPB-010 (洼地无流向)、GPB-011 (平面上流向恒定)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么做这一条(科学动机)\n//  --------------------------\n//  D8 流向是水文分析的基础算子。其核心语义是:每个像元流向最陡下降的\n//  邻居。若所有邻居都不低于中心,则中心为洼地(pit),流向未定义(NoFlow)。\n//\n//  本文件形式化验证这一语义:在精确算术下,若 3×3 窗口中八个邻居的高程\n//  均不小于中心,则 D8 流向必为 NoFlow。这是流向计算的**基本完整性**,\n//  也是后续汇流累积、填洼等算法的前置条件。\n//\n//  注意:本验证仅针对\"洼地无流向\"这一代数性质。平面上流向恒定的性质\n//  在另一引理中单独证明(见 GPB-011)。\n//\n// ===========================================================================\n\nmodule D8Flow {\n\n  // ------------------------------------------------------------------\n  // 3×3 窗口约定(行偏移 q 向下为正,列偏移 p 向右为正)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  //  中心元 e 在 D8 流向计算中是**比较基准**,不参与权重计算。\n  // ------------------------------------------------------------------\n\n  // 八个邻居的相对坐标 (Δp, Δq) 及其欧氏距离平方\n  type Dir = (\n    name: string,\n    dp: int,  // 列偏移\n    dq: int,  // 行偏移\n    dist2: real  // 距离平方 (1.0 或 2.0)\n  )\n\n  const dirs: seq<Dir> := [\n    (\"E\",  1,  0, 1.0),\n    (\"SE\", 1,  1, 2.0),\n    (\"S\",  0,  1, 1.0),\n    (\"SW\", -1,  1, 2.0),\n    (\"W\", -1,  0, 1.0),\n    (\"NW\", -1, -1, 2.0),\n    (\"N\",  0, -1, 1.0),\n    (\"NE\",  1, -1, 2.0)\n  ];\n\n  // ------------------------------------------------------------------\n  // D8 流向计算核心函数\n  // 输入: 3×3 窗口的九个高程值 (a..i 对应上图)\n  // 输出: 流向名称,若为洼地则返回 \"NoFlow\"\n  // ------------------------------------------------------------------\n  function D8Direction(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  ): string\n  {\n    var bestName := \"NoFlow\";\n    var bestPower := 0.0;\n\n    for dir in dirs\n      invariant bestName == \"NoFlow\" || bestPower > 0.0\n    {\n      var neighborElev: real;\n      // 根据方向选择对应邻居高程\n      match dir.dp, dir.dq {\n        case 1, 0 => neighborElev := f;\n        case 1, 1 => neighborElev := i;\n        case 0, 1 => neighborElev := h;\n        case -1, 1 => neighborElev := g;\n        case -1, 0 => neighborElev := d;\n        case -1, -1 => neighborElev := a;\n        case 0, -1 => neighborElev := b;\n        case 1, -1 => neighborElev := c;\n      }\n      var drop := e - neighborElev;\n      if drop > 0.0 {\n        var power := (drop * drop) / dir.dist2;\n        if bestName == \"NoFlow\" || power > bestPower {\n          bestName, bestPower := dir.name, power;\n        }\n      }\n    }\n    bestName\n  }\n\n  // ==================================================================\n  // 主定理:洼地无流向\n  // 若所有邻居高程均不小于中心高程 e,则 D8 流向必为 NoFlow。\n  // ==================================================================\n  lemma PitNoFlow(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  )\n    requires a >= e && b >= e && c >= e\n    requires d >= e && f >= e\n    requires g >= e && h >= e && i >= e\n    ensures D8Direction(a, b, c, d, e, f, g, h, i) == \"NoFlow\"\n  {\n    // 证明思路:遍历所有八个方向,每个方向的 drop = e - neighborElev ≤ 0,\n    // 因此不会进入 if drop > 0.0 分支,最终 bestName 保持初始值 \"NoFlow\"。\n    \n    // 展开 D8Direction 的计算过程\n    var bestName := \"NoFlow\";\n    var bestPower := 0.0;\n\n    // 对每个方向进行验证\n    for dir in dirs\n      invariant bestName == \"NoFlow\"\n      invariant bestPower == 0.0\n    {\n      var neighborElev: real;\n      // 根据方向选择邻居高程\n      match dir.dp, dir.dq {\n        case 1, 0 => neighborElev := f;\n        case 1, 1 => neighborElev := i;\n        case 0, 1 => neighborElev := h;\n        case -1, 1 => neighborElev := g;\n        case -1, 0 => neighborElev := d;\n        case -1, -1 => neighborElev := a;\n        case 0, -1 => neighborElev := b;\n        case 1, -1 => neighborElev := c;\n      }\n      // 由前提条件知 neighborElev ≥ e\n      assert neighborElev >= e;\n      var drop := e - neighborElev;\n      assert drop <= 0.0;\n      // drop ≤ 0, 不会更新 bestName 和 bestPower\n    }\n    // 循环结束后 bestName 仍为 \"NoFlow\"\n    assert bestName == \"NoFlow\";\n  }\n\n  // ==================================================================\n  // 测试用例:经典洼地配置\n  // 中心为 0, 周围八个邻居均为 1\n  // ==================================================================\n  lemma TestPit()\n    ensures D8Direction(1.0, 1.0, 1.0,\n                        1.0, 0.0, 1.0,\n                        1.0, 1.0, 1.0) == \"NoFlow\"\n  {\n    PitNoFlow(1.0, 1.0, 1.0,\n              1.0, 0.0, 1.0,\n              1.0, 1.0, 1.0);\n  }\n\n  // ==================================================================\n  // 反例构造:若存在严格更低的邻居,则流向不为 NoFlow\n  // 用于验证定理的边界条件\n  // ==================================================================\n  lemma CounterExample()\n    ensures D8Direction(1.0, 1.0, 1.0,\n                        1.0, 1.0, 0.5,  // f < e\n                        1.0, 1.0, 1.0) != \"NoFlow\"\n  {\n    // 计算实际流向\n    var dir := D8Direction(1.0, 1.0, 1.0,\n                           1.0, 1.0, 0.5,\n                           1.0, 1.0, 1.0);\n    // 东侧邻居 f = 0.5 < e = 1.0, drop = 0.5 > 0\n    // 距离平方为 1.0, power = 0.25\n    // 其他邻居均不小于 e, 因此流向应为 \"E\"\n    assert dir == \"E\";\n  }\n\n}\n\nmethod Main() {\n  print \"GeoProofBench P-005 — D8 洼地无流向定理\\n\";\n  print \"验证:若 3×3 窗口中所有邻居不低于中心,则流向为 NoFlow\\n\";\n  print \"编译期验证: dafny verify P005_d8.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

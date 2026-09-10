@@ -1,0 +1,28 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_efbqaqks/candidate.dfy\""
+    ],
+    "rc": 2,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_efbqaqks/candidate.dfy\",\"range\":{\"start\":{\"pos\":1098,\"line\":37,\"character\":2},\"end\":{\"pos\":1101,\"line\":37,\"character\":5}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"fields are not allowed to be declared at the module level; instead, wrap the field in a \\u0027class\\u0027 declaration\",\"errorId\":\"p_top_level_field\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_efbqaqks/candidate.dfy\",\"range\":{\"start\":{\"pos\":1240,\"line\":43,\"character\":2},\"end\":{\"pos\":1243,\"line\":43,\"character\":5}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"fields are not allowed to be declared at the module level; instead, wrap the field in a \\u0027class\\u0027 declaration\",\"errorId\":\"p_top_level_field\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_efbqaqks/candidate.dfy\",\"range\":{\"start\":{\"pos\":0,\"line\":116,\"character\":60},\"end\":{\"pos\":0,\"line\":116,\"character\":60}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"lbrace expected\",\"errorId\":\"p_generic_syntax_error\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_efbqaqks/candidate.dfy\",\"range\":{\"start\":{\"pos\":0,\"line\":134,\"character\":2},\"end\":{\"pos\":0,\"line\":134,\"character\":2}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"rbrace expected\",\"errorId\":\"p_generic_syntax_error\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"4 parse errors detected in candidate.dfy\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "failure_code": "F1",
+  "interpret": {
+    "compile_rc": 1,
+    "verify_rc": 1,
+    "failure_code": "F1",
+    "interpreted_from": "parse_errors",
+    "proc_rc": 2
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

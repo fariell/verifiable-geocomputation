@@ -1,0 +1,37 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1596,
+    "completion_tokens": 814,
+    "total_tokens": 2410,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1596
+  },
+  "api_id": "01a087149e7df1fc22b4b8f3f9e8bc00",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Analysis.SpecialFunctions.Pow.Real\nimport Mathlib.Data.Real.Basic\n\n/-\n  Horn (1981) finite-difference slope operator for a 3×3 window.\n  Given elevations z₀,…,z₈ arranged as:\n    z₀ z₁ z₂\n    z₃ z₄ z₅\n    z₆ z₇ z₈\n  and grid spacing w > 0, the squared slope is:\n    SlopeSq = ((z₆ + 2*z₇ + z₈) - (z₀ + 2*z₁ + z₂))² / (8*w)²\n            + ((z₂ + 2*z₅ + z₈) - (z₀ + 2*z₃ + z₆))² / (8*w)²\n-/\ndef HornSlopeSq (z : Fin 9 → ℝ) (w : ℝ) : ℝ :=\n  let dzdx := ((z 6 + 2 * z 7 + z 8) - (z 0 + 2 * z 1 + z 2)) / (8 * w)\n  let dzdy := ((z 2 + 2 * z 5 + z 8) - (z 0 + 2 * z 3 + z 6)) / (8 * w)\n  dzdx ^ 2 + dzdy ^ 2\n\n/--\n  For any finite 3×3 elevation window and positive grid spacing w,\n  the Horn slope-square is nonnegative.\n  This holds for arbitrary elevations, not only planar surfaces.\n-/\ntheorem HornSlopeSq_nonneg (z : Fin 9 → ℝ) (w : ℝ) (hw : w > 0) : 0 ≤ HornSlopeSq z w := by\n  unfold HornSlopeSq\n  have hw' : 8 * w > 0 := by linarith\n  have h1 : 0 ≤ ((z 6 + 2 * z 7 + z 8) - (z 0 + 2 * z 1 + z 2)) / (8 * w) ^ 2 := by\n    apply div_nonneg\n    · nlinarith [sq_nonneg ((z 6 + 2 * z 7 + z 8) - (z 0 + 2 * z 1 + z 2))]\n    · nlinarith\n  have h2 : 0 ≤ ((z 2 + 2 * z 5 + z 8) - (z 0 + 2 * z 3 + z 6)) / (8 * w) ^ 2 := by\n    apply div_nonneg\n    · nlinarith [sq_nonneg ((z 2 + 2 * z 5 + z 8) - (z 0 + 2 * z 3 + z 6))]\n    · nlinarith\n  have h3 : 0 ≤ ((z 6 + 2 * z 7 + z 8) - (z 0 + 2 * z 1 + z 2)) ^ 2 / ((8 * w) ^ 2) := by\n    apply div_nonneg (by nlinarith [sq_nonneg _]) (by nlinarith)\n  have h4 : 0 ≤ ((z 2 + 2 * z 5 + z 8) - (z 0 + 2 * z 3 + z 6)) ^ 2 / ((8 * w) ^ 2) := by\n    apply div_nonneg (by nlinarith [sq_nonneg _]) (by nlinarith)\n  nlinarith\n",
+  "verify_status": "TOOLCHAIN_MISSING"
+}

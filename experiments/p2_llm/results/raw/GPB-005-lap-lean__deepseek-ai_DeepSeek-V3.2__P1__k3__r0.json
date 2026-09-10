@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3117,
+    "completion_tokens": 1447,
+    "total_tokens": 4564,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 45
+  },
+  "api_id": "01a08a774736a7968ec578d5e5b31f98",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-003 (discrete Laplacian sign at local maximum)\n   文件 : formal/lean4/VeriGIS/DiscreteLaplacian.lean\n   命题 : 若 3×3 窗口中心为离散局部极大值(中心高程 ≥ 四个正交邻域),\n          则中心处的离散拉普拉斯 ≤ 0.\n   参考 : experiments/phase1/p003_curvature.py (numeric_zt)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本命题是曲率一致性讨论的前置引理: 在离散二阶差分(拉普拉斯)的语境下,\n  局部极大值必然对应非正的拉普拉斯值。这是连续情形的离散类比:\n    若 f 在 x₀ 处局部极大, 则 Δf(x₀) ≤ 0.\n\n  注意: 这里使用 Zevenbergen–Thorne (1987) 的离散拉普拉斯定义,\n  即 hxx + hyy, 其中 hxx = (d - 2e + f)/w², hyy = (b - 2e + h)/w².\n  该定义在 formal/dafny/P003_curvature.dfy 中已验证为二阶差分格式。\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.DiscreteLaplacian\n\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定(与 Horn 坡度相同)\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  离散拉普拉斯显式依赖中心元 e, 这与一阶差分不同。\n-/\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- x 方向的二阶差分分子(未除间距平方)。 -/\ndef numDxx (d e f : ℝ) : ℝ := d - 2 * e + f\n\n/-- y 方向的二阶差分分子(未除间距平方)。 -/\ndef numDyy (b e h : ℝ) : ℝ := b - 2 * e + h\n\n/-- 离散拉普拉斯分子(未除间距平方)。 -/\ndef numLaplacian (b d e f h : ℝ) : ℝ := numDxx d e f + numDyy b e h\n\n/-- 离散拉普拉斯值(无量纲, 假设 w ≠ 0)。 -/\ndef discreteLaplacian (b d e f h w : ℝ) : ℝ := numLaplacian b d e f h / (w * w)\n\n-- ==========================================================================\n-- 局部极大值条件\n-- ==========================================================================\n\n/-- 中心元 e 在四个正交方向(北、南、东、西)上为局部极大值。 -/\ndef isOrthogonalLocalMax (b d e f h : ℝ) : Prop :=\n  e ≥ b ∧ e ≥ d ∧ e ≥ f ∧ e ≥ h\n\n-- ==========================================================================\n-- 主定理: 局部极大值 ⇒ 拉普拉斯 ≤ 0\n-- ==========================================================================\n\ntheorem local_max_implies_nonpositive_laplacian\n    (b d e f h w : ℝ) (hw : w ≠ 0) (hmax : isOrthogonalLocalMax b d e f h) :\n    discreteLaplacian b d e f h w ≤ 0 := by\n  -- 展开定义\n  unfold discreteLaplacian numLaplacian numDxx numDyy isOrthogonalLocalMax at *\n  -- 分解局部极大条件\n  rcases hmax with ⟨heb, hed, hef, heh⟩\n  -- 分子非正的证明\n  have hnum_nonpos : (d - 2 * e + f) + (b - 2 * e + h) ≤ 0 := by\n    -- 整理为 (d - e) + (f - e) + (b - e) + (h - e) ≤ 0\n    ring_nf\n    -- 每一项都 ≤ 0\n    have h1 : d - e ≤ 0 := by linarith\n    have h2 : f - e ≤ 0 := by linarith\n    have h3 : b - e ≤ 0 := by linarith\n    have h4 : h - e ≤ 0 := by linarith\n    linarith\n  -- 分母为正\n  have hdenom_pos : 0 < w * w := by\n    exact mul_self_pos.mpr hw\n  -- 组合得到最终结论\n  exact (div_nonpos_of_nonpos_of_nonneg hnum_nonpos (by linarith))\n\n-- ==========================================================================\n-- 冒烟测试\n-- ==========================================================================\n\nexample : discreteLaplacian 1 1 2 1 1 1 = 0 := by\n  unfold discreteLaplacian numLaplacian numDxx numDyy\n  norm_num\n\nexample (w : ℝ) (hw : w ≠ 0) : discreteLaplacian 0 0 1 0 0 w ≤ 0 := by\n  apply local_max_implies_nonpositive_laplacian _ _ _ _ _ _ hw\n  unfold isOrthogonalLocalMax\n  constructor <;> linarith\n\n-- ==========================================================================\n-- 注记: 为什么这是曲率一致性的必要引理\n-- --------------------------------------------------------------------------\n-- 在连续情形, 若 f 在 x₀ 处局部极大, 则 Hessian 矩阵半负定, 故迹(拉普拉斯) ≤ 0.\n-- 离散版本要求同样的符号性质成立, 否则二阶差分格式无法保持极值点的基本分析性质。\n--\n-- 本引理在 P-003 的完整验证链中用于:\n--   1. 确认 ZT 离散 Hessian 在局部极值点给出正确符号。\n--   2. 作为反例构造的基础: 若某个\"曲率\"算子在局部极大点给出正拉普拉斯,\n--      则该算子必然不是正确的二阶差分近似。\n--\n-- 注意: 这里只考虑了正交邻域(4-邻域)。在实际地形分析中, 有时会考虑\n-- 8-邻域定义, 但正交邻域是更保守且符合\"局部极大\"直观的定义。\n-- ==========================================================================\n\nend -- noncomputable section\n\nend VeriGIS.DiscreteLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

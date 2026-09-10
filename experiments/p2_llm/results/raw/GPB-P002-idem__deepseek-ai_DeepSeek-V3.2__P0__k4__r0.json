@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1701,
+    "completion_tokens": 1178,
+    "total_tokens": 2879,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1701
+  },
+  "api_id": "01a08af20047d18ef748260ee1931892",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of 1D left-outlet pit filling idempotence and fixed-point property\n// for cells that do not spill left.\n\n// A 1D elevation array is represented as a sequence of integers.\n// The left-outlet condition means water flows only to the left neighbor (index i-1).\n\n// The Fill operation for 1D left-outlet is defined as cumulative maximum from left to right.\nfunction Fill(a: seq<int>): seq<int>\n  requires |a| > 0\n  ensures |Fill(a)| == |a|\n{\n  if |a| == 1 then [a[0]]\n  else Fill(a[0..|a|-1]) + [max(a[|a|-1], Fill(a[0..|a|-1])[|a|-2])]\n}\n\n// Alternative iterative definition for clarity in proofs.\nfunction FillIterative(a: seq<int>): seq<int>\n  requires |a| > 0\n  ensures FillIterative(a) == Fill(a)\n{\n  var result := [a[0]];\n  var i := 1;\n  while i < |a|\n    invariant i >= 1\n    invariant |result| == i\n    invariant result == Fill(a[0..i])\n    decreases |a| - i\n  {\n    result := result + [max(a[i], result[i-1])];\n    i := i + 1;\n  }\n  result\n}\n\n// Lemma: Fill is idempotent.\nlemma Idempotent(a: seq<int>)\n  requires |a| > 0\n  ensures Fill(Fill(a)) == Fill(a)\n{\n  // Expand definition of Fill(Fill(a)).\n  // Let b = Fill(a). Then b[i] = max_{j <= i} a[j].\n  // Fill(b)[i] = max_{j <= i} b[j] = max_{j <= i} (max_{k <= j} a[k]) = max_{k <= i} a[k] = b[i].\n  // We prove this by induction on i.\n  var b := Fill(a);\n  assert |b| == |a|;\n  forall i | 0 <= i < |a|\n    ensures Fill(b)[i] == b[i]\n  {\n    // b[i] = max_{j <= i} a[j]\n    // Fill(b)[i] = max_{j <= i} b[j] = max_{j <= i} (max_{k <= j} a[k])\n    // The inner max over k <= j, then outer max over j <= i, is equivalent to max over k <= i.\n    // This follows because the set {k | exists j: k <= j <= i} = {k | k <= i}.\n    // So Fill(b)[i] = max_{k <= i} a[k] = b[i].\n  }\n  // Since sequences are equal elementwise, they are equal.\n}\n\n// A cell does not spill to the left if its elevation is already >= left neighbor.\npredicate DoesNotSpillLeft(a: seq<int>, i: int)\n  requires 0 <= i < |a|\n{\n  i == 0 || a[i] >= a[i-1]\n}\n\n// Lemma: Cells that do not spill left are fixed points of Raise.\n// Here Raise is the operation that increases a cell's elevation to at least its left neighbor.\n// In 1D left-outlet, Raise is equivalent to setting a[i] := max(a[i], a[i-1]) for i>0.\n// For i=0, Raise leaves it unchanged (no left neighbor).\n// The Fill operation applies Raise to all cells from left to right.\n// We prove that if a cell does not spill left in the original array,\n// then its elevation is unchanged by Fill.\nlemma FixedPointOfRaise(a: seq<int>, i: int)\n  requires |a| > 0\n  requires 0 <= i < |a|\n  requires DoesNotSpillLeft(a, i)\n  ensures Fill(a)[i] == a[i]\n{\n  // Proof by induction on i.\n  if i == 0 {\n    // Fill(a)[0] = a[0] by definition.\n  } else {\n    // Since a[i] >= a[i-1], max(a[i], Fill(a)[i-1]) = a[i] because Fill(a)[i-1] >= a[i-1].\n    // We need to know Fill(a)[i-1] >= a[i-1], which holds by definition of Fill.\n    // Therefore Fill(a)[i] = a[i].\n    assert Fill(a)[i-1] >= a[i-1];\n    assert a[i] >= a[i-1];\n    // So max(a[i], Fill(a)[i-1]) >= a[i] and also <= a[i] because a[i] is one argument.\n    // Hence equal.\n  }\n}\n\n// Main theorem combining both properties.\ntheorem PitFillingIdempotentAndFixedPoint(a: seq<int>)\n  requires |a| > 0\n  ensures Fill(Fill(a)) == Fill(a)\n  ensures forall i | 0 <= i < |a| && DoesNotSpillLeft(a, i) :: Fill(a)[i] == a[i]\n{\n  Idempotent(a);\n  forall i | 0 <= i < |a| && DoesNotSpillLeft(a, i)\n    ensures Fill(a)[i] == a[i]\n  {\n    FixedPointOfRaise(a, i);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

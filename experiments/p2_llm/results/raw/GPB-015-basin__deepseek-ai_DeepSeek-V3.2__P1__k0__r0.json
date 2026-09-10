@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 1916,
+    "total_tokens": 5007,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3091
+  },
+  "api_id": "01a08acadbcbe41bf611f65b8f2c1a7b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 确定性 D8 流向下的流域唯一性\n//  覆盖 : GPB-015 (Layer A: 终止轨道出口唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  流域分析中,确定性流向函数(如 D8)从同一单元格出发的流动路径,\n//  若在有限步内终止于某个出口(不动点),则该出口必须唯一。\n//  这一性质是后续流域划分、累积流计算等算法的逻辑基础。\n//  本文件形式化该唯一性,使用有界迭代 stepN 而不依赖 SMT 递归搜索不动点。\n//\n//  结构说明\n//  ---------\n//  1. 导入 D8 流向核(来自 P-005),避免重复实现。\n//  2. 定义有界迭代函数 stepN,模拟最多 N 步的流向追踪。\n//  3. 证明:若从同一单元格出发,分别在 m 步和 n 步内到达出口,\n//     则这两个出口是同一个单元格。\n//  4. 该证明不要求预先知道不动点存在,仅基于流向函数的确定性。\n// ===========================================================================\n\nmodule WatershedUniqueness {\n\n  import opened D8Kernel  // 从 P-005 导入 D8 流向核\n\n  // ------------------------------------------------------------------\n  // 类型与状态定义\n  // ------------------------------------------------------------------\n\n  // 网格位置(行,列)\n  type Cell = (int, int)\n\n  // 流向函数:给定高程网格和当前位置,返回流向方向或 NoFlow\n  // 此处直接使用导入的 D8Kernel.d8_at 函数签名\n  // function d8_at(grid: Grid, r: int, c: int): D8Direction\n\n  // 后继函数:根据流向计算下一个位置,若为 NoFlow 则返回原位置(不动点)\n  function successor(grid: Grid, cell: Cell): Cell\n    requires ValidCell(grid, cell)\n  {\n    var (r, c) := cell;\n    var dir := d8_at(grid, r, c);\n    if dir.Downhill? then\n      (r + dir.dq, c + dir.dp)\n    else\n      (r, c)  // NoFlow 或边界情况(由 d8_at 保证返回原位置)\n  }\n\n  // ------------------------------------------------------------------\n  // 有界迭代函数 stepN\n  // ------------------------------------------------------------------\n\n  // 从 cell 开始,最多迭代 N 步,返回最终位置\n  // 若在少于 N 步内到达不动点,则提前停止\n  function stepN(grid: Grid, cell: Cell, N: nat): Cell\n    requires ValidCell(grid, cell)\n    decreases N\n  {\n    if N == 0 then\n      cell\n    else\n      var next := successor(grid, cell);\n      if next == cell then\n        cell  // 已到达不动点\n      else\n        stepN(grid, next, N-1)\n  }\n\n  // ------------------------------------------------------------------\n  // 辅助引理:后继函数的确定性\n  // ------------------------------------------------------------------\n\n  lemma SuccessorDeterministic(grid: Grid, cell: Cell)\n    requires ValidCell(grid, cell)\n    ensures forall n: nat :: successor(grid, cell) == successor(grid, cell)\n    // 流向函数 d8_at 是确定性的,因此 successor 也是确定性的\n  {\n    // 由 D8Kernel 的确定性保证\n  }\n\n  // ------------------------------------------------------------------\n  // 主要定理:出口唯一性\n  // ------------------------------------------------------------------\n  // 若从同一单元格出发,分别在 m 步和 n 步内到达出口(不动点),\n  // 则这两个出口是同一个单元格。\n  // 注意:这里不假设 m 或 n 是最小步数,只假设 stepN 返回的位置是不动点。\n  // ------------------------------------------------------------------\n\n  theorem OutletUnique(grid: Grid, start: Cell, m: nat, n: nat)\n    requires ValidCell(grid, start)\n    // 假设在 m 步内到达出口\n    requires stepN(grid, start, m) == successor(grid, stepN(grid, start, m))\n    // 假设在 n 步内到达出口\n    requires stepN(grid, start, n) == successor(grid, stepN(grid, start, n))\n    ensures stepN(grid, start, m) == stepN(grid, start, n)\n  {\n    // 令 A = stepN(start, m), B = stepN(start, n)\n    var A := stepN(grid, start, m);\n    var B := stepN(grid, start, n);\n\n    // 情况 1: m == n, 显然成立\n    if m == n {\n      return;\n    }\n\n    // 情况 2: m < n\n    if m < n {\n      // 由于 A 是不动点,从 A 开始迭代任意步仍停留在 A\n      assert stepN(grid, A, n-m) == A;\n      // 但 stepN(start, n) 可写为 stepN(A, n-m) (因为 m 步已到 A)\n      assert stepN(grid, start, n) == stepN(grid, A, n-m) by {\n        // 展开 stepN 的定义,利用后继函数的确定性\n        calc {\n          stepN(grid, start, n);\n          == stepN(grid, stepN(grid, start, m), n-m);\n          == stepN(grid, A, n-m);\n        }\n      }\n      // 因此 B == A\n      assert B == A;\n    }\n\n    // 情况 3: n < m, 对称同理\n    if n < m {\n      assert stepN(grid, B, m-n) == B;\n      calc {\n        stepN(grid, start, m);\n        == stepN(grid, stepN(grid, start, n), m-n);\n        == stepN(grid, B, m-n);\n        == B;\n      }\n      assert A == B;\n    }\n  }\n\n  // ------------------------------------------------------------------\n  // 推论:若存在有限步内到达的出口,则该出口唯一\n  // ------------------------------------------------------------------\n  // 即:不存在两个不同的不动点,都可以从同一单元格在有限步内到达。\n  // ------------------------------------------------------------------\n\n  corollary UniqueOutletIfTerminates(grid: Grid, start: Cell)\n    requires ValidCell(grid, start)\n    requires exists k: nat :: stepN(grid, start, k) == successor(grid, stepN(grid, start, k))\n    ensures exists! outlet: Cell ::\n      outlet == successor(grid, outlet) &&\n      exists k: nat :: stepN(grid, start, k) == outlet\n  {\n    // 由 OutletUnique 定理直接可得\n    // 选取最小的 k 使得 stepN(start, k) 是不动点\n    var k :| stepN(grid, start, k) == successor(grid, stepN(grid, start, k));\n    var outlet := stepN(grid, start, k);\n    // 唯一性由 OutletUnique 保证\n    forall outlet' | outlet' == successor(grid, outlet') && exists k': nat :: stepN(grid, start, k') == outlet'\n      ensures outlet' == outlet\n    {\n      var k' :| stepN(grid, start, k') == outlet';\n      OutletUnique(grid, start, k, k');\n    }\n  }\n\n  // ------------------------------------------------------------------\n  // 测试用例\n  // ------------------------------------------------------------------\n\n  method TestOutletUnique() {\n    // 构造一个简单的高程网格:平面斜坡,流向一致向南\n    var grid : Grid;\n    // 初始化网格...\n\n    var start := (0, 0);\n    // 假设在 5 步内到达出口\n    assume stepN(grid, start, 5) == successor(grid, stepN(grid, start, 5));\n    // 假设在 10 步内也到达出口\n    assume stepN(grid, start, 10) == successor(grid, stepN(grid, start, 10));\n\n    // 验证出口唯一\n    OutletUnique(grid, start, 5, 10);\n    print \"测试通过:出口唯一性成立\\n\";\n  }\n}\n\n// ===========================================================================\n// 注记\n// ===========================================================================\n// 1. 本证明仅依赖流向函数的确定性,不依赖网格的具体高程值。\n// 2. 对于不终止的轨道(如平坦区域的循环),定理前提不满足,结论不适用。\n//    这正是 Layer B (P-006b) 要处理的反例。\n// 3. 该唯一性性质是后续流域划分算法正确性的基础。\n// ===========================================================================\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

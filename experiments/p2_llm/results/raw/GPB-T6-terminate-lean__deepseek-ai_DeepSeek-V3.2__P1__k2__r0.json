@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2984,
+    "completion_tokens": 1388,
+    "total_tokens": 4372,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 2984
+  },
+  "api_id": "01a08b2a5f836c143a49cb8563b8aaba",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : 确定性 D8 流向下的流域唯一性\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明：在有限栅格上，若每个单元格的 D8 后继严格下降（高程严格降低），\n  则从任意单元格出发的流向追踪轨道必在有限步内终止于一个固定点（洼地或边界）。\n  证明使用良基论证：定义从单元格到其“剩余下降潜力”的度量，该度量在每一步严格减少。\n\n  注意：这里不假设 DEM 无平地（允许平地作为终止条件），但要求若存在流向则必须严格下降。\n  这是对 D8 流向算法的基本终止性保证。\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Finset.Basic\n\nnamespace VeriGIS.Watershed\n\n-- 单元格类型：有限二维栅格中的位置\nvariable {R C : Type} [Fintype R] [Fintype C]\n\n-- 高程函数：每个位置有一个实数高程\nvariable (height : R → C → ℝ)\n\n-- D8 后继函数：返回每个单元格的流向目标（若存在）\nvariable (succ : R → C → Option (R × C))\n\n-- 严格下降条件：若后继存在，则高程严格降低\nvariable (strict_desc : ∀ r c r' c', succ r c = some (r', c') → height r' c' < height r c)\n\n-- 定义轨道：从 (r, c) 开始，重复应用后继函数\ndef orbit (r c : R × C) : ℕ → Option (R × C)\n  | 0 => some (r, c)\n  | n + 1 => match orbit (r, c) n with\n    | none => none\n    | some (r', c') => succ r' c'\n\n-- 终止条件：轨道在有限步内达到固定点（后继为 none 或自身）\ndef terminates (r c : R × C) : Prop :=\n  ∃ n : ℕ, ∀ m ≥ n, orbit (succ := succ) (r, c) m = orbit (succ := succ) (r, c) n\n\n-- 定义度量：单元格到其“剩余下降潜力”的映射\nnoncomputable def measure (r c : R × C) : ℕ :=\n  let cells : Finset (R × C) := Finset.filter (λ p => height p.1 p.2 < height r c) Finset.univ\n  cells.card\n\n-- 度量在严格下降时减少\nlemma measure_decreases {r c r' c' : R × C} (h : succ r.1 r.2 = some (r', c')) :\n    measure height (r', c') < measure height (r, c) := by\n  unfold measure\n  have hlt : height r' c' < height r.1 r.2 := strict_desc _ _ _ _ h\n  refine Finset.card_lt_card ?_\n  refine ⟨Finset.subset_univ _, ?_⟩\n  intro hsub\n  have : (r.1, r.2) ∉ Finset.filter (λ p => height p.1 p.2 < height r' c') Finset.univ := by\n    simp [hlt.not_lt]\n  have : (r.1, r.2) ∈ Finset.filter (λ p => height p.1 p.2 < height r.1 r.2) Finset.univ := by\n    simp [hlt]\n  exact Finset.not_mem_mono hsub this\n\n-- 主定理：在严格下降条件下，所有轨道都终止\ntheorem all_orbits_terminate : ∀ (r c : R × C), terminates (succ := succ) r c := by\n  intro r c\n  -- 使用度量的良基性进行归纳\n  refine WellFounded.induction (α := R × C) (by\n    -- 证明 measure 是良基关系\n    have : WellFounded (λ a b : R × C => measure height a < measure height b) :=\n      measure_wf height\n    exact this) (r, c) ?_\n  intro p ih\n  -- 情况分析：p 的后继\n  match h : succ p.1 p.2 with\n  | none =>\n    -- 无后继，立即终止\n    refine ⟨0, λ m hm => ?_⟩\n    simp [orbit, terminates, h]\n  | some (r', c') =>\n    -- 有后继，递归证明\n    have hterm := ih (r', c') (measure_decreases height succ strict_desc h)\n    rcases hterm with ⟨n, hn⟩\n    refine ⟨n + 1, λ m hm => ?_⟩\n    -- 展开轨道定义\n    simp [orbit]\n    cases' m with m\n    · simp\n    · have : m ≥ n := by omega\n      rw [hn m this]\n      simp [h]\n\n-- 辅助引理：measure 是良基的（因为值域是有限自然数）\nlemma measure_wf : WellFounded (λ a b : R × C => measure height a < measure height b) := by\n  refine Subrelation.wf (λ a b h => ?_) (InvImage.wf (measure height) Nat.lt_wfRel)\n  exact h\n\n-- 冒烟测试：在简单栅格上验证终止性\nexample : terminates (succ := λ _ _ => none) (0, 0) := by\n  refine ⟨0, λ m hm => ?_⟩\n  simp [orbit, terminates]\n\n-- 注记：该定理不要求 DEM 无洼地，洼地单元格的后继为 none，自动成为终止点。\n-- 这是对 D8 流向算法在有限栅格上必然终止的形式化保证。\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

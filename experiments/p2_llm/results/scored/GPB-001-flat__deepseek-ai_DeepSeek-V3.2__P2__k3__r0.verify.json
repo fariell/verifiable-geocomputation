@@ -1,0 +1,28 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_bs7b7gxq/candidate.dfy\""
+    ],
+    "rc": 2,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_bs7b7gxq/candidate.dfy\",\"range\":{\"start\":{\"pos\":666,\"line\":15,\"character\":13},\"end\":{\"pos\":668,\"line\":15,\"character\":15}}},\"severity\":1,\"arguments\":[\"real\",\"int\"],\"defaultFormatMessage\":\"RHS (of type {1}) not assignable to LHS (of type {0})\",\"errorId\":null,\"source\":\"Resolver\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_bs7b7gxq/candidate.dfy\",\"range\":{\"start\":{\"pos\":745,\"line\":17,\"character\":13},\"end\":{\"pos\":747,\"line\":17,\"character\":15}}},\"severity\":1,\"arguments\":[\"real\",\"int\"],\"defaultFormatMessage\":\"RHS (of type {1}) not assignable to LHS (of type {0})\",\"errorId\":null,\"source\":\"Resolver\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"2 resolution/type errors detected in candidate.dfy\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "failure_code": "F2",
+  "interpret": {
+    "compile_rc": 1,
+    "verify_rc": 1,
+    "failure_code": "F2",
+    "interpreted_from": "diagnostics",
+    "proc_rc": 2
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

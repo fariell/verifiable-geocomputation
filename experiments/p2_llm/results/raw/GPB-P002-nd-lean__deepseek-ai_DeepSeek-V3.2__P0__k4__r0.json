@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1579,
+    "completion_tokens": 346,
+    "total_tokens": 1925,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1579
+  },
+  "api_id": "01a08b0918470a373235d54551d54300",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Stream.Defs\nimport Mathlib.Data.Stream.Init\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Basic\n\nnamespace Fill1D\n\n/-- The 1D left-outlet fill operator.\n    `fill a i` is defined as the maximum of the original value at `i` and the filled value at `i-1`\n    (with the left boundary treated as having value `-∞`). -/\ndef fill (a : ℕ → ℤ) : ℕ → ℤ\n  | 0 => a 0\n  | i + 1 => max (a (i + 1)) (fill a i)\n\n/-- The main theorem: the filled sequence is nondecreasing. -/\ntheorem fill_nondecreasing (a : ℕ → ℤ) (i : ℕ) : fill a i ≤ fill a (i + 1) := by\n  induction' i with k IH\n  · -- Base case i = 0\n    simp [fill]\n    exact le_max_right (a 0) (a 1)\n  · -- Inductive step\n    simp [fill]\n    have h1 : fill a k ≤ max (a (k + 1)) (fill a k) := le_max_right _ _\n    have h2 : max (a (k + 1)) (fill a k) ≤ max (a (k + 2)) (max (a (k + 1)) (fill a k)) :=\n      le_max_right _ _\n    exact h1.trans h2\n\nend Fill1D\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

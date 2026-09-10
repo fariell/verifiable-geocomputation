@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1579,
+    "completion_tokens": 417,
+    "total_tokens": 1996,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1579
+  },
+  "api_id": "01a08b07cbaa862abb5937b0645c69d6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Stream.Defs\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Basic\n\nnamespace Fill1D\n\n/-- A 1D array of values with a left outlet (index 0 is the outlet). -/\nabbrev Array1D (α : Type) := Nat → α\n\n/-- The left-outlet fill operator for 1D arrays.\n    For each position i, the fill value is the maximum of all original values from the outlet up to i. -/\ndef fill (a : Array1D ℕ) : Array1D ℕ :=\n  λ i => (Finset.range (i + 1)).sup' ⟨i, by simp⟩ a\n\n/-- The property that a sequence is nondecreasing: for all i, x[i] ≤ x[i+1]. -/\ndef Nondecreasing (x : Array1D ℕ) : Prop :=\n  ∀ i, x i ≤ x (i + 1)\n\n/-- Theorem: The 1D left-outlet fill yields a nondecreasing sequence. -/\ntheorem fill_nondecreasing (a : Array1D ℕ) : Nondecreasing (fill a) := by\n  intro i\n  unfold fill\n  have h1 : (Finset.range (i + 1)).sup' ⟨i, by simp⟩ a ≤ (Finset.range (i + 2)).sup' ⟨i + 1, by simp⟩ a := by\n    apply Finset.sup'_le_sup' _ (by intro x hx; simp [Finset.mem_range] at hx; omega)\n    intro x hx\n    simp [Finset.mem_range] at hx\n    have : x ≤ i + 1 := by omega\n    exact Finset.mem_range_succ_iff.mpr this\n  exact h1\n\nend Fill1D\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

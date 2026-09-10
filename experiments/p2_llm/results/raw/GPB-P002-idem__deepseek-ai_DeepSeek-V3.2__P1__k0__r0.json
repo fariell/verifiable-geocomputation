@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3187,
+    "completion_tokens": 2345,
+    "total_tokens": 5532,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3187
+  },
+  "api_id": "01a08af2c11405546b63cfb8b34cef21",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-5 / GPB-026\n//  文件 : formal/dafny/PCOMP_5_idempotent.dfy\n//  算子 : 1D 左出口填洼 (P-002 Fill 的一维特化)\n//  覆盖 : GPB-026(i) 幂等性、GPB-026(ii) 调度无关性(1D 平凡)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_5_idempotent.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先证这一条(科学动机)\n//  --------------------------\n//  Phase 2 实验揭示: 填洼算法的实现变体(W&L, Planchon–Darboux, Liu)\n//  在 2D 上输出差异可达 10% 格网。一个必须回答的追问是: 这些差异\n//  是算法本质的不确定性, 还是可以通过更严格的数学约束消除?\n//\n//  本文件从**最简非平凡情形**(1D 左出口)切入, 证明:\n//      1) 填洼算子幂等: Fill(Fill(a)) = Fill(a)\n//      2) 已满足左出口不溢出的格点是 Raise 的不动点\n//\n//  这两条是填洼作为**单调投影算子**的核心代数性质, 与具体调度\n//  (堆 tie‑break) 无关。在 1D 上它们可被严格证明, 为 2D 的\n//  形式化验证提供结构引理。\n//\n//  注意: 1D 左出口是 2D 填洼在单行上的投影, 此时水流方向固定向左,\n//  填洼退化为前缀最大值。这是理解填洼代数结构的理想测试床。\n// ===========================================================================\n\nmodule PCOMP5_Idempotent {\n\n  // ------------------------------------------------------------------\n  // 1D 高程序列约定\n  //\n  //   a[0] a[1] a[2] ... a[n-1]\n  //   左出口 → 水流只能向左流, 因此填洼只需向右传播高程\n  //\n  //   Fill(a)[i] = max_{0 ≤ k ≤ i} a[k]\n  //   即前缀最大值。\n  // ------------------------------------------------------------------\n\n  // ---- 1D 填洼算子 (左出口特化) ----\n  function Fill(a: seq<real>): seq<real>\n    reads {}\n    ensures |Fill(a)| == |a|\n    ensures forall i :: 0 <= i < |a| ==> Fill(a)[i] == MaxPrefix(a, i)\n    ensures forall i :: 0 <= i < |a| ==> Fill(a)[i] >= a[i]\n    ensures forall i :: 0 <= i < |a|-1 ==> Fill(a)[i] <= Fill(a)[i+1]\n  {\n    if |a| == 0 then []\n    else var res := [a[0]];\n         for idx := 1 to |a|\n           invariant |res| == idx\n           invariant forall j :: 0 <= j < idx ==> res[j] == MaxPrefix(a, j)\n         {\n           res := res + [max(res[idx-1], a[idx])];\n         }\n         res\n  }\n\n  // ---- 辅助函数: 前缀最大值 ----\n  function MaxPrefix(a: seq<real>, i: int): real\n    requires 0 <= i < |a|\n    reads {}\n  {\n    if i == 0 then a[0]\n    else max(MaxPrefix(a, i-1), a[i])\n  }\n\n  // ---- 辅助引理: 前缀最大值的单调性 ----\n  lemma MaxPrefixMonotonic(a: seq<real>, i: int, j: int)\n    requires 0 <= i <= j < |a|\n    ensures MaxPrefix(a, i) <= MaxPrefix(a, j)\n  {\n    if i < j {\n      MaxPrefixMonotonic(a, i, j-1);\n      assert MaxPrefix(a, j) == max(MaxPrefix(a, j-1), a[j]) >= MaxPrefix(a, j-1);\n    }\n  }\n\n  // ---- 辅助引理: Fill 保持前缀最大值 ----\n  lemma FillIsPrefixMax(a: seq<real>, i: int)\n    requires 0 <= i < |a|\n    ensures Fill(a)[i] == MaxPrefix(a, i)\n  {\n    // 由函数后条件直接得出\n  }\n\n  // ==================================================================\n  // 定理 1: 幂等性\n  //   Fill(Fill(a)) == Fill(a)\n  // ==================================================================\n  theorem FillIdempotent(a: seq<real>)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    // 关键观察: Fill(a) 本身已是单调不降序列\n    // 对单调序列取前缀最大值等于序列本身\n    assert |Fill(Fill(a))| == |Fill(a)|;  // 长度保持\n\n    forall i | 0 <= i < |a|\n      ensures Fill(Fill(a))[i] == Fill(a)[i]\n    {\n      // Fill(a)[i] 是 a[0..i] 的最大值\n      FillIsPrefixMax(a, i);\n      var m := Fill(a)[i];\n\n      // 现在考虑 Fill(Fill(a))[i]\n      // 它是 Fill(a)[0..i] 的最大值\n      // 因为 Fill(a) 单调不降, 其前缀最大值就是最后一个元素 Fill(a)[i]\n      assert forall k :: 0 <= k <= i ==> Fill(a)[k] <= Fill(a)[i];\n      assert MaxPrefix(Fill(a), i) == Fill(a)[i];\n\n      FillIsPrefixMax(Fill(a), i);\n    }\n  }\n\n  // ==================================================================\n  // 定理 2: 已满足左出口不溢出的格点是 Raise 的不动点\n  //\n  //  定义: 格点 i 在序列 a 中\"不向左溢出\"当且仅当\n  //        (i == 0) 或 (a[i] >= a[i-1])\n  //\n  //   Raise 算子: 将格点 i 抬高到 max(a[i], a[i-1]) (若 i>0)\n  //               格点 0 保持不变。\n  //\n  //  定理: 若格点 i 在 a 中不向左溢出, 则 Raise(a, i) = a[i]\n  // ==================================================================\n\n  // ---- Raise 算子 (单点抬高) ----\n  function Raise(a: seq<real>, i: int): real\n    requires 0 <= i < |a|\n    reads {}\n  {\n    if i == 0 then a[0]\n    else max(a[i], a[i-1])\n  }\n\n  // ---- 不向左溢出的定义 ----\n  predicate NoSpillLeft(a: seq<real>, i: int)\n    requires 0 <= i < |a|\n    reads {}\n  {\n    i == 0 || a[i] >= a[i-1]\n  }\n\n  theorem RaiseFixedPoint(a: seq<real>, i: int)\n    requires 0 <= i < |a|\n    requires NoSpillLeft(a, i)\n    ensures Raise(a, i) == a[i]\n  {\n    // 由 NoSpillLeft 定义直接推出\n    if i > 0 {\n      assert a[i] >= a[i-1];\n      assert max(a[i], a[i-1]) == a[i];\n    }\n  }\n\n  // ==================================================================\n  // 与参考实现的四个测试用例对齐 (GPB-026 hash 验证)\n  // ==================================================================\n  method VerifyHashCases() {\n    var cases := [\n      (\"plane\",  [5.0, 5.0, 5.0, 5.0], [5.0, 5.0, 5.0, 5.0]),\n      (\"pit\",    [3.0, 1.0, 4.0],      [3.0, 3.0, 4.0]),\n      (\"slope\",  [0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0, 3.0]),\n      (\"cascade\",[3.0, 1.0, 0.0],      [3.0, 3.0, 3.0])\n    ];\n\n    for case in cases {\n      var name := case.0;\n      var src := case.1;\n      var expected := case.2;\n\n      var filled := Fill(src);\n      print \"Case \", name, \": src \", src, \" -> filled \", filled, \"\\n\";\n      assert filled == expected;\n\n      // 幂等性检查\n      var filled2 := Fill(filled);\n      assert filled2 == filled;\n    }\n  }\n\n  // ==================================================================\n  // 结构注记: 为什么 1D 幂等性对 2D 重要\n  // ------------------------------------------------------------------\n  // 1D 左出口填洼是 2D 填洼在单行上的投影, 此时水流方向固定。\n  // 证明其幂等性揭示了填洼作为单调投影算子的核心代数结构:\n  //\n  //   Fill 是幂等的 ↔ Fill 是闭包算子 (closure operator)\n  //  闭包算子具有:\n  //    1) 扩展性: Fill(a) ≥ a\n  //    2) 单调性: a ≤ b ⇒ Fill(a) ≤ Fill(b)\n  //    3) 幂等性: Fill(Fill(a)) = Fill(a)\n  //\n  // 在 2D 中, 由于水流方向的多选择性和调度依赖性, 幂等性\n  // 需要更精细的论证 (例如基于最终高程单调收敛)。\n  // 本文件的 1D 证明为 2D 提供了**结构引理**: 若 2D 填洼\n  // 在每一行上投影都幂等, 则整体幂等性可被分解验证。\n  //\n  // 这也是 GPB-026 的实验设计原理: 先在 1D 上建立形式化\n  // 基准, 再逐步扩展到 2D 的调度无关性验证。\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-COMP-5 / GPB-026 — 1D 填洼幂等性与不动点\\n\";\n  print \"全部由编译期验证: dafny verify PCOMP_5_idempotent.dfy\\n\";\n  PCOMP5_Idempotent.VerifyHashCases();\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

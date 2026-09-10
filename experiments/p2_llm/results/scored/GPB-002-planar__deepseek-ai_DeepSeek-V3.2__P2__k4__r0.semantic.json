@@ -1,0 +1,55 @@
+{
+  "task_id": "GPB-002-planar",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 1,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "asymptotically",
+      "dzdx",
+      "dzdy",
+      "estimates",
+      "exactly",
+      "finite-difference",
+      "grid",
+      "horn",
+      "identity",
+      "merely",
+      "planar",
+      "recover",
+      "regular",
+      "sampled",
+      "spacing",
+      "surface"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "estimates",
+      "exactly",
+      "finite-difference",
+      "grid",
+      "horn",
+      "identity",
+      "planar",
+      "recover",
+      "regular",
+      "sampled",
+      "spacing",
+      "surface"
+    ],
+    "miss": [
+      "asymptotically",
+      "merely"
+    ],
+    "hit_ratio": 0.875
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

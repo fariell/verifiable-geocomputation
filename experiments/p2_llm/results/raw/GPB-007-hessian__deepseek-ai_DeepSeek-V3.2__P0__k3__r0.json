@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1736,
+    "completion_tokens": 2711,
+    "total_tokens": 4447,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1736
+  },
+  "api_id": "01a08a8471b022ac71256fbbde184755",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of Zevenbergen-Thorne Hessian exactness on quadratic surfaces\n// Quadratic surface: z = A*x^2 + B*y^2 + C*x*y + D*x + E*y + F\n// Sampled on 3x3 window with spacing w > 0\n// ZT Hessian recovers (2A, 2B, C) exactly\n\nmodule P003_Curvature {\n  // Grid coordinates for 3x3 window centered at (0,0)\n  datatype GridCoord = \n    | TL  // top-left     (-w, w)\n    | TC  // top-center   (0, w)\n    | TR  // top-right    (w, w)\n    | CL  // center-left  (-w, 0)\n    | CC  // center       (0, 0)\n    | CR  // center-right (w, 0)\n    | BL  // bottom-left  (-w, -w)\n    | BC  // bottom-center (0, -w)\n    | BR  // bottom-right (w, -w)\n\n  // Quadratic surface function\n  function quadratic(A: real, B: real, C: real, D: real, E: real, F: real, \n                     x: real, y: real): real\n    reads {}\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n\n  // Get coordinates for a grid point\n  function coordX(gc: GridCoord, w: real): real\n    requires w > 0.0\n    reads {}\n  {\n    match gc\n      case TL => -w\n      case TC => 0.0\n      case TR => w\n      case CL => -w\n      case CC => 0.0\n      case CR => w\n      case BL => -w\n      case BC => 0.0\n      case BR => w\n  }\n\n  function coordY(gc: GridCoord, w: real): real\n    requires w > 0.0\n    reads {}\n  {\n    match gc\n      case TL => w\n      case TC => w\n      case TR => w\n      case CL => 0.0\n      case CC => 0.0\n      case CR => 0.0\n      case BL => -w\n      case BC => -w\n      case BR => -w\n  }\n\n  // Sample the quadratic surface at a grid point\n  function sample(A: real, B: real, C: real, D: real, E: real, F: real,\n                  gc: GridCoord, w: real): real\n    requires w > 0.0\n    reads {}\n  {\n    quadratic(A, B, C, D, E, F, coordX(gc, w), coordY(gc, w))\n  }\n\n  // Zevenbergen-Thorne discrete Hessian components\n  function ztHxx(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real\n    requires w > 0.0\n    reads {}\n  {\n    // (z(CR) - 2*z(CC) + z(CL)) / w^2\n    (sample(A, B, C, D, E, F, CR, w) - 2.0*sample(A, B, C, D, E, F, CC, w) \n     + sample(A, B, C, D, E, F, CL, w)) / (w*w)\n  }\n\n  function ztHyy(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real\n    requires w > 0.0\n    reads {}\n  {\n    // (z(TC) - 2*z(CC) + z(BC)) / w^2\n    (sample(A, B, C, D, E, F, TC, w) - 2.0*sample(A, B, C, D, E, F, CC, w) \n     + sample(A, B, C, D, E, F, BC, w)) / (w*w)\n  }\n\n  function ztHxy(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real\n    requires w > 0.0\n    reads {}\n  {\n    // (z(TL) - z(TR) - z(BL) + z(BR)) / (4*w^2)\n    (sample(A, B, C, D, E, F, TL, w) - sample(A, B, C, D, E, F, TR, w)\n     - sample(A, B, C, D, E, F, BL, w) + sample(A, B, C, D, E, F, BR, w)) / (4.0*w*w)\n  }\n\n  // Main theorem: ZT Hessian recovers (2A, 2B, C) exactly\n  theorem ZTExactOnQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n    requires w > 0.0\n    ensures ztHxx(A, B, C, D, E, F, w) == 2.0*A\n    ensures ztHyy(A, B, C, D, E, F, w) == 2.0*B\n    ensures ztHxy(A, B, C, D, E, F, w) == C\n  {\n    // Expand all samples and simplify algebraically\n    // Proof for hxx:\n    calc {\n      ztHxx(A, B, C, D, E, F, w);\n      == // Definition of ztHxx\n      (sample(A, B, C, D, E, F, CR, w) - 2.0*sample(A, B, C, D, E, F, CC, w) \n       + sample(A, B, C, D, E, F, CL, w)) / (w*w);\n      == // Expand samples at CR (w, 0)\n      (quadratic(A, B, C, D, E, F, w, 0.0) \n       - 2.0*quadratic(A, B, C, D, E, F, 0.0, 0.0)\n       + quadratic(A, B, C, D, E, F, -w, 0.0)) / (w*w);\n      == // Expand quadratic function\n      ((A*w*w + B*0.0 + C*w*0.0 + D*w + E*0.0 + F)\n       - 2.0*(A*0.0 + B*0.0 + C*0.0 + D*0.0 + E*0.0 + F)\n       + (A*w*w + B*0.0 + C*(-w)*0.0 + D*(-w) + E*0.0 + F)) / (w*w);\n      == // Simplify\n      ((A*w*w + D*w + F) - 2.0*F + (A*w*w - D*w + F)) / (w*w);\n      == // Combine terms\n      (2.0*A*w*w + 2.0*F - 2.0*F) / (w*w);\n      == // Final simplification\n      2.0*A;\n    }\n\n    // Proof for hyy:\n    calc {\n      ztHyy(A, B, C, D, E, F, w);\n      == // Definition of ztHyy\n      (sample(A, B, C, D, E, F, TC, w) - 2.0*sample(A, B, C, D, E, F, CC, w) \n       + sample(A, B, C, D, E, F, BC, w)) / (w*w);\n      == // Expand samples at TC (0, w)\n      (quadratic(A, B, C, D, E, F, 0.0, w) \n       - 2.0*quadratic(A, B, C, D, E, F, 0.0, 0.0)\n       + quadratic(A, B, C, D, E, F, 0.0, -w)) / (w*w);\n      == // Expand quadratic function\n      ((A*0.0 + B*w*w + C*0.0*w + D*0.0 + E*w + F)\n       - 2.0*(A*0.0 + B*0.0 + C*0.0 + D*0.0 + E*0.0 + F)\n       + (A*0.0 + B*w*w + C*0.0*(-w) + D*0.0 + E*(-w) + F)) / (w*w);\n      == // Simplify\n      ((B*w*w + E*w + F) - 2.0*F + (B*w*w - E*w + F)) / (w*w);\n      == // Combine terms\n      (2.0*B*w*w + 2.0*F - 2.0*F) / (w*w);\n      == // Final simplification\n      2.0*B;\n    }\n\n    // Proof for hxy:\n    calc {\n      ztHxy(A, B, C, D, E, F, w);\n      == // Definition of ztHxy\n      (sample(A, B, C, D, E, F, TL, w) - sample(A, B, C, D, E, F, TR, w)\n       - sample(A, B, C, D, E, F, BL, w) + sample(A, B, C, D, E, F, BR, w)) / (4.0*w*w);\n      == // Expand all four samples\n      (quadratic(A, B, C, D, E, F, -w, w) - quadratic(A, B, C, D, E, F, w, w)\n       - quadratic(A, B, C, D, E, F, -w, -w) + quadratic(A, B, C, D, E, F, w, -w)) / (4.0*w*w);\n      == // Expand each quadratic\n      (((A*w*w + B*w*w + C*(-w)*w + D*(-w) + E*w + F)\n        - (A*w*w + B*w*w + C*w*w + D*w + E*w + F)\n        - (A*w*w + B*w*w + C*(-w)*(-w) + D*(-w) + E*(-w) + F)\n        + (A*w*w + B*w*w + C*w*(-w) + D*w + E*(-w) + F))) / (4.0*w*w);\n      == // Simplify each term\n      // TL: A*w² + B*w² - C*w² - D*w + E*w + F\n      // TR: A*w² + B*w² + C*w² + D*w + E*w + F  \n      // BL: A*w² + B*w² + C*w² - D*w - E*w + F\n      // BR: A*w² + B*w² - C*w² + D*w - E*w + F\n      // TL - TR = (-C*w² - D*w + E*w) - (C*w² + D*w + E*w) = -2*C*w² - 2*D*w\n      // -BL = -A*w² - B*w² - C*w² + D*w + E*w - F\n      // +BR = A*w² + B*w² - C*w² + D*w - E*w + F\n      // Sum: (-2*C*w² - 2*D*w) + (-C*w² + D*w + E*w) + (-C*w² + D*w - E*w)\n      //     = (-2*C*w² - C*w² - C*w²) + (-2*D*w + D*w + D*w) + (E*w - E*w)\n      //     = -4*C*w² + 0 + 0\n      (-4.0*C*w*w) / (4.0*w*w);\n      == // Final simplification\n      C;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

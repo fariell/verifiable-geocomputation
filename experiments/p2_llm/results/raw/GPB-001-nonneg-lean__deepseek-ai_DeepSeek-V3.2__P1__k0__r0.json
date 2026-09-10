@@ -1,0 +1,37 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3029,
+    "completion_tokens": 1791,
+    "total_tokens": 4820,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3029
+  },
+  "api_id": "01a087168d8f460e5694a848ff11a1de",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-019\n   文件 : formal/lean4/VeriGIS/HornSlope.lean\n   算子 : Horn (1981) 有限差分坡度\n   对偶 : formal/dafny/P019_slope_nonnegative.dfy\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  命题：对于任意 3×3 高程窗口和正网格间距 w，Horn 坡度平方 SlopeSq 非负。\n  此性质对任意高程成立，不仅限于平面表面。\n\n  覆盖：\n    GPB-001 的推广：从平面精确性到任意高程的非负性\n    Horn 坡度算子的数学性质：平方和形式保证非负性\n    网格间距 w > 0 的物理意义\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Analysis.SpecialFunctions.Pow.Real\n\nnamespace VeriGIS.HornSlope\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下)，与 Horn (1981) 原始定义一致。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  网格间距 w > 0，高程值 a..i 为任意实数。\n-/\n\n/-- Horn (1981) 有限差分坡度算子的 x 方向分量 -/\ndef dzdx (a b c d f g h i w : ℝ) : ℝ :=\n  ((c + 2 * f + i) - (a + 2 * d + g)) / (8 * w)\n\n/-- Horn (1981) 有限差分坡度算子的 y 方向分量 -/\ndef dzdy (a b c d f g h i w : ℝ) : ℝ :=\n  ((g + 2 * h + i) - (a + 2 * b + c)) / (8 * w)\n\n/-- Horn 坡度平方：dzdx² + dzdy² -/\ndef slopeSq (a b c d e f g h i w : ℝ) : ℝ :=\n  (dzdx a b c d f g h i w) ^ 2 + (dzdy a b c d f g h i w) ^ 2\n\n/-- 主定理：对于任意高程和正网格间距，Horn 坡度平方非负 -/\ntheorem horn_slope_sq_nonneg\n    (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    0 ≤ slopeSq a b c d e f g h i w := by\n  unfold slopeSq\n  have h1 : 0 ≤ (dzdx a b c d f g h i w) ^ 2 := pow_two_nonneg _\n  have h2 : 0 ≤ (dzdy a b c d f g h i w) ^ 2 := pow_two_nonneg _\n  nlinarith\n\n/-- 更强的形式：坡度平方是 dzdx 和 dzdy 的平方和 -/\ntheorem slopeSq_eq_sum_squares\n    (a b c d e f g h i w : ℝ) :\n    slopeSq a b c d e f g h i w =\n      (dzdx a b c d f g h i w) ^ 2 + (dzdy a b c d f g h i w) ^ 2 :=\n  rfl\n\n/-- 当且仅当 dzdx 和 dzdy 同时为零时，坡度平方为零 -/\ntheorem slopeSq_eq_zero_iff\n    (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    slopeSq a b c d e f g h i w = 0 ↔\n      dzdx a b c d f g h i w = 0 ∧ dzdy a b c d f g h i w = 0 := by\n  constructor\n  · intro h\n    unfold slopeSq at h\n    have hdx : dzdx a b c d f g h i w = 0 := by\n      have h1 : (dzdx a b c d f g h i w) ^ 2 = 0 := by\n        nlinarith\n      exact pow_eq_zero h1\n    have hdy : dzdy a b c d f g h i w = 0 := by\n      have h2 : (dzdy a b c d f g h i w) ^ 2 = 0 := by\n        nlinarith\n      exact pow_eq_zero h2\n    exact ⟨hdx, hdy⟩\n  · intro ⟨hdx, hdy⟩\n    unfold slopeSq\n    rw [hdx, hdy]\n    simp\n\n/-- 网格间距缩放不变性：坡度平方与 w² 成反比 -/\ntheorem slopeSq_scaling\n    (a b c d e f g h i w k : ℝ) (hw : w > 0) (hk : k > 0) :\n    slopeSq a b c d e f g h i (k * w) =\n      (1 / k ^ 2) * slopeSq a b c d e f g h i w := by\n  unfold slopeSq dzdx dzdy\n  field_simp [show k * w ≠ 0 from mul_ne_zero hk.ne' hw.ne']\n  ring\n\n/-- 高程平移不变性：所有高程加同一常数不影响坡度平方 -/\ntheorem slopeSq_translation_invariant\n    (a b c d e f g h i w K : ℝ) (hw : w > 0) :\n    slopeSq (a + K) (b + K) (c + K) (d + K) (e + K) (f + K) (g + K) (h + K) (i + K) w =\n      slopeSq a b c d e f g h i w := by\n  unfold slopeSq dzdx dzdy\n  ring\n\n/-- 平面表面的特殊情况：坡度平方等于解析斜率的平方 -/\ntheorem slopeSq_exact_on_plane\n    (A B C D E F w : ℝ) (hw : w > 0) :\n    let a := A * (-w) + B * (-w) + C * (-w) * (-w) + D * (-w) + E * (-w) + F\n        b := A * 0 + B * (-w) + C * 0 * (-w) + D * 0 + E * (-w) + F\n        c := A * w + B * (-w) + C * w * (-w) + D * w + E * (-w) + F\n        d := A * (-w) + B * 0 + C * (-w) * 0 + D * (-w) + E * 0 + F\n        e := A * 0 + B * 0 + C * 0 * 0 + D * 0 + E * 0 + F\n        f := A * w + B * 0 + C * w * 0 + D * w + E * 0 + F\n        g := A * (-w) + B * w + C * (-w) * w + D * (-w) + E * w + F\n        h := A * 0 + B * w + C * 0 * w + D * 0 + E * w + F\n        i := A * w + B * w + C * w * w + D * w + E * w + F\n    slopeSq a b c d e f g h i w = (A ^ 2 + B ^ 2) := by\n  intro a b c d e f g h i\n  unfold slopeSq dzdx dzdy\n  field_simp [hw.ne']\n  ring\n\nend\n\nend VeriGIS.HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING"
+}

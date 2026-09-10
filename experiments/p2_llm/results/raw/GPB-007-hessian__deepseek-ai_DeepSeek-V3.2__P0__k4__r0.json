@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1736,
+    "completion_tokens": 2168,
+    "total_tokens": 3904,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1736
+  },
+  "api_id": "01a08a86223e8ca940f7f8395cdcbe9c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P003: Zevenbergen-Thorne Hessian exactness on quadratic surfaces\n// Formalization of the statement:\n//   For a quadratic surface z = A x² + B y² + C xy + D x + E y + F\n//   sampled on a 3×3 window with spacing w > 0,\n//   the ZT discrete Hessian recovers (2A, 2B, C) exactly.\n\nmodule P003_curvature {\n  // Quadratic surface definition\n  function quadratic(A: real, B: real, C: real, D: real, E: real, F: real,\n                     x: real, y: real): real\n    reads\n  {\n    A * x * x + B * y * y + C * x * y + D * x + E * y + F\n  }\n\n  // Sample the quadratic surface on a 3×3 grid centered at (0,0)\n  // with spacing w > 0.\n  // Indices: (i,j) where i,j ∈ {-1,0,1}\n  function sample(A: real, B: real, C: real, D: real, E: real, F: real,\n                  w: real, i: int, j: int): real\n    requires w > 0.0\n    requires -1 <= i <= 1 && -1 <= j <= 1\n  {\n    quadratic(A, B, C, D, E, F, real(i) * w, real(j) * w)\n  }\n\n  // Zevenbergen-Thorne discrete Hessian formulas\n  function zt_hxx(A: real, B: real, C: real, D: real, E: real, F: real,\n                  w: real): real\n    requires w > 0.0\n  {\n    // hxx = (z(-1,0) - 2*z(0,0) + z(1,0)) / w²\n    (sample(A, B, C, D, E, F, w, -1, 0) -\n     2.0 * sample(A, B, C, D, E, F, w, 0, 0) +\n     sample(A, B, C, D, E, F, w, 1, 0)) / (w * w)\n  }\n\n  function zt_hyy(A: real, B: real, C: real, D: real, E: real, F: real,\n                  w: real): real\n    requires w > 0.0\n  {\n    // hyy = (z(0,-1) - 2*z(0,0) + z(0,1)) / w²\n    (sample(A, B, C, D, E, F, w, 0, -1) -\n     2.0 * sample(A, B, C, D, E, F, w, 0, 0) +\n     sample(A, B, C, D, E, F, w, 0, 1)) / (w * w)\n  }\n\n  function zt_hxy(A: real, B: real, C: real, D: real, E: real, F: real,\n                  w: real): real\n    requires w > 0.0\n  {\n    // hxy = (z(-1,-1) - z(-1,1) - z(1,-1) + z(1,1)) / (4 w²)\n    (sample(A, B, C, D, E, F, w, -1, -1) -\n     sample(A, B, C, D, E, F, w, -1, 1) -\n     sample(A, B, C, D, E, F, w, 1, -1) +\n     sample(A, B, C, D, E, F, w, 1, 1)) / (4.0 * w * w)\n  }\n\n  // Lemma: ZT Hessian recovers (2A, 2B, C) exactly for any quadratic\n  // and any spacing w > 0.\n  lemma ZT_exact_on_quadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n    requires w > 0.0\n    ensures zt_hxx(A, B, C, D, E, F, w) == 2.0 * A\n    ensures zt_hyy(A, B, C, D, E, F, w) == 2.0 * B\n    ensures zt_hxy(A, B, C, D, E, F, w) == C\n  {\n    // Expand all sample calls and simplify algebraically.\n    // We'll prove each component separately.\n\n    // Helper: value of quadratic at (x,y)\n    calc {\n      quadratic(A, B, C, D, E, F, 0.0, 0.0);\n      ==\n      A * 0.0 * 0.0 + B * 0.0 * 0.0 + C * 0.0 * 0.0 + D * 0.0 + E * 0.0 + F;\n      ==\n      F;\n    }\n\n    // hxx proof\n    calc {\n      zt_hxx(A, B, C, D, E, F, w);\n      == // definition\n      (quadratic(A, B, C, D, E, F, -w, 0.0) -\n       2.0 * quadratic(A, B, C, D, E, F, 0.0, 0.0) +\n       quadratic(A, B, C, D, E, F, w, 0.0)) / (w * w);\n      == // expand each term\n      ((A * w * w + B * 0.0 + C * (-w) * 0.0 + D * (-w) + E * 0.0 + F) -\n       2.0 * F +\n       (A * w * w + B * 0.0 + C * w * 0.0 + D * w + E * 0.0 + F)) / (w * w);\n      == // simplify\n      (A * w * w - D * w + F - 2.0 * F + A * w * w + D * w + F) / (w * w);\n      == // cancel D*w and F terms\n      (2.0 * A * w * w) / (w * w);\n      ==\n      2.0 * A;\n    }\n\n    // hyy proof (symmetric)\n    calc {\n      zt_hyy(A, B, C, D, E, F, w);\n      ==\n      (quadratic(A, B, C, D, E, F, 0.0, -w) -\n       2.0 * quadratic(A, B, C, D, E, F, 0.0, 0.0) +\n       quadratic(A, B, C, D, E, F, 0.0, w)) / (w * w);\n      ==\n      ((A * 0.0 + B * w * w + C * 0.0 * (-w) + D * 0.0 + E * (-w) + F) -\n       2.0 * F +\n       (A * 0.0 + B * w * w + C * 0.0 * w + D * 0.0 + E * w + F)) / (w * w);\n      ==\n      (B * w * w - E * w + F - 2.0 * F + B * w * w + E * w + F) / (w * w);\n      ==\n      (2.0 * B * w * w) / (w * w);\n      ==\n      2.0 * B;\n    }\n\n    // hxy proof\n    calc {\n      zt_hxy(A, B, C, D, E, F, w);\n      ==\n      (quadratic(A, B, C, D, E, F, -w, -w) -\n       quadratic(A, B, C, D, E, F, -w, w) -\n       quadratic(A, B, C, D, E, F, w, -w) +\n       quadratic(A, B, C, D, E, F, w, w)) / (4.0 * w * w);\n      == // expand each term\n      ((A * w * w + B * w * w + C * w * w - D * w - E * w + F) -\n       (A * w * w + B * w * w - C * w * w - D * w + E * w + F) -\n       (A * w * w + B * w * w - C * w * w + D * w - E * w + F) +\n       (A * w * w + B * w * w + C * w * w + D * w + E * w + F)) / (4.0 * w * w);\n      == // group and cancel\n      // A*w² terms: (1 - 1 - 1 + 1) = 0\n      // B*w² terms: (1 - 1 - 1 + 1) = 0\n      // C*w² terms: (1 - (-1) - (-1) + 1) = 4\n      // D*w terms: (-1 - (-1) - 1 + 1) = 0\n      // E*w terms: (-1 - 1 - (-1) + 1) = 0\n      // F terms: (1 - 1 - 1 + 1) = 0\n      (4.0 * C * w * w) / (4.0 * w * w);\n      ==\n      C;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

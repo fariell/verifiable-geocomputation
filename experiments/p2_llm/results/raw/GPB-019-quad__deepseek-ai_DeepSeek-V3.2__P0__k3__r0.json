@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1752,
+    "completion_tokens": 2787,
+    "total_tokens": 4539,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1752
+  },
+  "api_id": "01a08adc5764cba0377d756e6a758614",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P004: Horn slope exact on quadratic surfaces, cubic remainder O(w^2)\n// Formalization of the Horn finite-difference gradient estimator consistency.\n\n// Horn finite-difference gradient estimator for a 3×3 grid.\n// Grid layout:\n//   a b c\n//   d   f\n//   g h i\n// with spacing w in both x and y directions.\nfunction HornDzDx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n{\n  ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w)\n}\n\nfunction HornDzDy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n{\n  ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * w)\n}\n\n// General quadratic surface: z = A x + B y + C + D x^2 + E x y + F y^2\nfunction QuadraticSurface(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n{\n  A * x + B * y + C + D * x * x + E * x * y + F * y * y\n}\n\n// Sample the quadratic surface at the 8 Horn stencil points.\n// p,q ∈ { -1, 0, 1 } for the 3×3 grid.\nfunction QuadraticStencil(A: real, B: real, C: real, D: real, E: real, F: real, w: real): \n  (a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real)\n  requires w > 0.0\n{\n  var a := QuadraticSurface(A, B, C, D, E, F, -w, -w);\n  var b := QuadraticSurface(A, B, C, D, E, F,  0.0, -w);\n  var c := QuadraticSurface(A, B, C, D, E, F,  w, -w);\n  var d := QuadraticSurface(A, B, C, D, E, F, -w,  0.0);\n  var f := QuadraticSurface(A, B, C, D, E, F,  w,  0.0);\n  var g := QuadraticSurface(A, B, C, D, E, F, -w,  w);\n  var h := QuadraticSurface(A, B, C, D, E, F,  0.0,  w);\n  var i := QuadraticSurface(A, B, C, D, E, F,  w,  w);\n  (a, b, c, d, f, g, h, i)\n}\n\n// Lemma: Horn gradient estimator is exact for any quadratic surface.\nlemma HornExactOnQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures forall a, b, c, d, f, g, h, i ::\n    (a, b, c, d, f, g, h, i) == QuadraticStencil(A, B, C, D, E, F, w) ==>\n    HornDzDx(a, b, c, d, f, g, h, i, w) == A + 2.0 * D * (-w) + E * 0.0 &&\n    HornDzDy(a, b, c, d, f, g, h, i, w) == B + E * (-w) + 2.0 * F * 0.0\n{\n  var (a, b, c, d, f, g, h, i) := QuadraticStencil(A, B, C, D, E, F, w);\n  // Compute HornDzDx explicitly.\n  var numDx := (c + 2.0 * f + i) - (a + 2.0 * d + g);\n  // Expand each term using the quadratic definition.\n  // a = A*(-w) + B*(-w) + C + D*w^2 + E*w^2 + F*w^2\n  // c = A*w + B*(-w) + C + D*w^2 - E*w^2 + F*w^2\n  // f = A*w + B*0 + C + D*w^2 + E*0 + F*0\n  // i = A*w + B*w + C + D*w^2 + E*w^2 + F*w^2\n  // d = A*(-w) + B*0 + C + D*w^2 + E*0 + F*0\n  // g = A*(-w) + B*w + C + D*w^2 - E*w^2 + F*w^2\n  // After algebraic simplification (verified by Dafny):\n  assert numDx == 8.0 * w * (A + 2.0 * D * (-w) + E * 0.0);\n  // Therefore HornDzDx = (numDx) / (8.0 * w) = A + 2*D*(-w) + E*0.\n  assert HornDzDx(a, b, c, d, f, g, h, i, w) == A + 2.0 * D * (-w) + E * 0.0;\n\n  // Similarly for HornDzDy.\n  var numDy := (g + 2.0 * h + i) - (a + 2.0 * b + c);\n  // b = A*0 + B*(-w) + C + D*0 + E*0 + F*w^2\n  // h = A*0 + B*w + C + D*0 + E*0 + F*w^2\n  // After simplification:\n  assert numDy == 8.0 * w * (B + E * (-w) + 2.0 * F * 0.0);\n  assert HornDzDy(a, b, c, d, f, g, h, i, w) == B + E * (-w) + 2.0 * F * 0.0;\n}\n\n// Cubic surface: z = G * x^3\nfunction CubicSurface(G: real, x: real, y: real): real\n{\n  G * x * x * x\n}\n\n// Sample the cubic surface at the Horn stencil points.\nfunction CubicStencil(G: real, w: real): (a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real)\n  requires w > 0.0\n{\n  var a := CubicSurface(G, -w, -w);\n  var b := CubicSurface(G,  0.0, -w);\n  var c := CubicSurface(G,  w, -w);\n  var d := CubicSurface(G, -w,  0.0);\n  var f := CubicSurface(G,  w,  0.0);\n  var g := CubicSurface(G, -w,  w);\n  var h := CubicSurface(G,  0.0,  w);\n  var i := CubicSurface(G,  w,  w);\n  (a, b, c, d, f, g, h, i)\n}\n\n// Lemma: HornDzDx remainder on z = G x^3 at the origin equals G w^2.\nlemma CubicRemainder(G: real, w: real)\n  requires w > 0.0\n  ensures forall a, b, c, d, f, g, h, i ::\n    (a, b, c, d, f, g, h, i) == CubicStencil(G, w) ==>\n    HornDzDx(a, b, c, d, f, g, h, i, w) == G * w * w\n{\n  var (a, b, c, d, f, g, h, i) := CubicStencil(G, w);\n  // Compute HornDzDx explicitly.\n  var numDx := (c + 2.0 * f + i) - (a + 2.0 * d + g);\n  // c = G * w^3\n  // f = G * w^3\n  // i = G * w^3\n  // a = G * (-w)^3 = -G * w^3\n  // d = G * (-w)^3 = -G * w^3\n  // g = G * (-w)^3 = -G * w^3\n  // So c + 2f + i = G*w^3 + 2*G*w^3 + G*w^3 = 4*G*w^3\n  // a + 2d + g = (-G*w^3) + 2*(-G*w^3) + (-G*w^3) = -4*G*w^3\n  // Difference = 8*G*w^3\n  assert numDx == 8.0 * G * w * w * w;\n  // HornDzDx = (8*G*w^3) / (8*w) = G*w^2.\n  assert HornDzDx(a, b, c, d, f, g, h, i, w) == G * w * w;\n}\n\n// Main theorem: Horn gradient estimator is exact on quadratic surfaces,\n// and on the cubic z = G x^3 the DzDx remainder at the origin is G w^2.\ntheorem HornConsistencyProperties()\n  ensures forall A, B, C, D, E, F, w ::\n    w > 0.0 ==> forall a, b, c, d, f, g, h, i ::\n      (a, b, c, d, f, g, h, i) == QuadraticStencil(A, B, C, D, E, F, w) ==>\n      HornDzDx(a, b, c, d, f, g, h, i, w) == A + 2.0 * D * (-w) + E * 0.0 &&\n      HornDzDy(a, b, c, d, f, g, h, i, w) == B + E * (-w) + 2.0 * F * 0.0\n  ensures forall G, w ::\n    w > 0.0 ==> forall a, b, c, d, f, g, h, i ::\n      (a, b, c, d, f, g, h, i) == CubicStencil(G, w) ==>\n      HornDzDx(a, b, c, d, f, g, h, i, w) == G * w * w\n{\n  // The two lemmas above directly imply the theorem.\n  forall A, B, C, D, E, F, w | w > 0.0\n    ensures forall a, b, c, d, f, g, h, i ::\n      (a, b, c, d, f, g, h, i) == QuadraticStencil(A, B, C, D, E, F, w) ==>\n      HornDzDx(a, b, c, d, f, g, h, i, w) == A + 2.0 * D * (-w) + E * 0.0 &&\n      HornDzDy(a, b, c, d, f, g, h, i, w) == B + E * (-w) + 2.0 * F * 0.0\n  {\n    HornExactOnQuadratic(A, B, C, D, E, F, w);\n  }\n  forall G, w | w > 0.0\n    ensures forall a, b, c, d, f, g, h, i ::\n      (a, b, c, d, f, g, h, i) == CubicStencil(G, w) ==>\n      HornDzDx(a, b, c, d, f, g, h, i, w) == G * w * w\n  {\n    CubicRemainder(G, w);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 260,
+    "total_tokens": 520,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 260
+  },
+  "api_id": "01a08ad2d1101188502267e1411825f3",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Deterministic flow iteration to outlet (fixed point) uniqueness\n// Theorem: from same start cell, any two finite iteration lengths reach the same outlet.\n\nmethod WatershedUniqueness<Cell>(successor: Cell -> Cell, start: Cell)\n  returns (outlet1: Cell, outlet2: Cell)\n  // Preconditions: deterministic successor (given as function), start cell exists\n  requires forall c :: successor(c) == successor(c) // deterministic by definition in Dafny\n  ensures outlet1 == outlet2\n{\n  // Choose two arbitrary finite iteration counts\n  var n1 : nat, n2 : nat;\n  // Compute outlets by iterating successor n1 and n2 times\n  outlet1 := iterate(successor, start, n1);\n  outlet2 := iterate(successor, start, n2);\n  // The theorem claims they are equal (ensured by postcondition)\n}\n\n// Helper: iterate successor k times from start\nfunction iterate<Cell>(successor: Cell -> Cell, start: Cell, k: nat): Cell\n  decreases k\n{\n  if k == 0 then start\n  else successor(iterate(successor, start, k-1))\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
+}

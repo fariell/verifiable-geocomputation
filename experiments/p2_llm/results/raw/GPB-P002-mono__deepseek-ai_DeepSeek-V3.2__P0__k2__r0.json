@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "eab8c2a3213e460c9bd707579906280dd615923ea4a9033bad5daa0dc361f804",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1604,
+    "completion_tokens": 324,
+    "total_tokens": 1928,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1604
+  },
+  "api_id": "01a08afe3855f76d8298f0d2601767bf",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of 1D Wang-Liu pit-filling with left outlet\n// Property: After a full scan the profile is nondecreasing.\n\nmethod FillProfile(orig: array<int>) returns (Fill: array<int>)\n  requires orig != null && orig.Length > 0\n  ensures Fill != null && Fill.Length == orig.Length\n  ensures forall i :: 0 <= i < Fill.Length - 1 ==> Fill[i] <= Fill[i + 1]\n{\n  Fill := new int[orig.Length];\n  if (orig.Length == 0) {\n    return;\n  }\n  Fill[0] := orig[0];\n  var i: int := 1;\n  while i < orig.Length\n    invariant 1 <= i <= orig.Length\n    invariant forall j :: 0 <= j < i ==> Fill[j] == if j == 0 then orig[0] else max(orig[j], Fill[j - 1])\n    invariant forall j :: 0 <= j < i - 1 ==> Fill[j] <= Fill[j + 1]\n  {\n    Fill[i] := if orig[i] > Fill[i - 1] then orig[i] else Fill[i - 1];\n    // Show monotonicity for the new pair (i-1, i)\n    assert Fill[i - 1] <= Fill[i];\n    i := i + 1;\n  }\n}\n\nfunction max(a: int, b: int): int\n{\n  if a > b then a else b\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

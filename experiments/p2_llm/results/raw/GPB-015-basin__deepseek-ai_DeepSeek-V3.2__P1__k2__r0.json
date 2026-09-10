@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 1482,
+    "total_tokens": 4573,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3091
+  },
+  "api_id": "01a08ace72c82864282fad1f29bc30fe",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 确定性 D8 流向下的流域唯一性\n//  覆盖 : GPB-015 (Layer A: 终止轨道出口唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  Phase 1 实验显示，在确定性 D8 流向规则下，从同一单元格出发的流径\n//  总是收敛到同一个出口点（即使流径长度不同）。这一观察需要形式化证明，\n//  以确立流域划分算法的代数基础。\n//\n//  本文件证明：对于给定的有限网格和确定性后继函数，若从同一单元格出发\n//  的轨道在有限步内终止于固定点（出口），则无论终止步数如何，出口相同。\n//  证明使用有界迭代 stepN，避免依赖 SMT 递归搜索固定点。\n//\n//  注：本证明不要求全局无环（允许存在平坦区域循环），但要求所考虑的\n//  两条轨道均在有限步内终止于固定点。\n// ===========================================================================\n\nmodule WatershedUniqueness {\n  import opened D8Kernel  // 从现有模块导入 D8 流向核\n\n  // ------------------------------------------------------------------\n  // 网格坐标与后继函数\n  // ------------------------------------------------------------------\n  type Cell = (int, int)\n  predicate ValidCell(c: Cell, rows: int, cols: int) {\n    0 <= c.0 < rows && 0 <= c.1 < cols\n  }\n\n  // 确定性后继函数：给定高程网格和单元格，返回流向的相邻单元格或自身（无流）\n  function Succ(h: array2<real>, c: Cell): Cell\n    requires h.Length0 > 0 && h.Length1 > 0\n    requires ValidCell(c, h.Length0, h.Length1)\n    reads h\n  {\n    D8Kernel.D8Flow(h, c)\n  }\n\n  // ------------------------------------------------------------------\n  // 有界迭代：应用后继函数 n 次\n  // ------------------------------------------------------------------\n  function stepN(h: array2<real>, start: Cell, n: nat): Cell\n    requires h.Length0 > 0 && h.Length1 > 0\n    requires ValidCell(start, h.Length0, h.Length1)\n    reads h\n    decreases n\n  {\n    if n == 0 then start\n    else Succ(h, stepN(h, start, n-1))\n  }\n\n  // ------------------------------------------------------------------\n  // 固定点谓词：单元格是自身后继（即出口）\n  // ------------------------------------------------------------------\n  predicate isFixedPoint(h: array2<real>, c: Cell)\n    requires h.Length0 > 0 && h.Length1 > 0\n    requires ValidCell(c, h.Length0, h.Length1)\n    reads h\n  {\n    Succ(h, c) == c\n  }\n\n  // ------------------------------------------------------------------\n  // 主要定理：若从同一单元格出发的两条有界轨道均终止于固定点，\n  // 则它们的出口相同。\n  // ------------------------------------------------------------------\n  theorem WatershedUniqueness(\n    h: array2<real>,\n    start: Cell,\n    m: nat, n: nat\n  )\n    requires h.Length0 > 0 && h.Length1 > 0\n    requires ValidCell(start, h.Length0, h.Length1)\n    requires isFixedPoint(h, stepN(h, start, m))\n    requires isFixedPoint(h, stepN(h, start, n))\n    ensures stepN(h, start, m) == stepN(h, start, n)\n    reads h\n  {\n    // 关键引理：一旦到达固定点，继续迭代不会改变结果\n    lemma FixedPointStable(k: nat, p: Cell)\n      requires isFixedPoint(h, p)\n      ensures stepN(h, p, k) == p\n      decreases k\n    {\n      if k == 0 {\n        // base case\n      } else {\n        FixedPointStable(k-1, p);\n        assert stepN(h, p, k) == Succ(h, stepN(h, p, k-1));\n        assert stepN(h, p, k-1) == p;\n        assert Succ(h, p) == p;\n      }\n    }\n\n    // 情况分析：假设 m ≤ n（对称性）\n    if m <= n {\n      // 将 n 步分解为 m 步 + (n-m) 步\n      var outlet_m := stepN(h, start, m);\n      FixedPointStable(n - m, outlet_m);\n      assert stepN(h, start, n) == stepN(h, outlet_m, n - m);\n      assert stepN(h, outlet_m, n - m) == outlet_m;\n    } else {\n      // 对称情况：n ≤ m\n      var outlet_n := stepN(h, start, n);\n      FixedPointStable(m - n, outlet_n);\n      assert stepN(h, start, m) == stepN(h, outlet_n, m - n);\n      assert stepN(h, outlet_n, m - n) == outlet_n;\n    }\n  }\n\n  // ------------------------------------------------------------------\n  // 辅助引理：终止性蕴含固定点（用于连接外部终止性证明）\n  // ------------------------------------------------------------------\n  lemma TerminationImpliesFixedPoint(\n    h: array2<real>,\n    start: Cell,\n    bound: nat\n  )\n    requires h.Length0 > 0 && h.Length1 > 0\n    requires ValidCell(start, h.Length0, h.Length1)\n    requires forall k: nat :: k < bound ==> stepN(h, start, k) != stepN(h, start, k+1)\n    requires stepN(h, start, bound) == stepN(h, start, bound+1)\n    ensures isFixedPoint(h, stepN(h, start, bound))\n    reads h\n  {\n    var outlet := stepN(h, start, bound);\n    assert Succ(h, outlet) == stepN(h, start, bound+1);\n    assert stepN(h, start, bound+1) == outlet;\n  }\n}\n\n// ===========================================================================\n// 附注\n// ---------------------------------------------------------------------------\n// 本证明仅依赖 D8 后继函数的确定性，不要求网格无坑或无平坦区域。\n// 定理前提要求两条轨道均终止于固定点，这可由外部条件（如网格边界、无循环）\n// 或更大范围的终止性引理保证。\n//\n// 对于存在循环的非终止情况（如 P-006b 的 4 环），本定理的前提不满足，\n// 因此不产生结论——这与 Layer B 的预期行为一致。\n// ===========================================================================\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1711,
+    "completion_tokens": 594,
+    "total_tokens": 2305,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1711
+  },
+  "api_id": "01a08a736aee28ac8c85222083059108",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Real.Basic\n\n-- A 3x3 window of elevations represented as a 3×3 matrix of real numbers\nabbrev Window := Matrix (Fin 3) (Fin 3) ℝ\n\n-- Get the center cell elevation\ndef center (w : Window) : ℝ := w 1 1\n\n-- Get the four orthogonal neighbors: north, south, east, west\ndef north (w : Window) : ℝ := w 0 1\ndef south (w : Window) : ℝ := w 2 1\ndef east (w : Window) : ℝ := w 1 2\ndef west (w : Window) : ℝ := w 1 0\n\n-- Discrete local maximum condition: center ≥ each orthogonal neighbor\ndef is_local_max (w : Window) : Prop :=\n  center w ≥ north w ∧ center w ≥ south w ∧ center w ≥ east w ∧ center w ≥ west w\n\n-- Discrete Laplacian at the center: Δ = (north + south + east + west) - 4 * center\ndef laplacian (w : Window) : ℝ :=\n  north w + south w + east w + west w - 4 * center w\n\n-- The theorem: if the center is a discrete local maximum, then the Laplacian ≤ 0\ntheorem local_max_implies_nonpositive_laplacian (w : Window) (h : is_local_max w) :\n    laplacian w ≤ 0 := by\n  -- Unpack the local maximum hypothesis\n  rcases h with ⟨h_north, h_south, h_east, h_west⟩\n  -- Expand the definition of laplacian\n  unfold laplacian\n  -- Rewrite each neighbor inequality as `center w - neighbor ≥ 0`\n  have hn : center w - north w ≥ 0 := by linarith\n  have hs : center w - south w ≥ 0 := by linarith\n  have he : center w - east w ≥ 0 := by linarith\n  have hw : center w - west w ≥ 0 := by linarith\n  -- Combine the four nonnegative differences\n  have h_sum : (center w - north w) + (center w - south w) + (center w - east w) + (center w - west w) ≥ 0 := by\n    nlinarith\n  -- Simplify the sum\n  have h_simplified : 4 * center w - (north w + south w + east w + west w) ≥ 0 := by\n    ring_nf at h_sum ⊢\n    exact h_sum\n  -- Rearrange to get the desired inequality\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

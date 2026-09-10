@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 800,
+    "total_tokens": 1068,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 268
+  },
+  "api_id": "01a08a9393356a6a42ae6786af3d5b80",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Quadratic surface: z = A x^2 + B y^2 + C xy + Dx + Ey + F\n// Sampled on a 3x3 window with spacing w > 0\n// Zevenbergen-Thorne discrete Hessian recovers (2A, 2B, C) exactly.\n\nmethod QuadraticSurfaceHessian(A: real, B: real, C: real, D: real, E: real, F: real, w: real) \n  returns (Hxx: real, Hyy: real, Hxy: real)\n  requires w > 0.0\n  ensures Hxx == 2.0 * A\n  ensures Hyy == 2.0 * B\n  ensures Hxy == C\n{\n  // Define the 3x3 grid points\n  var x0 := -w;\n  var x1 := 0.0;\n  var x2 := w;\n  var y0 := -w;\n  var y1 := 0.0;\n  var y2 := w;\n\n  // Compute z values at each grid point\n  var z00 := A * x0 * x0 + B * y0 * y0 + C * x0 * y0 + D * x0 + E * y0 + F;\n  var z01 := A * x0 * x0 + B * y1 * y1 + C * x0 * y1 + D * x0 + E * y1 + F;\n  var z02 := A * x0 * x0 + B * y2 * y2 + C * x0 * y2 + D * x0 + E * y2 + F;\n  var z10 := A * x1 * x1 + B * y0 * y0 + C * x1 * y0 + D * x1 + E * y0 + F;\n  var z11 := A * x1 * x1 + B * y1 * y1 + C * x1 * y1 + D * x1 + E * y1 + F;\n  var z12 := A * x1 * x1 + B * y2 * y2 + C * x1 * y2 + D * x1 + E * y2 + F;\n  var z20 := A * x2 * x2 + B * y0 * y0 + C * x2 * y0 + D * x2 + E * y0 + F;\n  var z21 := A * x2 * x2 + B * y1 * y1 + C * x2 * y1 + D * x2 + E * y1 + F;\n  var z22 := A * x2 * x2 + B * y2 * y2 + C * x2 * y2 + D * x2 + E * y2 + F;\n\n  // Zevenbergen-Thorne discrete Hessian formulas\n  // Hxx = (z20 - 2*z10 + z00) / (w^2)\n  // Hyy = (z02 - 2*z01 + z00) / (w^2)\n  // Hxy = (z22 - z20 - z02 + z00) / (4*w^2)\n  var w2 := w * w;\n  Hxx := (z20 - 2.0 * z10 + z00) / w2;\n  Hyy := (z02 - 2.0 * z01 + z00) / w2;\n  Hxy := (z22 - z20 - z02 + z00) / (4.0 * w2);\n\n  // The verification will automatically prove the postconditions\n  // because the expressions simplify exactly to 2A, 2B, C.\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

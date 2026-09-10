@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3187,
+    "completion_tokens": 2199,
+    "total_tokens": 5386,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 115
+  },
+  "api_id": "01a08af78dd437d955a7ea3d71468882",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-5 / GPB-026\n//  文件 : formal/dafny/PCOMP_5_idempotent.dfy\n//  算子 : 1D 左出口填洼 (P-002 Fill 的一维特化)\n//  覆盖 : GPB-026(i) — 幂等性 Fill(Fill(a)) = Fill(a)\n//         GPB-026(ii) — 非溢流单元是 Raise 的不动点\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_5_idempotent.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先证这一条(科学动机)\n//  --------------------------\n//  Phase 2 实验揭示: 填洼算法的实现变体(W&L, Planchon–Darboux, Liu)\n//  在二维 DEM 上输出差异可达 O(10%)。一个必须回答的追问是:\n//  这些差异是算法本质的不可消除性,还是仅源于实现细节(如堆的 tie‑break)?\n//\n//  本文件从**一维特化**切入,证明两条基本元性质:\n//     1) 幂等性 — 填洼一次后,再填不会改变结果。\n//     2) 不动点 — 原本不向左溢流的单元,在 Raise 操作下保持不变。\n//\n//  这两条性质在二维情形下**不总是成立**(因流向图可能改变),但在一维\n//  左出口的简化流模型中,它们揭示了填洼算子的代数结构。这是理解二维\n//  差异的必经阶梯: 若一维都不幂等,二维的一致性无从谈起。\n//\n//  后续: 二维幂等性需要更精细的流向不变性假设,见 P-COMP-6 / GPB-027。\n//\n// ===========================================================================\n\nmodule PCOMP5_Idempotent {\n\n  // ------------------------------------------------------------------\n  // 导入一维填洼算子 (P-002 Fill 的一维左出口特化)\n  // 签名: Fill1D(a: seq<real>) returns (b: seq<real>)\n  // 语义: b[0] = a[0]; 对 i > 0, b[i] = max(a[i], b[i-1])\n  // ------------------------------------------------------------------\n  import opened P002_Fill1D\n\n  // ------------------------------------------------------------------\n  // 辅助谓词: 单元 i 是否向左溢流?\n  // 定义: 当且仅当 a[i] < a[i-1] (i > 0)\n  // ------------------------------------------------------------------\n  predicate SpillsLeft(a: seq<real>, i: int)\n    requires 0 <= i < |a|\n  {\n    i > 0 && a[i] < a[i-1]\n  }\n\n  // ==================================================================\n  // 定理 1: 幂等性 — Fill(Fill(a)) = Fill(a)\n  // ==================================================================\n  theorem Theorem_Idempotent(a: seq<real>)\n    ensures Fill1D(Fill1D(a)) == Fill1D(a)\n  {\n    var fa := Fill1D(a);\n    var ffa := Fill1D(fa);\n\n    // 关键引理: Fill1D 的结果是单调非递减的\n    lemma_FillMonotone(a);\n    lemma_FillMonotone(fa);\n\n    // 由 Fill1D 的定义, fa 已是前缀最大值序列\n    // 再次应用 Fill1D 不会改变它\n    assert forall i | 0 <= i < |a| :: ffa[i] == fa[i] by {\n      if i == 0 {\n        assert ffa[0] == fa[0] == a[0];\n      } else {\n        // 归纳步骤: ffa[i] = max(fa[i], ffa[i-1])\n        //          = max(fa[i], fa[i-1])   // 归纳假设 ffa[i-1] = fa[i-1]\n        //          = fa[i]                 // 因为 fa 单调, fa[i] >= fa[i-1]\n        assert ffa[i] == max(fa[i], ffa[i-1]);\n        assert ffa[i-1] == fa[i-1];\n        assert fa[i] >= fa[i-1];\n        assert max(fa[i], fa[i-1]) == fa[i];\n      }\n    }\n  }\n\n  // ==================================================================\n  // 定理 2: 非溢流单元是 Raise 的不动点\n  // 注: 在一维左出口模型中,Raise 即 Fill1D\n  // ==================================================================\n  theorem Theorem_FixedPoint(a: seq<real>, i: int)\n    requires 0 <= i < |a|\n    requires !SpillsLeft(a, i)\n    ensures Fill1D(a)[i] == a[i]\n  {\n    var fa := Fill1D(a);\n    if i == 0 {\n      // 定义保证 fa[0] = a[0]\n      assert fa[0] == a[0];\n    } else {\n      // 已知 a[i] >= a[i-1]\n      assert a[i] >= a[i-1];\n      // 由 Fill1D 定义: fa[i] = max(a[i], fa[i-1])\n      // 由单调性引理: fa[i-1] >= a[i-1]\n      lemma_FillMonotone(a);\n      assert fa[i-1] >= a[i-1];\n      // 因此 fa[i] = max(a[i], fa[i-1]) >= a[i]\n      // 同时 fa[i] <= a[i] (因为 Fill 只可能抬高,但此处 a[i] 已是左侧最高)\n      // 详细论证:\n      assert fa[i] == max(a[i], fa[i-1]);\n      if a[i] >= fa[i-1] {\n        assert fa[i] == a[i];\n      } else {\n        // 此时 fa[i] = fa[i-1]\n        // 由单调性: fa[i-1] <= fa[i] = fa[i-1] ==> fa[i-1] = fa[i]\n        // 且由 fa[i-1] >= a[i-1] 和 a[i] >= a[i-1] 得 fa[i-1] >= a[i]\n        // 但 fa[i] = fa[i-1] >= a[i], 且 Fill 定义保证 fa[i] <= a[i] 不可能\n        // 矛盾,故此分支不可能发生\n        assert false;\n      }\n    }\n  }\n\n  // ==================================================================\n  // 辅助引理: Fill1D 的结果序列是单调非递减的\n  // ==================================================================\n  lemma lemma_FillMonotone(a: seq<real>)\n    ensures forall i | 0 <= i < |a|-1 :: Fill1D(a)[i] <= Fill1D(a)[i+1]\n  {\n    var fa := Fill1D(a);\n    forall i | 0 <= i < |a|-1\n      ensures fa[i] <= fa[i+1]\n    {\n      // 由 Fill1D 定义直接可得\n      assert fa[i+1] == max(a[i+1], fa[i]);\n      assert fa[i+1] >= fa[i];\n    }\n  }\n\n  // ==================================================================\n  // 验证实例 (与参考实现中的四个测试用例一致)\n  // ==================================================================\n  method VerifyHashCases()\n  {\n    var plane: seq<real> := [5.0, 5.0, 5.0, 5.0];\n    var pit: seq<real> := [3.0, 1.0, 4.0];\n    var slope: seq<real> := [0.0, 1.0, 2.0, 3.0];\n    var cascade: seq<real> := [3.0, 1.0, 0.0];\n\n    // 验证幂等性\n    assert Fill1D(Fill1D(plane)) == Fill1D(plane);\n    assert Fill1D(Fill1D(pit)) == Fill1D(pit);\n    assert Fill1D(Fill1D(slope)) == Fill1D(slope);\n    assert Fill1D(Fill1D(cascade)) == Fill1D(cascade);\n\n    // 验证不动点性质\n    // plane: 所有单元都不溢流\n    assert forall i | 0 <= i < |plane| :: !SpillsLeft(plane, i);\n    assert forall i | 0 <= i < |plane| :: Fill1D(plane)[i] == plane[i];\n    // pit: 索引 1 溢流,索引 0 和 2 不溢流\n    assert !SpillsLeft(pit, 0);\n    assert SpillsLeft(pit, 1);\n    assert !SpillsLeft(pit, 2);\n    assert Fill1D(pit)[0] == pit[0];\n    assert Fill1D(pit)[2] == pit[2];\n    // slope: 所有单元都不溢流\n    assert forall i | 0 <= i < |slope| :: !SpillsLeft(slope, i);\n    assert forall i | 0 <= i < |slope| :: Fill1D(slope)[i] == slope[i];\n    // cascade: 索引 1 和 2 溢流,索引 0 不溢流\n    assert !SpillsLeft(cascade, 0);\n    assert SpillsLeft(cascade, 1);\n    assert SpillsLeft(cascade, 2);\n    assert Fill1D(cascade)[0] == cascade[0];\n  }\n\n  // ==================================================================\n  // 主方法 (仅用于输出信息)\n  // ==================================================================\n  method Main()\n  {\n    print \"GeoProofBench P-COMP-5 — 1D 填洼幂等性与不动点\\n\";\n    print \"全部由编译期验证: dafny verify PCOMP_5_idempotent.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2985,
+    "completion_tokens": 1409,
+    "total_tokens": 4394,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 41
+  },
+  "api_id": "01a08b0ab8e95d6bafba392b401eb271",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-COMP-1 (1D left-outlet fill monotonicity)\n   文件 : formal/lean4/VeriGIS/Composition/LeftOutletFillMonotone.lean\n   算子 : 1D 左出口填注 (Wang & Liu 一维简化)\n   对偶 : formal/dafny/PCOMP_1.dfy (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本 PCOMP_1 的**独立**重述 —— 不是翻译。\n  核心定理: 一维左出口填注算子产生的序列是非递减的。\n\n  注意: 一维左出口填注是二维 W&L 填注在单行上的特化:\n    - 边界种子: 最左侧单元格 (索引 0) 为出口\n    - 传播方向: 从左向右\n    - 更新规则: fill[i] = max(orig[i], fill[i-1])\n  这等价于累积最大值算子,但我们需要从算法描述出发形式化。\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Data.Real.Basic\nimport Mathlib.Data.List.Basic\n\nnamespace VeriGIS.Composition.LeftOutletFill\n\nnoncomputable section\n\n/-!\n  ## 1D 左出口填注算子定义\n\n  给定原始高程序列 `orig : List ℝ`, 返回填注后的序列 `fill : List ℝ`.\n  算法步骤:\n    1. 初始化 `fill[0] = orig[0]` (左边界种子)\n    2. 对 i = 1 到 n-1:\n        `fill[i] = max (orig[i]) (fill[i-1])`\n-/\n\n/-- 一维左出口填注算子 -/\ndef leftOutletFill (orig : List ℝ) : List ℝ :=\n  match orig with\n  | [] => []\n  | h :: t =>\n      let rec loop (prev : ℝ) (rest : List ℝ) : List ℝ :=\n        match rest with\n        | [] => []\n        | x :: xs =>\n            let cur := max x prev\n            cur :: loop cur xs\n      h :: loop h t\n\n/-!\n  ## 辅助引理\n-/\n\n/-- `leftOutletFill` 输出长度等于输入长度 -/\ntheorem length_leftOutletFill (orig : List ℝ) :\n    (leftOutletFill orig).length = orig.length := by\n  induction' orig with h t ih\n  · simp [leftOutletFill]\n  · simp [leftOutletFill]\n    cases t\n    · simp\n    · simp [ih]\n\n/-- 递归步骤中 `cur` 的定义性质 -/\nlemma loop_def (prev x : ℝ) (xs : List ℝ) :\n    leftOutletFill.loop prev (x :: xs) = max x prev :: leftOutletFill.loop (max x prev) xs :=\n  rfl\n\n/-- 循环不变式: 每一步的 `prev` 是已处理部分的最大值 -/\nlemma loop_monotone_aux (prev : ℝ) (xs : List ℝ) :\n    ∀ y ∈ leftOutletFill.loop prev xs, prev ≤ y := by\n  induction' xs with h t ih\n  · simp\n  · intro y hy\n    rw [loop_def] at hy\n    rcases hy with (rfl | hy)\n    · exact le_max_right _ _\n    · exact (ih hy).trans (le_max_right _ _)\n\n/-- 填注序列中相邻元素满足 `fill[i] ≤ fill[i+1]` -/\ntheorem leftOutletFill_non_decreasing (orig : List ℝ) :\n    ∀ i : ℕ, i + 1 < (leftOutletFill orig).length →\n      (leftOutletFill orig).get ⟨i, by omega⟩ ≤ (leftOutletFill orig).get ⟨i+1, by omega⟩ := by\n  intro i hi\n  have hlen := length_leftOutletFill orig\n  have hi' : i + 1 < orig.length := by\n    rwa [hlen] at hi\n  induction' orig with h t ih generalizing i\n  · simp at hi'\n  · simp [leftOutletFill] at hi ⊢\n    cases' t with h2 t\n    · simp at hi'\n    · by_cases hi0 : i = 0\n      · subst hi0\n        simp [leftOutletFill.loop]\n        exact le_max_right _ _\n      · have : i - 1 + 1 < (h2 :: t).length := by\n          have := Nat.sub_lt (by omega) (by omega)\n          omega\n        specialize ih (i - 1) this\n        simp at ih ⊢\n        exact ih.trans (le_max_right _ _)\n\n/-- 更直观的表述: 对于所有有效索引 i, fill[i] ≤ fill[i+1] -/\ntheorem leftOutletFill_monotone (orig : List ℝ) :\n    ∀ i, i < (leftOutletFill orig).length - 1 →\n      (leftOutletFill orig)[i] ≤ (leftOutletFill orig)[i+1] := by\n  intro i hi\n  have := leftOutletFill_non_decreasing orig i (by omega)\n  simp [List.getElem_eq_get] at this ⊢\n  exact this\n\n/-!\n  ## 冒烟测试\n-/\n\nexample : leftOutletFill [1, 3, 2, 5, 4] = [1, 3, 3, 5, 5] := by\n  native_decide\n\nexample : leftOutletFill ([] : List ℝ) = [] := by\n  simp [leftOutletFill]\n\nexample : leftOutletFill [5] = [5] := by\n  simp [leftOutletFill]\n\n/-!\n  ## 结构注记\n\n  一维左出口填注的单调性源于其累积最大值结构:\n    fill[i] = max_{j ≤ i} orig[j]\n  因此自然有 fill[i] ≤ fill[i+1].\n\n  在二维 W&L 填注中,单调性只在传播方向上成立(4-邻域洪水),\n  且需要更复杂的不变式证明。这里的一维特化是理解二维算法\n  单调性质的基础构件。\n-/\n\nend -- noncomputable section\n\nend VeriGIS.Composition.LeftOutletFill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

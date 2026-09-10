@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1579,
+    "completion_tokens": 652,
+    "total_tokens": 2231,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1579
+  },
+  "api_id": "01a08b062f6dca5dced1c7aec8b95f4f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Stream.Defs\nimport Mathlib.Data.Stream.Init\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Basic\n\nnamespace Fill1D\n\n/-- A 1D digital elevation model as a function from indices to elevations. -/\nabbrev DEM (α : Type) [Preorder α] := ℕ → α\n\n/-- The left-outlet fill operator for 1D DEMs.\n    For each position i, the fill value is the maximum of the original elevation at i\n    and the fill value at the previous position (i-1).\n    At position 0, the fill value is just the original elevation. -/\ndef fill {α : Type} [Preorder α] (a : DEM α) : DEM α :=\n  λ i => Nat.recOn i (a 0) (λ n prev => max (a (n + 1)) prev)\n\n/-- The property that a sequence is nondecreasing: for all i, s i ≤ s (i+1). -/\ndef Nondecreasing {α : Type} [Preorder α] (s : DEM α) : Prop :=\n  ∀ i, s i ≤ s (i + 1)\n\n/-- Theorem: The 1D left-outlet fill operator yields a nondecreasing sequence. -/\ntheorem fill_nondecreasing {α : Type} [Preorder α] (a : DEM α) : Nondecreasing (fill a) := by\n  intro i\n  unfold fill\n  induction' i with k IH\n  · -- Base case: i = 0\n    simp [fill]\n    have h : a 0 ≤ max (a 1) (a 0) := le_max_right (a 1) (a 0)\n    exact h\n  · -- Inductive step: i = k + 1\n    simp [fill]\n    have h1 : max (a (k + 1)) (Nat.rec (a 0) (λ n prev => max (a (n + 1)) prev) k) ≤ \n              max (a (k + 2)) (max (a (k + 1)) (Nat.rec (a 0) (λ n prev => max (a (n + 1)) prev) k)) :=\n      le_max_right (a (k + 2)) (max (a (k + 1)) (Nat.rec (a 0) (λ n prev => max (a (n + 1)) prev) k))\n    have h2 : max (a (k + 1)) (Nat.rec (a 0) (λ n prev => max (a (n + 1)) prev) k) = \n              Nat.rec (a 0) (λ n prev => max (a (n + 1)) prev) (k + 1) := by\n      simp [fill]\n    rw [h2] at h1\n    exact h1\n\nend Fill1D\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

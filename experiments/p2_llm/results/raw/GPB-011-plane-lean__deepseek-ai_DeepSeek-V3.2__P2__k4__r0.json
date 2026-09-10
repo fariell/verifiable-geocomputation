@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 250,
+    "completion_tokens": 818,
+    "total_tokens": 1068,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 250
+  },
+  "api_id": "01a08ac5cda10d755483bdfb7296c775",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Fin.VecNotation\n\nopen Matrix\n\n-- Represent a planar DEM: z = A x + B y + C\nstructure DEM : Type where\n  A : ℝ\n  B : ℝ\n  C : ℝ\n\n-- Grid coordinates (integer indices)\nabbrev GridCoord := ℤ × ℤ\n\n-- D8 flow direction as an integer from 1 to 8 (or 0 for no flow)\nabbrev Direction := Fin 9\n\n-- Slope must be positive: A > 0 or B > 0 (or both)\ndef DEM.positive_slope (d : DEM) : Prop := d.A > 0 ∨ d.B > 0\n\n-- Elevation at a grid cell for a given DEM\ndef elevation (d : DEM) (x y : ℤ) : ℝ := d.A * (x : ℝ) + d.B * (y : ℝ) + d.C\n\n-- D8 flow direction calculation (simplified interior case)\n-- For interior cells, we compare elevation with the 8 neighbors.\n-- Here we define a deterministic rule: choose the steepest descent among the 8 neighbors.\n-- If multiple have same steepest descent, pick the smallest direction index.\n-- If no descent, direction is 0.\ndef direction_to_neighbor (dx dy : ℤ) : Option Direction :=\n  match dx, dy with\n  | (-1), (-1) => some ⟨1, by decide⟩\n  | 0, (-1)    => some ⟨2, by decide⟩\n  | 1, (-1)    => some ⟨3, by decide⟩\n  | (-1), 0    => some ⟨4, by decide⟩\n  | 1, 0       => some ⟨5, by decide⟩\n  | (-1), 1    => some ⟨6, by decide⟩\n  | 0, 1       => some ⟨7, by decide⟩\n  | 1, 1       => some ⟨8, by decide⟩\n  | _, _       => none\n\n-- List of all 8 neighbor offsets\ndef neighbor_offsets : List (ℤ × ℤ) :=\n  [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]\n\n-- Compute D8 flow direction for a cell at (x, y) given DEM d\ndef flow_direction (d : DEM) (x y : ℤ) : Direction :=\n  let neighbors := neighbor_offsets.filterMap fun (dx, dy) =>\n        direction_to_neighbor dx dy |>.map fun dir =>\n          (dir, elevation d (x + dx) (y + dy))\n  let current := elevation d x y\n  let descending := neighbors.filter fun (_, h) => h < current\n  if h : descending.isEmpty then\n    ⟨0, by decide⟩\n  else\n    let (dir, _) := descending.minBy (fun (_, h) => h) (by simp [descending, h])\n    dir\n\n-- The main theorem: translating C does not change flow direction for interior cells\n-- when slope is positive.\ntheorem direction_independent_of_C (d : DEM) (hpos : d.positive_slope) (x y : ℤ) :\n    ∀ C' : ℝ, flow_direction d x y = flow_direction { d with C := C' } x y := by\n  intro C'\n  unfold flow_direction\n  simp [elevation]\n  congr\n  ext ⟨dx, dy⟩\n  simp [elevation]\n  ring\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

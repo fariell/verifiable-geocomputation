@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1686,
+    "completion_tokens": 1754,
+    "total_tokens": 3440,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1686
+  },
+  "api_id": "01a08a976278507b37fb8ebaf4bc4c73",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of D8 steepest-descent routing pit condition\n// Property: If no neighbor is strictly lower than the center, flow direction is NoFlow.\n\nmodule P005_D8 {\n  // Grid dimensions\n  const N: int\n  const M: int\n  ghost predicate ValidGrid() reads {\n    N > 0 && M > 0\n  }\n\n  // Height values\n  type Height = real\n  ghost predicate ValidHeight(h: Height) reads {\n    true  // No constraints on height values for this property\n  }\n\n  // Flow directions\n  datatype FlowDir = \n    | East\n    | Southeast\n    | South\n    | Southwest\n    | West\n    | Northwest\n    | North\n    | Northeast\n    | NoFlow\n\n  // Neighbor offsets for D8\n  const neighborOffsets: seq<(int, int)> := [\n    (1, 0),   // E\n    (1, 1),   // SE\n    (0, 1),   // S\n    (-1, 1),  // SW\n    (-1, 0),  // W\n    (-1, -1), // NW\n    (0, -1),  // N\n    (1, -1)   // NE\n  ]\n\n  // Grid access with bounds checking\n  function GridAt(grid: seq<seq<Height>>, r: int, c: int): Height\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n    requires |grid| == N && forall i :: 0 <= i < N ==> |grid[i]| == M\n    reads grid\n  {\n    grid[r][c]\n  }\n\n  // D8 steepest-descent computation\n  function D8FlowAt(grid: seq<seq<Height>>, r: int, c: int): FlowDir\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n    requires |grid| == N && forall i :: 0 <= i < N ==> |grid[i]| == M\n    reads grid\n    decreases *\n  {\n    var center := GridAt(grid, r, c);\n    var bestDir: FlowDir := NoFlow;\n    var bestPower: real := 0.0;\n\n    var i := 0;\n    while i < |neighborOffsets|\n      invariant 0 <= i <= |neighborOffsets|\n      invariant bestDir == NoFlow ==> bestPower == 0.0\n      decreases |neighborOffsets| - i\n    {\n      var (dr, dc) := neighborOffsets[i];\n      var nr := r + dr;\n      var nc := c + dc;\n      \n      if 0 <= nr < N && 0 <= nc < M {\n        var neighbor := GridAt(grid, nr, nc);\n        var drop := center - neighbor;\n        if drop > 0.0 {\n          var dist2 := if dr != 0 && dc != 0 then 2.0 else 1.0;\n          var power := drop * drop / dist2;\n          if bestDir == NoFlow || power > bestPower {\n            bestDir := match (dr, dc)\n              case (1, 0) => East\n              case (1, 1) => Southeast\n              case (0, 1) => South\n              case (-1, 1) => Southwest\n              case (-1, 0) => West\n              case (-1, -1) => Northwest\n              case (0, -1) => North\n              case (1, -1) => Northeast\n            };\n            bestPower := power;\n          }\n        }\n      }\n      i := i + 1;\n    }\n    \n    bestDir\n  }\n\n  // Main theorem: pit condition implies NoFlow\n  theorem PitImpliesNoFlow(grid: seq<seq<Height>>, r: int, c: int)\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n    requires |grid| == N && forall i :: 0 <= i < N ==> |grid[i]| == M\n    requires forall dr, dc :: \n      (dr, dc) in neighborOffsets && 0 <= r + dr < N && 0 <= c + dc < M ==>\n        GridAt(grid, r + dr, c + dc) >= GridAt(grid, r, c)\n    ensures D8FlowAt(grid, r, c) == NoFlow\n    reads grid\n  {\n    // Proof by contradiction: assume D8FlowAt returns a direction\n    if D8FlowAt(grid, r, c) != NoFlow {\n      // Then there exists a neighbor with positive drop\n      var center := GridAt(grid, r, c);\n      \n      // Unroll the loop in D8FlowAt to find the contradiction\n      var i: int := 0;\n      while i < |neighborOffsets|\n        invariant 0 <= i <= |neighborOffsets|\n        invariant forall j :: 0 <= j < i ==> \n          let (dr, dc) := neighborOffsets[j] in\n          !(0 <= r + dr < N && 0 <= c + dc < M && \n            GridAt(grid, r + dr, c + dc) < center)\n        decreases |neighborOffsets| - i\n      {\n        var (dr, dc) := neighborOffsets[i];\n        var nr := r + dr;\n        var nc := c + dc;\n        \n        if 0 <= nr < N && 0 <= nc < M {\n          var neighbor := GridAt(grid, nr, nc);\n          // By precondition, neighbor >= center\n          assert neighbor >= center;\n          // Therefore drop <= 0, so this neighbor cannot be selected\n        }\n        i := i + 1;\n      }\n      \n      // After checking all neighbors, no neighbor has positive drop\n      // Therefore D8FlowAt must return NoFlow\n      assert false; // Contradiction with our assumption\n    }\n  }\n\n  // Example witness: a 3x3 pit\n  method ExamplePit()\n    returns (grid: seq<seq<Height>>, r: int, c: int)\n    ensures ValidGrid()\n    ensures 0 <= r < N && 0 <= c < M\n    ensures |grid| == N && forall i :: 0 <= i < N ==> |grid[i]| == M\n    ensures forall dr, dc :: \n      (dr, dc) in neighborOffsets && 0 <= r + dr < N && 0 <= c + dc < M ==>\n        GridAt(grid, r + dr, c + dc) >= GridAt(grid, r, c)\n    ensures D8FlowAt(grid, r, c) == NoFlow\n  {\n    // Create a 3x3 grid with pit in center\n    grid := [\n      [1.0, 1.0, 1.0],\n      [1.0, 0.0, 1.0],\n      [1.0, 1.0, 1.0]\n    ];\n    N := 3;\n    M := 3;\n    r := 1;\n    c := 1;\n    \n    // Verify the pit condition\n    calc {\n      GridAt(grid, 0, 0) >= GridAt(grid, 1, 1);\n      GridAt(grid, 0, 1) >= GridAt(grid, 1, 1);\n      GridAt(grid, 0, 2) >= GridAt(grid, 1, 1);\n      GridAt(grid, 1, 0) >= GridAt(grid, 1, 1);\n      GridAt(grid, 1, 2) >= GridAt(grid, 1, 1);\n      GridAt(grid, 2, 0) >= GridAt(grid, 1, 1);\n      GridAt(grid, 2, 1) >= GridAt(grid, 1, 1);\n      GridAt(grid, 2, 2) >= GridAt(grid, 1, 1);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

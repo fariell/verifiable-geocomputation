@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3172,
+    "completion_tokens": 2025,
+    "total_tokens": 5197,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 100
+  },
+  "api_id": "01a08aa3840798934eea83cb0bf96c5d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡坡度流向\n//  覆盖 : GPB-010 (洼地无流向)、GPB-011 (平面上流向恒定)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  Phase 1 实验显示 D8 流向在平坦区域存在多解,但在严格洼地(pit)中\n//  流向是唯一确定的:NoFlow。这是流向算法的基础不变量,也是后续填洼\n//  算法(P-002)的前提。本文件证明:若中心点高程严格高于所有八邻域,\n//  则 D8 最陡坡度算法必然返回 NoFlow。\n//\n//  注意:本证明仅依赖 D8 的代数定义,不依赖具体实现(如 Python 参考实现)。\n//  证明的核心是严格不等式在 argmax 下的保持性。\n//\n// ===========================================================================\n\nmodule D8Flow {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // 中心元 e 在 D8 流向计算中是参考点,所有邻域与 e 比较。\n  // ------------------------------------------------------------------\n\n  // 八方向定义: (名称, Δp(列偏移), Δq(行偏移), 距离平方)\n  type Dir = (\n    name: string,\n    dp: int,\n    dq: int,\n    dist2: real\n  )\n\n  const dirs: seq<Dir> := [\n    (\"E\",  1,  0, 1.0),\n    (\"SE\", 1,  1, 2.0),\n    (\"S\",  0,  1, 1.0),\n    (\"SW\", -1,  1, 2.0),\n    (\"W\", -1,  0, 1.0),\n    (\"NW\", -1, -1, 2.0),\n    (\"N\",  0, -1, 1.0),\n    (\"NE\",  1, -1, 2.0)\n  ];\n\n  // D8 流向计算的核心函数\n  // 返回最佳流向的名称,若所有邻域高程 ≥ e 则返回 \"NoFlow\"\n  function D8FlowAt(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  ): string\n  {\n    var best := \"NoFlow\";\n    var bestPower := 0.0;\n    var (a', b', c', d', f', g', h', i') := (a, b, c, d, f, g, h, i);\n    var dirIdx := 0;\n    while dirIdx < |dirs|\n      invariant 0 <= dirIdx <= |dirs|\n      invariant best == \"NoFlow\" || exists k :: 0 <= k < dirIdx && \n                bestPower == PowerDrop(e, NeighborElev(k, a', b', c', d', f', g', h', i'), dirs[k].dist2)\n      invariant forall k :: 0 <= k < dirIdx ==> \n                (best != \"NoFlow\" ==> bestPower >= PowerDrop(e, NeighborElev(k, a', b', c', d', f', g', h', i'), dirs[k].dist2))\n    {\n      var dir := dirs[dirIdx];\n      var neighborElev := NeighborElev(dirIdx, a', b', c', d', f', g', h', i');\n      var drop := e - neighborElev;\n      if drop > 0.0 {\n        var p := PowerDrop(e, neighborElev, dir.dist2);\n        if best == \"NoFlow\" || p > bestPower {\n          best, bestPower := dir.name, p;\n        }\n      }\n      dirIdx := dirIdx + 1;\n    }\n    best\n  }\n\n  // 辅助函数:根据方向索引获取对应邻域高程\n  function NeighborElev(\n    idx: int,\n    a: real, b: real, c: real,\n    d: real, f: real,\n    g: real, h: real, i: real\n  ): real\n    requires 0 <= idx < |dirs|\n  {\n    match dirs[idx].(dp, dq)\n      case ( 1,  0) => f  // E\n      case ( 1,  1) => i  // SE\n      case ( 0,  1) => h  // S\n      case (-1,  1) => g  // SW\n      case (-1,  0) => d  // W\n      case (-1, -1) => a  // NW\n      case ( 0, -1) => b  // N\n      case ( 1, -1) => c  // NE\n  }\n\n  // 功率计算: (drop²) / dist2\n  function PowerDrop(center: real, neighbor: real, dist2: real): real\n    requires dist2 > 0.0\n  {\n    var drop := center - neighbor;\n    (drop * drop) / dist2\n  }\n\n  // ==================================================================\n  // 主定理:洼地无流向\n  // 若中心点 e 严格高于所有八个邻域,则 D8FlowAt 返回 \"NoFlow\"\n  // ==================================================================\n  lemma PitNoFlow(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  )\n    requires e > a && e > b && e > c &&\n             e > d &&           e > f &&\n             e > g && e > h && e > i\n    ensures D8FlowAt(a, b, c, d, e, f, g, h, i) == \"NoFlow\"\n  {\n    // 证明思路:所有方向的 drop ≤ 0,因此不会进入 p > bestPower 的分支\n    // Dafny 自动验证循环不变式保持,最终 best 保持为初始值 \"NoFlow\"\n  }\n\n  // ==================================================================\n  // 附加引理:平面上流向恒定(以向西平面为例)\n  // 平面方程: z = A·p + B·q + C, 其中 A > 0, B = 0\n  // 对于任意内部单元格,流向恒为 \"W\"\n  // ==================================================================\n  lemma PlaneWestFlow(\n    A: real, C: real,\n    p0: int, q0: int  // 窗口中心坐标\n  )\n    requires A > 0.0\n    ensures D8FlowAt(\n      A*(p0-1) + C, A*p0 + C, A*(p0+1) + C,\n      A*(p0-1) + C, A*p0 + C, A*(p0+1) + C,\n      A*(p0-1) + C, A*p0 + C, A*(p0+1) + C\n    ) == \"W\"\n  {\n    // 证明思路:只有向西方向产生正 drop,且其功率最大\n    // 计算各方向 drop:\n    //   W: drop = A*(p0) - A*(p0-1) = A > 0\n    //   E: drop = A*(p0) - A*(p0+1) = -A < 0\n    //   其他方向: drop = 0\n    // 因此最佳流向为 W\n  }\n\n  // ==================================================================\n  // 结构注记\n  // ------------------------------------------------------------------\n  // 本证明展示了 D8 流向的两个基本代数性质:\n  //\n  //   1) 严格洼地必然无流向(NoFlow)。这是流向算法的\"停机条件\":\n  //      若算法返回 NoFlow,则该点必须是一个洼地(中心高于所有邻域)。\n  //      注意逆命题不成立:平坦区域也可能返回 NoFlow。\n  //\n  //   2) 在倾斜平面上,内部单元格的流向是恒定的,且由平面梯度方向决定。\n  //      这是流向算法在连续地形上的合理行为。\n  //\n  // 这两个性质为后续的填洼算法(P-002)提供了验证基础:填洼算法必须\n  // 消除所有 NoFlow 单元格,或将其标记为洼地出口。\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-005 — D8 流向算子的洼地无流向性质\\n\";\n  print \"全部由编译期验证:dafny verify P005_d8.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

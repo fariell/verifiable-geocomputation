@@ -1,8 +1,9 @@
 {
   "task_id": "GPB-001-flat",
   "expected_verdict": "PASS",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
   "name_overlap": [
     "FlatSlopeZero",
     "SlopeSq"
@@ -56,6 +57,6 @@
   },
   "trivial_assume": false,
   "drift_suspect": false,
-  "fidelity_label": "VERIFY_SKIPPED",
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
   "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
 }

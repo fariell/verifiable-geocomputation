@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1701,
+    "completion_tokens": 1170,
+    "total_tokens": 2871,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1701
+  },
+  "api_id": "01a08aef734c03c84867feebd8e3c896",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P-COMP-5: Idempotence of 1D left-outlet pit filling\n// Formalization of: Fill(Fill(a)) = Fill(a)\n// and: Cells that already do not spill to the left are fixed points of Raise.\n\nmodule PCOMP5 {\n  // 1D left-outlet pit filling (prefix max)\n  function Fill(a: seq<int>): seq<int>\n    ensures |Fill(a)| == |a|\n    ensures forall i :: 0 <= i < |a| ==> Fill(a)[i] >= a[i]\n    ensures forall i :: 0 <= i < |a| ==> (i > 0 ==> Fill(a)[i] >= Fill(a)[i-1])\n    ensures forall i :: 0 <= i < |a| ==> (i == 0 || Fill(a)[i-1] >= a[i] ==> Fill(a)[i] == a[i])\n  {\n    if |a| == 0 then []\n    else FillAux(a, 0, a[0])\n  }\n\n  // Helper: Fill from index i with current maximum cur\n  function FillAux(a: seq<int>, i: int, cur: int): seq<int>\n    requires 0 <= i <= |a|\n    ensures |FillAux(a, i, cur)| == |a|\n    ensures forall j :: 0 <= j < i ==> FillAux(a, i, cur)[j] == Fill(a)[j]\n    ensures forall j :: i <= j < |a| ==> FillAux(a, i, cur)[j] >= a[j]\n    ensures forall j :: i <= j < |a| ==> FillAux(a, i, cur)[j] >= cur\n    ensures forall j :: i <= j < |a| ==> (j > i ==> FillAux(a, i, cur)[j] >= FillAux(a, i, cur)[j-1])\n    decreases |a| - i\n  {\n    if i == |a| then []\n    else\n      let newCur = if a[i] > cur then a[i] else cur in\n      [newCur] + FillAux(a, i+1, newCur)\n  }\n\n  // Lemma: Fill is idempotent\n  lemma Idempotent(a: seq<int>)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    // Key property: Fill is monotone and already satisfies prefix-max property\n    // We prove by induction on index i that Fill(Fill(a))[i] == Fill(a)[i]\n    if |a| > 0 {\n      var i: int := 0;\n      var cur1: int := a[0];\n      var cur2: int := Fill(a)[0];\n      while i < |a|\n        invariant 0 <= i <= |a|\n        invariant cur1 == (if i > 0 then Fill(a)[i-1] else a[0])\n        invariant cur2 == (if i > 0 then Fill(Fill(a))[i-1] else Fill(a)[0])\n        invariant forall j :: 0 <= j < i ==> Fill(Fill(a))[j] == Fill(a)[j]\n        decreases |a| - i\n      {\n        // Fill(a)[i] = max(a[i], cur1)\n        // Fill(Fill(a))[i] = max(Fill(a)[i], cur2)\n        // But by invariant, for j < i, Fill(Fill(a))[j] == Fill(a)[j]\n        // So cur2 == Fill(Fill(a))[i-1] == Fill(a)[i-1] == cur1\n        // Therefore max(Fill(a)[i], cur2) = max(Fill(a)[i], cur1)\n        // Since Fill(a)[i] >= cur1, this equals Fill(a)[i]\n        i := i + 1;\n        if i < |a| {\n          cur1 := if a[i] > cur1 then a[i] else cur1;\n          cur2 := if Fill(a)[i] > cur2 then Fill(a)[i] else cur2;\n        }\n      }\n    }\n  }\n\n  // Definition: a cell does not spill to the left if its height is >= all previous cells\n  predicate NoSpillLeft(a: seq<int>, i: int)\n    requires 0 <= i < |a|\n  {\n    forall j :: 0 <= j < i ==> a[i] >= a[j]\n  }\n\n  // Lemma: Cells that do not spill to the left are fixed points of Raise (i.e., Fill)\n  lemma NoSpillFixedPoint(a: seq<int>, i: int)\n    requires 0 <= i < |a|\n    requires NoSpillLeft(a, i)\n    ensures Fill(a)[i] == a[i]\n  {\n    // By definition of Fill, Fill(a)[i] = max(a[i], Fill(a)[i-1])\n    // We show that a[i] >= Fill(a)[i-1]\n    if i > 0 {\n      // Fill(a)[i-1] is the maximum of a[0..i-1]\n      // Since a[i] >= all a[j] for j < i, a[i] >= max(a[0..i-1]) = Fill(a)[i-1]\n      // Therefore max(a[i], Fill(a)[i-1]) = a[i]\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

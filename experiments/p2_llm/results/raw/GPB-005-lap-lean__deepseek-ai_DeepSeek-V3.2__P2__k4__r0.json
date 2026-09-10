@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 416,
+    "total_tokens": 659,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08a7be594e1fe613d7e0bbc3fd486",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib\n\n-- We'll model a 3×3 grid of elevations as a function from ℤ × ℤ to ℝ.\n-- The discrete Laplacian here is the sum of the four orthogonal neighbors minus 4 times the center.\n-- The theorem: if the center is a local maximum among its four orthogonal neighbors,\n-- then the discrete Laplacian ≤ 0.\n\ntheorem local_max_implies_nonpositive_laplacian\n    (f : ℤ × ℤ → ℝ) (x y : ℤ)\n    (h_max : f (x, y) ≥ f (x + 1, y))\n    (h_max2 : f (x, y) ≥ f (x - 1, y))\n    (h_max3 : f (x, y) ≥ f (x, y + 1))\n    (h_max4 : f (x, y) ≥ f (x, y - 1)) :\n    let neighbors_sum := f (x + 1, y) + f (x - 1, y) + f (x, y + 1) + f (x, y - 1)\n    let laplacian := neighbors_sum - 4 * f (x, y)\n    in laplacian ≤ 0 := by\n  intro neighbors_sum laplacian\n  have h1 : f (x + 1, y) ≤ f (x, y) := h_max\n  have h2 : f (x - 1, y) ≤ f (x, y) := h_max2\n  have h3 : f (x, y + 1) ≤ f (x, y) := h_max3\n  have h4 : f (x, y - 1) ≤ f (x, y) := h_max4\n  have h_sum : neighbors_sum ≤ 4 * f (x, y) := by\n    linarith\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

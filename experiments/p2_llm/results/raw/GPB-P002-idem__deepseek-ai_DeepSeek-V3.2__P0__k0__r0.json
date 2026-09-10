@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1701,
+    "completion_tokens": 998,
+    "total_tokens": 2699,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1701
+  },
+  "api_id": "01a08aed8e36b7d609c33b8b2a5dfc83",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0 · Zero-shot auto-formalization: Pit filling idempotence and fixed points\n// Target: dafny\n// Natural-language specification:\n//   (i)  Pit filling is idempotent on the 1D left-outlet specialization: Fill(Fill(a)) = Fill(a).\n//   (ii) Cells that already do not spill to the left are fixed points of Raise.\n\nmodule PCOMP5 {\n  // 1D left-outlet fill: cumulative maximum from left to right.\n  function Fill1D(a: seq<int>): seq<int>\n    ensures |Fill1D(a)| == |a|\n    ensures forall i :: 0 <= i < |a| ==> Fill1D(a)[i] == cumulativeMax(a, i)\n  {\n    if |a| == 0 then []\n    else Fill1DHelper(a, 0, [])\n  }\n\n  // Helper: compute cumulative maximum recursively.\n  function Fill1DHelper(a: seq<int>, idx: int, prefix: seq<int>): seq<int>\n    requires 0 <= idx <= |a|\n    requires |prefix| == idx\n    requires forall j :: 0 <= j < idx ==> prefix[j] == cumulativeMax(a, j)\n    ensures |Fill1DHelper(a, idx, prefix)| == |a|\n    ensures forall i :: 0 <= i < |a| ==> Fill1DHelper(a, idx, prefix)[i] == cumulativeMax(a, i)\n    decreases |a| - idx\n  {\n    if idx == |a| then prefix\n    else\n      var newMax := if idx == 0 then a[0] else max(prefix[idx-1], a[idx]);\n      Fill1DHelper(a, idx+1, prefix + [newMax])\n  }\n\n  // Cumulative maximum up to index i (inclusive).\n  function cumulativeMax(a: seq<int>, i: int): int\n    requires 0 <= i < |a|\n  {\n    if i == 0 then a[0]\n    else max(cumulativeMax(a, i-1), a[i])\n  }\n\n  // Lemma: Fill1D is idempotent.\n  lemma FillIdempotent(a: seq<int>)\n    ensures Fill1D(Fill1D(a)) == Fill1D(a)\n  {\n    // Key property: cumulativeMax of a non-decreasing sequence is the sequence itself.\n    var fa := Fill1D(a);\n    // Show fa is non-decreasing.\n    forall i | 1 <= i < |fa|\n      ensures fa[i-1] <= fa[i]\n    {\n      assert cumulativeMax(a, i-1) <= cumulativeMax(a, i);\n    }\n    // Now show cumulativeMax(fa, i) == fa[i].\n    forall i | 0 <= i < |fa|\n      ensures cumulativeMax(fa, i) == fa[i]\n    {\n      if i == 0 {\n        assert cumulativeMax(fa, 0) == fa[0];\n      } else {\n        // Since fa is non-decreasing, the max up to i is just fa[i].\n        assert cumulativeMax(fa, i) == max(cumulativeMax(fa, i-1), fa[i]);\n        assert cumulativeMax(fa, i-1) <= fa[i];\n        assert cumulativeMax(fa, i) == fa[i];\n      }\n    }\n    // By definition of Fill1D, Fill1D(fa) uses cumulativeMax(fa, i) which equals fa[i].\n    // Therefore Fill1D(fa) == fa.\n    assert Fill1D(fa) == fa;\n  }\n\n  // Raise operation: raise a cell to the maximum of itself and its left neighbor.\n  function Raise(a: seq<int>, i: int): int\n    requires 0 <= i < |a|\n  {\n    if i == 0 then a[0]\n    else max(a[i], a[i-1])\n  }\n\n  // Lemma: cells that do not spill to the left are fixed points of Raise.\n  lemma NoSpillLeftFixedPoint(a: seq<int>, i: int)\n    requires 0 <= i < |a|\n    requires i == 0 || a[i] >= a[i-1]   // does not spill left\n    ensures Raise(a, i) == a[i]\n  {\n    // By definition of Raise and the precondition.\n    if i == 0 {\n      assert Raise(a, i) == a[i];\n    } else {\n      assert a[i] >= a[i-1];\n      assert Raise(a, i) == max(a[i], a[i-1]) == a[i];\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

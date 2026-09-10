@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "344ceb916dac07e97c3b52f3a8371609af11c3828fdf4e865cad24e497832500",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 247,
+    "completion_tokens": 318,
+    "total_tokens": 565,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 247
+  },
+  "api_id": "01a08afce668ec41feaba9a1e4a66b80",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Fill(a: array<int>) returns (b: array<int>)\n  requires a.Length > 0\n  ensures b.Length == a.Length\n  ensures forall i :: 0 <= i < b.Length ==> b[i] >= a[i]\n  ensures forall i :: 0 <= i < b.Length ==> (i == 0 || b[i] <= b[i-1])\n{\n  b := new int[a.Length];\n  var i := 0;\n  while i < a.Length\n    invariant 0 <= i <= a.Length\n    invariant forall j :: 0 <= j < i ==> b[j] >= a[j]\n    invariant forall j :: 0 <= j < i ==> (j == 0 || b[j] <= b[j-1])\n  {\n    if i == 0 {\n      b[i] := a[i];\n    } else {\n      b[i] := max(a[i], b[i-1]);\n    }\n    i := i + 1;\n  }\n}\n\nfunction max(x: int, y: int): int\n{\n  if x > y then x else y\n}\n\nmethod Idempotence(a: array<int>)\n  requires a.Length > 0\n{\n  var b := Fill(a);\n  var c := Fill(b);\n  assert b.Length == c.Length;\n  forall i | 0 <= i < b.Length\n    ensures b[i] == c[i]\n  {\n    assert b[i] == c[i];\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
+}

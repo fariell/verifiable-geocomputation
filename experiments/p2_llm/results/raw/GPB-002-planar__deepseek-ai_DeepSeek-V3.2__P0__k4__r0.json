@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 1955,
+    "total_tokens": 3566,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1611
+  },
+  "api_id": "01a08a5fd615fa828b2ed6e4f2da36fe",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference slope operator exactness on a plane\n// Formalization of: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w>0, the Horn finite-difference estimates DzDx and DzDy recover A and B exactly.\n\nmodule HornPlaneExact {\n  // Grid dimensions\n  const N: int\n  const M: int\n  // Grid spacing (positive)\n  const w: real\n  ghost predicate w_pos() ensures w_pos() == (w > 0.0) { w > 0.0 }\n  // Plane parameters\n  const A: real\n  const B: real\n  const C: real\n\n  // Elevation function for the plane\n  function elevation(x: int, y: int): real\n    reads {}\n    ensures elevation(x, y) == A * (x as real) * w + B * (y as real) * w + C\n\n  // Horn finite-difference operators (Horn, 1981)\n  function horn_dzdx(i: int, j: int): real\n    requires 1 <= i < N-1 && 1 <= j < M-1\n    reads {}\n    ensures horn_dzdx(i, j) ==\n      (elevation(i+1, j-1) + 2.0 * elevation(i+1, j) + elevation(i+1, j+1)\n       - elevation(i-1, j-1) - 2.0 * elevation(i-1, j) - elevation(i-1, j+1)) / (8.0 * w)\n\n  function horn_dzdy(i: int, j: int): real\n    requires 1 <= i < N-1 && 1 <= j < M-1\n    reads {}\n    ensures horn_dzdy(i, j) ==\n      (elevation(i-1, j+1) + 2.0 * elevation(i, j+1) + elevation(i+1, j+1)\n       - elevation(i-1, j-1) - 2.0 * elevation(i, j-1) - elevation(i+1, j-1)) / (8.0 * w)\n\n  // Lemma: Horn operator recovers A exactly for interior points\n  lemma horn_dzdx_exact(i: int, j: int)\n    requires w_pos()\n    requires 1 <= i < N-1 && 1 <= j < M-1\n    ensures horn_dzdx(i, j) == A\n  {\n    // Expand elevation calls in horn_dzdx definition\n    calc {\n      horn_dzdx(i, j);\n      == // Definition\n      (elevation(i+1, j-1) + 2.0 * elevation(i+1, j) + elevation(i+1, j+1)\n       - elevation(i-1, j-1) - 2.0 * elevation(i-1, j) - elevation(i-1, j+1)) / (8.0 * w);\n      == // Expand each elevation term using plane formula\n      ( (A * ((i+1) as real) * w + B * ((j-1) as real) * w + C)\n        + 2.0 * (A * ((i+1) as real) * w + B * (j as real) * w + C)\n        + (A * ((i+1) as real) * w + B * ((j+1) as real) * w + C)\n        - (A * ((i-1) as real) * w + B * ((j-1) as real) * w + C)\n        - 2.0 * (A * ((i-1) as real) * w + B * (j as real) * w + C)\n        - (A * ((i-1) as real) * w + B * ((j+1) as real) * w + C) ) / (8.0 * w);\n      == // Distribute and collect terms\n      // A terms:\n      // (i+1) appears in first three lines: coefficient 1 + 2 + 1 = 4\n      // (i-1) appears in last three lines: coefficient -(1 + 2 + 1) = -4\n      // Total A contribution: 4*A*(i+1)*w - 4*A*(i-1)*w = 4*A*w*((i+1)-(i-1)) = 4*A*w*2 = 8*A*w\n      // B terms:\n      // First line: B*(j-1)*w\n      // Second: 2*B*j*w\n      // Third: B*(j+1)*w\n      // Fourth: -B*(j-1)*w\n      // Fifth: -2*B*j*w\n      // Sixth: -B*(j+1)*w\n      // Sum = 0\n      // C terms: C + 2C + C - C - 2C - C = 0\n      (8.0 * A * w) / (8.0 * w);\n      == // Cancel w (w > 0)\n      A;\n    }\n  }\n\n  // Lemma: Horn operator recovers B exactly for interior points\n  lemma horn_dzdy_exact(i: int, j: int)\n    requires w_pos()\n    requires 1 <= i < N-1 && 1 <= j < M-1\n    ensures horn_dzdy(i, j) == B\n  {\n    calc {\n      horn_dzdy(i, j);\n      == // Definition\n      (elevation(i-1, j+1) + 2.0 * elevation(i, j+1) + elevation(i+1, j+1)\n       - elevation(i-1, j-1) - 2.0 * elevation(i, j-1) - elevation(i+1, j-1)) / (8.0 * w);\n      == // Expand each elevation term\n      ( (A * ((i-1) as real) * w + B * ((j+1) as real) * w + C)\n        + 2.0 * (A * (i as real) * w + B * ((j+1) as real) * w + C)\n        + (A * ((i+1) as real) * w + B * ((j+1) as real) * w + C)\n        - (A * ((i-1) as real) * w + B * ((j-1) as real) * w + C)\n        - 2.0 * (A * (i as real) * w + B * ((j-1) as real) * w + C)\n        - (A * ((i+1) as real) * w + B * ((j-1) as real) * w + C) ) / (8.0 * w);\n      == // Collect terms\n      // A terms:\n      // First: A*(i-1)*w\n      // Second: 2*A*i*w\n      // Third: A*(i+1)*w\n      // Fourth: -A*(i-1)*w\n      // Fifth: -2*A*i*w\n      // Sixth: -A*(i+1)*w\n      // Sum = 0\n      // B terms:\n      // (j+1) appears in first three lines: coefficient 1 + 2 + 1 = 4\n      // (j-1) appears in last three lines: coefficient -(1 + 2 + 1) = -4\n      // Total B contribution: 4*B*(j+1)*w - 4*B*(j-1)*w = 4*B*w*((j+1)-(j-1)) = 4*B*w*2 = 8*B*w\n      // C terms: C + 2C + C - C - 2C - C = 0\n      (8.0 * B * w) / (8.0 * w);\n      == // Cancel w\n      B;\n    }\n  }\n\n  // Main theorem: Horn finite-difference estimates recover A and B exactly\n  // for all interior grid points.\n  theorem horn_exact_on_plane()\n    requires w_pos()\n    requires N >= 3 && M >= 3  // Ensure interior exists\n    ensures forall i, j :: 1 <= i < N-1 && 1 <= j < M-1 ==>\n      horn_dzdx(i, j) == A && horn_dzdy(i, j) == B\n  {\n    forall i: int, j: int | 1 <= i < N-1 && 1 <= j < M-1\n      ensures horn_dzdx(i, j) == A && horn_dzdy(i, j) == B\n    {\n      horn_dzdx_exact(i, j);\n      horn_dzdy_exact(i, j);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

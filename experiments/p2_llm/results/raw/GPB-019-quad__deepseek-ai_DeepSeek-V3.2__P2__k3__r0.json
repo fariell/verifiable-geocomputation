@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 266,
+    "completion_tokens": 881,
+    "total_tokens": 1147,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 266
+  },
+  "api_id": "01a08aebf57f4dc8e7042115bde1b579",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope exactness on quadratic surfaces\n// DzDx and DzDy recover true planar gradient coefficients (A,B) identically.\n// On z = G x^3, DzDx remainder at origin equals G w^2 (order O(w^2)).\n\nmethod QuadraticExactness(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w != 0.0\n{\n  // Quadratic surface: z = A x + B y + C\n  // Central differences over a square grid of spacing w\n  var z00 := C;                     // (0,0)\n  var z10 := A * w + B * 0.0 + C;   // (w,0)\n  var z01 := A * 0.0 + B * w + C;   // (0,w)\n  var zm10 := A * (-w) + B * 0.0 + C; // (-w,0)\n  var z0m1 := A * 0.0 + B * (-w) + C; // (0,-w)\n\n  // Horn's finite-difference slope operators\n  DzDx := (z10 - zm10) / (2.0 * w);\n  DzDy := (z01 - z0m1) / (2.0 * w);\n\n  // Exact recovery of coefficients\n  assert DzDx == A by {\n    calc {\n      DzDx;\n      == (z10 - zm10) / (2.0 * w);\n      == ((A * w + C) - (A * (-w) + C)) / (2.0 * w);\n      == (A * w + C + A * w - C) / (2.0 * w);\n      == (2.0 * A * w) / (2.0 * w);\n      == A;\n    }\n  }\n  assert DzDy == B by {\n    calc {\n      DzDy;\n      == (z01 - z0m1) / (2.0 * w);\n      == ((B * w + C) - (B * (-w) + C)) / (2.0 * w);\n      == (B * w + C + B * w - C) / (2.0 * w);\n      == (2.0 * B * w) / (2.0 * w);\n      == B;\n    }\n  }\n}\n\nmethod CubicRemainder(G: real, w: real) \n  returns (remainder: real)\n  requires w != 0.0\n{\n  // Surface: z = G * x^3\n  var z00 := 0.0;           // (0,0)\n  var z10 := G * w * w * w; // (w,0)\n  var zm10 := G * (-w) * (-w) * (-w); // (-w,0) = -G w^3\n\n  // Horn's DzDx operator\n  var DzDx := (z10 - zm10) / (2.0 * w);\n\n  // True derivative at origin is 0 (since d/dx (G x^3) = 3 G x^2, at x=0 gives 0)\n  var trueDerivative := 0.0;\n\n  // Remainder = computed - true\n  remainder := DzDx - trueDerivative;\n\n  // Show remainder equals G w^2\n  assert remainder == G * w * w by {\n    calc {\n      DzDx;\n      == (G * w * w * w - (-G * w * w * w)) / (2.0 * w);\n      == (G * w * w * w + G * w * w * w) / (2.0 * w);\n      == (2.0 * G * w * w * w) / (2.0 * w);\n      == G * w * w;\n    }\n    remainder == DzDx - 0.0;\n    == G * w * w;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

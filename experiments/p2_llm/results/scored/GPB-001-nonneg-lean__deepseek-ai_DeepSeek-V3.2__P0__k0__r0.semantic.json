@@ -1,0 +1,58 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [
+    "dzdx",
+    "dzdy",
+    "slopeSq",
+    "slopeSq_nonneg"
+  ],
+  "n_gen_names": 4,
+  "n_gold_names": 26,
+  "keyword_hits": {
+    "keywords": [
+      "arbitrary",
+      "elevation",
+      "elevations",
+      "finite",
+      "grid",
+      "hold",
+      "horn",
+      "nonnegative",
+      "planar",
+      "positive",
+      "slope-square",
+      "slopesq",
+      "spacing",
+      "surfaces",
+      "window"
+    ],
+    "hit": [
+      "elevation",
+      "elevations",
+      "finite",
+      "grid",
+      "horn",
+      "slopesq",
+      "spacing",
+      "window"
+    ],
+    "miss": [
+      "arbitrary",
+      "hold",
+      "nonnegative",
+      "planar",
+      "positive",
+      "slope-square",
+      "surfaces"
+    ],
+    "hit_ratio": 0.5333
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

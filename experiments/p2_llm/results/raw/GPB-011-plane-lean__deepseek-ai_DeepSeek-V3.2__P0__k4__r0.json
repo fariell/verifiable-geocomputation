@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1697,
+    "completion_tokens": 1537,
+    "total_tokens": 3234,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1697
+  },
+  "api_id": "01a08ab45ee1f89598f95995de3be0d0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Fin.Basic\nimport Mathlib.Data.Matrix.Basic\n\nopen Matrix\n\n/-\n  D8 flow direction on a planar DEM z = A x + B y + C with positive slope.\n  We prove that for interior cells sharing the same (A,B,w), the D8 flow direction\n  is constant, and translating the elevation datum C does not change the direction.\n-/\n\n-- Directions for D8 flow: 8 cardinal and intercardinal directions plus NoFlow\ninductive D8Dir\n  | E | SE | S | SW | W | NW | N | NE | NoFlow\n  deriving DecidableEq, Repr\n\n-- Grid coordinates\nabbrev Row := ℤ\nabbrev Col := ℤ\n\n-- Neighbor offsets for D8\ndef D8_offsets : List (D8Dir × (Col × Row) × ℝ) :=\n  [ (D8Dir.E,  (1, 0), 1.0),\n    (D8Dir.SE, (1, 1), Real.sqrt 2),\n    (D8Dir.S,  (0, 1), 1.0),\n    (D8Dir.SW, (-1, 1), Real.sqrt 2),\n    (D8Dir.W,  (-1, 0), 1.0),\n    (D8Dir.NW, (-1, -1), Real.sqrt 2),\n    (D8Dir.N,  (0, -1), 1.0),\n    (D8Dir.NE, (1, -1), Real.sqrt 2) ]\n\n-- Elevation function for a plane: z = A*x + B*y + C\ndef plane_elevation (A B C : ℝ) (x y : ℤ) : ℝ :=\n  A * (x : ℝ) + B * (y : ℝ) + C\n\n-- D8 flow direction at a cell (x,y) on a plane\ndef D8_on_plane (A B C : ℝ) (x y : ℤ) : D8Dir :=\n  let z0 := plane_elevation A B C x y\n  let candidates := D8_offsets.filterMap fun (dir, (dx, dy), dist) =>\n    let z1 := plane_elevation A B C (x + dx) (y + dy)\n    let drop := z0 - z1\n    if drop > 0 then\n      some (dir, drop / dist)\n    else\n      none\n  match candidates.maximum? (λ a b => a.2 ≤ b.2) with\n  | some (dir, _) => dir\n  | none => D8Dir.NoFlow\n\n-- Positive slope condition: at least one of A,B positive and the other nonnegative\nstructure PositiveSlope where\n  A : ℝ\n  B : ℝ\n  hA : 0 < A ∨ (A = 0 ∧ 0 < B)\n  hB : 0 ≤ B\n\n-- Main theorem: D8 direction is invariant under translation of C\ntheorem D8_plane_constant (ps : PositiveSlope) (C1 C2 : ℝ) (x y : ℤ) :\n    D8_on_plane ps.A ps.B C1 x y = D8_on_plane ps.A ps.B C2 x y := by\n  unfold D8_on_plane\n  have h : ∀ C dx dy, plane_elevation ps.A ps.B C1 (x + dx) (y + dy) - plane_elevation ps.A ps.B C1 x y\n                    = plane_elevation ps.A ps.B C2 (x + dx) (y + dy) - plane_elevation ps.A ps.B C2 x y := by\n    intro C dx dy\n    simp [plane_elevation]\n    ring\n  congr 1\n  ext ⟨dir, dp⟩\n  simp only [Option.mem_def, List.mem_filterMap]\n  constructor\n  · intro ⟨⟨dx, dy, dist⟩, hmem, hdrop⟩\n    refine ⟨⟨dx, dy, dist⟩, hmem, ?_⟩\n    simp [h] at hdrop ⊢\n    exact hdrop\n  · intro ⟨⟨dx, dy, dist⟩, hmem, hdrop⟩\n    refine ⟨⟨dx, dy, dist⟩, hmem, ?_⟩\n    simp [h] at hdrop ⊢\n    exact hdrop\n\n-- Corollary: For interior cells (no boundary effects), direction depends only on A,B,w\n-- Here w is the grid spacing (implicitly 1 in our integer grid)\ntheorem D8_plane_interior_constant (ps : PositiveSlope) (C : ℝ) (x1 y1 x2 y2 : ℤ) :\n    D8_on_plane ps.A ps.B C x1 y1 = D8_on_plane ps.A ps.B C x2 y2 := by\n  calc\n    D8_on_plane ps.A ps.B C x1 y1 = D8_on_plane ps.A ps.B 0 x1 y1 := by\n      symm\n      apply D8_plane_constant ps C 0 x1 y1\n    _ = D8_on_plane ps.A ps.B 0 x2 y2 := by\n      -- The direction depends only on A,B because C=0, and the relative drops are proportional to A*dx + B*dy\n      unfold D8_on_plane\n      congr 1\n      ext ⟨dir, dp⟩\n      simp only [List.mem_filterMap]\n      constructor\n      · intro ⟨⟨dx, dy, dist⟩, hmem, hdrop⟩\n        refine ⟨⟨dx, dy, dist⟩, hmem, ?_⟩\n        simp [plane_elevation] at hdrop ⊢\n        have : ps.A * (dx : ℝ) + ps.B * (dy : ℝ) > 0 := by\n          rcases ps.hA with (hA | ⟨hA0, hBpos⟩)\n          · have := ps.hB\n            nlinarith?  -- A>0, B≥0, dx,dy in {-1,0,1} with at least one nonzero\n          · nlinarith\n        nlinarith\n      · intro ⟨⟨dx, dy, dist⟩, hmem, hdrop⟩\n        refine ⟨⟨dx, dy, dist⟩, hmem, ?_⟩\n        simp [plane_elevation] at hdrop ⊢\n        have : ps.A * (dx : ℝ) + ps.B * (dy : ℝ) > 0 := by\n          rcases ps.hA with (hA | ⟨hA0, hBpos⟩)\n          · have := ps.hB\n            nlinarith?\n          · nlinarith\n        nlinarith\n    _ = D8_on_plane ps.A ps.B C x2 y2 := by\n      apply D8_plane_constant ps 0 C x2 y2\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

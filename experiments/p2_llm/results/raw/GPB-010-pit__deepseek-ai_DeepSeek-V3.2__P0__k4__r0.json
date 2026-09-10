@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1686,
+    "completion_tokens": 1705,
+    "total_tokens": 3391,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1686
+  },
+  "api_id": "01a08a9cc4082abfd855da0fb6fc63c8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of D8 steepest-descent routing pit condition\n// Property: If no neighbor is strictly lower than center, flow direction is NoFlow\n\nmodule P005_D8 {\n  // Grid dimensions and indices\n  type Grid = array2<int>\n  ghost predicate ValidGrid(g: Grid)\n    reads g\n  {\n    g.Length0 > 0 && g.Length1 > 0\n  }\n\n  // Neighbor offsets for D8 (8 directions)\n  type Dir = (\n    E: (dx: 1, dy: 0, dist2: 1),\n    SE: (dx: 1, dy: 1, dist2: 2),\n    S: (dx: 0, dy: 1, dist2: 1),\n    SW: (dx: -1, dy: 1, dist2: 2),\n    W: (dx: -1, dy: 0, dist2: 1),\n    NW: (dx: -1, dy: -1, dist2: 2),\n    N: (dx: 0, dy: -1, dist2: 1),\n    NE: (dx: 1, dy: -1, dist2: 2)\n  )\n\n  // Flow direction result\n  datatype FlowDir = \n    | NoFlow\n    | Flow(dx: int, dy: int)\n\n  // Check if neighbor position is within grid bounds\n  predicate InBounds(g: Grid, r: int, c: int)\n    requires ValidGrid(g)\n  {\n    0 <= r < g.Length0 && 0 <= c < g.Length1\n  }\n\n  // D8 steepest-descent routing at a single cell\n  function D8At(g: Grid, r: int, c: int): FlowDir\n    requires ValidGrid(g)\n    requires InBounds(g, r, c)\n    reads g\n    decreases g.Length0 - r, g.Length1 - c\n  {\n    var center := g[r, c];\n    var bestDir := NoFlow;\n    var bestPower := 0.0;\n\n    // Check all 8 directions\n    var dirs := [\n      Dir.E, Dir.SE, Dir.S, Dir.SW, \n      Dir.W, Dir.NW, Dir.N, Dir.NE\n    ];\n    \n    // Helper to process one direction\n    ghost function ProcessDir(dir: (dx: int, dy: int, dist2: int), \n                             currentBest: FlowDir, \n                             currentPower: real): (best: FlowDir, power: real)\n      decreases dir.dx, dir.dy\n    {\n      var rr := r + dir.dy;\n      var cc := c + dir.dx;\n      if InBounds(g, rr, cc) then\n        var neighbor := g[rr, cc];\n        var drop := center - neighbor;\n        if drop > 0 then\n          var power := (drop as real) * (drop as real) / (dir.dist2 as real);\n          if currentBest == NoFlow || power > currentPower then\n            (Flow(dir.dx, dir.dy), power)\n          else\n            (currentBest, currentPower)\n        else\n          (currentBest, currentPower)\n      else\n        (currentBest, currentPower)\n    }\n    \n    // Process all directions\n    var i := 0;\n    while i < |dirs|\n      invariant 0 <= i <= |dirs|\n      invariant forall k :: 0 <= k < i ==> \n        !(InBounds(g, r + dirs[k].dy, c + dirs[k].dx) && \n          center > g[r + dirs[k].dy, c + dirs[k].dx])\n        ==> bestDir == NoFlow\n      decreases |dirs| - i\n    {\n      var dir := dirs[i];\n      var rr := r + dir.dy;\n      var cc := c + dir.dx;\n      if InBounds(g, rr, cc) && center > g[rr, cc] then\n        // Found a lower neighbor, so flow will be determined\n        // (actual direction computation not needed for this proof)\n        bestDir := Flow(dir.dx, dir.dy);\n        return bestDir;\n      i := i + 1;\n    }\n    \n    // If we get here, no strictly lower neighbor was found\n    NoFlow\n  }\n\n  // Main theorem: If no neighbor is strictly lower, result is NoFlow\n  theorem D8PitCondition(g: Grid, r: int, c: int)\n    requires ValidGrid(g)\n    requires InBounds(g, r, c)\n    requires forall dx, dy :: \n      (dx, dy) in [(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1),(1,-1)] ==>\n      !(InBounds(g, r + dy, c + dx) && g[r, c] > g[r + dy, c + dx])\n    ensures D8At(g, r, c) == NoFlow\n  {\n    // The loop invariant in D8At ensures that if no lower neighbor is found,\n    // the result remains NoFlow. The precondition guarantees no lower neighbor exists.\n    // We prove this by showing the loop invariant holds and the postcondition follows.\n    \n    // Expand the D8At computation\n    var center := g[r, c];\n    var dirs := [\n      Dir.E, Dir.SE, Dir.S, Dir.SW, \n      Dir.W, Dir.NW, Dir.N, Dir.NE\n    ];\n    \n    // Show that for each direction, either out of bounds or not strictly lower\n    assert forall dir :: dir in dirs ==>\n      !(InBounds(g, r + dir.dy, c + dir.dx) && center > g[r + dir.dy, c + dir.dx]);\n    \n    // Therefore, the loop in D8At will complete without finding a lower neighbor\n    // and return NoFlow\n  }\n\n  // Example witness: 3x3 pit with rim height 1 and center height 0\n  method ExamplePit()\n    returns (g: Grid, r: int, c: int)\n    ensures ValidGrid(g)\n    ensures InBounds(g, r, c)\n    ensures D8At(g, r, c) == NoFlow\n  {\n    // Create a 3x3 grid\n    g := new int[3, 3];\n    // Set rim cells to 1\n    for i := 0 to 2\n      invariant forall ii, jj :: 0 <= ii < i && 0 <= jj < 3 ==> g[ii, jj] == 1 || (ii == 1 && jj == 1)\n      decreases 2 - i\n    {\n      for j := 0 to 2\n        invariant forall jj :: 0 <= jj < j ==> g[i, jj] == 1 || (i == 1 && jj == 1)\n        decreases 2 - j\n      {\n        if i != 1 || j != 1 {\n          g[i, j] := 1;\n        }\n      }\n    }\n    // Set center cell to 0\n    g[1, 1] := 0;\n    \n    r := 1;\n    c := 1;\n    \n    // Verify the pit condition\n    assert forall dx, dy :: \n      (dx, dy) in [(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1),(1,-1)] ==>\n      !(InBounds(g, r + dy, c + dx) && g[r, c] > g[r + dy, c + dx]);\n    \n    // Apply the theorem\n    D8PitCondition(g, r, c);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

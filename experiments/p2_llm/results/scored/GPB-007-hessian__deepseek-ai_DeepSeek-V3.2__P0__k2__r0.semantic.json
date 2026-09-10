@@ -1,0 +1,42 @@
+{
+  "task_id": "GPB-007-hessian",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 4,
+  "n_gold_names": 20,
+  "keyword_hits": {
+    "keywords": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "miss": [],
+    "hit_ratio": 1.0
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

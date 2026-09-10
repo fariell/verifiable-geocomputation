@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2985,
+    "completion_tokens": 1778,
+    "total_tokens": 4763,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 2985
+  },
+  "api_id": "01a08b0966f9b3646a45fcf1d9024d6e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-COMP-1 (algebraic half)\n   文件 : formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean\n   算子 : 1D 左出口填洼 (Wang & Liu 简化版)\n   对偶 : formal/dafny/PCOMP_1.dfy (Dafny 4.11)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件形式化 1D 左出口填洼算子的单调性：\n  对于任意输入序列 a，填洼结果 Fill(a) 是非递减序列。\n\n  注意：这是 2D Wang & Liu 填洼在 1D 线性情况下的特化。\n  边界条件：左端为出口（索引 0），水只能向左流。\n  填洼规则：每个单元格的高程被提升到 max(原始高程, 左侧邻居的填洼后高程)。\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Data.Real.Basic\n\nnamespace VeriGIS.Composition.PitFillingThenWatershed\n\nnoncomputable section\n\n/-!\n  ## 1D 左出口填洼算子定义\n\n  输入：实数序列 a : ℕ → ℝ\n  输出：填洼后序列 fill : ℕ → ℝ，满足：\n    fill 0 = a 0\n    fill (i+1) = max (a (i+1)) (fill i)\n\n  这对应于 2D Wang & Liu 填洼在 1D 线性网格上的特例，\n  其中每个单元格只考虑左侧邻居（左出口）。\n-/\n\n/-- 1D 左出口填洼算子 -/\ndef fill1D (a : ℕ → ℝ) : ℕ → ℝ :=\n  Nat.rec (a 0) (fun i fill_i => max (a (i+1)) fill_i)\n\n/-!\n  ## 单调性定理\n\n  定理：对于任意输入序列 a，填洼结果 fill1D a 是非递减序列。\n  即对于所有 i，有 (fill1D a) i ≤ (fill1D a) (i+1)。\n\n  证明思路：\n    1. 基本情况 i=0：由定义 fill1D a 0 = a 0，且 fill1D a 1 = max (a 1) (a 0) ≥ a 0。\n    2. 归纳步骤：假设对于 i 成立，证明对于 i+1 也成立。\n       利用 max 的性质和归纳假设。\n-/\n\ntheorem fill1D_nondecreasing (a : ℕ → ℝ) (i : ℕ) :\n    fill1D a i ≤ fill1D a (i+1) := by\n  induction' i with k IH\n  · -- 基本情况 i = 0\n    unfold fill1D\n    simp [Nat.rec]\n    exact le_max_right (a 1) (a 0)\n  · -- 归纳步骤 i = k+1\n    unfold fill1D at *\n    simp [Nat.rec] at IH ⊢\n    -- 此时需要证明：max (a (k+1)) (fill1D a k) ≤ max (a (k+2)) (max (a (k+1)) (fill1D a k))\n    have h1 : fill1D a k ≤ max (a (k+1)) (fill1D a k) := le_max_right _ _\n    have h2 : a (k+1) ≤ max (a (k+1)) (fill1D a k) := le_max_left _ _\n    -- 由归纳假设 IH: fill1D a k ≤ max (a (k+1)) (fill1D a k)\n    -- 且 max (a (k+1)) (fill1D a k) ≤ max (a (k+2)) (max (a (k+1)) (fill1D a k))\n    exact le_max_of_le_right (by\n      -- 需要证明：max (a (k+1)) (fill1D a k) ≤ max (a (k+2)) (max (a (k+1)) (fill1D a k))\n      refine le_max_right _ _)\n\n-- 更简洁的证明版本，利用 `le_max_right` 直接得到\ntheorem fill1D_nondecreasing' (a : ℕ → ℝ) (i : ℕ) :\n    fill1D a i ≤ fill1D a (i+1) := by\n  unfold fill1D\n  induction' i with k IH\n  · simp [Nat.rec]\n    exact le_max_right (a 1) (a 0)\n  · simp [Nat.rec]\n    exact le_max_right (a (k+2)) (max (a (k+1)) (Nat.rec (a 0) (fun i fill_i => max (a (i+1)) fill_i) k))\n\n/-!\n  ## 冒烟测试：验证算子在具体输入上的行为\n-/\n\n-- 测试1：常数序列\nexample : fill1D (fun _ => 5) = (fun _ => 5) := by\n  ext i\n  induction' i with k IH\n  · rfl\n  · unfold fill1D at *\n    simp [Nat.rec, IH]\n\n-- 测试2：递增序列\nexample (i : ℕ) : fill1D (fun n => (n : ℝ)) i = (i : ℝ) := by\n  induction' i with k IH\n  · rfl\n  · unfold fill1D\n    simp [Nat.rec, IH]\n    have : (k : ℝ) ≤ (k+1 : ℝ) := by simp\n    simp [max_eq_left this]\n\n-- 测试3：递减序列（填洼后变为常数）\nexample : fill1D (fun n => 10 - (n : ℝ)) 0 = 10 := rfl\nexample : fill1D (fun n => 10 - (n : ℝ)) 1 = 10 := by\n  unfold fill1D\n  simp [Nat.rec]\nexample : fill1D (fun n => 10 - (n : ℝ)) 2 = 10 := by\n  unfold fill1D\n  simp [Nat.rec]\n\n/-!\n  ## 与 2D Wang & Liu 填洼的关系\n\n  1D 左出口填洼是 2D 填洼在以下配置下的特例：\n    - 网格：1×n 的单行网格\n    - 出口：最左侧单元格 (0,0)\n    - 邻居关系：只考虑左侧邻居（4-连通中的左邻居）\n\n  2D Wang & Liu 填洼的规则：\n    fill(r,c) = max(orig(r,c), min_{n∈N4(r,c)} fill(n))\n  在 1D 左出口情况下简化为：\n    fill(i) = max(orig(i), fill(i-1))  对于 i>0\n    fill(0) = orig(0)\n\n  这正是我们定义的 `fill1D`。\n-/\n\n/-- 1D 填洼保持边界值不变 -/\ntheorem fill1D_boundary (a : ℕ → ℝ) : fill1D a 0 = a 0 := rfl\n\n/-- 1D 填洼是原始高程的下界 -/\ntheorem fill1D_ge_original (a : ℕ → ℝ) (i : ℕ) : a i ≤ fill1D a i := by\n  induction' i with k IH\n  · rfl\n  · unfold fill1D\n    simp [Nat.rec]\n    exact le_max_left _ _\n\n/-- 1D 填洼的递推关系 -/\ntheorem fill1D_rec (a : ℕ → ℝ) (i : ℕ) :\n    fill1D a (i+1) = max (a (i+1)) (fill1D a i) := rfl\n\nend -- noncomputable section\n\nend VeriGIS.Composition.PitFillingThenWatershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

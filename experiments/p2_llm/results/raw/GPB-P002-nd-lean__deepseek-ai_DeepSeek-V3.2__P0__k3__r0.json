@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1579,
+    "completion_tokens": 519,
+    "total_tokens": 2098,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1579
+  },
+  "api_id": "01a08b0821e508713e9cddc94961e8ab",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Stream.Defs\nimport Mathlib.Data.Stream.Init\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Order.Basic\n\nnamespace Fill1D\n\n/-- The 1D left-outlet Fill operator as a stream transformer.\n    For each position i, Fill(a)[i] = max(a[i], Fill(a)[i-1]) with Fill(a)[-1] = -∞.\n    We implement it as a stream `Stream' ℕ ℤ` for simplicity (ℤ allows negative values). -/\ndef Fill (a : Stream' ℕ ℤ) : Stream' ℕ ℤ :=\n  Stream'.scanl (λ prev i => max prev (a.get i)) (-∞) a\n\n/-- The property that a sequence is nondecreasing: for all i, s[i] ≤ s[i+1]. -/\ndef Nondecreasing (s : Stream' ℕ ℤ) : Prop :=\n  ∀ i : ℕ, s.get i ≤ s.get (i+1)\n\n/-- Theorem: The 1D left-outlet Fill operator yields a nondecreasing sequence. -/\ntheorem fill_nondecreasing (a : Stream' ℕ ℤ) : Nondecreasing (Fill a) := by\n  intro i\n  unfold Fill\n  unfold Nondecreasing\n  -- We need to show: (scanl f init a)[i] ≤ (scanl f init a)[i+1]\n  -- where f prev idx = max prev (a.get idx) and init = -∞\n  let f := λ (prev : ℤ) (idx : ℕ) => max prev (a.get idx)\n  have h_scanl_succ : ∀ n : ℕ, (Stream'.scanl f (-∞) a).get (n+1) =\n      f ((Stream'.scanl f (-∞) a).get n) n := by\n    intro n\n    rw [Stream'.scanl_succ]\n  rw [h_scanl_succ i]\n  -- Now we have: (Fill a)[i+1] = max ((Fill a)[i]) (a.get i)\n  -- So we need: (Fill a)[i] ≤ max ((Fill a)[i]) (a.get i)\n  -- This holds by `le_max_left`.\n  exact le_max_left _ (a.get i)\n\nend Fill1D\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

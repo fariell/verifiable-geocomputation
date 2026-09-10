@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 595,
+    "total_tokens": 838,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08a7acac2258043647c14e79e014a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib\n\n-- We'll model a 3×3 grid of integers (elevations)\n-- We'll represent it as a 3×3 matrix (Fin 3 → Fin 3 → ℤ)\n-- The discrete Laplacian here is the sum of orthogonal neighbor differences:\n--   Δ = (north + south + east + west) - 4 * center\n-- But the problem states: if center ≥ each orthogonal neighbor,\n-- then the discrete Laplacian ≤ 0.\n\n-- Let's define the discrete Laplacian for a 3×3 grid at the center (1,1)\n-- using zero-indexing: indices 0,1,2. Center is (1,1).\n-- We'll assume the grid is given as a function `g : Fin 3 → Fin 3 → ℤ`.\n\ntheorem local_max_implies_nonpositive_laplacian (g : Fin 3 → Fin 3 → ℤ) :\n    (g 1 1 ≥ g 0 1 ∧ g 1 1 ≥ g 2 1 ∧ g 1 1 ≥ g 1 0 ∧ g 1 1 ≥ g 1 2) →\n    (g 0 1 + g 2 1 + g 1 0 + g 1 2 - 4 * g 1 1 ≤ 0) := by\n  intro h\n  rcases h with ⟨hnorth, hsouth, hwest, heast⟩\n  -- We have: g 1 1 ≥ g 0 1, g 1 1 ≥ g 2 1, g 1 1 ≥ g 1 0, g 1 1 ≥ g 1 2\n  -- Want: g 0 1 + g 2 1 + g 1 0 + g 1 2 - 4 * g 1 1 ≤ 0\n  -- Rewrite as: (g 0 1 - g 1 1) + (g 2 1 - g 1 1) + (g 1 0 - g 1 1) + (g 1 2 - g 1 1) ≤ 0\n  have h1 : g 0 1 - g 1 1 ≤ 0 := by linarith\n  have h2 : g 2 1 - g 1 1 ≤ 0 := by linarith\n  have h3 : g 1 0 - g 1 1 ≤ 0 := by linarith\n  have h4 : g 1 2 - g 1 1 ≤ 0 := by linarith\n  -- Sum of four nonpositive numbers is nonpositive\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

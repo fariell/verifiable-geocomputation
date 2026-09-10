@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1736,
+    "completion_tokens": 1894,
+    "total_tokens": 3630,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1736
+  },
+  "api_id": "01a08a82e9f62fd535b61888350f1633",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P003: Zevenbergen-Thorne Hessian exactness on quadratic surfaces\n// Formal specification and proof for a 3x3 window with spacing w > 0.\n\n// Quadratic surface definition\nfunction QuadraticSurface(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n  reads\n{\n  A*x*x + B*y*y + C*x*y + D*x + E*y + F\n}\n\n// Grid sampling of quadratic surface on 3x3 window\nfunction SampledQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real): (grid: array2<real>)\n  requires w > 0.0\n  ensures grid.Length0 == 3 && grid.Length1 == 3\n{\n  var g := new real[3,3];\n  var i: int := 0;\n  while i < 3\n    invariant 0 <= i <= 3\n    decreases 3 - i\n  {\n    var j: int := 0;\n    while j < 3\n      invariant 0 <= j <= 3\n      decreases 3 - j\n    {\n      g[i, j] := QuadraticSurface(A, B, C, D, E, F, (i-1)*w, (j-1)*w);\n      j := j + 1;\n    }\n    i := i + 1;\n  }\n  g\n}\n\n// Zevenbergen-Thorne discrete Hessian computation\nfunction ZTHessian(grid: array2<real>, w: real): (hxx: real, hyy: real, hxy: real)\n  requires grid.Length0 == 3 && grid.Length1 == 3\n  requires w > 0.0\n{\n  // Extract 3x3 window values (indices 0..2)\n  var a := grid[0,0];\n  var b := grid[0,1];\n  var c := grid[0,2];\n  var d := grid[1,0];\n  var e := grid[1,1];\n  var f := grid[1,2];\n  var g := grid[2,0];\n  var h := grid[2,1];\n  var i := grid[2,2];\n  \n  // ZT finite-difference formulas\n  var hxx_local := (d - 2.0*e + f) / (w*w);\n  var hyy_local := (b - 2.0*e + h) / (w*w);\n  var hxy_local := (a - c - g + i) / (4.0*w*w);\n  \n  (hxx_local, hyy_local, hxy_local)\n}\n\n// Main theorem: ZT Hessian recovers (2A, 2B, C) exactly\ntheorem Theorem_ZTHessianExactOnQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n{\n  var grid := SampledQuadratic(A, B, C, D, E, F, w);\n  var (hxx, hyy, hxy) := ZTHessian(grid, w);\n  \n  // Expected analytic second derivatives\n  var expected_hxx: real := 2.0 * A;\n  var expected_hyy: real := 2.0 * B;\n  var expected_hxy: real := C;\n  \n  // Proof by algebraic simplification\n  calc {\n    hxx;\n    == // Expand hxx definition\n    (grid[1,0] - 2.0*grid[1,1] + grid[1,2]) / (w*w);\n    == // Expand grid values\n    (QuadraticSurface(A,B,C,D,E,F,0*w,(-1)*w) - \n     2.0*QuadraticSurface(A,B,C,D,E,F,0*w,0*w) + \n     QuadraticSurface(A,B,C,D,E,F,0*w,1*w)) / (w*w);\n    == // Simplify quadratic expressions\n    {\n      assert QuadraticSurface(A,B,C,D,E,F,0*w,(-1)*w) == A*0.0 + B*w*w + C*0.0 + D*0.0 - E*w + F;\n      assert QuadraticSurface(A,B,C,D,E,F,0*w,0*w) == F;\n      assert QuadraticSurface(A,B,C,D,E,F,0*w,1*w) == A*0.0 + B*w*w + C*0.0 + D*0.0 + E*w + F;\n    }\n    ((B*w*w - E*w + F) - 2.0*F + (B*w*w + E*w + F)) / (w*w);\n    == // Combine terms\n    (2.0*B*w*w) / (w*w);\n    == // Cancel w*w (w ≠ 0)\n    2.0*B;\n  }\n  assert hxx == expected_hxx;\n  \n  calc {\n    hyy;\n    == // Expand hyy definition\n    (grid[0,1] - 2.0*grid[1,1] + grid[2,1]) / (w*w);\n    == // Expand grid values\n    (QuadraticSurface(A,B,C,D,E,F,(-1)*w,0*w) - \n     2.0*QuadraticSurface(A,B,C,D,E,F,0*w,0*w) + \n     QuadraticSurface(A,B,C,D,E,F,1*w,0*w)) / (w*w);\n    == // Simplify quadratic expressions\n    {\n      assert QuadraticSurface(A,B,C,D,E,F,(-1)*w,0*w) == A*w*w + B*0.0 - C*w*w + D*(-w) + E*0.0 + F;\n      assert QuadraticSurface(A,B,C,D,E,F,1*w,0*w) == A*w*w + B*0.0 + C*w*w + D*w + E*0.0 + F;\n    }\n    ((A*w*w - C*w*w - D*w + F) - 2.0*F + (A*w*w + C*w*w + D*w + F)) / (w*w);\n    == // Combine terms (C and D terms cancel)\n    (2.0*A*w*w) / (w*w);\n    == // Cancel w*w\n    2.0*A;\n  }\n  assert hyy == expected_hyy;\n  \n  calc {\n    hxy;\n    == // Expand hxy definition\n    (grid[0,0] - grid[0,2] - grid[2,0] + grid[2,2]) / (4.0*w*w);\n    == // Expand grid values\n    (QuadraticSurface(A,B,C,D,E,F,(-1)*w,(-1)*w) - \n     QuadraticSurface(A,B,C,D,E,F,(-1)*w,1*w) - \n     QuadraticSurface(A,B,C,D,E,F,1*w,(-1)*w) + \n     QuadraticSurface(A,B,C,D,E,F,1*w,1*w)) / (4.0*w*w);\n    == // Simplify each term\n    {\n      assert QuadraticSurface(A,B,C,D,E,F,(-1)*w,(-1)*w) == A*w*w + B*w*w + C*w*w - D*w - E*w + F;\n      assert QuadraticSurface(A,B,C,D,E,F,(-1)*w,1*w) == A*w*w + B*w*w - C*w*w - D*w + E*w + F;\n      assert QuadraticSurface(A,B,C,D,E,F,1*w,(-1)*w) == A*w*w + B*w*w - C*w*w + D*w - E*w + F;\n      assert QuadraticSurface(A,B,C,D,E,F,1*w,1*w) == A*w*w + B*w*w + C*w*w + D*w + E*w + F;\n    }\n    // Combine: (A*w*w+B*w*w+C*w*w-D*w-E*w+F) - (A*w*w+B*w*w-C*w*w-D*w+E*w+F)\n    //         - (A*w*w+B*w*w-C*w*w+D*w-E*w+F) + (A*w*w+B*w*w+C*w*w+D*w+E*w+F)\n    == // Cancel systematically\n    (4.0*C*w*w) / (4.0*w*w);\n    == // Cancel 4.0*w*w\n    C;\n  }\n  assert hxy == expected_hxy;\n  \n  // Final conclusion\n  assert hxx == 2.0*A && hyy == 2.0*B && hxy == C;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

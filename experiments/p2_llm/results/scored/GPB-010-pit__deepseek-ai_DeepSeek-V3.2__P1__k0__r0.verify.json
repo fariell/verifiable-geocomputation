@@ -1,0 +1,28 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_1mvz1wf9/candidate.dfy\""
+    ],
+    "rc": 2,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_1mvz1wf9/candidate.dfy\",\"range\":{\"start\":{\"pos\":0,\"line\":55,\"character\":13},\"end\":{\"pos\":0,\"line\":55,\"character\":13}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"then expected\",\"errorId\":\"p_generic_syntax_error\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_1mvz1wf9/candidate.dfy\",\"range\":{\"start\":{\"pos\":0,\"line\":57,\"character\":41},\"end\":{\"pos\":0,\"line\":57,\"character\":41}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"then expected\",\"errorId\":\"p_generic_syntax_error\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_1mvz1wf9/candidate.dfy\",\"range\":{\"start\":{\"pos\":0,\"line\":58,\"character\":24},\"end\":{\"pos\":0,\"line\":58,\"character\":24}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"rbrace expected\",\"errorId\":\"p_generic_syntax_error\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"3 parse errors detected in candidate.dfy\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "failure_code": "F1",
+  "interpret": {
+    "compile_rc": 1,
+    "verify_rc": 1,
+    "failure_code": "F1",
+    "interpreted_from": "parse_errors",
+    "proc_rc": 2
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

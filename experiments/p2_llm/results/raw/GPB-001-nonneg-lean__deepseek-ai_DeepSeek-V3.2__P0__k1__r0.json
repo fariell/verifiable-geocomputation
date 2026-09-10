@@ -1,0 +1,37 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1596,
+    "completion_tokens": 484,
+    "total_tokens": 2080,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1596
+  },
+  "api_id": "01a087149b6197a09cbc8cb7e3ad1d08",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Analysis.SpecialFunctions.Pow.Real\nimport Mathlib.Data.Real.Basic\n\n/-\n  Horn (1981) finite-difference slope operator for a 3×3 window.\n  Given elevations z₁,…,z₉ arranged as:\n    z₁ z₂ z₃\n    z₄ z₅ z₆\n    z₇ z₈ z₉\n  and grid spacing w > 0, the slope squared is:\n    SlopeSq = ((z₃ + 2z₆ + z₉ - z₁ - 2z₄ - z₇)/(8w))²\n            + ((z₇ + 2z₈ + z₉ - z₁ - 2z₂ - z₃)/(8w))²\n-/\n\nstructure HornWindow where\n  z₁ z₂ z₃ z₄ z₅ z₆ z₇ z₈ z₉ : ℝ\n\nnamespace HornWindow\n\ndef dzdx (w : ℝ) (h : HornWindow) : ℝ :=\n  (h.z₃ + 2 * h.z₆ + h.z₉ - h.z₁ - 2 * h.z₄ - h.z₇) / (8 * w)\n\ndef dzdy (w : ℝ) (h : HornWindow) : ℝ :=\n  (h.z₇ + 2 * h.z₈ + h.z₉ - h.z₁ - 2 * h.z₂ - h.z₃) / (8 * w)\n\ndef slopeSq (w : ℝ) (h : HornWindow) : ℝ :=\n  (dzdx w h) ^ 2 + (dzdy w h) ^ 2\n\ntheorem horn_slopeSq_nonneg (h : HornWindow) (w : ℝ) (hw : w > 0) : 0 ≤ slopeSq w h := by\n  unfold slopeSq\n  have h1 : 0 ≤ (dzdx w h) ^ 2 := by apply pow_two_nonneg\n  have h2 : 0 ≤ (dzdy w h) ^ 2 := by apply pow_two_nonneg\n  linarith\n\nend HornWindow\n",
+  "verify_status": "TOOLCHAIN_MISSING"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 250,
+    "completion_tokens": 956,
+    "total_tokens": 1206,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 250
+  },
+  "api_id": "01a08ac2e1f2944c1cb781d83bc85ef6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.ZMod.Basic\n\nopen Matrix\n\n-- Representing a planar DEM: z = A x + B y + C\nstructure PlanarDEM where\n  A : ℚ\n  B : ℚ\n  C : ℚ\n\n-- D8 flow direction encoding as an integer 1..8 (or 0 for no flow)\n-- We'll use ZMod 9 for simplicity, where 0 means no flow and 1..8 are directions.\nabbrev D8Dir := ZMod 9\n\n-- Grid cell coordinates\nstructure Cell where\n  x : ℤ\n  y : ℤ\n\n-- Slope must be positive: A > 0 and B > 0\ndef positive_slope (dem : PlanarDEM) : Prop :=\n  dem.A > 0 ∧ dem.B > 0\n\n-- Elevation at a cell for a given DEM\ndef elevation (dem : PlanarDEM) (c : Cell) : ℚ :=\n  dem.A * (c.x : ℚ) + dem.B * (c.y : ℚ) + dem.C\n\n-- D8 flow direction from a cell to its 8 neighbors\n-- We compute the steepest descent among the 8 neighbors.\n-- If no descent exists, return 0.\ndef d8_dir (dem : PlanarDEM) (c : Cell) : D8Dir :=\n  let neighbors : List (Cell × D8Dir) :=\n    [ (⟨c.x - 1, c.y - 1⟩, 1), (⟨c.x, c.y - 1⟩, 2), (⟨c.x + 1, c.y - 1⟩, 3),\n      (⟨c.x - 1, c.y⟩, 4),                         (⟨c.x + 1, c.y⟩, 5),\n      (⟨c.x - 1, c.y + 1⟩, 6), (⟨c.x, c.y + 1⟩, 7), (⟨c.x + 1, c.y + 1⟩, 8) ]\n  let z0 := elevation dem c\n  let candidates := neighbors.filterMap (λ ⟨nb, dir⟩ =>\n    let znb := elevation dem nb\n    if znb < z0 then some (z0 - znb, dir) else none)\n  match candidates.maximum? (λ a b => a.1 ≤ b.1) with\n  | some (_, dir) => dir\n  | none => 0\n\n-- Theorem: On a planar DEM with positive slope, D8 flow direction is constant\n-- across interior cells that share the same (A, B, w) where w = A/B (slope ratio).\n-- Translating the elevation datum C does not change the direction.\ntheorem d8_dir_constant_for_same_slope_ratio (A B : ℚ) (hA : A > 0) (hB : B > 0) :\n    let w := A / B in\n    ∀ (C1 C2 : ℚ) (c1 c2 : Cell),\n      d8_dir ⟨A, B, C1⟩ c1 = d8_dir ⟨A, B, C2⟩ c2 := by\n  intro w C1 C2 c1 c2\n  -- Unfold definitions\n  simp [d8_dir, elevation, PlanarDEM.mk]\n  -- The elevation at any cell is linear in C, and C cancels when comparing differences.\n  -- Because the slope is the same (A, B fixed), the relative differences between\n  -- a cell and its neighbors are independent of C.\n  have h1 : ∀ (C : ℚ) (c : Cell) (dx dy : ℤ),\n      elevation ⟨A, B, C⟩ ⟨c.x + dx, c.y + dy⟩ - elevation ⟨A, B, C⟩ c = A * (dx : ℚ) + B * (dy : ℚ) := by\n    intro C c dx dy\n    simp [elevation]\n    ring\n  -- Therefore, the steepest descent choice depends only on A, B, dx, dy, not on C.\n  -- Hence the D8 direction is the same for any C.\n  ext i\n  simp [d8_dir, elevation]\n  congr\n  funext nb\n  simp [h1]\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

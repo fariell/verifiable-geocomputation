@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 538,
+    "total_tokens": 806,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 268
+  },
+  "api_id": "01a08a9439e6f1276d555c50c33738ff",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Zevenbergen-Thorne discrete Hessian on a quadratic surface\n// Theorem: For z = A x^2 + B y^2 + C xy + Dx + Ey + F sampled on a 3x3 window\n// with spacing w > 0, the discrete Hessian recovers (2A, 2B, C) exactly.\n\nmethod ZTHessianExactRecovery(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures true\n{\n  // Define the quadratic surface function\n  function z(x: real, y: real): real\n  {\n    A * x * x + B * y * y + C * x * y + D * x + E * y + F\n  }\n\n  // Sample points on a 3x3 grid centered at (0,0) with spacing w\n  var z00 := z(-w, -w);\n  var z01 := z(-w, 0.0);\n  var z02 := z(-w, w);\n  var z10 := z(0.0, -w);\n  var z11 := z(0.0, 0.0);\n  var z12 := z(0.0, w);\n  var z20 := z(w, -w);\n  var z21 := z(w, 0.0);\n  var z22 := z(w, w);\n\n  // Zevenbergen-Thorne discrete Hessian formulas\n  var Hxx := (z20 - 2.0 * z10 + z00) / (w * w);\n  var Hyy := (z02 - 2.0 * z01 + z00) / (w * w);\n  var Hxy := (z22 - z20 - z02 + z00) / (4.0 * w * w);\n\n  // Expected values from the continuous Hessian of z(x,y)\n  // ∂²z/∂x² = 2A, ∂²z/∂y² = 2B, ∂²z/∂x∂y = C\n  var expected_Hxx := 2.0 * A;\n  var expected_Hyy := 2.0 * B;\n  var expected_Hxy := C;\n\n  // The theorem claims exact equality for quadratic surfaces\n  assert Hxx == expected_Hxx;\n  assert Hyy == expected_Hyy;\n  assert Hxy == expected_Hxy;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

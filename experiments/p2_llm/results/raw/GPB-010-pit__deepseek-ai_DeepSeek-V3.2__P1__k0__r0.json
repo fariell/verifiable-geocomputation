@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3172,
+    "completion_tokens": 2115,
+    "total_tokens": 5287,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3172
+  },
+  "api_id": "01a08a9e6f7a70454c380f47ab831858",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡坡度流向\n//  覆盖 : GPB-010 (洼地无流向)、GPB-011 (平面上流向恒定)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  D8 流向算法是水文分析的基础算子。其核心语义是：\n//      1. 洼地（中心点高程 ≤ 所有邻域）→ 无流向 (NoFlow)\n//      2. 平面（线性倾斜面）→ 内部流向恒定（平移不变性）\n//\n//  本文件形式化第一条性质：洼地无流向。这是 D8 正确性的必要条件，\n//  也是后续流向累积、流域划分等算法的起点。\n//\n//  注：本证明不依赖格网间距 w，因为 D8 只关心高程差的正负与比值，\n//      不涉及实际坡度计算。\n// ===========================================================================\n\nmodule D8Flow {\n  // ------------------------------------------------------------------\n  // 3×3 窗口约定（与 Horn 坡度一致，行偏移 q 向下为正）\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  //  注意：D8 流向显式依赖中心元 e，与 Horn 坡度不同。\n  // ------------------------------------------------------------------\n\n  // 流向编码（按 ArcGIS / TauDEM 惯例）\n  // 方向顺序：E, SE, S, SW, W, NW, N, NE\n  datatype FlowDir =\n    | E | SE | S | SW | W | NW | N | NE\n    | NoFlow  // 无流向（洼地或平坦）\n\n  // ------------------------------------------------------------------\n  // D8 最陡坡度流向计算\n  // 对每个邻域计算 (drop² / distance²)，取最大者。\n  // 若所有 drop ≤ 0，则返回 NoFlow。\n  // ------------------------------------------------------------------\n  function D8(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  ): FlowDir\n  {\n    var best := NoFlow;\n    var bestPower := 0.0;\n\n    // E (1,0) 距离 1\n    if e > f {\n      var p := (e - f)*(e - f) / 1.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := E, p;\n      }\n    }\n    // SE (1,1) 距离 √2 → 平方距离 2\n    if e > i {\n      var p := (e - i)*(e - i) / 2.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := SE, p;\n      }\n    }\n    // S (0,1) 距离 1\n    if e > h {\n      var p := (e - h)*(e - h) / 1.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := S, p;\n      }\n    }\n    // SW (-1,1) 距离 √2 → 平方距离 2\n    if e > g {\n      var p := (e - g)*(e - g) / 2.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := SW, p;\n      }\n    }\n    // W (-1,0) 距离 1\n    if e > d {\n      var p := (e - d)*(e - d) / 1.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := W, p;\n      }\n    }\n    // NW (-1,-1) 距离 √2 → 平方距离 2\n    if e > a {\n      var p := (e - a)*(e - a) / 2.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := NW, p;\n      }\n    }\n    // N (0,-1) 距离 1\n    if e > b {\n      var p := (e - b)*(e - b) / 1.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := N, p;\n      }\n    }\n    // NE (1,-1) 距离 √2 → 平方距离 2\n    if e > c {\n      var p := (e - c)*(e - c) / 2.0;\n      if best == NoFlow || p > bestPower {\n        best, bestPower := NE, p;\n      }\n    }\n    best\n  }\n\n  // ==================================================================\n  // 洼地无流向定理\n  // 若中心元 e ≤ 所有八个邻域的高程，则 D8 返回 NoFlow。\n  // ==================================================================\n  lemma PitNoFlow(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  )\n    requires e <= a\n    requires e <= b\n    requires e <= c\n    requires e <= d\n    requires e <= f\n    requires e <= g\n    requires e <= h\n    requires e <= i\n    ensures D8(a, b, c, d, e, f, g, h, i) == NoFlow\n  {\n    // 根据前提，所有 e > neighbor 的条件均为 false，\n    // 因此 best 始终保持为 NoFlow。\n    // Dafny 自动验证所有分支均不更新 best。\n  }\n\n  // ==================================================================\n  // 反例构造：若存在严格更低的邻域，则流向不为 NoFlow\n  // 这是 PitNoFlow 的逆否命题，用于验证条件的必要性。\n  // ==================================================================\n  lemma NotPitImpliesFlow(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  )\n    ensures D8(a, b, c, d, e, f, g, h, i) != NoFlow\n      ==> exists neighbor :: \n           (neighbor == a && e > a) ||\n           (neighbor == b && e > b) ||\n           (neighbor == c && e > c) ||\n           (neighbor == d && e > d) ||\n           (neighbor == f && e > f) ||\n           (neighbor == g && e > g) ||\n           (neighbor == h && e > h) ||\n           (neighbor == i && e > i)\n  {\n    // 由 D8 定义：若结果不为 NoFlow，则至少一个邻域满足 e > neighbor。\n    // Dafny 自动展开函数定义进行验证。\n  }\n\n  // ==================================================================\n  // 测试用例：标准洼地（中心为 0，邻域均为 1）\n  // ==================================================================\n  lemma TestPit()\n    ensures D8(1.0, 1.0, 1.0,\n               1.0, 0.0, 1.0,\n               1.0, 1.0, 1.0) == NoFlow\n  {\n    // 直接调用 PitNoFlow，前提显然满足。\n    PitNoFlow(1.0, 1.0, 1.0,\n              1.0, 0.0, 1.0,\n              1.0, 1.0, 1.0);\n  }\n\n  // ==================================================================\n  // 测试用例：平坦面（所有高程相等）\n  // 注意：平坦面是洼地的特例，也应返回 NoFlow。\n  // ==================================================================\n  lemma TestFlat()\n    ensures D8(5.0, 5.0, 5.0,\n               5.0, 5.0, 5.0,\n               5.0, 5.0, 5.0) == NoFlow\n  {\n    PitNoFlow(5.0, 5.0, 5.0,\n              5.0, 5.0, 5.0,\n              5.0, 5.0, 5.0);\n  }\n\n  // ==================================================================\n  // 注记\n  // ------------------------------------------------------------------\n  // 1. 本证明仅依赖高程的大小关系，不涉及具体数值或格网间距。\n  // 2. 性质对任意实数高程成立，包括负值（如海平面以下）。\n  // 3. 这是 D8 流向算子的最弱正确性条件之一：洼地必须被识别。\n  //\n  // 后续工作（GPB-011）将证明平面上的流向恒定性质，需要引入\n  // 线性高程面模型并证明平移不变性。\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-005 — D8 洼地无流向定理\\n\";\n  print \"验证: dafny verify P005_d8.dfy\\n\";\n  print \"测试用例: 标准洼地 → NoFlow, 平坦面 → NoFlow\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

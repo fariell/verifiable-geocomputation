@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1701,
+    "completion_tokens": 1721,
+    "total_tokens": 3422,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1701
+  },
+  "api_id": "01a08af02e452a2ff7341ca6d209c77d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of 1D left-outlet pit filling idempotence and fixed-point property\n// Target: Dafny\n\n// A 1D digital elevation model is represented as a sequence of integers.\n// The left-outlet condition means water can only flow to the left neighbor.\n// The fill operation raises each cell to at least the height of its left neighbor.\n\n// Fill operation: for i from 1 to n-1, set a[i] = max(a[i], a[i-1])\nfunction Fill(a: seq<int>): seq<int>\n  requires |a| > 0\n  ensures |Fill(a)| == |a|\n{\n  if |a| == 0 then a else\n    var result := a;\n    var i := 1;\n    while i < |a|\n      invariant 1 <= i <= |a|\n      invariant forall j :: 0 <= j < i ==> result[j] == (if j == 0 then a[0] else max(a[j], result[j-1]))\n      invariant forall j :: i <= j < |a| ==> result[j] == a[j]\n      decreases |a| - i\n    {\n      result := result[i := max(result[i], result[i-1])];\n      i := i + 1;\n    }\n    result\n}\n\n// Lemma: Fill is idempotent: Fill(Fill(a)) == Fill(a)\nlemma FillIdempotent(a: seq<int>)\n  requires |a| > 0\n  ensures Fill(Fill(a)) == Fill(a)\n{\n  var fa := Fill(a);\n  var ffa := Fill(fa);\n  // Show ffa == fa by element-wise equality\n  assert |ffa| == |fa| == |a|;\n  forall i | 0 <= i < |a|\n    ensures ffa[i] == fa[i]\n  {\n    // Proof by induction on i\n    if i == 0 {\n      assert fa[0] == a[0];\n      assert ffa[0] == fa[0];\n    } else {\n      // From definition of Fill: fa[i] = max(a[i], fa[i-1])\n      // and ffa[i] = max(fa[i], ffa[i-1])\n      // By induction, ffa[i-1] == fa[i-1]\n      calc {\n        ffa[i];\n        == // definition of Fill on fa\n        max(fa[i], ffa[i-1]);\n        == // induction hypothesis\n        max(fa[i], fa[i-1]);\n        == // since fa[i] >= fa[i-1] by construction of Fill\n        fa[i];\n      }\n    }\n  }\n  // Extensional equality\n  assert ffa == fa;\n}\n\n// A cell does not spill to the left if its height is already >= left neighbor.\npredicate NoSpillLeft(a: seq<int>, i: int)\n  requires 0 <= i < |a|\n  requires |a| > 0\n{\n  i == 0 || a[i] >= a[i-1]\n}\n\n// Lemma: Cells that do not spill to the left are fixed points of Raise.\n// Here \"Raise\" is the same as Fill (since Fill raises cells when needed).\nlemma NoSpillIsFixedPoint(a: seq<int>, i: int)\n  requires |a| > 0\n  requires 0 <= i < |a|\n  requires NoSpillLeft(a, i)\n  ensures Fill(a)[i] == a[i]\n{\n  var fa := Fill(a);\n  if i == 0 {\n    assert fa[0] == a[0];\n  } else {\n    // Since a[i] >= a[i-1], max(a[i], fa[i-1]) = a[i] if fa[i-1] <= a[i].\n    // But fa[i-1] >= a[i-1] by Fill definition, and a[i] >= a[i-1],\n    // so a[i] >= fa[i-1]? Not necessarily: fa[i-1] could be larger than a[i-1].\n    // Need stronger invariant: Fill is monotonic and preserves order.\n    // Actually, Fill is the prefix maximum, so fa[i-1] = max_{j<=i-1} a[j].\n    // Since a[i] >= a[i-1], we have a[i] >= max_{j<=i-1} a[j] = fa[i-1].\n    // Therefore max(a[i], fa[i-1]) = a[i].\n    // Let's prove fa[i-1] <= a[i].\n    assert forall k :: 0 <= k <= i-1 ==> a[k] <= a[i] by {\n      if k == i-1 {\n        assert a[k] <= a[i] by NoSpillLeft(a, i);\n      } else {\n        // For k < i-1, by induction? Actually need transitivity.\n        // Since a[i] >= a[i-1] and a[i-1] >= a[i-2] ... not given.\n        // Wait, NoSpillLeft only says a[i] >= a[i-1], not about earlier cells.\n        // So we cannot conclude a[i] >= a[k] for k < i-1.\n        // But fa[i-1] is the max of a[0..i-1], so fa[i-1] >= a[i-1].\n        // Since a[i] >= a[i-1], we only know a[i] >= a[i-1], not necessarily >= fa[i-1].\n        // Counterexample: a = [10, 5, 6]. i=2: a[2]=6 >= a[1]=5, but fa[1]=10, so fa[2]=max(6,10)=10 != 6.\n        // So the original statement is false! Let's verify.\n        // The natural language says: \"Cells that already do not spill to the left are fixed points of Raise.\"\n        // But in 1D left-outlet, \"does not spill to the left\" means a[i] >= a[i-1].\n        // In the counterexample, cell 2 (value 6) does not spill left (6>=5), but after fill it becomes 10.\n        // So the statement is incorrect as written.\n        // However, maybe they meant \"does not spill to the left *in the original DEM*\"?\n        // Even so, the counterexample shows it's false.\n        // Therefore we cannot prove this lemma; it's actually false.\n        // We must output a counterexample instead.\n        // But the requirement says \"Prove the stated property\". Since it's false, we should not prove it.\n        // Instead, we should provide a counterexample and prove the negation.\n        // However, the instruction says: if the property is negative, construct an explicit witness.\n        // Let's do that.\n    }\n    // Since we discovered the statement is false, we stop this proof and instead provide a counterexample.\n  }\n}\n\n// Counterexample to \"NoSpillLeft => fixed point\"\nlemma Counterexample()\n  ensures exists a: seq<int>, i: int :: |a| > 0 && 0 <= i < |a| && NoSpillLeft(a, i) && Fill(a)[i] != a[i]\n{\n  var a := [10, 5, 6];\n  var i := 2;\n  assert |a| == 3 > 0;\n  assert 0 <= i < |a|;\n  assert NoSpillLeft(a, i) because a[2] == 6 >= 5 == a[1];\n  var fa := Fill(a);\n  // Compute Fill: [10, max(5,10)=10, max(6,10)=10] = [10,10,10]\n  assert fa[0] == 10;\n  assert fa[1] == 10;\n  assert fa[2] == 10;\n  assert fa[2] != a[2]; // 10 != 6\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 255,
+    "completion_tokens": 374,
+    "total_tokens": 629,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 255
+  },
+  "api_id": "01a08b22810416182658924891ef0e61",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P2 · Iterative repair (verifier feedback)\n// Theorem: In the 2D local raise step RaiseNbr, raising a 4-neighbor from an already-processed cell\n// never decreases any cell elevation, and the neighbor is lifted at least to max(original neighbor, processed cell fill).\n\nmethod RaiseNbrPreservesNonDecreasingAndLiftsToMax(\n  processedElev: real, neighborElev: real, fillHeight: real\n) returns (newNeighborElev: real)\n  requires processedElev >= 0.0 && neighborElev >= 0.0 && fillHeight >= 0.0\n  ensures newNeighborElev >= neighborElev  // never decreases any cell elevation\n  ensures newNeighborElev >= max(neighborElev, max(processedElev, fillHeight))  // lifted at least to max(original neighbor, processed cell fill)\n{\n  // The raise step: new neighbor elevation is the maximum of its original elevation\n  // and the processed cell's fill height (which itself is the maximum of processed cell's elevation and fillHeight).\n  var processedFill := max(processedElev, fillHeight);\n  newNeighborElev := max(neighborElev, processedFill);\n\n  // Verification of postconditions:\n  // 1. newNeighborElev >= neighborElev  (by definition of max)\n  // 2. newNeighborElev >= max(neighborElev, processedFill)  (trivially true since newNeighborElev = max(neighborElev, processedFill))\n  //    But we need newNeighborElev >= max(neighborElev, max(processedElev, fillHeight))\n  //    Since processedFill = max(processedElev, fillHeight), this is equivalent to the above.\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

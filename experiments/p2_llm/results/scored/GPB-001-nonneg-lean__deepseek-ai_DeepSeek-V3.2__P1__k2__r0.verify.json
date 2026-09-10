@@ -1,0 +1,7 @@
+{
+  "toolchain": null,
+  "status": "TOOLCHAIN_MISSING",
+  "compile_rc": null,
+  "verify_rc": null,
+  "note": "lake/lean not on PATH (local). Authority build is AutoDL."
+}

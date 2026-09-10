@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1686,
+    "completion_tokens": 1654,
+    "total_tokens": 3340,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1686
+  },
+  "api_id": "01a08a99a5caab6cdeeac4c0390cb457",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formal specification of D8 steepest-descent routing pit condition\n// Property: If no neighbor is strictly lower than the center, flow direction is NoFlow.\n\n// Grid dimensions and adjacency definitions\ntype GridIndex = (r: int, c: int)\ntype Direction = (\n    | E\n    | SE\n    | S\n    | SW\n    | W\n    | NW\n    | N\n    | NE\n    | NoFlow\n)\n\n// Grid with positive dimensions\ndatatype Grid = Grid(elevations: array2<real>, rows: int, cols: int)\n    requires rows > 0 && cols > 0\n    requires elevations.Length0 == rows && elevations.Length1 == cols\n\n// Valid grid indices\npredicate InGrid(g: Grid, idx: GridIndex)\n{\n    0 <= idx.r < g.rows && 0 <= idx.c < g.cols\n}\n\n// D8 neighbor offsets with distances\nconst D8_NEIGHBORS: seq<(dp: int, dq: int, dist2: real)> :=\n    [\n        (1, 0, 1.0),   // E\n        (1, 1, 2.0),   // SE\n        (0, 1, 1.0),   // S\n        (-1, 1, 2.0),  // SW\n        (-1, 0, 1.0),  // W\n        (-1, -1, 2.0), // NW\n        (0, -1, 1.0),  // N\n        (1, -1, 2.0)   // NE\n    ];\n\n// Get neighbor index\nfunction NeighborIndex(center: GridIndex, offset: (dp: int, dq: int)): GridIndex\n{\n    (center.r + offset.dq, center.c + offset.dp)\n}\n\n// D8 flow direction calculation\nfunction D8Flow(g: Grid, center: GridIndex): Direction\n    requires InGrid(g, center)\n    decreases *\n{\n    var center_elev := g.elevations[center.r, center.c];\n    var best_dir: Direction := NoFlow;\n    var best_power: real := 0.0;\n    \n    // Check all 8 neighbors\n    for i := 0 to |D8_NEIGHBORS| - 1\n        invariant best_dir == NoFlow || best_power > 0.0\n    {\n        var offset := D8_NEIGHBORS[i];\n        var neighbor_idx := NeighborIndex(center, offset);\n        \n        if InGrid(g, neighbor_idx) {\n            var neighbor_elev := g.elevations[neighbor_idx.r, neighbor_idx.c];\n            var drop := center_elev - neighbor_elev;\n            \n            if drop > 0.0 {\n                var power := (drop * drop) / offset.dist2;\n                if best_dir == NoFlow || power > best_power {\n                    best_dir := match i\n                        case 0 => E\n                        case 1 => SE\n                        case 2 => S\n                        case 3 => SW\n                        case 4 => W\n                        case 5 => NW\n                        case 6 => N\n                        case 7 => NE\n                    ;\n                    best_power := power;\n                }\n            }\n        }\n    }\n    \n    best_dir\n}\n\n// Predicate: No neighbor is strictly lower than center\npredicate NoLowerNeighbor(g: Grid, center: GridIndex)\n    requires InGrid(g, center)\n{\n    forall offset :: offset in D8_NEIGHBORS ==>\n        !InGrid(g, NeighborIndex(center, offset)) ||\n        g.elevations[center.r, center.c] <= g.elevations[NeighborIndex(center, offset).r, NeighborIndex(center, offset).c]\n}\n\n// Main theorem: If no neighbor is strictly lower, flow is NoFlow\ntheorem D8PitNoFlow(g: Grid, center: GridIndex)\n    requires InGrid(g, center)\n    requires NoLowerNeighbor(g, center)\n    ensures D8Flow(g, center) == NoFlow\n{\n    // Proof by contradiction: assume flow is not NoFlow\n    if D8Flow(g, center) != NoFlow {\n        // Then there exists a neighbor with positive drop\n        var center_elev := g.elevations[center.r, center.c];\n        \n        // Unfold the definition of D8Flow\n        var best_dir := NoFlow;\n        var best_power: real := 0.0;\n        \n        for i := 0 to |D8_NEIGHBORS| - 1\n            invariant best_dir == NoFlow || best_power > 0.0\n            invariant forall j :: 0 <= j < i ==>\n                !(InGrid(g, NeighborIndex(center, D8_NEIGHBORS[j])) &&\n                  center_elev - g.elevations[NeighborIndex(center, D8_NEIGHBORS[j]).r, NeighborIndex(center, D8_NEIGHBORS[j]).c] > 0.0)\n        {\n            var offset := D8_NEIGHBORS[i];\n            var neighbor_idx := NeighborIndex(center, offset);\n            \n            if InGrid(g, neighbor_idx) {\n                var neighbor_elev := g.elevations[neighbor_idx.r, neighbor_idx.c];\n                var drop := center_elev - neighbor_elev;\n                \n                // By NoLowerNeighbor hypothesis, drop cannot be positive\n                assert drop <= 0.0 by {\n                    // This follows directly from the precondition\n                    assert g.elevations[center.r, center.c] <= neighbor_elev;\n                }\n            }\n        }\n        \n        // After checking all neighbors, best_dir must still be NoFlow\n        assert best_dir == NoFlow;\n        // Contradiction with our assumption\n        assert false;\n    }\n}\n\n// Example: 3×3 pit with rim height 1 and center height 0\nmethod ExamplePit()\n{\n    var rows := 3;\n    var cols := 3;\n    var elevations := new real[rows, cols];\n    \n    // Initialize pit\n    elevations[0,0] := 1.0; elevations[0,1] := 1.0; elevations[0,2] := 1.0;\n    elevations[1,0] := 1.0; elevations[1,1] := 0.0; elevations[1,2] := 1.0;\n    elevations[2,0] := 1.0; elevations[2,1] := 1.0; elevations[2,2] := 1.0;\n    \n    var g := Grid(elevations, rows, cols);\n    var center: GridIndex := (1, 1);\n    \n    // Verify the pit condition\n    assert InGrid(g, center);\n    \n    // Check that no neighbor is strictly lower\n    assert NoLowerNeighbor(g, center) by {\n        forall offset | offset in D8_NEIGHBORS\n            ensures !InGrid(g, NeighborIndex(center, offset)) ||\n                    g.elevations[center.r, center.c] <= g.elevations[NeighborIndex(center, offset).r, NeighborIndex(center, offset).c]\n        {\n            // All neighbors have elevation 1.0, center has 0.0\n            // So center <= neighbor (0.0 <= 1.0) holds\n        }\n    }\n    \n    // Apply the theorem\n    D8PitNoFlow(g, center);\n    assert D8Flow(g, center) == NoFlow;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

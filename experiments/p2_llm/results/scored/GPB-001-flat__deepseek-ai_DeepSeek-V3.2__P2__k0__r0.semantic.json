@@ -1,0 +1,59 @@
+{
+  "task_id": "GPB-001-flat",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 0,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "horn",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "slope",
+      "slopesq",
+      "spacing",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "hit": [
+      "cells",
+      "elevation",
+      "finite",
+      "horn",
+      "magnitude",
+      "nine",
+      "slope",
+      "slopesq",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "miss": [
+      "equivalently",
+      "grid",
+      "identically",
+      "positive",
+      "share",
+      "spacing"
+    ],
+    "hit_ratio": 0.6667
+  },
+  "trivial_assume": true,
+  "drift_suspect": true,
+  "fidelity_label": "VERIFIED_BUT_DRIFT_SUSPECT",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

@@ -1,0 +1,28 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\""
+    ],
+    "rc": 4,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":562,\"line\":17,\"character\":56},\"end\":{\"pos\":563,\"line\":17,\"character\":57}}},\"severity\":2,\"arguments\":[],\"defaultFormatMessage\":\"deprecated style: a semi-colon is not needed here\",\"errorId\":\"p_deprecated_semicolon\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1269,\"line\":33,\"character\":15},\"end\":{\"pos\":1270,\"line\":33,\"character\":16}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1380,\"line\":34,\"character\":37},\"end\":{\"pos\":1381,\"line\":34,\"character\":38}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1448,\"line\":35,\"character\":53},\"end\":{\"pos\":1449,\"line\":35,\"character\":54}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1613,\"line\":39,\"character\":29},\"end\":{\"pos\":1614,\"line\":39,\"character\":30}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1839,\"line\":47,\"character\":17},\"end\":{\"pos\":1840,\"line\":47,\"character\":18}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1850,\"line\":47,\"character\":28},\"end\":{\"pos\":1851,\"line\":47,\"character\":29}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1979,\"line\":52,\"character\":18},\"end\":{\"pos\":1980,\"line\":52,\"character\":19}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_jk6fljno/candidate.dfy\",\"range\":{\"start\":{\"pos\":1990,\"line\":52,\"character\":29},\"end\":{\"pos\":1991,\"line\":52,\"character\":30}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"element might not be in domain\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 0 verified, 8 errors\\n\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "failure_code": "F1",
+  "interpret": {
+    "compile_rc": 1,
+    "verify_rc": 1,
+    "failure_code": "F1",
+    "interpreted_from": "parse_errors",
+    "proc_rc": 4
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

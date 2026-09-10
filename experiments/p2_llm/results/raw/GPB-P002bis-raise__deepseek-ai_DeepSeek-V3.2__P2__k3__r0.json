@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 255,
+    "completion_tokens": 643,
+    "total_tokens": 898,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 255
+  },
+  "api_id": "01a08b2222a340e7775d856de0e4eb02",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method RaiseNbrPreservesElevation(\n  grid: array2<int>,\n  processedRow: int, processedCol: int,\n  neighborRow: int, neighborCol: int\n)\n  requires grid != null\n  requires 0 <= processedRow < grid.Length0 && 0 <= processedCol < grid.Length1\n  requires 0 <= neighborRow < grid.Length0 && 0 <= neighborCol < grid.Length1\n  requires |processedRow - neighborRow| + |processedCol - neighborCol| == 1  // 4-neighbor\n  requires grid[processedRow, processedCol] >= old(grid)[processedRow, processedCol]  // already processed\n  requires forall r, c :: 0 <= r < grid.Length0 && 0 <= c < grid.Length1 ==> grid[r, c] >= old(grid)[r, c]\n  ensures forall r, c :: 0 <= r < grid.Length0 && 0 <= c < grid.Length1 ==> grid[r, c] >= old(grid)[r, c]\n  ensures grid[neighborRow, neighborCol] >= old(grid)[neighborRow, neighborCol]\n  ensures grid[neighborRow, neighborCol] >= max(old(grid)[neighborRow, neighborCol], old(grid)[processedRow, processedCol])\n{\n  // Assume the RaiseNbr operation is performed\n  assume grid[neighborRow, neighborCol] := max(grid[neighborRow, neighborCol], grid[processedRow, processedCol]);\n\n  // Postcondition 1: No cell elevation decreased\n  assert forall r, c :: 0 <= r < grid.Length0 && 0 <= c < grid.Length1 ==> grid[r, c] >= old(grid)[r, c] by {\n    forall r, c | 0 <= r < grid.Length0 && 0 <= c < grid.Length1\n      ensures grid[r, c] >= old(grid)[r, c]\n    {\n      if r == neighborRow && c == neighborCol {\n        // Updated neighbor\n        assert grid[r, c] >= old(grid)[r, c] by {\n          assert grid[r, c] == max(old(grid)[r, c], grid[processedRow, processedCol]);\n          assert grid[processedRow, processedCol] >= old(grid)[processedRow, processedCol];\n        }\n      } else {\n        // Unchanged cell\n        assert grid[r, c] == old(grid)[r, c];\n      }\n    }\n  }\n\n  // Postcondition 2: Neighbor lifted at least to max(original neighbor, processed cell fill)\n  assert grid[neighborRow, neighborCol] >= max(old(grid)[neighborRow, neighborCol], old(grid)[processedRow, processedCol]) by {\n    calc >= {\n      grid[neighborRow, neighborCol];\n      max(old(grid)[neighborRow, neighborCol], grid[processedRow, processedCol]);\n      max(old(grid)[neighborRow, neighborCol], old(grid)[processedRow, processedCol]);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

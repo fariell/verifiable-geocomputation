@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3090,
+    "completion_tokens": 1391,
+    "total_tokens": 4481,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 18
+  },
+  "api_id": "01a08b00c24d89a1926ff1c18cb53f3b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-002-bis (1D specialization)\n//  文件 : formal/dafny/P002_bis_1d_wang_liu_fill.dfy\n//  算子 : Wang & Liu (2002) 洼地填平 (一维左出口特化)\n//  覆盖 : GPB-021 的一维代数核心 (单调性、非递减性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P002_bis_1d_wang_liu_fill.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  Phase 2 的复合验证(P-COMP-1)需要洼地填平作为前置条件。二维 Wang & Liu\n//  填平算法在边界播种、4-邻接泛洪,其核心递归规则是:\n//      fill[n] = max(orig[n], fill[p])   // p 是已填平的邻居\n//\n//  一维左出口特化是二维算法的退化情形:只有左邻居 p = i-1 是已处理的。\n//  这保留了算法的单调性本质,但简化了证明结构,可作为二维证明的引理基石。\n//\n//  本文件证明两个基本性质:\n//    (i)  每次抬高都是单调的(没有单元格高程降低)\n//    (ii) 完整扫描后,剖面是非递减的\n//\n//  这两个性质是后续验证 D8 严格下降和环终止的基础(见 P-COMP-1)。\n// ===========================================================================\n\nmodule OneDWangLiuFill {\n\n  // ------------------------------------------------------------------\n  // 1D 剖面约定\n  //\n  //   orig[0..N-1] : 原始高程剖面\n  //   fill[0..N-1] : 填平后高程剖面\n  //\n  //  左出口特化: fill[0] = orig[0]\n  //              fill[i] = max(orig[i], fill[i-1])   for i > 0\n  // ------------------------------------------------------------------\n\n  // ---- 填平算子 (递归定义) ----\n  function Fill(orig: seq<real>, i: int): real\n    requires 0 <= i < |orig|\n    decreases i\n  {\n    if i == 0 then orig[0]\n    else\n      let prev := Fill(orig, i-1) in\n      if orig[i] > prev then orig[i] else prev\n  }\n\n  // ---- 辅助引理: 单调性 (每次抬高不降低) ----\n  lemma FillMonotoneStep(orig: seq<real>, i: int)\n    requires 0 <= i < |orig|\n    ensures Fill(orig, i) >= orig[i]\n    decreases i\n  {\n    if i > 0 {\n      FillMonotoneStep(orig, i-1);\n      // 根据定义: Fill(orig, i) = max(orig[i], Fill(orig, i-1))\n      // 因此 Fill(orig, i) >= orig[i]\n    }\n  }\n\n  // ---- 主要性质 1: 每次抬高都是单调的 (没有单元格高程降低) ----\n  lemma NoDecrease(orig: seq<real>, i: int)\n    requires 0 <= i < |orig|\n    ensures Fill(orig, i) >= orig[i]\n  {\n    FillMonotoneStep(orig, i);\n  }\n\n  // ---- 辅助引理: 序列单调性 (递推关系) ----\n  lemma FillMonotoneSequence(orig: seq<real>, i: int)\n    requires 0 <= i < |orig|\n    ensures i > 0 ==> Fill(orig, i) >= Fill(orig, i-1)\n    decreases i\n  {\n    if i > 0 {\n      FillMonotoneSequence(orig, i-1);\n      // 根据定义: Fill(orig, i) = max(orig[i], Fill(orig, i-1))\n      // 因此 Fill(orig, i) >= Fill(orig, i-1)\n    }\n  }\n\n  // ---- 主要性质 2: 完整扫描后剖面是非递减的 ----\n  lemma NondecreasingProfile(orig: seq<real>)\n    ensures forall i, j :: 0 <= i <= j < |orig| ==> Fill(orig, i) <= Fill(orig, j)\n  {\n    forall i, j | 0 <= i <= j < |orig|\n      ensures Fill(orig, i) <= Fill(orig, j)\n    {\n      if i == j {\n        // 平凡情况\n      } else {\n        // 对 j 进行归纳\n        var k := i + 1;\n        while k <= j\n          invariant i <= k <= j+1\n          invariant Fill(orig, i) <= Fill(orig, k-1)\n          decreases j - k\n        {\n          FillMonotoneSequence(orig, k);\n          k := k + 1;\n        }\n      }\n    }\n  }\n\n  // ==================================================================\n  // 结构注记\n  // ------------------------------------------------------------------\n  // 一维左出口特化保留了 Wang & Liu 算法的两个关键代数性质:\n  //\n  //   1) 单调性: 每个单元格在填平后不会低于原始高程。\n  //      这是由 max(orig[i], fill[i-1]) 保证的。\n  //\n  //   2) 非递减性: 填平后的剖面从左到右不会下降。\n  //      这是由递推关系 fill[i] >= fill[i-1] 保证的。\n  //\n  //  这两个性质在二维情况下依然成立,但证明需要处理 4-邻接泛洪的\n  //  偏序关系。一维证明为二维证明提供了归纳基础。\n  //\n  //  在 P-COMP-1 中,非递减性用于证明 D8 流路在填平后的 DEM 上\n  //  严格下降(除了平坦区域),从而保证环终止。\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-002-bis — 1D Wang & Liu 洼地填平单调性\\n\";\n  print \"全部由编译期验证: dafny verify P002_bis_1d_wang_liu_fill.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

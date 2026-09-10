@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 1806,
+    "total_tokens": 4897,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 19
+  },
+  "api_id": "01a08accebcc9433fa6b05c89ac5d672",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 确定性 D8 流向下的流域唯一性\n//  覆盖 : GPB-015 (Layer A: 终止轨道出口唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  流域分析中,确定性流向函数(如 D8)从同一单元格出发的流动路径,\n//  若在有限步内终止于某个出口(不动点),则该出口必须唯一。\n//  这一性质是流域划分算法正确性的基础:若同一单元格可流向两个不同出口,\n//  则流域边界将出现矛盾。\n//\n//  本文件形式化该唯一性,采用有界迭代 stepN 而非 SMT 递归搜索不动点,\n//  避免对终止性的全称量化,专注于\"若两条有限路径都终止,则出口相等\"。\n//  这对应 GPB-015 Layer A 的代数部分。\n//\n//  注:本证明不要求全局终止性(允许循环),仅要求当两条有限路径都找到\n//  出口时,这两个出口是同一个单元格。\n// ===========================================================================\n\nmodule WatershedUniqueness {\n\n  // ------------------------------------------------------------------\n  // 网格坐标与流向约定\n  // ------------------------------------------------------------------\n  type Cell = (int, int)  // (行, 列), 行向下为正\n\n  // D8 方向名(引用自 P005 模块,此处仅声明签名)\n  datatype D8Dir = NoFlow | E | NE | N | NW | W | SW | S | SE\n\n  // 流向函数:给定高程矩阵和单元格,返回流向(可能为 NoFlow)\n  // 此为抽象函数,具体实现见 P005_d8 模块\n  function D8At(h: array2<real>, r: int, c: int): D8Dir\n\n  // 后继函数:若流向非 NoFlow,则移动到相邻单元格\n  function Successor(h: array2<real>, cell: Cell): Cell\n    requires 0 <= cell.0 < h.Length0 && 0 <= cell.1 < h.Length1\n  {\n    var (r, c) := cell;\n    var dir := D8At(h, r, c);\n    if dir == NoFlow then\n      (r, c)\n    else\n      match dir {\n        case E  => (r, c+1)\n        case NE => (r-1, c+1)\n        case N  => (r-1, c)\n        case NW => (r-1, c-1)\n        case W  => (r, c-1)\n        case SW => (r+1, c-1)\n        case S  => (r+1, c)\n        case SE => (r+1, c+1)\n      }\n  }\n\n  // ------------------------------------------------------------------\n  // 有界迭代:应用后继函数 step 次\n  // ------------------------------------------------------------------\n  function StepN(h: array2<real>, start: Cell, step: nat): Cell\n    requires 0 <= start.0 < h.Length0 && 0 <= start.1 < h.Length1\n    decreases step\n  {\n    if step == 0 then\n      start\n    else\n      Successor(h, StepN(h, start, step-1))\n  }\n\n  // ------------------------------------------------------------------\n  // 不动点判定:单元格是否为出口(流向自身)\n  // ------------------------------------------------------------------\n  predicate IsFixedPoint(h: array2<real>, cell: Cell)\n    requires 0 <= cell.0 < h.Length0 && 0 <= cell.1 < h.Length1\n  {\n    Successor(h, cell) == cell\n  }\n\n  // ------------------------------------------------------------------\n  // 主要定理:若从同一单元格出发,在有限步 m 和 n 都到达不动点,\n  // 则这两个不动点是同一个单元格。\n  // ------------------------------------------------------------------\n  theorem WatershedUniqueness(\n    h: array2<real>,\n    start: Cell,\n    m: nat, n: nat\n  )\n    requires 0 <= start.0 < h.Length0 && 0 <= start.1 < h.Length1\n    requires IsFixedPoint(h, StepN(h, start, m))\n    requires IsFixedPoint(h, StepN(h, start, n))\n    ensures StepN(h, start, m) == StepN(h, start, n)\n  {\n    // 关键观察:一旦到达不动点,继续迭代将停留在该点\n    // 即:对于任意 k ≥ m, StepN(h, start, k) = StepN(h, start, m)\n    // 同理对于 n。\n    // 因此,取 k = max(m, n), 两个表达式都等于 StepN(h, start, k)\n    var k := if m > n then m else n;\n    lemma_fixed_point_stable(h, start, m, k);\n    lemma_fixed_point_stable(h, start, n, k);\n  }\n\n  // ------------------------------------------------------------------\n  // 辅助引理:若第 m 步是不动点,则所有后续步都停留在此点\n  // ------------------------------------------------------------------\n  lemma lemma_fixed_point_stable(\n    h: array2<real>,\n    start: Cell,\n    m: nat, k: nat\n  )\n    requires 0 <= start.0 < h.Length0 && 0 <= start.1 < h.Length1\n    requires m <= k\n    requires IsFixedPoint(h, StepN(h, start, m))\n    ensures StepN(h, start, k) == StepN(h, start, m)\n    decreases k - m\n  {\n    if m == k {\n      // 基础情况\n    } else {\n      // 归纳步骤\n      lemma_fixed_point_stable(h, start, m, k-1);\n      // 现在 StepN(h, start, k-1) = StepN(h, start, m)\n      var prev := StepN(h, start, k-1);\n      // 由不动点性质,后继仍是自身\n      assert Successor(h, prev) == prev;\n      // 因此 StepN(h, start, k) = Successor(h, prev) = prev\n      assert StepN(h, start, k) == StepN(h, start, m);\n    }\n  }\n\n  // ------------------------------------------------------------------\n  // 推论:若两条有限路径都终止于出口,则出口相同\n  // (等价于定理,但使用路径长度可能不同)\n  // ------------------------------------------------------------------\n  corollary UniqueOutletIfBothTerminate(\n    h: array2<real>,\n    start: Cell,\n    steps1: nat, steps2: nat\n  )\n    requires 0 <= start.0 < h.Length0 && 0 <= start.1 < h.Length1\n    requires IsFixedPoint(h, StepN(h, start, steps1))\n    requires IsFixedPoint(h, StepN(h, start, steps2))\n    ensures StepN(h, start, steps1) == StepN(h, start, steps2)\n  {\n    WatershedUniqueness(h, start, steps1, steps2);\n  }\n\n  // ------------------------------------------------------------------\n  // 注记:与 GPB-015 Layer B 的关系\n  // ------------------------------------------------------------------\n  // 本文件证明的是 Layer A:当轨道终止时,出口唯一。\n  // Layer B (P-006b) 构造了一个 4 单元格的平坦环,其中流向形成循环,\n  // 不存在不动点。该反例不违反本定理,因为前提条件(存在不动点)不满足。\n  //\n  // 实际 DEM 中,平坦区域确实可能产生循环,此时流域划分需要额外处理\n  // (如填洼或平坦区域解析)。本定理划清了确定性流向的可靠边界:\n  //   终止 → 唯一出口\n  //   不终止 → 需要额外算法处理\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-006 — 确定性 D8 流向下的流域出口唯一性\\n\";\n  print \"验证命令: dafny verify P006_watershed.dfy\\n\";\n  print \"覆盖: GPB-015 Layer A (终止轨道出口唯一性)\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

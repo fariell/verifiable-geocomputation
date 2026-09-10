@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1711,
+    "completion_tokens": 585,
+    "total_tokens": 2296,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1711
+  },
+  "api_id": "01a08a71a88022d82f0cad54e4fd366f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Real.Basic\n\nopen Matrix\n\n-- A 3×3 window of elevations (real numbers)\nstructure Window3x3 where\n  a : ℝ  -- top-left\n  b : ℝ  -- top-center\n  c : ℝ  -- top-right\n  d : ℝ  -- middle-left\n  e : ℝ  -- center\n  f : ℝ  -- middle-right\n  g : ℝ  -- bottom-left\n  h : ℝ  -- bottom-center\n  i : ℝ  -- bottom-right\n\nnamespace Window3x3\n\n-- Orthogonal neighbors of the center cell\ndef orthogonalNeighbors (w : Window3x3) : List ℝ :=\n  [w.b, w.d, w.f, w.h]\n\n-- Discrete local maximum condition: center ≥ each orthogonal neighbor\ndef isLocalMax (w : Window3x3) : Prop :=\n  ∀ x ∈ w.orthogonalNeighbors, w.e ≥ x\n\n-- Discrete Laplacian (using the standard 4-neighbor stencil)\n-- Δe = (b + d + f + h) - 4*e\ndef laplacian (w : Window3x3) : ℝ :=\n  (w.b + w.d + w.f + w.h) - 4 * w.e\n\n-- The theorem: if center is a discrete local max, then Laplacian ≤ 0\ntheorem local_max_implies_nonpositive_laplacian (w : Window3x3) :\n    w.isLocalMax → w.laplacian ≤ 0 := by\n  intro hmax\n  -- Expand the local max condition for each neighbor\n  have hb : w.e ≥ w.b := hmax w.b (by simp [orthogonalNeighbors])\n  have hd : w.e ≥ w.d := hmax w.d (by simp [orthogonalNeighbors])\n  have hf : w.e ≥ w.f := hmax w.f (by simp [orthogonalNeighbors])\n  have hh : w.e ≥ w.h := hmax w.h (by simp [orthogonalNeighbors])\n  -- Compute Laplacian\n  calc\n    w.laplacian = (w.b + w.d + w.f + w.h) - 4 * w.e := rfl\n    _ ≤ (w.e + w.e + w.e + w.e) - 4 * w.e := by\n      -- Each neighbor ≤ center\n      have hsum : w.b + w.d + w.f + w.h ≤ w.e + w.e + w.e + w.e := by\n        linarith\n      linarith\n    _ = 0 := by ring\n\nend Window3x3\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

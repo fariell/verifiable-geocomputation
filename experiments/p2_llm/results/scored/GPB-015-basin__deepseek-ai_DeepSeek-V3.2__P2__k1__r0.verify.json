@@ -1,0 +1,29 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_x7rfgezy/candidate.dfy\""
+    ],
+    "rc": 4,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_x7rfgezy/candidate.dfy\",\"range\":{\"start\":{\"pos\":482,\"line\":9,\"character\":0},\"end\":{\"pos\":483,\"line\":9,\"character\":1}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"a postcondition could not be proved on this return path\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_x7rfgezy/candidate.dfy\",\"range\":{\"start\":{\"pos\":470,\"line\":8,\"character\":18},\"end\":{\"pos\":472,\"line\":8,\"character\":20}}},\"arguments\":[],\"errorId\":\"\",\"defaultFormatMessage\":\"this is the postcondition that could not be proved\"}]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_x7rfgezy/candidate.dfy\",\"range\":{\"start\":{\"pos\":663,\"line\":13,\"character\":39},\"end\":{\"pos\":665,\"line\":13,\"character\":41}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"variable \\u0027n1\\u0027, which is subject to definite-assignment rules, might be uninitialized here\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_x7rfgezy/candidate.dfy\",\"range\":{\"start\":{\"pos\":708,\"line\":14,\"character\":39},\"end\":{\"pos\":710,\"line\":14,\"character\":41}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"variable \\u0027n2\\u0027, which is subject to definite-assignment rules, might be uninitialized here\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 1 verified, 3 errors\\n\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "failure_code": "F3",
+  "interpret": {
+    "compile_rc": 0,
+    "verify_rc": 1,
+    "failure_code": "F3",
+    "interpreted_from": "verifier_finished",
+    "proc_rc": 4,
+    "n_verify_errors": 3
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

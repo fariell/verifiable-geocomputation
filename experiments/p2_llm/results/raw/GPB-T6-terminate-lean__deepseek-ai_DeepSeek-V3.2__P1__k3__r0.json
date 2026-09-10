@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2984,
+    "completion_tokens": 1705,
+    "total_tokens": 4689,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 40
+  },
+  "api_id": "01a08b2b3cb4fea1ed602d11eefac04d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : 确定性 D8 流向下的流域唯一性\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. Dafny 的 `decreases` 子句要求显式提供度量函数;Lean 的 `WellFoundedRelation`\n       通过类型类自动推导。这里我们显式构造一个基于有限格网大小的良基关系。\n\n    2. 证明风格:Dafny 靠 SMT 自动验证终止性;Lean 需要显式提供良基论证。\n       同一条性质在两边自动化的程度差异,本身就是 GeoProofBench 想测量的东西。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Finset.Basic\n\nnamespace VeriGIS.Watershed\n\n-- 非计算部分: 我们只证明结构性质,不提供可执行代码\nnoncomputable section\n\n/-!\n  ## 格网与流向约定\n\n  设 `Cell` 为有限类型,表示 DEM 中的单元格。\n  严格下降后继函数 `succ : Cell → Cell` 满足:\n    - 若 `succ c = c`, 则 `c` 是固定点(洼地或边界)\n    - 否则 `h (succ c) < h c` (严格下降)\n\n  目标: 证明从任意单元格出发的轨道都会终止于固定点。\n-/\n\nvariable {Cell : Type} [Fintype Cell] [DecidableEq Cell]\nvariable (succ : Cell → Cell) (h : Cell → ℕ)\n\n/-- 严格下降条件: 若非固定点,则后继的高程严格降低 -/\ndef StrictDescent : Prop :=\n  ∀ c, succ c ≠ c → h (succ c) < h c\n\n/-- 轨道: 从 `c` 开始重复应用 `succ` 得到的序列 -/\ndef orbit (c : Cell) : ℕ → Cell\n  | 0 => c\n  | n + 1 => succ (orbit c n)\n\n/-- 固定点: 后继等于自身 -/\ndef IsFixedPoint (c : Cell) : Prop := succ c = c\n\n/-- 终止性: 存在 `n` 使得 `orbit c n` 是固定点 -/\ndef TerminatesAt (c : Cell) : Prop :=\n  ∃ n, IsFixedPoint succ (orbit succ c n)\n\n/-- 所有轨道都终止 -/\ndef AllOrbitsTerminate : Prop :=\n  ∀ c, TerminatesAt succ c\n\n/-!\n  ## 良基论证\n\n  关键观察: 在严格下降条件下,高程 `h c` 构成一个自然数度量。\n  由于 `Cell` 有限,我们可以用 `Finset.card` 来界定轨道长度。\n-/\n\n/-- 可达集: 从 `c` 出发通过 `succ` 可达的单元格集合 -/\ndef reachableSet (c : Cell) : Finset Cell :=\n  Finset.filter (fun x => ∃ n, orbit succ c n = x) Finset.univ\n\n/-- 度量函数: 当前单元格的高程加上可达集的大小 -/\ndef measure (c : Cell) : ℕ × ℕ :=\n  (h c, Finset.card (reachableSet succ c))\n\n/-- 字典序的良基关系 -/\ntheorem measure_decreases (h_desc : StrictDescent succ h) (c : Cell) (h_not_fixed : succ c ≠ c) :\n    Prod.Lex (· < ·) (· < ·) (measure succ h (succ c)) (measure succ h c) := by\n  unfold measure reachableSet\n  constructor\n  · -- 第一部分: 高程严格下降\n    exact h_desc c h_not_fixed\n  · -- 第二部分: 可达集大小不变或减小\n    have h_reach : reachableSet succ (succ c) ⊆ reachableSet succ c := by\n      intro x hx\n      rcases Finset.mem_filter.mp hx with ⟨hx_univ, ⟨n, hx_eq⟩⟩\n      refine Finset.mem_filter.mpr ⟨hx_univ, ?_⟩\n      use n + 1\n      simp [orbit, hx_eq]\n    exact Finset.card_le_univ_of_subset h_reach\n\n/-- 主要定理: 在严格下降条件下,所有轨道都终止于固定点 -/\ntheorem all_orbits_terminate (h_desc : StrictDescent succ h) : AllOrbitsTerminate succ := by\n  intro c\n  -- 使用良基归纳法\n  refine WellFounded.induction (Prod.instWellFoundedLT_prod).wf (measure succ h c) ?_\n  intro m IH\n  by_cases h_fixed : IsFixedPoint succ c\n  · -- 如果已经是固定点,则立即终止\n    refine ⟨0, ?_⟩\n    exact h_fixed\n  · -- 否则应用后继并利用归纳假设\n    have h_not_fixed : succ c ≠ c := h_fixed\n    have h_decr : Prod.Lex (· < ·) (· < ·) (measure succ h (succ c)) (measure succ h c) :=\n      measure_decreases succ h h_desc c h_not_fixed\n    rcases IH (measure succ h (succ c)) h_decr with ⟨n, hn⟩\n    refine ⟨n + 1, ?_⟩\n    simp [orbit, hn]\n\n/-!\n  ## 推论: 唯一出口\n\n  在严格下降条件下,每个单元格有唯一出口(即后继是固定点时就是自身,\n  否则是严格下降的后继)。这保证了流域划分的唯一性。\n-/\n\n/-- 出口唯一性: 每个单元格的后继要么是自身(洼地),要么是严格下降的邻居 -/\ntheorem unique_outlet (h_desc : StrictDescent succ h) (c : Cell) :\n    (IsFixedPoint succ c) ∨ (h (succ c) < h c) := by\n  by_cases h_eq : succ c = c\n  · left; exact h_eq\n  · right; exact h_desc c h_eq\n\n-- ==========================================================================\n-- 冒烟测试(非命题,仅确认类型检查通过)\n-- ==========================================================================\n\nexample : True := by\n  trivial\n\n-- ==========================================================================\n-- 结构注记\n-- --------------------------------------------------------------------------\n-- 上面的证明依赖于两个关键假设:\n--\n--   1) `Cell` 是有限类型: 保证可达集有限,从而度量函数有界。\n--   2) `h : Cell → ℕ` 取值自然数: 保证严格下降序列必然终止。\n--\n-- 在实际 DEM 中,高程通常是实数。但我们可以通过离散化(如乘以精度因子后取整)\n-- 或使用实数上的良序关系(如将高程映射到某个良序集)来适配这个框架。\n--\n-- 对于 P-006b 的 4-环反例,上述假设被破坏: 在平坦区域(等高),\n-- 严格下降条件不成立,因此轨道可能无限循环。这正是\"代数半部\"要揭示的:\n-- 终止性依赖于严格下降条件,而平坦区域需要特殊处理。\n-- ==========================================================================\n\nend -- noncomputable section\n\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

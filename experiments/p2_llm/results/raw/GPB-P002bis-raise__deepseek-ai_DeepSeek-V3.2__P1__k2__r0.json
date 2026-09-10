@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3077,
+    "completion_tokens": 1135,
+    "total_tokens": 4212,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3077
+  },
+  "api_id": "01a08b1ce7b9e55e53e2190591f49b0b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-002-bis\n//  文件 : formal/dafny/P002_bis_raise_nbr.dfy\n//  算子 : Wang & Liu (2016) 填洼的局部抬升步骤\n//  覆盖 : GPB-021 的代数部分(抬升邻居不降低高程)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P002_bis_raise_nbr.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么需要这个引理(科学动机)\n//  ----------------------------\n//  Wang & Liu 的 4-连通填洼算法从边界开始,以优先队列传播高程。\n//  核心步骤 RaiseNbr 处理一个已填充的单元格 p 和它的 4-邻居 n:\n//      新高程 = max(原始邻居高程, 已填充单元格的高程)\n//\n//  这个步骤必须保证两个关键的不变量:\n//      1) 不会降低任何单元格的高程(单调性)\n//      2) 邻居至少被抬升到 max(原始邻居, 已填充单元格)\n//\n//  本文件证明这个局部步骤满足这两个性质,为整个填洼算法的\n//  正确性提供基础模块。\n//\n// ===========================================================================\n\nmodule RaiseNbr {\n  // ------------------------------------------------------------------\n  // 核心函数: 抬升邻居的高程\n  // 参数:\n  //   orig_nbr: 邻居单元格的原始高程\n  //   fill_cell: 已处理单元格的填充后高程\n  // 返回: 邻居单元格的新高程\n  // ------------------------------------------------------------------\n  function RaiseNbr(orig_nbr: real, fill_cell: real): real\n  {\n    if orig_nbr >= fill_cell then orig_nbr else fill_cell\n  }\n\n  // ==================================================================\n  // 性质 1: 抬升不会降低高程\n  // 对于任何 orig_nbr 和 fill_cell, RaiseNbr 的结果 ≥ orig_nbr\n  // ==================================================================\n  lemma RaiseNbrNeverDecreases(orig_nbr: real, fill_cell: real)\n    ensures RaiseNbr(orig_nbr, fill_cell) >= orig_nbr\n  {\n    // 根据 RaiseNbr 的定义直接得出\n    // 情况 1: orig_nbr >= fill_cell → 返回 orig_nbr = orig_nbr\n    // 情况 2: orig_nbr < fill_cell → 返回 fill_cell > orig_nbr\n  }\n\n  // ==================================================================\n  // 性质 2: 邻居至少被抬升到 max(原始邻居, 已填充单元格)\n  // 实际上, RaiseNbr 的结果就是 max(orig_nbr, fill_cell)\n  // ==================================================================\n  lemma RaiseNbrLiftsToMax(orig_nbr: real, fill_cell: real)\n    ensures RaiseNbr(orig_nbr, fill_cell) >= orig_nbr\n    ensures RaiseNbr(orig_nbr, fill_cell) >= fill_cell\n    ensures RaiseNbr(orig_nbr, fill_cell) == (\n      if orig_nbr >= fill_cell then orig_nbr else fill_cell\n    )\n  {\n    // 第一个确保条件已由 RaiseNbrNeverDecreases 证明\n    // 第二个确保条件:\n    //   情况 1: orig_nbr >= fill_cell → RaiseNbr = orig_nbr ≥ fill_cell\n    //   情况 2: orig_nbr < fill_cell → RaiseNbr = fill_cell ≥ fill_cell\n    // 第三个确保条件就是函数定义\n  }\n\n  // ==================================================================\n  // 组合引理: 同时满足两个性质\n  // 这正是任务规格中描述的性质\n  // ==================================================================\n  lemma RaiseNbrProperties(orig_nbr: real, fill_cell: real)\n    ensures RaiseNbr(orig_nbr, fill_cell) >= orig_nbr  // 不降低高程\n    ensures RaiseNbr(orig_nbr, fill_cell) >= (\n      if orig_nbr >= fill_cell then orig_nbr else fill_cell\n    )  // 抬升到至少 max(orig_nbr, fill_cell)\n  {\n    // 调用已证明的引理\n    RaiseNbrNeverDecreases(orig_nbr, fill_cell);\n    // 第二个确保条件等价于 RaiseNbr >= max(orig_nbr, fill_cell)\n    // 而根据定义，RaiseNbr 就是 max(orig_nbr, fill_cell)\n    assert RaiseNbr(orig_nbr, fill_cell) == (\n      if orig_nbr >= fill_cell then orig_nbr else fill_cell\n    );\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-002-bis — RaiseNbr 的两个关键性质\\n\";\n  print \"1. 抬升邻居不会降低其高程\\n\";\n  print \"2. 邻居被抬升到至少 max(原始邻居, 已处理单元格)\\n\";\n  print \"全部由编译期验证: dafny verify P002_bis_raise_nbr.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

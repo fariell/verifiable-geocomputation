@@ -1,0 +1,29 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_i__5vph_/candidate.dfy\""
+    ],
+    "rc": 2,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_i__5vph_/candidate.dfy\",\"range\":{\"start\":{\"pos\":4390,\"line\":98,\"character\":4},\"end\":{\"pos\":4396,\"line\":98,\"character\":10}}},\"severity\":2,\"arguments\":[],\"defaultFormatMessage\":\"assume statement has no {:axiom} annotation\",\"errorId\":\"r_assume_statement_without_axiom\",\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 9 verified, 0 errors\\n\"}\n{\"type\":\"status\",\"value\":\"Compilation failed because warnings were found and --allow-warnings is false\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "failure_code": null,
+  "interpret": {
+    "compile_rc": 0,
+    "verify_rc": 0,
+    "failure_code": null,
+    "interpreted_from": "verifier_finished",
+    "proc_rc": 2,
+    "n_verify_errors": 0
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

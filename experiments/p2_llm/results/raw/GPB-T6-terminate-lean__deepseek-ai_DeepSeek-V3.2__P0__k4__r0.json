@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1578,
+    "completion_tokens": 990,
+    "total_tokens": 2568,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1578
+  },
+  "api_id": "01a08b2546264d4ad3b9fea003cd4e4a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Logic.Relation\n\nsection\n\nvariable {α : Type} [Fintype α] (succ : α → α)\n\n/-- A strict descent relation: `succ a = b` and `b ≠ a`. -/\ndef StrictDescent (a b : α) : Prop := succ a = b ∧ b ≠ a\n\n/-- A fixed point of `succ`. -/\ndef IsFixedPoint (a : α) : Prop := succ a = a\n\n/-- The orbit of `a` under `succ`. -/\ndef orbit (a : α) : ℕ → α\n  | 0 => a\n  | n + 1 => succ (orbit a n)\n\n/-- The orbit terminates at a fixed point if it eventually reaches a fixed point. -/\ndef TerminatesAtFixedPoint (a : α) : Prop :=\n  ∃ n : ℕ, IsFixedPoint succ (orbit a n) ∧ ∀ m < n, ¬ IsFixedPoint succ (orbit a m)\n\n/-- A measure that strictly decreases under strict descent. -/\ndef descentMeasure (a : α) : ℕ :=\n  Fintype.card α - Fintype.card {x | ∃ k : ℕ, orbit a k = x}\n\ntheorem descentMeasure_decreases {a : α} (h : StrictDescent succ a (succ a)) :\n    descentMeasure succ (succ a) < descentMeasure succ a := by\n  unfold descentMeasure\n  have hcard : Fintype.card {x | ∃ k : ℕ, orbit (succ a) k = x} ≤ Fintype.card {x | ∃ k : ℕ, orbit a k = x} := by\n    refine Fintype.card_le_univ_of_surjective ?_\n    intro x\n    rcases x with ⟨x, ⟨k, hk⟩⟩\n    refine ⟨⟨x, ⟨k + 1, ?_⟩⟩, Subtype.ext hk⟩\n    simp [orbit, hk]\n  have hstrict : Fintype.card {x | ∃ k : ℕ, orbit a k = x} < Fintype.card α := by\n    refine lt_of_le_of_ne ?_ ?_\n    · exact Fintype.card_le_univ\n    · intro hcard_eq\n      have : ∀ x : α, ∃ k : ℕ, orbit a k = x := by\n        intro x\n        have := Fintype.card_congr (Equiv.subtypeUnivEquiv (by intro x; exact ⟨fun ⟨k, hk⟩ => hk ▸ mem_univ x, fun _ => ⟨0, rfl⟩⟩))\n        simp_rw [Fintype.card_subtype, Fintype.card_fin] at hcard_eq\n        exact Fintype.complete x\n      have hfixed : IsFixedPoint succ a := by\n        have := this (succ a)\n        rcases this with ⟨k, hk⟩\n        induction' k with k ih\n        · simp [orbit] at hk\n          exact hk.symm\n        · simp [orbit] at hk\n          rw [hk] at ih\n          exact ih\n      rcases h with ⟨hsucc, hne⟩\n      apply hne\n      rw [← hsucc, hfixed]\n  omega\n\ntheorem termination_of_strict_descent (hdesc : ∀ a, succ a ≠ a → StrictDescent succ a (succ a)) :\n    ∀ a, TerminatesAtFixedPoint succ a := by\n  intro a\n  by_cases hfixed : IsFixedPoint succ a\n  · refine ⟨0, hfixed, by intro m hm; exfalso; omega⟩\n  · have hstrict : StrictDescent succ a (succ a) := hdesc a (by\n      intro h\n      apply hfixed\n      exact h)\n    have : descentMeasure succ (succ a) < descentMeasure succ a :=\n      descentMeasure_decreases succ hstrict\n    have IH := termination_of_strict_descent hdesc (succ a)\n    rcases IH with ⟨n, hn_fixed, hn_min⟩\n    refine ⟨n + 1, hn_fixed, ?_⟩\n    intro m hm\n    rcases Nat.lt_succ_iff_lt_or_eq.mp hm with (hm' | rfl)\n    · exact hn_min m hm'\n    · exact hfixed\n\nend\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

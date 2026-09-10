@@ -1,0 +1,57 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [
+    "RaiseNbr"
+  ],
+  "n_gen_names": 4,
+  "n_gold_names": 11,
+  "keyword_hits": {
+    "keywords": [
+      "already-processed",
+      "cell",
+      "decreases",
+      "elevation",
+      "fill",
+      "least",
+      "lifted",
+      "local",
+      "neighbor",
+      "never",
+      "original",
+      "processed",
+      "raise",
+      "raisenbr",
+      "raising",
+      "step"
+    ],
+    "hit": [
+      "cell",
+      "decreases",
+      "fill",
+      "never",
+      "raise",
+      "raisenbr"
+    ],
+    "miss": [
+      "already-processed",
+      "elevation",
+      "least",
+      "lifted",
+      "local",
+      "neighbor",
+      "original",
+      "processed",
+      "raising",
+      "step"
+    ],
+    "hit_ratio": 0.375
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "LIKELY_ALIGNED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

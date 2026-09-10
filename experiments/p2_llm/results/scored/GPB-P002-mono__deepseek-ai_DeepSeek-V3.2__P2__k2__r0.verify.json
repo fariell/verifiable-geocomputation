@@ -1,0 +1,29 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_o_tntbdo/candidate.dfy\""
+    ],
+    "rc": 0,
+    "stdout": "{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 2 verified, 0 errors\\n\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "failure_code": null,
+  "interpret": {
+    "compile_rc": 0,
+    "verify_rc": 0,
+    "failure_code": null,
+    "interpreted_from": "verifier_finished",
+    "proc_rc": 0,
+    "n_verify_errors": 0
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

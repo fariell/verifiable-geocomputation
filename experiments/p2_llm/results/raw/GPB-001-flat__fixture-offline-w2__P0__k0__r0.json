@@ -11,12 +11,18 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P001_horn_slope.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 0,
+  "verify_rc": 0,
   "dry_run": false,
   "backend": "fixture",
   "status": "GENERATED_FIXTURE",
   "note": "Offline fixture used for harness path smoke. NOT a live LLM sample; do not report as verify@ / model metric.",
   "raw_text": "// P2_AIMATH W2 offline fixture — NOT gold_formal, NOT a paper metric.\n// Purpose: exercise harness generate→verify→score path when external LLM API is unreachable.\n// Intentional gaps: definitions are stubs; lemma body empty → expected compile/verify fail or skip.\nmodule HornSlopeSmokeFixture {\n  function SlopeSq(a: real, b: real, c: real, d: real, f: real,\n                   g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    0.0  // stub: deliberately wrong / incomplete vs Horn formula\n  }\n\n  lemma FlatSlopeZero(C: real, w: real)\n    requires w > 0.0\n    ensures SlopeSq(C, C, C, C, C, C, C, C, w) == 0.0\n  {\n  }\n}\n",
-  "verify_status": "TOOLCHAIN_MISSING"
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null,
+  "semantic": "VERIFIED_NEEDS_HUMAN",
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "metric_eligible": false,
+  "backfill_ts_utc": "2026-09-10T07:55:03.249353+00:00"
 }

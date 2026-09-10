@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1686,
+    "completion_tokens": 1337,
+    "total_tokens": 3023,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1686
+  },
+  "api_id": "01a08a9809bc55fd5c89105f1c0feb02",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of D8 steepest-descent routing pit condition\n// Property: If no neighbor is strictly lower than center, flow direction is NoFlow\n\nmodule P005_D8 {\n  // Grid dimensions\n  const N: int\n  const M: int\n  ghost predicate ValidGrid() reads {\n    N > 0 && M > 0\n  }\n\n  // Height values at grid positions\n  function height(r: int, c: int): real\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n\n  // D8 neighbor offsets (row, column, squared distance)\n  const neighborOffsets: seq<(int, int, real)> := [\n    (0, 1, 1.0),   // E\n    (1, 1, 2.0),   // SE\n    (1, 0, 1.0),   // S\n    (1, -1, 2.0),  // SW\n    (0, -1, 1.0),  // W\n    (-1, -1, 2.0), // NW\n    (-1, 0, 1.0),  // N\n    (-1, 1, 2.0)   // NE\n  ]\n\n  // Flow direction type\n  datatype FlowDir = \n    | NoFlow()\n    | Dir(name: string, dr: int, dc: int)\n\n  // D8 steepest-descent computation\n  function D8FlowAt(r: int, c: int): FlowDir\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n    reads height\n  {\n    var centerHeight := height(r, c);\n    var bestDir: FlowDir := NoFlow();\n    var bestPower: real := 0.0;\n    \n    for i := 0 to |neighborOffsets| - 1\n      invariant bestDir == NoFlow() || exists j :: 0 <= j < i && \n               bestDir.Dr? && bestDir.Dc? && \n               bestPower == (centerHeight - height(r + bestDir.dr, c + bestDir.dc))^2 / neighborOffsets[j].2\n    {\n      var (dr, dc, dist2) := neighborOffsets[i];\n      var nr := r + dr;\n      var nc := c + dc;\n      \n      if 0 <= nr < N && 0 <= nc < M {\n        var neighborHeight := height(nr, nc);\n        var drop := centerHeight - neighborHeight;\n        if drop > 0.0 {\n          var power := drop * drop / dist2;\n          if bestDir.NoFlow? || power > bestPower {\n            bestDir := Dir(\"\", dr, dc);\n            bestPower := power;\n          }\n        }\n      }\n    }\n    bestDir\n  }\n\n  // Predicate: No neighbor is strictly lower than center\n  predicate NoLowerNeighbor(r: int, c: int)\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n    reads height\n  {\n    forall dr, dc :: \n      (dr, dc) in neighborOffsets[..].(0,1) ==> \n      (0 <= r + dr < N && 0 <= c + dc < M) ==> \n      height(r + dr, c + dc) >= height(r, c)\n  }\n\n  // Main theorem: If no neighbor is strictly lower, flow is NoFlow\n  theorem D8PitNoFlow(r: int, c: int)\n    requires ValidGrid()\n    requires 0 <= r < N && 0 <= c < M\n    requires NoLowerNeighbor(r, c)\n    ensures D8FlowAt(r, c) == NoFlow()\n  {\n    // Show that for every neighbor, either:\n    // 1. It's out of bounds, or\n    // 2. Its height >= center height (so drop <= 0)\n    \n    // The loop in D8FlowAt examines all 8 neighbors\n    // We need to prove that no neighbor satisfies drop > 0\n    \n    // Proof by contradiction: assume some neighbor gives drop > 0\n    if D8FlowAt(r, c) != NoFlow() {\n      // Then there exists a neighbor with drop > 0\n      var dir := D8FlowAt(r, c);\n      assert dir.Dr?; // Because it's not NoFlow\n      var dr := dir.dr;\n      var dc := dir.dc;\n      \n      // This neighbor must be in bounds (from D8FlowAt logic)\n      assert 0 <= r + dr < N && 0 <= c + dc < M;\n      \n      // And must have drop > 0\n      var drop := height(r, c) - height(r + dr, c + dc);\n      assert drop > 0.0;\n      \n      // But NoLowerNeighbor says all neighbors have height >= center\n      assert height(r + dr, c + dc) >= height(r, c);\n      // Contradiction: drop > 0 implies height(neighbor) < height(center)\n      assert false;\n    }\n  }\n\n  // Example: 3x3 pit with rim height 1, center height 0\n  method ExamplePit()\n    requires ValidGrid()\n    requires N >= 3 && M >= 3\n    ensures exists r, c :: 0 <= r < N && 0 <= c < M && D8FlowAt(r, c) == NoFlow()\n  {\n    // Construct a pit at position (1,1)\n    assume forall dr, dc :: \n      (dr, dc) in neighborOffsets[..].(0,1) ==> \n      height(1 + dr, 1 + dc) == 1.0;\n    assume height(1, 1) == 0.0;\n    \n    // Verify the pit condition\n    assert NoLowerNeighbor(1, 1);\n    \n    // Apply the theorem\n    D8PitNoFlow(1, 1);\n    \n    // Witness exists\n    assert D8FlowAt(1, 1) == NoFlow();\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

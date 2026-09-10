@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 339,
+    "total_tokens": 582,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08b1074694d66daf00a1e0824d4b2",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "-- Define the Fill operator for a 1D sequence (list) with left outlet.\n-- Fill(a)[i] is the maximum value seen from the start up to index i.\ndef fill (a : List ℕ) : List ℕ :=\n  a.scanl max 0 |>.tail? |>.getD []\n\n-- Theorem: For all i, if Fill(a)[i] and Fill(a)[i+1] are defined, then Fill(a)[i] ≤ Fill(a)[i+1].\ntheorem fill_nondecreasing (a : List ℕ) (i : ℕ) (h : i + 1 < (fill a).length) :\n    (fill a).get ⟨i, by omega⟩ ≤ (fill a).get ⟨i + 1, h⟩ := by\n  unfold fill\n  match a with\n  | [] => simp\n  | x :: xs =>\n    simp [List.scanl]\n    induction xs generalizing x with\n    | nil => simp\n    | cons y ys ih =>\n      simp [List.scanl]\n      intro hlen\n      have hlen' : i < (List.scanl max (max 0 x) (y :: ys)).length := by\n        simpa [List.length_cons] using h\n      cases' i with i\n      · simp [List.get]\n      · have : i + 1 < (List.scanl max (max 0 x) (y :: ys)).length := by\n          simpa [List.length_cons] using h\n        exact ih this\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

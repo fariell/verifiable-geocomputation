@@ -38,9 +38,13 @@ PROVIDERS: dict[str, dict[str, Any]] = {
     "siliconflow": {
         "env": ("SILICONFLOW_API_KEY",),
         "chat_url": "https://api.siliconflow.cn/v1/chat/completions",
-        "default_model": "deepseek-ai/DeepSeek-V3",
+        "default_model": "deepseek-ai/DeepSeek-V3.2",
         "measured_ms": 328.1,
-        "note": "domestic direct, TCP 82.6 ms; one key serves DeepSeek/Qwen/GLM families",
+        "note": (
+            "domestic direct, TCP 82.6 ms; one key serves DeepSeek/Qwen/GLM families; "
+            "W3 roster M1=V3.2 M2=Qwen2.5-72B M3=GLM-4-32B M4=R1 "
+            "(see results/raw/siliconflow_model_roster_w3.json)"
+        ),
     },
     "deepseek": {
         "env": ("DEEPSEEK_API_KEY",),
@@ -154,7 +158,7 @@ def call_chat_api(
     model: str = "",
     temperature: float = 0.0,
     max_tokens: int = 4096,
-    timeout_s: float = 90.0,
+    timeout_s: float = 180.0,
     provider: str | None = None,
 ) -> dict[str, Any]:
     """Call an OpenAI-compatible endpoint. Return shape matches extract_text()."""

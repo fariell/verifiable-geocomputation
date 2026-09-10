@@ -981,6 +981,54 @@ task16-W3-live verdict = BLOCKED-PI (await SILICONFLOW_API_KEY)
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live) · M1 partial PASS
+
+```
+[task]      task16-W3-live / L1 全量主实验(A.13 + A.16 cold-start)
+[step]      1) 修 Dafny 工具链(WSL 4.11 + ASCII temp + --json-output 解释)
+            2) 修 metric_eligible 假阳性; 新增 verify_backfill.py
+            3) 离线补验既有 .dfy → 再 resume M1 DeepSeek-V3.2 全量 210 cells
+[cmd]       wsl -- bash -lc 'dafny /version'  → dafny 4.11.0.0
+            python harness/run_verify.py --source <raw/*.dfy>
+            python harness/verify_backfill.py --dfy-only
+            python harness/run_l1_batch.py --backend openai --require-live \
+              --models deepseek-ai/DeepSeek-V3.2 --prompts P0,P1,P2 --k 5 \
+              --budget-usd 50 --jsonl results/raw/l1_full_w3_live.jsonl
+[rc]        backfill=0; M1 batch=0 (verdict PASS, partial=true)
+[key lines]
+  toolchain evidence (gold P001): status=RAN compile_rc=0 verify_rc=0 via wsl:/usr/local/bin/dafny
+  toolchain evidence (LLM cell parse-fail): status=RAN compile_rc=1 verify_rc=1 failure_code=F1
+  roster confirmed on GET /v1/models: M1 DeepSeek-V3.2 / M2 Qwen2.5-72B / M3 GLM-4-32B-0414 / M4 R1
+  M1 unique cells=210/210 (gen=174 skip=23 provider_error=13) elapsed_s=14908 est_spend_usd≈0.168
+  metric_eligible RAN=125 (Dafny); TOOLCHAIN_MISSING=70 (all Lean — no lean/lake on Win/WSL)
+  DeepSeek-V3.2 compile@1 = 24/125 = 0.192
+  DeepSeek-V3.2 verify@1  = 18/125 = 0.144
+  semantic on RAN: UNCOMPILED=100 LIKELY_ALIGNED=10 VERIFIED_NEEDS_HUMAN=6 COMPILE_ONLY=6 VERIFIED_BUT_DRIFT_SUSPECT=2 null=1
+  by prompt verify@1: P0=5/41(0.122) P1=3/39(0.077) P2=10/45(0.222)  ← repair gain visible on P2
+  PROVIDER_ERROR class=ReadTimeout (siliconflow); now retryable (no longer permanent SKIP)
+  fixture-offline cell metric_eligible=false (honesty)
+[gates]     A.16 toolchain PASS(dafny); metric_eligible假阳性 FIXED; M1 L1 PASS(partial);
+            Lean verify BLOCKED(local); M2–M4 PENDING; W3.6 not yet (full 4-model incomplete)
+[verdict]   PASS (partial — M1 only)
+[blocker]   (1) Lean/lake 本机+WSL 均无 → Lean 子集 verify@ / semantic 须 AutoDL 补验
+            (2) M2/M3/M4 尚未跑; 13 个 PROVIDER_ERROR 待下轮重试
+            (3) 未达 A.13.5 全量完成 → STATUS 保持 W3/PENDING 不进 W3.6
+```
+
+改了什么:
+- 新: `experiments/p2_llm/harness/verify_backfill.py`
+- 改: `experiments/p2_llm/harness/run_verify.py` — WSL Dafny + `--json-output` 解释 + `is_metric_eligible`
+- 改: `experiments/p2_llm/harness/run_l1_batch.py` — A.16 eligible 门禁; SKIP 时补验; PROVIDER_ERROR 可重试
+- 新: `experiments/p2_llm/results/scored/verify_backfill_w3.json` + `l1_m1_deepseek_v32_partial.json`
+- 改: `experiments/p2_llm/results/raw/l1_full_w3_live.jsonl` + 大量 raw `.dfy/.lean/.json` + scored `*.verify.json`/`*.semantic.json`
+- 改: `experiments/p2_llm/results/scored/l1_batch_w3.json` (M1 210-cell report)
+- 改: INBOX §A `STATUS: W3/PENDING` (M2–M4 resume; 非 W3.6)
+未改 papers/P2(FORM LOCK)。未编造 verify@。未 git push。未写 key 进仓。
+
+task16-W3-live verdict = PASS (M1 partial) / continue W3 for M2–M4
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

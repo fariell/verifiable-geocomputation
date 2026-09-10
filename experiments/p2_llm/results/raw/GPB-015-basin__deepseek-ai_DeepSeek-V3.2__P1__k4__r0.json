@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 1696,
+    "total_tokens": 4787,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 19
+  },
+  "api_id": "01a08ad11544be890de485478db25137",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 确定性 D8 流向下的流域唯一性\n//  覆盖 : GPB-015 (Layer A: 终止轨道出口唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  流域分析中,确定性流向函数(如 D8)从同一单元格出发的流动路径,\n//  若在有限步内终止于某个出口(不动点),则该出口必须唯一。\n//  这一性质是后续累积分析、流域划分正确性的基础。\n//  本文件形式化该唯一性,不依赖不动点搜索,仅通过有界迭代步数证明。\n//\n//  结构说明\n//  --------\n//  1. 导入 D8 流向核(来自 P-005),避免重复实现。\n//  2. 定义有界迭代函数 stepN,模拟最多 N 步的流向追踪。\n//  3. 证明:若从同一单元格出发,分别在步数 m 和 n 内到达出口,\n//     则这两个出口是同一个单元格。\n//  4. 不假设全局终止性,仅对实际终止的路径证明唯一性。\n//\n// ===========================================================================\n\ninclude \"P005_d8.dfy\"  // 导入 D8 流向函数定义\n\nmodule WatershedUniqueness {\n  import opened D8Kernel  // 打开 D8 核模块,使用其类型和函数\n\n  // ------------------------------------------------------------------\n  // 有界迭代函数:从单元格 (r,c) 出发,执行最多 N 步的流向追踪。\n  // 返回 (是否在 N 步内终止, 终止时的单元格, 实际步数)\n  // ------------------------------------------------------------------\n  function stepN(h: Grid, r: int, c: int, N: nat): (terminated: bool, outR: int, outC: int, steps: nat)\n    requires 0 <= r < h.rows && 0 <= c < h.cols\n    decreases N\n  {\n    if N == 0 then\n      (false, r, c, 0)\n    else\n      var d := D8Kernel.d8_at(h, r, c);\n      if d == D8Kernel.NoFlow then\n        (true, r, c, 0)\n      else\n        var (dp, dq) := D8Kernel.delta(d);\n        var nr := r + dq;\n        var nc := c + dp;\n        if !(0 <= nr < h.rows && 0 <= nc < h.cols) then\n          (true, r, c, 0)\n        else\n          var (term, outR, outC, st) := stepN(h, nr, nc, N-1);\n          (term, outR, outC, st+1)\n  }\n\n  // ------------------------------------------------------------------\n  // 辅助引理:若在 N 步内终止,则对于任意 M >= N,在 M 步内也终止,\n  // 且出口相同。\n  // ------------------------------------------------------------------\n  lemma stepN_monotonic(h: Grid, r: int, c: int, N: nat, M: nat)\n    requires 0 <= r < h.rows && 0 <= c < h.cols\n    requires N <= M\n    ensures forall term, outR, outC, steps ::\n      (term, outR, outC, steps) == stepN(h, r, c, N) ==>\n      (term, outR, outC, steps) == stepN(h, r, c, M)\n    decreases M - N\n  {\n    if N == M {\n      // 相等情况直接成立\n    } else {\n      // 归纳步骤:证明 N 到 N+1\n      var (termN, outRN, outCN, stepsN) := stepN(h, r, c, N);\n      var (termN1, outRN1, outCN1, stepsN1) := stepN(h, r, c, N+1);\n      // 根据 stepN 定义,若在 N 步终止,则 N+1 步结果相同\n      if termN {\n        assert termN1 && outRN1 == outRN && outCN1 == outCN && stepsN1 == stepsN;\n      }\n      // 递归应用引理到 N+1 和 M\n      stepN_monotonic(h, r, c, N+1, M);\n    }\n  }\n\n  // ==================================================================\n  // 主定理:流域出口唯一性\n  // 若从同一单元格 (r,c) 出发,分别在 m 步和 n 步内到达出口,\n  // 则这两个出口是同一个单元格。\n  // ==================================================================\n  theorem watershed_unique_outlet(h: Grid, r: int, c: int, m: nat, n: nat)\n    requires 0 <= r < h.rows && 0 <= c < h.cols\n    ensures\n      var (termM, outRM, outCM, stepsM) := stepN(h, r, c, m);\n      var (termN, outRN, outCN, stepsN) := stepN(h, r, c, n);\n      termM && termN ==> outRM == outRN && outCM == outCN\n  {\n    var (termM, outRM, outCM, stepsM) := stepN(h, r, c, m);\n    var (termN, outRN, outCN, stepsN) := stepN(h, r, c, n);\n    if termM && termN {\n      // 取最大步数 M = max(m, n)\n      var M := if m >= n then m else n;\n      // 应用单调性引理\n      stepN_monotonic(h, r, c, m, M);\n      stepN_monotonic(h, r, c, n, M);\n      // 现在两者都在 M 步内终止,且结果与各自原结果相同\n      var (termM2, outRM2, outCM2, stepsM2) := stepN(h, r, c, M);\n      assert termM2 && outRM2 == outRM && outCM2 == outCM;\n      assert termM2 && outRM2 == outRN && outCM2 == outCN;  // 注意:第二个断言来自 n 的单调性\n      // 因此 outRM == outRN 且 outCM == outCN\n    }\n  }\n\n  // ==================================================================\n  // 推论:若在 N 步内终止,则实际步数小于等于 N\n  // (完整性引理,非核心但有用)\n  // ==================================================================\n  lemma steps_bound(h: Grid, r: int, c: int, N: nat)\n    requires 0 <= r < h.rows && 0 <= c < h.cols\n    ensures var (term, outR, outC, steps) := stepN(h, r, c, N);\n            term ==> steps <= N\n    decreases N\n  {\n    var (term, outR, outC, steps) := stepN(h, r, c, N);\n    if term {\n      // 根据 stepN 定义,递归结构保证 steps <= N\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-006 — 确定性 D8 流向下的流域出口唯一性\\n\";\n  print \"定理:若从同一单元格出发在有限步内终止,出口唯一。\\n\";\n  print \"验证: dafny verify P006_watershed.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

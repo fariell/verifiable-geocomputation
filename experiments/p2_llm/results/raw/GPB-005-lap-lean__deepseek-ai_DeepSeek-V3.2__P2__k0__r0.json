@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 684,
+    "total_tokens": 927,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08a79e9da43b4beb7b6ed63416c8c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib\n\n-- We'll define a simple grid as a function from ℤ × ℤ to ℝ\n-- For a 3×3 window, we only need the center and its four orthogonal neighbors.\n-- We'll assume the grid is defined everywhere we need it.\n\n-- Discrete Laplacian (5-point stencil) at (i,j) is:\n--   f(i+1,j) + f(i-1,j) + f(i,j+1) + f(i,j-1) - 4*f(i,j)\n-- If the center is a local maximum in the 4 orthogonal directions, then:\n--   f(i,j) ≥ f(i+1,j), f(i,j) ≥ f(i-1,j), f(i,j) ≥ f(i,j+1), f(i,j) ≥ f(i,j-1)\n-- We want to show that under these conditions, the discrete Laplacian ≤ 0.\n\ntheorem local_max_implies_nonpositive_laplacian\n    (f : ℤ × ℤ → ℝ)\n    (i j : ℤ)\n    (h1 : f (i, j) ≥ f (i+1, j))\n    (h2 : f (i, j) ≥ f (i-1, j))\n    (h3 : f (i, j) ≥ f (i, j+1))\n    (h4 : f (i, j) ≥ f (i, j-1)) :\n    f (i+1, j) + f (i-1, j) + f (i, j+1) + f (i, j-1) - 4 * f (i, j) ≤ 0 := by\n  -- Let L = f(i+1,j) + f(i-1,j) + f(i,j+1) + f(i,j-1) - 4*f(i,j)\n  -- We know each neighbor ≤ f(i,j), so each term f(neighbor) - f(i,j) ≤ 0.\n  -- Therefore, the sum of four such terms is ≤ 0.\n  have h1' : f (i+1, j) - f (i, j) ≤ 0 := by linarith\n  have h2' : f (i-1, j) - f (i, j) ≤ 0 := by linarith\n  have h3' : f (i, j+1) - f (i, j) ≤ 0 := by linarith\n  have h4' : f (i, j-1) - f (i, j) ≤ 0 := by linarith\n  -- Sum the four inequalities\n  have h_sum : (f (i+1, j) - f (i, j)) + (f (i-1, j) - f (i, j)) +\n               (f (i, j+1) - f (i, j)) + (f (i, j-1) - f (i, j)) ≤ 0 := by\n    linarith\n  -- Simplify the left-hand side to get the discrete Laplacian expression\n  ring_nf at h_sum\n  exact h_sum\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

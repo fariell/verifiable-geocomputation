@@ -1,0 +1,37 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3029,
+    "completion_tokens": 1333,
+    "total_tokens": 4362,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 85
+  },
+  "api_id": "01a08718b91761c45502f5a74888f575",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-019\n   文件 : formal/lean4/VeriGIS/HornSlopeNonneg.lean\n   算子 : Horn (1981) 有限差分坡度平方\n   对偶 : formal/dafny/P019_slope_nonnegative.dfy\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  命题：对于任意 3×3 高程窗口和正网格间距 w，Horn 坡度平方 SlopeSq 非负。\n  此性质对任意高程值成立，不仅限于平面表面。\n\n  覆盖：\n    GPB-001 的代数精确性（平面情形）\n    GPB-019 的全局非负性（任意高程）\n    Horn 坡度平方 = (dz/dx)² + (dz/dy)² 的有限差分近似\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Analysis.SpecialFunctions.Pow.Real\n\nnamespace VeriGIS.HornSlope\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下)，与 `Curvature` / Dafny P-003 相同。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n-/\n\n/-- Horn (1981) 有限差分坡度平方算子 -/\ndef slopeSq (a b c d e f g h i w : ℝ) : ℝ :=\n  let dzdx := (c + 2 * f + i - (a + 2 * d + g)) / (8 * w)\n  let dzdy := (g + 2 * h + i - (a + 2 * b + c)) / (8 * w)\n  dzdx ^ 2 + dzdy ^ 2\n\n/-- 辅助引理：分母非零 -/\nlemma eight_w_ne_zero {w : ℝ} (hw : w > 0) : 8 * w ≠ 0 := by\n  linarith [show (0 : ℝ) < 8 from by norm_num, hw]\n\n/-- 主要定理：Horn 坡度平方对任意高程值非负 -/\ntheorem horn_slope_sq_nonneg\n    (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    0 ≤ slopeSq a b c d e f g h i w := by\n  unfold slopeSq\n  have hpos : 0 ≤ (c + 2 * f + i - (a + 2 * d + g)) ^ 2 := pow_two_nonneg _\n  have hpos' : 0 ≤ (g + 2 * h + i - (a + 2 * b + c)) ^ 2 := pow_two_nonneg _\n  have den_pos : 0 < (8 * w) ^ 2 := by\n    have : 0 < 8 * w := by linarith\n    exact pow_pos this 2\n  have h1 : 0 ≤ ((c + 2 * f + i - (a + 2 * d + g)) / (8 * w)) ^ 2 :=\n    div_pow_nonneg (by linarith) (by linarith)\n  have h2 : 0 ≤ ((g + 2 * h + i - (a + 2 * b + c)) / (8 * w)) ^ 2 :=\n    div_pow_nonneg (by linarith) (by linarith)\n  nlinarith\n\n/-- 平面表面的精确性：在平面 z = A·x + B·y + C 上，Horn 坡度平方等于 A² + B² -/\ntheorem horn_slope_sq_exact_on_plane\n    (A B C w : ℝ) (hw : w > 0) :\n    slopeSq\n      (C - A * w - B * w)  -- a\n      (C - B * w)          -- b\n      (C + A * w - B * w)  -- c\n      (C - A * w)          -- d\n      C                    -- e\n      (C + A * w)          -- f\n      (C - A * w + B * w)  -- g\n      (C + B * w)          -- h\n      (C + A * w + B * w)  -- i\n      w = A ^ 2 + B ^ 2 := by\n  unfold slopeSq\n  field_simp [eight_w_ne_zero hw]\n  ring\n\n/-- 非负性的直接推论：坡度平方的平方根（坡度大小）是实数 -/\ntheorem horn_slope_magnitude_real\n    (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    Real.sqrt (slopeSq a b c d e f g h i w) ≥ 0 :=\n  Real.sqrt_nonneg _\n\n/-- 零坡度条件：当窗口完全平坦时，坡度平方为零 -/\ntheorem horn_slope_sq_zero_on_flat\n    (z w : ℝ) (hw : w > 0) :\n    slopeSq z z z z z z z z z w = 0 := by\n  unfold slopeSq\n  norm_num\n\n/-- 对称性：坡度平方在旋转 90° 后不变 -/\ntheorem horn_slope_sq_rotate_90\n    (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    slopeSq a b c d e f g h i w =\n    slopeSq c f i b e h a d g w := by\n  unfold slopeSq\n  ring\n\nend\nend VeriGIS.HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING"
+}

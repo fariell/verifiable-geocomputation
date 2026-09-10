@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3187,
+    "completion_tokens": 1747,
+    "total_tokens": 4934,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 115
+  },
+  "api_id": "01a08af67e7a949a44b0a3095b644158",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-5 / GPB-026\n//  文件 : formal/dafny/PCOMP_5_idempotent.dfy\n//  算子 : 1D 左出口填洼 (P-002 Fill 的一维特化)\n//  覆盖 : GPB-026(i) — 填洼算子的幂等性\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_5_idempotent.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么证这一条(科学动机)\n//  --------------------------\n//  填洼是 DEM 预处理的核心算子,其幂等性是后续流域分析可靠性的基石。\n//  若 Fill(Fill(a)) ≠ Fill(a),则迭代填洼会不断改变地形,导致流向、\n//  累积流等衍生指标失去稳定收敛性。\n//\n//  一维左出口特化是二维填洼在单行上的投影,保留了幂等性证明所需的\n//  关键结构:单调前缀传播。本证明为二维填洼的幂等性提供模块化基础。\n//\n// ===========================================================================\n\nmodule PitFillingIdempotent {\n\n  // ------------------------------------------------------------------\n  // 1D 左出口填洼算子 (P-002 Fill 的一维版本)\n  // 输入: 高程数组 a[0..n-1], 水流只能向左流(即向右看是上游)\n  // 输出: b[i] = max(a[0], a[1], ..., a[i])  即前缀最大值\n  // ------------------------------------------------------------------\n\n  function Fill1D(a: seq<real>): seq<real>\n    reads {}\n    ensures |Fill1D(a)| == |a|\n    ensures forall i :: 0 <= i < |a| ==> Fill1D(a)[i] == MaxPrefix(a, i)\n  {\n    if |a| == 0 then []\n    else Fill1DHelper(a, 0, a[0])\n  }\n\n  // 辅助函数: 计算前缀最大值序列\n  function Fill1DHelper(a: seq<real>, idx: int, runningMax: real): seq<real>\n    requires 0 <= idx <= |a|\n    reads {}\n    ensures |Fill1DHelper(a, idx, runningMax)| == |a| - idx\n    ensures forall j :: 0 <= j < |a| - idx ==> \n            Fill1DHelper(a, idx, runningMax)[j] == MaxPrefix(a, idx + j)\n    decreases |a| - idx\n  {\n    if idx == |a| then []\n    else\n      var newMax := if a[idx] > runningMax then a[idx] else runningMax;\n      [newMax] + Fill1DHelper(a, idx + 1, newMax)\n  }\n\n  // 前缀最大值函数\n  function MaxPrefix(a: seq<real>, i: int): real\n    requires 0 <= i < |a|\n    reads {}\n  {\n    if i == 0 then a[0]\n    else\n      var prev := MaxPrefix(a, i - 1);\n      if a[i] > prev then a[i] else prev\n  }\n\n  // ------------------------------------------------------------------\n  // 引理: 前缀最大值序列是单调非递减的\n  // ------------------------------------------------------------------\n  lemma Fill1DIsMonotonic(a: seq<real>)\n    ensures forall i :: 0 <= i < |a| - 1 ==> Fill1D(a)[i] <= Fill1D(a)[i + 1]\n  {\n    // 由 Fill1D 定义直接可得\n  }\n\n  // ------------------------------------------------------------------\n  // 主要定理: 填洼算子的幂等性\n  // 定理陈述: Fill(Fill(a)) = Fill(a)\n  // ------------------------------------------------------------------\n  theorem FillIdempotent(a: seq<real>)\n    ensures Fill1D(Fill1D(a)) == Fill1D(a)\n  {\n    // 策略: 证明两次填洼的结果与一次填洼相同\n    // 关键观察: 对任意 i, Fill1D(a)[i] 已经是 a[0..i] 的最大值\n    //           因此对 Fill1D(a) 再次应用前缀最大值不会改变任何元素\n\n    if |a| == 0 {\n      // 空序列情况平凡成立\n    } else {\n      // 归纳证明每个位置上的值相等\n      IdempotentHelper(a, 0, a[0]);\n    }\n  }\n\n  // 归纳辅助引理\n  lemma IdempotentHelper(a: seq<real>, idx: int, runningMax: real)\n    requires 0 <= idx <= |a|\n    ensures Fill1DHelper(Fill1DHelper(a, idx, runningMax), 0, runningMax)\n           == Fill1DHelper(a, idx, runningMax)\n    decreases |a| - idx\n  {\n    if idx == |a| {\n      // 基本情况\n    } else {\n      var newMax := if a[idx] > runningMax then a[idx] else runningMax;\n      // 递归步骤\n      IdempotentHelper(a, idx + 1, newMax);\n    }\n  }\n\n  // ------------------------------------------------------------------\n  // 推论: 已不向左溢出的单元是 Raise 的不动点\n  // 即: 若 a[i] >= a[i-1] (对于 i>0), 则 Fill1D(a)[i] = a[i]\n  // ------------------------------------------------------------------\n  lemma FixedPointOfRaise(a: seq<real>, i: int)\n    requires 0 <= i < |a|\n    requires i == 0 || a[i] >= a[i - 1]\n    ensures Fill1D(a)[i] == a[i]\n  {\n    // 由前缀最大值的定义直接可得\n    // 当 a[i] >= a[i-1] 且 a[i] >= 所有更早元素时, a[i] 就是前缀最大值\n  }\n\n  // ------------------------------------------------------------------\n  // 验证示例: 与参考实现中的四个测试用例一致\n  // ------------------------------------------------------------------\n  method VerifyHashCases() {\n    // 用例1: 平面 (5,5,5,5)\n    var case1 := [5.0, 5.0, 5.0, 5.0];\n    var fill1 := Fill1D(case1);\n    assert fill1 == case1;\n    assert Fill1D(fill1) == fill1;  // 幂等性\n\n    // 用例2: 洼地 (3,1,4)\n    var case2 := [3.0, 1.0, 4.0];\n    var fill2 := Fill1D(case2);\n    assert fill2 == [3.0, 3.0, 4.0];\n    assert Fill1D(fill2) == fill2;\n\n    // 用例3: 斜坡 (0,1,2,3)\n    var case3 := [0.0, 1.0, 2.0, 3.0];\n    var fill3 := Fill1D(case3);\n    assert fill3 == case3;\n    assert Fill1D(fill3) == fill3;\n\n    // 用例4: 级联洼地 (3,1,0)\n    var case4 := [3.0, 1.0, 0.0];\n    var fill4 := Fill1D(case4);\n    assert fill4 == [3.0, 3.0, 3.0];\n    assert Fill1D(fill4) == fill4;\n\n    print \"P-COMP-5: 四个测试用例的幂等性验证通过\\n\";\n  }\n\n}\n\nmethod Main() {\n  print \"GeoProofBench P-COMP-5 — 1D 填洼算子幂等性证明\\n\";\n  print \"编译期验证: dafny verify PCOMP_5_idempotent.dfy\\n\";\n  PitFillingIdempotent.VerifyHashCases();\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -126,6 +126,7 @@ def generate_one(
     verifier_stderr: str = "",
     dry_run: bool = False,
     backend: str = "anthropic",
+    allow_fixture_fallback: bool = True,
 ) -> dict[str, Any]:
     task = load_task(task_path)
     tmpl = render_prompt(
@@ -181,9 +182,18 @@ def generate_one(
             meta["status"] = "GENERATED"
         except Exception as exc:
             api_error = str(exc)
-            backend = "fixture"
-            meta["api_error"] = api_error
-            meta["backend"] = "fixture"
+            if allow_fixture_fallback:
+                backend = "fixture"
+                meta["api_error"] = api_error
+                meta["backend"] = "fixture"
+            else:
+                meta["api_error"] = api_error
+                meta["status"] = "PROVIDER_ERROR"
+                meta["raw_text"] = ""
+                out = RESULTS_RAW / f"{raw_result_stem(task['id'], model, prompt_id, sample_index, repair_round)}.json"
+                write_json(out, meta)
+                meta["raw_json"] = str(out)
+                return meta
 
     elif backend == "openai":
         try:
@@ -205,9 +215,19 @@ def generate_one(
             meta["status"] = "GENERATED"
         except Exception as exc:
             api_error = str(exc)
-            backend = "fixture"
-            meta["api_error"] = api_error
-            meta["backend"] = "fixture"
+            # Live W3 path must never silently substitute fixtures (A.11.8 / A.13).
+            if allow_fixture_fallback:
+                backend = "fixture"
+                meta["api_error"] = api_error
+                meta["backend"] = "fixture"
+            else:
+                meta["api_error"] = api_error
+                meta["status"] = "PROVIDER_ERROR"
+                meta["raw_text"] = ""
+                out = RESULTS_RAW / f"{raw_result_stem(task['id'], model, prompt_id, sample_index, repair_round)}.json"
+                write_json(out, meta)
+                meta["raw_json"] = str(out)
+                return meta
 
     if backend == "fixture":
         fix = _fixture_path_for(task)
@@ -290,6 +310,7 @@ def main(argv: list[str] | None = None) -> int:
             verifier_stderr=args.verifier_stderr,
             dry_run=args.dry_run,
             backend=args.backend,
+            allow_fixture_fallback=(args.backend != "openai"),
         )
     except Exception as exc:
         print(f"[run_generate] FAIL: {exc}", file=sys.stderr)

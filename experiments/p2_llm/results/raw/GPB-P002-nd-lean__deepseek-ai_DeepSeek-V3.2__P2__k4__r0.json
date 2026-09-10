@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 325,
+    "total_tokens": 568,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08b11f8e5328a1e9323a48182794f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "def Fill (a : List ℕ) : List ℕ :=\n  match a with\n  | [] => []\n  | h :: t =>\n      let rec loop (current : ℕ) (rest : List ℕ) : List ℕ :=\n        match rest with\n        | [] => [current]\n        | h :: t =>\n            let next := max current h\n            current :: loop next t\n      loop h t\n\ntheorem Fill_nondecreasing (a : List ℕ) :\n    ∀ i, i + 1 < (Fill a).length → (Fill a).get ⟨i, by omega⟩ ≤ (Fill a).get ⟨i + 1, by omega⟩ := by\n  intro a i h\n  unfold Fill at h\n  split at h\n  · simp at h\n  · rename_i hd tl\n    have : i < (Fill (hd :: tl)).length := by omega\n    simp [Fill] at this h\n    induction' tl with x xs IH generalizing hd i\n    · simp at h\n    · simp [Fill] at h\n      match i with\n      | 0 =>\n          simp [Fill]\n          exact Nat.le_max_left _ _\n      | i+1 =>\n          have : i + 1 < (Fill (max hd x :: xs)).length := by\n            simpa [Fill] using h\n          have IH' := IH (max hd x) i this\n          simpa [Fill] using IH'\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

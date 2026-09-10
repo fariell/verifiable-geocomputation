@@ -1,0 +1,51 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 9,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "across",
+      "cells",
+      "change",
+      "constant",
+      "datum",
+      "direction",
+      "elevation",
+      "flow",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit": [
+      "constant",
+      "elevation",
+      "flow"
+    ],
+    "miss": [
+      "across",
+      "cells",
+      "change",
+      "datum",
+      "direction",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit_ratio": 0.2143
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

@@ -70,6 +70,19 @@ if ($status -match 'BLOCKED') {
     }
 }
 
+# W3/RUNNING: L1 live batch may already be writing jsonl. Skip agent launch while
+# run_l1_batch.py is alive (avoids double-spend). If the batch process died, fall
+# through so the next agent can resume or finalize (A.15.4).
+if ($status -match 'RUNNING') {
+    $batchAlive = Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
+                  Where-Object { $_.CommandLine -match 'run_l1_batch\.py' }
+    if ($batchAlive) {
+        Log "noop (STATUS is RUNNING and run_l1_batch.py is alive pid=$($batchAlive.ProcessId))"
+        exit 0
+    }
+    Log "STATUS RUNNING but no live run_l1_batch.py - proceeding to resume/finalize"
+}
+
 # concurrency guard: skip if an agent run is already in flight
 if (Test-Path $lock) {
     $age = (Get-Date) - (Get-Item $lock).LastWriteTime

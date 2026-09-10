@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 1798,
+    "total_tokens": 2056,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 258
+  },
+  "api_id": "01a08a6f4762746c94c9269a3d0d9e33",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference gradient estimation on a planar surface\n// Theorem: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w > 0, the Horn finite-difference estimates DzDx and DzDy\n// recover A and B exactly.\n\nmethod HornPlanarExactRecovery(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w > 0.0\n  ensures DzDx == A && DzDy == B\n{\n  // Define a planar surface function\n  function z(x: real, y: real): real\n  {\n    A * x + B * y + C\n  }\n\n  // Horn finite-difference kernel weights for gradient in x-direction\n  // Kernel applied to 3x3 neighborhood centered at (x0, y0):\n  //   [ -1  0  1 ]\n  //   [ -2  0  2 ] * (1/(8*w))\n  //   [ -1  0  1 ]\n  // Similarly for y-direction (transposed).\n\n  // Compute contributions from the 3x3 grid around (0,0) for simplicity.\n  // Grid coordinates: x = i*w, y = j*w for i,j in {-1,0,1}\n  var sum_x := 0.0;\n  var sum_y := 0.0;\n\n  // Iterate over the 3x3 neighborhood\n  var i := -1;\n  while i <= 1\n    invariant -2 <= i <= 2\n    decreases if i <= 1 then 1 - i else 0\n  {\n    var j := -1;\n    while j <= 1\n      invariant -2 <= j <= 2\n      decreases if j <= 1 then 1 - j else 0\n    {\n      var weight_x: real;\n      var weight_y: real;\n      // Assign Horn kernel weights\n      if i == -1 && j == -1 { weight_x := -1.0; weight_y := -1.0; }\n      else if i == -1 && j == 0 { weight_x := -2.0; weight_y := 0.0; }\n      else if i == -1 && j == 1 { weight_x := -1.0; weight_y := 1.0; }\n      else if i == 0 && j == -1 { weight_x := 0.0; weight_y := -2.0; }\n      else if i == 0 && j == 0 { weight_x := 0.0; weight_y := 0.0; }\n      else if i == 0 && j == 1 { weight_x := 0.0; weight_y := 2.0; }\n      else if i == 1 && j == -1 { weight_x := 1.0; weight_y := -1.0; }\n      else if i == 1 && j == 0 { weight_x := 2.0; weight_y := 0.0; }\n      else { weight_x := 1.0; weight_y := 1.0; } // i == 1 && j == 1\n\n      var x_val := i as real * w;\n      var y_val := j as real * w;\n      var z_val := z(x_val, y_val);\n      sum_x := sum_x + weight_x * z_val;\n      sum_y := sum_y + weight_y * z_val;\n      j := j + 1;\n    }\n    i := i + 1;\n  }\n\n  // Normalize by (8 * w) for both directions\n  DzDx := sum_x / (8.0 * w);\n  DzDy := sum_y / (8.0 * w);\n\n  // The proof that DzDx == A and DzDy == B follows from linearity:\n  // sum_x = Σ_{i,j} weight_x(i,j) * (A*(i*w) + B*(j*w) + C)\n  // = A*w * Σ_{i,j} weight_x(i,j)*i  + B*w * Σ_{i,j} weight_x(i,j)*j + C * Σ_{i,j} weight_x(i,j)\n  // The Horn kernel satisfies:\n  //   Σ weight_x(i,j) = 0\n  //   Σ weight_x(i,j)*j = 0\n  //   Σ weight_x(i,j)*i = 8\n  // Therefore sum_x = A*w * 8, so DzDx = (A*w*8)/(8*w) = A.\n  // Similarly for y-direction.\n  // We can assert these sums as lemmas or compute them explicitly.\n  // Here we compute them to satisfy the verifier.\n\n  var sum_weight_x := 0.0;\n  var sum_weight_x_i := 0.0;\n  var sum_weight_x_j := 0.0;\n  var sum_weight_y := 0.0;\n  var sum_weight_y_i := 0.0;\n  var sum_weight_y_j := 0.0;\n\n  i := -1;\n  while i <= 1\n    invariant -2 <= i <= 2\n    decreases if i <= 1 then 1 - i else 0\n  {\n    j := -1;\n    while j <= 1\n      invariant -2 <= j <= 2\n      decreases if j <= 1 then 1 - j else 0\n    {\n      var weight_x: real;\n      var weight_y: real;\n      if i == -1 && j == -1 { weight_x := -1.0; weight_y := -1.0; }\n      else if i == -1 && j == 0 { weight_x := -2.0; weight_y := 0.0; }\n      else if i == -1 && j == 1 { weight_x := -1.0; weight_y := 1.0; }\n      else if i == 0 && j == -1 { weight_x := 0.0; weight_y := -2.0; }\n      else if i == 0 && j == 0 { weight_x := 0.0; weight_y := 0.0; }\n      else if i == 0 && j == 1 { weight_x := 0.0; weight_y := 2.0; }\n      else if i == 1 && j == -1 { weight_x := 1.0; weight_y := -1.0; }\n      else if i == 1 && j == 0 { weight_x := 2.0; weight_y := 0.0; }\n      else { weight_x := 1.0; weight_y := 1.0; }\n\n      sum_weight_x := sum_weight_x + weight_x;\n      sum_weight_x_i := sum_weight_x_i + weight_x * (i as real);\n      sum_weight_x_j := sum_weight_x_j + weight_x * (j as real);\n      sum_weight_y := sum_weight_y + weight_y;\n      sum_weight_y_i := sum_weight_y_i + weight_y * (i as real);\n      sum_weight_y_j := sum_weight_y_j + weight_y * (j as real);\n      j := j + 1;\n    }\n    i := i + 1;\n  }\n\n  // Assert kernel properties\n  assert sum_weight_x == 0.0;\n  assert sum_weight_x_j == 0.0;\n  assert sum_weight_x_i == 8.0;\n  assert sum_weight_y == 0.0;\n  assert sum_weight_y_i == 0.0;\n  assert sum_weight_y_j == 8.0;\n\n  // Now show that DzDx == A and DzDy == B\n  assert sum_x == A * w * sum_weight_x_i + B * w * sum_weight_x_j + C * sum_weight_x;\n  assert sum_y == A * w * sum_weight_y_i + B * w * sum_weight_y_j + C * sum_weight_y;\n  // Therefore:\n  assert DzDx == (A * w * 8.0) / (8.0 * w);\n  assert DzDy == (B * w * 8.0) / (8.0 * w);\n  // Simplify:\n  assert DzDx == A && DzDy == B;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

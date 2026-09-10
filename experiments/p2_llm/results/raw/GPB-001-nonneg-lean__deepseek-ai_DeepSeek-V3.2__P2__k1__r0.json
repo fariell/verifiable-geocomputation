@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "8b9c0663bb132c9d9ba47e78f517c93c6884a3c4d7a6bb1d6f724e317cde3e13",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 621,
+    "total_tokens": 864,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08a5466e5b89f9f88f1bc94a12326",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Fin.VecNotation\n\nopen Matrix\n\n/-- Horn's slope-square formula for a 3x3 window with spacing w.\n    Given elevations z00..z22 and spacing w > 0, returns a nonnegative value. -/\ndef hornSlopeSq (z : Matrix (Fin 3) (Fin 3) ℝ) (w : ℝ) : ℝ :=\n  let dx := ((z 0 2 + z 1 2 + z 2 2) - (z 0 0 + z 1 0 + z 2 0)) / (6 * w)\n  let dy := ((z 2 0 + z 2 1 + z 2 2) - (z 0 0 + z 0 1 + z 0 2)) / (6 * w)\n  dx ^ 2 + dy ^ 2\n\ntheorem hornSlopeSq_nonneg (z : Matrix (Fin 3) (Fin 3) ℝ) (w : ℝ) (hw : w > 0) :\n    hornSlopeSq z w ≥ 0 := by\n  unfold hornSlopeSq\n  have h1 : 0 ≤ ((z 0 2 + z 1 2 + z 2 2) - (z 0 0 + z 1 0 + z 2 0)) / (6 * w) ^ 2 := by\n    apply div_nonneg\n    · exact sub_nonneg.mp ?_  -- This line is problematic: sub_nonneg requires a ≤ b, which we don't have.\n    · exact pow_nonneg (by linarith [hw]) 2\n  sorry\n\n-- The above attempt fails because the numerator can be negative.\n-- We need to realize that the square of any real is nonnegative, regardless of sign.\n\ntheorem hornSlopeSq_nonneg_corrected (z : Matrix (Fin 3) (Fin 3) ℝ) (w : ℝ) (hw : w > 0) :\n    hornSlopeSq z w ≥ 0 := by\n  unfold hornSlopeSq\n  have hdx : 0 ≤ (((z 0 2 + z 1 2 + z 2 2) - (z 0 0 + z 1 0 + z 2 0)) / (6 * w)) ^ 2 :=\n    pow_two_nonneg _\n  have hdy : 0 ≤ (((z 2 0 + z 2 1 + z 2 2) - (z 0 0 + z 0 1 + z 0 2)) / (6 * w)) ^ 2 :=\n    pow_two_nonneg _\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

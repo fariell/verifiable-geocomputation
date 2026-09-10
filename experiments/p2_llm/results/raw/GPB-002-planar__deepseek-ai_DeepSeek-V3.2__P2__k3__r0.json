@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 468,
+    "total_tokens": 726,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 258
+  },
+  "api_id": "01a08a706bb0209d4d6e82254f17b845",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference gradient estimation on a planar surface\n// Theorem: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w > 0, the Horn finite-difference estimates DzDx and DzDy\n// recover A and B exactly.\n\nmethod HornPlanarExactRecovery(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w > 0.0\n  ensures DzDx == A && DzDy == B\n{\n  // Define grid coordinates\n  var x0 := 0.0;\n  var y0 := 0.0;\n  \n  // Sample the planar surface at the 3x3 stencil points\n  // Central point\n  var z00 := A * x0 + B * y0 + C;\n  \n  // Neighbors for x-derivative (Horn's method uses immediate neighbors)\n  var z10 := A * (x0 + w) + B * y0 + C;\n  var zm10 := A * (x0 - w) + B * y0 + C;\n  \n  // Neighbors for y-derivative\n  var z01 := A * x0 + B * (y0 + w) + C;\n  var z0m1 := A * x0 + B * (y0 - w) + C;\n  \n  // Horn finite-difference formulas (weighted central difference)\n  // For x: (z10 - zm10) / (2*w)\n  // For y: (z01 - z0m1) / (2*w)\n  DzDx := (z10 - zm10) / (2.0 * w);\n  DzDy := (z01 - z0m1) / (2.0 * w);\n  \n  // Verification that these equal A and B\n  // Dafny automatically verifies the arithmetic:\n  // (z10 - zm10) = A*(x0+w) - A*(x0-w) = 2*A*w\n  // Dividing by 2*w gives A. Similarly for B.\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

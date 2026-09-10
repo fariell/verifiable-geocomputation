@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1711,
+    "completion_tokens": 917,
+    "total_tokens": 2628,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1711
+  },
+  "api_id": "01a08a7291a75b99c132d53e17e7bf6b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "Here is a complete Lean source file that formalizes and proves the stated property:\n\n```lean\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Real.Basic\n\nnamespace DiscreteDEM\n\n-- A 3x3 window of elevations (real numbers)\nstructure Window3x3 where\n  a : ℝ  -- top-left\n  b : ℝ  -- top-center\n  c : ℝ  -- top-right\n  d : ℝ  -- middle-left\n  e : ℝ  -- center\n  f : ℝ  -- middle-right\n  g : ℝ  -- bottom-left\n  h : ℝ  -- bottom-center\n  i : ℝ  -- bottom-right\n\nnamespace Window3x3\n\n-- Orthogonal neighbors of the center cell\ndef orthogonal_neighbors (w : Window3x3) : List ℝ :=\n  [w.b, w.d, w.f, w.h]\n\n-- Center is a discrete local maximum (≥ each orthogonal neighbor)\ndef is_local_max (w : Window3x3) : Prop :=\n  w.e ≥ w.b ∧ w.e ≥ w.d ∧ w.e ≥ w.f ∧ w.e ≥ w.h\n\n-- Discrete Laplacian at center (using 4-connectivity)\ndef laplacian (w : Window3x3) : ℝ :=\n  (w.b + w.d + w.f + w.h) - 4 * w.e\n\n-- The theorem: if center is a discrete local maximum, then Laplacian ≤ 0\ntheorem local_max_implies_nonpositive_laplacian (w : Window3x3) :\n    is_local_max w → laplacian w ≤ 0 := by\n  intro hmax\n  unfold is_local_max at hmax\n  rcases hmax with ⟨heb, hed, hef, heh⟩\n  unfold laplacian\n  have h1 : w.b ≤ w.e := heb\n  have h2 : w.d ≤ w.e := hed\n  have h3 : w.f ≤ w.e := hef\n  have h4 : w.h ≤ w.e := heh\n  linarith\n\nend Window3x3\n\n-- Alternative formulation using matrices for grid context\nsection GridFormulation\n\nvariable {m n : ℕ} (grid : Matrix (Fin m) (Fin n) ℝ)\n\n-- Get a 3x3 window centered at (i,j), with boundary handling\ndef get_window (grid : Matrix (Fin m) (Fin n) ℝ) (i : Fin m) (j : Fin n) : Option Window3x3 :=\n  if hi : 0 < (i : ℕ) ∧ (i : ℕ) + 1 < m ∧ 0 < (j : ℕ) ∧ (j : ℕ) + 1 < n then\n    let i' : ℕ := i.val\n    let j' : ℕ := j.val\n    some {\n      a := grid ⟨i' - 1, by omega⟩ ⟨j' - 1, by omega⟩\n      b := grid ⟨i' - 1, by omega⟩ j\n      c := grid ⟨i' - 1, by omega⟩ ⟨j' + 1, by omega⟩\n      d := grid i ⟨j' - 1, by omega⟩\n      e := grid i j\n      f := grid i ⟨j' + 1, by omega⟩\n      g := grid ⟨i' + 1, by omega⟩ ⟨j' - 1, by omega⟩\n      h := grid ⟨i' + 1, by omega⟩ j\n      i := grid ⟨i' + 1, by omega⟩ ⟨j' + 1, by omega⟩\n    }\n  else\n    none\n\n-- Theorem for valid interior points\ntheorem grid_local_max_implies_nonpositive_laplacian\n    (grid : Matrix (Fin m) (Fin n) ℝ) (i : Fin m) (j : Fin n)\n    (hwindow : get_window grid i j = some w) (hmax : Window3x3.is_local_max w) :\n    Window3x3.laplacian w ≤ 0 :=\n  Window3x3.local_max_implies_nonpositive_laplacian w hmax\n\nend GridFormulation\n\nend DiscreteDEM\n```\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

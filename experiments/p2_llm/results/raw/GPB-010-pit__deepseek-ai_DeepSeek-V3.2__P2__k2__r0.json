@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5b1d80c9f558cecc7abebaec3f40a41e3aa5f66762cf489a62d60b5d8363feaf",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 239,
+    "completion_tokens": 753,
+    "total_tokens": 992,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 239
+  },
+  "api_id": "01a08aaafe3c82384a2f83f2e9ea5d8c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P2 · Iterative repair (verifier feedback)\n// Theorem: Under D8 steepest-descent routing, if none of the eight neighbors\n// is strictly lower than the center, the flow direction is NoFlow (pit).\n\n// Grid definition\ntype Grid = array2d<int>\ntype Point = (int, int)\n\n// Directions for D8 (including center for NoFlow)\ndatatype Direction = North | NorthEast | East | SouthEast | South | SouthWest | West | NorthWest | NoFlow\n\n// Function to get neighbor coordinates given a direction and point\nfunction GetNeighbor(p: Point, d: Direction): Point\n  requires d != NoFlow\n{\n  var (x, y) := p;\n  match d\n    case North => (x, y-1)\n    case NorthEast => (x+1, y-1)\n    case East => (x+1, y)\n    case SouthEast => (x+1, y+1)\n    case South => (x, y+1)\n    case SouthWest => (x-1, y+1)\n    case West => (x-1, y)\n    case NorthWest => (x-1, y-1)\n}\n\n// Predicate to check if a point is inside the grid\npredicate InGrid(g: Grid, p: Point)\n{\n  var (x, y) := p;\n  0 <= x < g.Length0 && 0 <= y < g.Length1\n}\n\n// Function to get elevation at a point (with default high value for out-of-bounds)\nfunction Elevation(g: Grid, p: Point): int\n  requires InGrid(g, p)\n{\n  var (x, y) := p;\n  g[x, y]\n}\n\n// Main theorem: if no neighbor is strictly lower, direction is NoFlow\nmethod D8_NoFlow_Theorem(g: Grid, center: Point)\n  requires InGrid(g, center)\n  requires forall d: Direction :: d != NoFlow ==> InGrid(g, GetNeighbor(center, d))\n  ensures (forall d: Direction :: d != NoFlow ==> Elevation(g, GetNeighbor(center, d)) >= Elevation(g, center))\n    ==> FlowDirection(g, center) == NoFlow\n{\n  // The theorem follows directly from the definition of FlowDirection\n}\n\n// Flow direction calculation\nfunction FlowDirection(g: Grid, p: Point): Direction\n  requires InGrid(g, p)\n  requires forall d: Direction :: d != NoFlow ==> InGrid(g, GetNeighbor(p, d))\n{\n  var minDir := NoFlow;\n  var minVal := Elevation(g, p);\n  var dirs: seq<Direction> := [North, NorthEast, East, SouthEast, South, SouthWest, West, NorthWest];\n\n  // Iterate through directions to find the steepest descent\n  for dir in dirs\n    invariant minDir == NoFlow || (minDir != NoFlow && Elevation(g, GetNeighbor(p, minDir)) < Elevation(g, p))\n    invariant forall d: Direction :: d in dirs[..|dirs|] && d != NoFlow && d != minDir ==> Elevation(g, GetNeighbor(p, d)) >= minVal\n  {\n    var neighbor := GetNeighbor(p, dir);\n    var neighborElev := Elevation(g, neighbor);\n    if neighborElev < minVal {\n      minVal := neighborElev;\n      minDir := dir;\n    }\n  }\n  minDir\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

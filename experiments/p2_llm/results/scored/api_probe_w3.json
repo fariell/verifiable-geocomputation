@@ -1,7 +1,10 @@
 {
-  "live_api_ok": false,
-  "error": "no OpenAI-compatible key in env. Set exactly one of: DASHSCOPE_API_KEY, DEEPSEEK_API_KEY, MOONSHOT_API_KEY, OPENROUTER_API_KEY, SILICONFLOW_API_KEY, ZHIPU_API_KEY",
-  "error_class": "missing-key",
-  "provider": null,
-  "model_locked": null
+  "live_api_ok": true,
+  "status_code": 200,
+  "provider": "siliconflow",
+  "endpoint": "https://api.siliconflow.cn/v1/chat/completions",
+  "model_locked": "deepseek-ai/DeepSeek-V3.2",
+  "error_class": null,
+  "error": null,
+  "echo": "你好！😊 看起来你发送了一个简单的“ping”，是想测试连接"
 }

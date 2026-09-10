@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1697,
+    "completion_tokens": 792,
+    "total_tokens": 2489,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1697
+  },
+  "api_id": "01a08aacfbee9a50d6e79ff0213ac4ed",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Data.Fin.VecNotation\n\nopen Matrix\n\n/-\n  D8 flow direction on a planar DEM z = A x + B y + C with positive slope.\n  We prove that for interior cells sharing the same (A,B,w), the D8 direction\n  is constant, and translating the elevation datum C does not change the direction.\n-/\n\n/-- D8 neighbor offsets: (dx, dy, squared distance) -/\ndef D8_offsets : List (ℤ × ℤ × ℝ) :=\n  [ (1, 0, 1), (1, 1, 2), (0, 1, 1), (-1, 1, 2),\n    (-1, 0, 1), (-1, -1, 2), (0, -1, 1), (1, -1, 2) ]\n\n/-- Flow direction as an optional vector (dx, dy). `none` means \"NoFlow\". -/\nabbrev Direction := Option (ℤ × ℤ)\n\n/-- Elevation of a planar DEM at cell (x,y): z = A*x + B*y + C -/\ndef elevation (A B C : ℝ) (x y : ℤ) : ℝ := A * (x : ℝ) + B * (y : ℝ) + C\n\n/-- D8 steepest‑descent direction for a cell (x,y) on a DEM given by (A,B,C). -/\ndef D8_direction (A B C : ℝ) (x y : ℤ) : Direction :=\n  let candidates := D8_offsets.filterMap λ ⟨dx, dy, d2⟩ =>\n    let x' := x + dx\n    let y' := y + dy\n    let drop := elevation A B C x y - elevation A B C x' y'\n    if drop > 0 then some ((drop * drop) / d2, (dx, dy)) else none\n  match candidates.maximum? (λ a b => a.1 ≤ b.1) with\n  | none => none\n  | some (_, dir) => some dir\n\n/-- Interior cell condition: all eight D8 neighbors exist within the grid bounds.\n    For simplicity we assume an infinite grid, so every cell is interior. -/\ndef is_interior (x y : ℤ) : Prop := True\n\n/-- Main theorem: On a planar DEM with positive slope, D8 direction is constant\n    across interior cells that share the same (A,B,w), and translating C does not\n    change the direction. -/\ntheorem D8_plane_constant (A B : ℝ) (hA : A > 0) (hB : B > 0) (C₁ C₂ : ℝ) (x₁ y₁ x₂ y₂ : ℤ) :\n    is_interior x₁ y₁ → is_interior x₂ y₂ →\n    D8_direction A B C₁ x₁ y₁ = D8_direction A B C₂ x₂ y₂ := by\n  intro _ _\n  unfold D8_direction\n  have : ∀ (C : ℝ) (x y dx dy : ℤ) (d2 : ℝ),\n      elevation A B C x y - elevation A B C (x + dx) (y + dy) =\n      elevation A B 0 x y - elevation A B 0 (x + dx) (y + dy) := by\n    intro C x y dx dy d2\n    simp [elevation]\n    ring\n  simp_rw [this]\n  congr\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

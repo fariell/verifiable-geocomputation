@@ -1,0 +1,43 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4ad5bb6863e850e9dbcf49614acbc628556a5d50b32cfcdd7408c75c3d6d6874",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3121,
+    "completion_tokens": 1489,
+    "total_tokens": 4610,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 49
+  },
+  "api_id": "01a08710fd97daef6b97cc3d575b9a91",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-001 (Horn slope)\n//  文件 : formal/dafny/P001_horn_flat_zero.dfy\n//  算子 : Horn (1981) 3x3 有限差分坡度\n//  覆盖 : GPB-019 的代数核（平坦窗口 → 坡度为零）\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P001_horn_flat_zero.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  命题：在任意 3x3 高程窗口中，若所有九个单元格的高程相同，\n//        则 Horn (1981) 坡度大小（或其平方 SlopeSq）恒为零。\n//        网格间距 w 必须为正。\n//\n//  这是 GPB-019 一致性命题的代数特例，也是 Horn 算子的基本性质：\n//      平坦地形 → 零坡度。\n//  与 P-003 不同，这里不涉及曲率，仅使用一阶差分。\n//\n//  窗口约定（与 P-001 主文件相同）：\n//      a(-1,-1)   b( 0,-1)   c( 1,-1)\n//      d(-1, 0)     e        f( 1, 0)\n//      g(-1, 1)   h( 0, 1)   i( 1, 1)\n//\n//  Horn (1981) 坡度分量：\n//      dz/dx ≈ ( (c + 2f + i) - (a + 2d + g) ) / (8 * w)\n//      dz/dy ≈ ( (g + 2h + i) - (a + 2b + c) ) / (8 * w)\n//  坡度平方 SlopeSq = (dz/dx)² + (dz/dy)²\n//\n//  平坦窗口：a = b = c = d = e = f = g = h = i = Z\n//  代入即得 dz/dx = 0, dz/dy = 0, SlopeSq = 0。\n// ===========================================================================\n\nmodule HornFlatZero {\n  import opened HornSlope  // 假设已有 Horn 坡度算子的定义模块\n\n  // ------------------------------------------------------------------\n  // 平坦窗口的 Horn 坡度为零（直接计算）\n  // ------------------------------------------------------------------\n  lemma FlatWindowZeroSlopeSq(\n    Z: real, w: real\n  )\n    requires w > 0.0\n    ensures HornSlope.SlopeSq(Z, Z, Z, Z, Z, Z, Z, Z, Z, w) == 0.0\n  {\n    // 计算 dz/dx\n    var num_dx: real := (Z + 2.0*Z + Z) - (Z + 2.0*Z + Z);\n    var dzdx: real := num_dx / (8.0 * w);\n    assert dzdx == 0.0;\n\n    // 计算 dz/dy\n    var num_dy: real := (Z + 2.0*Z + Z) - (Z + 2.0*Z + Z);\n    var dzdy: real := num_dy / (8.0 * w);\n    assert dzdy == 0.0;\n\n    // 坡度平方\n    assert HornSlope.SlopeSq(Z, Z, Z, Z, Z, Z, Z, Z, Z, w) == dzdx*dzdx + dzdy*dzdy;\n    assert dzdx*dzdx + dzdy*dzdy == 0.0;\n  }\n\n  // ------------------------------------------------------------------\n  // 平坦窗口的 Horn 坡度大小为零（调用平方根）\n  // ------------------------------------------------------------------\n  lemma FlatWindowZeroSlopeMagnitude(\n    Z: real, w: real\n  )\n    requires w > 0.0\n    ensures HornSlope.SlopeMagnitude(Z, Z, Z, Z, Z, Z, Z, Z, Z, w) == 0.0\n  {\n    FlatWindowZeroSlopeSq(Z, w);\n    // SlopeMagnitude 定义为 sqrt(SlopeSq)，且 SlopeSq ≥ 0\n    assert HornSlope.SlopeSq(Z, Z, Z, Z, Z, Z, Z, Z, Z, w) == 0.0;\n    assert HornSlope.SlopeMagnitude(Z, Z, Z, Z, Z, Z, Z, Z, Z, w) == 0.0;\n  }\n\n  // ------------------------------------------------------------------\n  // 辅助引理：若所有九个值相等，则 Horn 坡度分量为零\n  // ------------------------------------------------------------------\n  lemma FlatWindowZeroComponents(\n    a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real,\n    w: real\n  )\n    requires w > 0.0\n    requires a == b && b == c && c == d && d == e && e == f && f == g && g == h && h == i\n    ensures HornSlope.dzdx(a, b, c, d, e, f, g, h, i, w) == 0.0\n    ensures HornSlope.dzdy(a, b, c, d, e, f, g, h, i, w) == 0.0\n  {\n    var Z: real := a;\n    // 展开 dzdx 的分子\n    var num_dx: real := (c + 2.0*f + i) - (a + 2.0*d + g);\n    assert num_dx == (Z + 2.0*Z + Z) - (Z + 2.0*Z + Z);\n    assert num_dx == 0.0;\n    assert HornSlope.dzdx(a, b, c, d, e, f, g, h, i, w) == 0.0;\n\n    // 展开 dzdy 的分子\n    var num_dy: real := (g + 2.0*h + i) - (a + 2.0*b + c);\n    assert num_dy == (Z + 2.0*Z + Z) - (Z + 2.0*Z + Z);\n    assert num_dy == 0.0;\n    assert HornSlope.dzdy(a, b, c, d, e, f, g, h, i, w) == 0.0;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-001 (flat window) — Horn slope is zero on constant elevation\\n\";\n  print \"全部由编译期验证: dafny verify P001_horn_flat_zero.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2",
+  "semantic": "UNCOMPILED",
+  "fidelity_label": "UNCOMPILED",
+  "metric_eligible": true,
+  "backfill_ts_utc": "2026-09-10T07:55:00.250067+00:00"
+}

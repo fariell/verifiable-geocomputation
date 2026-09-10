@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 255,
+    "completion_tokens": 375,
+    "total_tokens": 630,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 255
+  },
+  "api_id": "01a08b2092967a21e7d1a627b33c3461",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method RaiseNbrPreservesElevation(\n  elevations: array2<int>,\n  processed: (int, int),\n  neighbor: (int, int)\n)\n  requires elevations != null\n  requires 0 <= processed.0 < elevations.Length0\n  requires 0 <= processed.1 < elevations.Length1\n  requires 0 <= neighbor.0 < elevations.Length0\n  requires 0 <= neighbor.1 < elevations.Length1\n  requires |processed.0 - neighbor.0| + |processed.1 - neighbor.1| == 1\n  requires elevations[processed.0, processed.1] >= 0\n  requires elevations[neighbor.0, neighbor.1] >= 0\n  modifies elevations\n  ensures elevations[processed.0, processed.1] >= old(elevations[processed.0, processed.1])\n  ensures elevations[neighbor.0, neighbor.1] >= old(elevations[neighbor.0, neighbor.1])\n  ensures elevations[neighbor.0, neighbor.1] >= old(elevations[processed.0, processed.1])\n  ensures elevations[neighbor.0, neighbor.1] >= old(elevations[neighbor.0, neighbor.1])\n{\n  var oldProc := elevations[processed.0, processed.1];\n  var oldNbr := elevations[neighbor.0, neighbor.1];\n  var newNbr := if oldNbr >= oldProc then oldNbr else oldProc;\n  elevations[neighbor.0, neighbor.1] := newNbr;\n  assert elevations[neighbor.0, neighbor.1] >= oldNbr;\n  assert elevations[neighbor.0, neighbor.1] >= oldProc;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

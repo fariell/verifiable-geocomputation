@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 1713,
+    "total_tokens": 3324,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1611
+  },
+  "api_id": "01a08a5e4c5f2dc526b163e1156ff2a7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference slope estimator exactness on planar surfaces\n// Formalization of GPB-019 algebraic half (P-001)\n\nmodule HornExactness {\n  // Grid dimensions\n  ghost const N: int\n  ghost const M: int\n  assume N >= 3 && M >= 3  // Need interior points for finite differences\n\n  // Grid spacing\n  ghost const w: real\n  assume w > 0.0\n\n  // Plane parameters\n  ghost const A: real\n  ghost const B: real\n  ghost const C: real\n\n  // Elevation function for plane z = A*x + B*y + C\n  function elevation(i: int, j: int): real\n    requires 0 <= i < N && 0 <= j < M\n  {\n    A * (w * i as real) + B * (w * j as real) + C\n  }\n\n  // Horn finite-difference operators (1981)\n  function hornDzDx(i: int, j: int): real\n    requires 1 <= i < N-1 && 1 <= j < M-1  // Interior points\n  {\n    // Central difference in x-direction, using 3x3 neighborhood\n    ((elevation(i+1, j-1) + 2.0 * elevation(i+1, j) + elevation(i+1, j+1)) -\n     (elevation(i-1, j-1) + 2.0 * elevation(i-1, j) + elevation(i-1, j+1))) / (8.0 * w)\n  }\n\n  function hornDzDy(i: int, j: int): real\n    requires 1 <= i < N-1 && 1 <= j < M-1\n  {\n    // Central difference in y-direction, using 3x3 neighborhood\n    ((elevation(i-1, j+1) + 2.0 * elevation(i, j+1) + elevation(i+1, j+1)) -\n     (elevation(i-1, j-1) + 2.0 * elevation(i, j-1) + elevation(i+1, j-1))) / (8.0 * w)\n  }\n\n  // Lemma: Horn operators recover exact plane coefficients\n  lemma HornExactOnPlane()\n    ensures forall i, j :: \n      1 <= i < N-1 && 1 <= j < M-1 ==> \n        hornDzDx(i, j) == A && hornDzDy(i, j) == B\n  {\n    // Expand elevation function for all points in the 3x3 neighborhood\n    forall i, j | 1 <= i < N-1 && 1 <= j < M-1\n      ensures hornDzDx(i, j) == A && hornDzDy(i, j) == B\n    {\n      // Helper to compute elevation at any grid point\n      calc {\n        // Compute numerator for DzDx\n        (elevation(i+1, j-1) + 2.0 * elevation(i+1, j) + elevation(i+1, j+1)) -\n        (elevation(i-1, j-1) + 2.0 * elevation(i-1, j) + elevation(i-1, j+1));\n        ==\n        // Expand using elevation = A*(w*i) + B*(w*j) + C\n        (A*w*(i+1) + B*w*(j-1) + C + 2.0*(A*w*(i+1) + B*w*j + C) + A*w*(i+1) + B*w*(j+1) + C) -\n        (A*w*(i-1) + B*w*(j-1) + C + 2.0*(A*w*(i-1) + B*w*j + C) + A*w*(i-1) + B*w*(j+1) + C);\n        ==\n        // Simplify algebraically\n        { \n          // Combine terms with A\n          var A_terms: real := \n            A*w*( (i+1) + 2*(i+1) + (i+1) - ((i-1) + 2*(i-1) + (i-1)) );\n          // Combine terms with B  \n          var B_terms: real :=\n            B*w*( (j-1) + 2*j + (j+1) - ((j-1) + 2*j + (j+1)) );\n          // Constant terms cancel completely\n          var const_terms: real := C + 2*C + C - (C + 2*C + C);\n          \n          assert A_terms == 8.0 * A * w;\n          assert B_terms == 0.0;\n          assert const_terms == 0.0;\n        }\n        8.0 * A * w;\n      }\n      // Therefore hornDzDx = (8.0 * A * w) / (8.0 * w) = A\n      assert hornDzDx(i, j) == A;\n\n      // Similar calculation for DzDy\n      calc {\n        // Compute numerator for DzDy\n        (elevation(i-1, j+1) + 2.0 * elevation(i, j+1) + elevation(i+1, j+1)) -\n        (elevation(i-1, j-1) + 2.0 * elevation(i, j-1) + elevation(i+1, j-1));\n        ==\n        // Expand using elevation formula\n        (A*w*(i-1) + B*w*(j+1) + C + 2.0*(A*w*i + B*w*(j+1) + C) + A*w*(i+1) + B*w*(j+1) + C) -\n        (A*w*(i-1) + B*w*(j-1) + C + 2.0*(A*w*i + B*w*(j-1) + C) + A*w*(i+1) + B*w*(j-1) + C);\n        ==\n        // Simplify algebraically\n        {\n          // Combine terms with A\n          var A_terms: real :=\n            A*w*( (i-1) + 2*i + (i+1) - ((i-1) + 2*i + (i+1)) );\n          // Combine terms with B\n          var B_terms: real :=\n            B*w*( (j+1) + 2*(j+1) + (j+1) - ((j-1) + 2*(j-1) + (j-1)) );\n          // Constant terms cancel\n          var const_terms: real := C + 2*C + C - (C + 2*C + C);\n          \n          assert A_terms == 0.0;\n          assert B_terms == 8.0 * B * w;\n          assert const_terms == 0.0;\n        }\n        8.0 * B * w;\n      }\n      // Therefore hornDzDy = (8.0 * B * w) / (8.0 * w) = B\n      assert hornDzDy(i, j) == B;\n    }\n  }\n\n  // Main theorem: Horn finite-difference estimates recover A and B exactly\n  // for all interior points of a planar surface on a regular grid\n  theorem HornExactnessTheorem()\n    requires N >= 3 && M >= 3\n    requires w > 0.0\n    ensures forall i, j :: \n      1 <= i < N-1 && 1 <= j < M-1 ==> \n        hornDzDx(i, j) == A && hornDzDy(i, j) == B\n  {\n    HornExactOnPlane();\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1578,
+    "completion_tokens": 601,
+    "total_tokens": 2179,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1578
+  },
+  "api_id": "01a08b24b6141113c17a3f9229f16176",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Order.WellFounded\n\nsection\n\nvariable {α : Type} [Fintype α] (succ : α → α)\n\n/-- A strict descent relation: `succ a = b` implies `b` is strictly less than `a`\n    according to some measure `μ : α → ℕ`. -/\nstructure StrictDescent (μ : α → ℕ) : Prop where\n  desc : ∀ a, μ (succ a) < μ a\n\n/-- The orbit of `a` under `succ`, as a sequence. -/\ndef orbit (a : α) : ℕ → α :=\n  λ n => Nat.recOn n a (λ _ x => succ x)\n\n/-- A fixed point of `succ`. -/\ndef IsFixedPoint (a : α) : Prop :=\n  succ a = a\n\n/-- Termination of the orbit: there exists `n` such that all later steps are fixed. -/\ndef terminates (a : α) : Prop :=\n  ∃ n, ∀ m, n ≤ m → IsFixedPoint (orbit a m)\n\ntheorem termination_under_strict_descent (μ : α → ℕ) (h : StrictDescent succ μ) (a : α) :\n    terminates succ a := by\n  -- The measure gives a well-founded decreasing sequence\n  have hwf : WellFounded (λ (x y : α) => μ x < μ y) :=\n    WellFounded.wellFounded_lt\n  -- Define the sequence of measures along the orbit\n  let μ_seq (n : ℕ) : ℕ := μ (orbit succ a n)\n  have h_decr : ∀ n, μ_seq (n + 1) < μ_seq n := by\n    intro n\n    simp [μ_seq, orbit]\n    exact h.desc (orbit succ a n)\n  -- Since ℕ is well‑founded, this decreasing sequence must stabilize\n  obtain ⟨n, hn⟩ := WellFounded.not_lt_min (WellFounded.wellFounded_lt) (Set.range μ_seq) ⟨μ_seq 0, 0, rfl⟩\n  refine ⟨n, λ m hm => ?_⟩\n  -- Show that from n onward, the orbit is constant\n  have : orbit succ a n = orbit succ a m := by\n    induction' hm with k hle ih\n    · rfl\n    · have := h_decr (n + k)\n      exfalso\n      exact Nat.lt_asymm this (hn ⟨μ_seq (n + k + 1), n + k + 1, rfl⟩ (by omega))\n  simp [IsFixedPoint, this]\n\nend\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

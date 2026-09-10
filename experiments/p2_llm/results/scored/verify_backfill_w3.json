@@ -1,0 +1,177 @@
+{
+  "ts_utc": "2026-09-10T07:55:03.258238+00:00",
+  "sanitize": {
+    "ok": true,
+    "n_kept": 23,
+    "n_bad": 0,
+    "bad_lines": [],
+    "backup": null
+  },
+  "n_sources": 14,
+  "n_ran": 14,
+  "n_toolchain_missing": 0,
+  "n_metric_eligible": 13,
+  "n_compile_ok": 4,
+  "n_verify_ok": 4,
+  "jsonl": {
+    "ok": true,
+    "n_rows": 23,
+    "n_patched": 21,
+    "n_metric_eligible": 13,
+    "n_verify_ran": 13,
+    "n_toolchain_missing": 8
+  },
+  "rows": [
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F1"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "semantic": "LIKELY_ALIGNED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": null
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "semantic": "LIKELY_ALIGNED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": null
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F1"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F2"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F1"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F2"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "semantic": "VERIFIED_BUT_DRIFT_SUSPECT",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": null
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F1"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F1"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F2"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "semantic": "UNCOMPILED",
+      "metric_eligible": true,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": "F2"
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__fixture-offline-w2__P0__k0__r0.dfy",
+      "skipped": false,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "semantic": "VERIFIED_NEEDS_HUMAN",
+      "metric_eligible": false,
+      "toolchain": "wsl:/usr/local/bin/dafny",
+      "failure_code": null
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1578,
+    "completion_tokens": 460,
+    "total_tokens": 2038,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1578
+  },
+  "api_id": "01a08b23a8ede7a308af478013c5446f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Finset.Basic\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Order.WellFounded\n\nsection\n\nvariable {α : Type} [Fintype α] (succ : α → α)\n\n/-- A strict descent relation: `succ x` is strictly less than `x` according to some measure. -/\nstructure StrictDescent (measure : α → ℕ) : Prop where\n  desc : ∀ x, succ x ≠ x → measure (succ x) < measure x\n\n/-- The orbit of `x` under `succ`, as a list of successive applications. -/\ndef orbit (x : α) : List α :=\n  let rec go (x : α) (seen : Finset α) : List α :=\n    if h : x ∈ seen then []\n    else x :: go (succ x) (insert x seen)\n  go x ∅\n\n/-- The orbit terminates if it reaches a fixed point. -/\ndef terminates (x : α) : Prop :=\n  ∃ n : ℕ, (Nat.iterate succ n x) = succ ((Nat.iterate succ n x))\n\n/-- Every orbit terminates under a strict descent relation. -/\ntheorem all_orbits_terminate (measure : α → ℕ) (h_desc : StrictDescent succ measure) :\n    ∀ x, terminates succ x := by\n  intro x\n  have wf : WellFounded (InvImage (· < ·) measure) :=\n    InvImage.wf measure (Nat.lt_wfRel.wf)\n  refine WellFounded.induction wf x ?_\n  intro y IH\n  by_cases h_fixed : succ y = y\n  · refine ⟨0, ?_⟩\n    simp [h_fixed]\n  · have h_lt : measure (succ y) < measure y :=\n      h_desc.desc y h_fixed\n    rcases IH (succ y) h_lt with ⟨n, hn⟩\n    refine ⟨n + 1, ?_⟩\n    simp [Nat.iterate_succ', hn]\n\nend\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

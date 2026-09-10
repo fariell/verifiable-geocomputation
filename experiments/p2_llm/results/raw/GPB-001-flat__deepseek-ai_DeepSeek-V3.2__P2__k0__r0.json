@@ -1,0 +1,43 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 542,
+    "total_tokens": 802,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 260
+  },
+  "api_id": "01a087122acfc8e6537d1fbf03b2659b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn (1981) slope magnitude on a 3x3 window\n// Theorem: If all nine cells have the same elevation, the slope magnitude is zero.\n\nmethod Theorem_SlopeZeroOnFlatWindow(w: real) returns (slopeSq: real)\n  requires w > 0.0\n  ensures slopeSq == 0.0\n{\n  // Assume a 3x3 elevation window with all equal finite values\n  var e00: real := 1.0;\n  var e01: real := 1.0;\n  var e02: real := 1.0;\n  var e10: real := 1.0;\n  var e11: real := 1.0;\n  var e12: real := 1.0;\n  var e20: real := 1.0;\n  var e21: real := 1.0;\n  var e22: real := 1.0;\n\n  // Horn (1981) finite-difference slope components\n  var dzdx: real := (e02 + 2.0*e12 + e22 - e00 - 2.0*e10 - e20) / (8.0 * w);\n  var dzdy: real := (e20 + 2.0*e21 + e22 - e00 - 2.0*e01 - e02) / (8.0 * w);\n\n  // Slope magnitude squared\n  slopeSq := dzdx*dzdx + dzdy*dzdy;\n\n  // Since all elevations are equal, dzdx and dzdy are zero\n  assert dzdx == 0.0 && dzdy == 0.0 by {\n    calc {\n      e02 + 2.0*e12 + e22 - e00 - 2.0*e10 - e20;\n      == 1.0 + 2.0*1.0 + 1.0 - 1.0 - 2.0*1.0 - 1.0;\n      == 0.0;\n    }\n    calc {\n      e20 + 2.0*e21 + e22 - e00 - 2.0*e01 - e02;\n      == 1.0 + 2.0*1.0 + 1.0 - 1.0 - 2.0*1.0 - 1.0;\n      == 0.0;\n    }\n  }\n  assert slopeSq == 0.0;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null,
+  "semantic": "VERIFIED_BUT_DRIFT_SUSPECT",
+  "fidelity_label": "VERIFIED_BUT_DRIFT_SUSPECT",
+  "metric_eligible": true,
+  "backfill_ts_utc": "2026-09-10T07:55:00.923509+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 1119,
+    "total_tokens": 2724,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a08ac7accf4fdb900c7b4f808127d4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of watershed uniqueness under deterministic D8 flow\n// Property: If a deterministic successor function reaches an outlet (fixed point)\n// from the same start cell in any two finite step counts, those outlets are equal.\n\n// Grid dimensions and cell type\ntype Cell = (int, int)\ntype Grid = array2<int>\n\n// Deterministic successor function: returns the unique downstream neighbor or the cell itself if it's an outlet\npredicate IsOutlet(succ: Cell -> Cell, cell: Cell)\n  reads this\n{\n  succ(cell) == cell\n}\n\n// Bounded iteration without searching for fixed points\nfunction StepN(succ: Cell -> Cell, start: Cell, n: nat): Cell\n  reads this\n  decreases n\n{\n  if n == 0 then start\n  else StepN(succ, succ(start), n - 1)\n}\n\n// Main theorem: if two bounded iterations from the same start both reach outlets,\n// then those outlets must be the same cell.\ntheorem WatershedUniqueness(succ: Cell -> Cell, start: Cell, m: nat, n: nat)\n  requires m > 0 && n > 0\n  requires IsOutlet(succ, StepN(succ, start, m))\n  requires IsOutlet(succ, StepN(succ, start, n))\n  ensures StepN(succ, start, m) == StepN(succ, start, n)\n{\n  // Key insight: once an outlet is reached, further iterations stay at that outlet\n  var outlet_m := StepN(succ, start, m);\n  var outlet_n := StepN(succ, start, n);\n  \n  // Show that outlet_m is a fixed point\n  assert IsOutlet(succ, outlet_m);\n  assert forall k: nat :: StepN(succ, outlet_m, k) == outlet_m;\n  \n  // Similarly for outlet_n\n  assert IsOutlet(succ, outlet_n);\n  assert forall k: nat :: StepN(succ, outlet_n, k) == outlet_n;\n  \n  // Consider the maximum of m and n\n  var max := if m > n then m else n;\n  \n  // Both iterations reach the same cell at step max\n  calc {\n    StepN(succ, start, max);\n    == // Case analysis on which is larger\n    { if m > n {\n        calc {\n          StepN(succ, start, max);\n          == // max = m\n          StepN(succ, start, m);\n          == // outlet_m is fixed point\n          StepN(succ, outlet_m, max - m);\n          ==\n          outlet_m;\n        }\n      } else {\n        calc {\n          StepN(succ, start, max);\n          == // max = n\n          StepN(succ, start, n);\n          == // outlet_n is fixed point\n          StepN(succ, outlet_n, max - n);\n          ==\n          outlet_n;\n        }\n      }\n    }\n    ==\n    { if m > n then outlet_m else outlet_n; }\n  }\n  \n  // Therefore both outlets are the same\n  assert StepN(succ, start, m) == StepN(succ, start, n);\n}\n\n// Additional lemma: once an outlet is reached, all further steps remain there\nlemma OutletFixedPoint(succ: Cell -> Cell, cell: Cell, k: nat)\n  requires IsOutlet(succ, cell)\n  ensures StepN(succ, cell, k) == cell\n  decreases k\n{\n  if k == 0 {\n    // Base case\n  } else {\n    // Inductive step\n    OutletFixedPoint(succ, cell, k - 1);\n  }\n}\n\n// Verification for the artificial flat 4-ring counterexample\n// This shows the theorem's precondition (reaching an outlet) is necessary\nconst RingCells: set<Cell> := {(0,0), (0,1), (1,1), (1,0)}\nconst RingSucc: Cell -> Cell = \n  (c: Cell) requires c in RingCells =>\n    match c\n      case (0,0) => (0,1)\n      case (0,1) => (1,1)\n      case (1,1) => (1,0)\n      case (1,0) => (0,0)\n\nlemma RingNoOutlet()\n  ensures forall c: Cell :: c in RingCells ==> !IsOutlet(RingSucc, c)\n{\n  // All cells in the ring have different successors\n  forall c: Cell | c in RingCells\n    ensures !IsOutlet(RingSucc, c)\n  {\n    // By definition of RingSucc, no cell maps to itself\n  }\n}\n\nlemma RingCycles()\n  ensures forall c: Cell, n: nat :: c in RingCells ==> StepN(RingSucc, c, n) in RingCells\n  decreases n\n{\n  // The ring stays within the 4 cells\n  forall c: Cell, n: nat | c in RingCells\n    ensures StepN(RingSucc, c, n) in RingCells\n    decreases n\n  {\n    if n == 0 {\n    } else {\n      RingCycles();\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

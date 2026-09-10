@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 233,
+    "completion_tokens": 376,
+    "total_tokens": 609,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 233
+  },
+  "api_id": "01a08b2ffee40d3832d2a00f241c6378",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nvariable {α : Type} [Fintype α] [DecidableEq α]\n\nstructure StrictDescent (succ : α → α) : Prop where\n  descent : ∀ a, succ a = a ∨ (succ a) ≠ a ∧ ∃ (f : α → Nat), f (succ a) < f a\n\ntheorem terminates_at_fixed_point (succ : α → α) (h : StrictDescent succ) :\n    ∀ a, ∃ n, (succ^[n] a) = (succ^[n+1] a) := by\n  intro a\n  have : WellFounded (InvImage (· < ·) (h.descent a).choose_spec.2.choose) :=\n    ⟨by\n      intro x\n      apply Acc.intro\n      intro y hlt\n      exact Acc.intro y (fun z hz => (Nat.lt_trans hz hlt).not_lt (Nat.lt_irrefl _))⟩\n  refine WellFounded.fix this (fun n IH => ?_) 0\n  cases' h.descent (succ^[n] a) with heq hdesc\n  · exact ⟨n, heq⟩\n  · have hlt : h.descent a).choose_spec.2.choose (succ^[n+1] a) <\n      (h.descent a).choose_spec.2.choose (succ^[n] a) := by\n      simpa [Function.iterate_succ'] using hdesc.2.2\n    obtain ⟨k, hk⟩ := IH (n+1) hlt\n    exact ⟨k, hk⟩\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

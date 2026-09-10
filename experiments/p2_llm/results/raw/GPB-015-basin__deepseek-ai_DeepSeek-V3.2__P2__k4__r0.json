@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 1031,
+    "total_tokens": 1291,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 260
+  },
+  "api_id": "01a08ad47e1ed6a2740fd2cec0e12649",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Deterministic flow accumulation to outlet fixed point\n// Theorem: from the same start cell, any two finite iteration lengths\n// that reach a fixed point (outlet) yield the same outlet.\n\ndatatype Option<T> = None | Some(value: T)\n\nfunction stepN<T>(step: T → Option<T>, start: T, n: nat): Option<T>\n  decreases n\n{\n  if n == 0 then Some(start)\n  else\n    match stepN(step, start, n-1)\n      case None => None\n      case Some(x) => step(x)\n}\n\npredicate isFixedPoint<T(==)>(step: T → Option<T>, x: T) {\n  step(x) == Some(x)\n}\n\nlemma WatershedUniqueness<T(==)>(step: T → Option<T>, start: T, n: nat, m: nat)\n  requires forall x :: step(x) == None || step(x) == Some(x) || exists y :: step(x) == Some(y)\n  requires stepN(step, start, n) as Some? && isFixedPoint(step, stepN(step, start, n).value)\n  requires stepN(step, start, m) as Some? && isFixedPoint(step, stepN(step, start, m).value)\n  ensures stepN(step, start, n).value == stepN(step, start, m).value\n{\n  // The deterministic step function ensures that from a given start,\n  // the sequence is uniquely determined.\n  // If both n and m reach a fixed point, they must be the same fixed point\n  // because the step function is deterministic and a fixed point is stable.\n  // We prove this by showing that the fixed point reached is independent of n and m.\n\n  var fn := stepN(step, start, n).value;\n  var fm := stepN(step, start, m).value;\n\n  // Key observation: once you reach a fixed point, further steps stay there.\n  // So if you iterate max(n,m) steps, you'll get the same fixed point from both.\n  if n <= m {\n    // Extend n to m steps\n    var extended := stepN(step, start, m);\n    assert extended == Some(fm);\n    // But also, because fn is a fixed point, stepping from fn stays fn.\n    // So the sequence from start after n steps is fn, and after m steps (m ≥ n)\n    // it must still be fn if we follow deterministic steps.\n    // However, we know after m steps we have fm, which is also a fixed point.\n    // Since the step function is deterministic, the path is unique,\n    // so fn == fm.\n    // We prove by induction that stepN(step, start, k) == Some(fn) for all k ≥ n.\n    // Base: k = n, true by definition.\n    // Inductive step: assume for k, prove for k+1.\n    // But Dafny needs more guidance.\n    // Instead, we note: stepN(step, fn, m-n) == Some(fn) because fn is fixed.\n    // And stepN(step, start, m) == stepN(step, fn, m-n) by deterministic unfolding.\n    // Therefore fm == fn.\n    calc {\n      stepN(step, start, m);\n      == // unfold stepN m-n times from n\n      stepN(step, fn, m-n);\n      == { FixedPointLemma(step, fn, m-n); }\n      Some(fn);\n    }\n    assert fm == fn;\n  } else {\n    // symmetric case\n    var extended := stepN(step, start, n);\n    assert extended == Some(fn);\n    calc {\n      stepN(step, start, n);\n      ==\n      stepN(step, fm, n-m);\n      == { FixedPointLemma(step, fm, n-m); }\n      Some(fm);\n    }\n    assert fn == fm;\n  }\n}\n\nlemma FixedPointLemma<T(==)>(step: T → Option<T>, x: T, k: nat)\n  requires isFixedPoint(step, x)\n  ensures stepN(step, x, k) == Some(x)\n  decreases k\n{\n  if k == 0 {\n    // stepN(step, x, 0) == Some(x) by definition\n  } else {\n    FixedPointLemma(step, x, k-1);\n    // Now stepN(step, x, k-1) == Some(x)\n    // Then step(x) == Some(x) because x is fixed point\n    // So stepN(step, x, k) == step(stepN(step, x, k-1).value) == step(x) == Some(x)\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

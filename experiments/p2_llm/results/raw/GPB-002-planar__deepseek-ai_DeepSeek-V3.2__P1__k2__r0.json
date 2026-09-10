@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3119,
+    "completion_tokens": 2115,
+    "total_tokens": 5234,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 47
+  },
+  "api_id": "01a08a65c32f23fdb051ca62b509d0a8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-001\n//  文件 : formal/dafny/P001_horn_slope_exact.dfy\n//  算子 : Horn (1981) 有限差分坡度\n//  覆盖 : GPB-019 的代数核（平面上的精确恢复）\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P001_horn_slope_exact.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  命题：在平面 z = A*x + B*y + C 上，Horn 有限差分算子精确恢复 A 和 B\n//  ----------------------------------------------------------------\n//  给定规则网格（间距 w > 0），Horn 坡度算子：\n//    DzDx = (f - d) / (2w)\n//    DzDy = (h - b) / (2w)\n//  在任意平面采样值上，恒有 DzDx = A 且 DzDy = B。\n//\n//  这是 GPB-019 的代数部分（恒等），区别于渐近一致性。\n//  注意：本证明不依赖 w → 0 的极限，而是对任意 w > 0 成立。\n//\n// ===========================================================================\n\nmodule HornSlopeExact {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定（与 P-003 相同：p 向右，q 向下）\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  //  Horn (1981) 坡度差分：\n  //    ∂z/∂x ≈ (f - d) / (2w)\n  //    ∂z/∂y ≈ (h - b) / (2w)\n  // ------------------------------------------------------------------\n\n  // 平面函数：z = A*x + B*y + C\n  function Plane(x: real, y: real, A: real, B: real, C: real): real\n  {\n    A * x + B * y + C\n  }\n\n  // 网格坐标到实际距离（以中心 e 为原点 (0,0)）\n  function GridX(p: int): real { p as real }\n  function GridY(q: int): real { q as real }\n\n  // 采样平面上的点\n  function Sample(p: int, q: int, A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  {\n    Plane(GridX(p) * w, GridY(q) * w, A, B, C)\n  }\n\n  // 窗口九个点的简写\n  function Qa(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample(-1, -1, A, B, C, w) }\n  function Qb(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample( 0, -1, A, B, C, w) }\n  function Qc(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample( 1, -1, A, B, C, w) }\n  function Qd(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample(-1,  0, A, B, C, w) }\n  function Qe(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample( 0,  0, A, B, C, w) }\n  function Qf(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample( 1,  0, A, B, C, w) }\n  function Qg(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample(-1,  1, A, B, C, w) }\n  function Qh(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample( 0,  1, A, B, C, w) }\n  function Qi(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { Sample( 1,  1, A, B, C, w) }\n\n  // Horn 有限差分算子\n  function HornDzDx(d: real, f: real, w: real): real\n    requires w > 0.0\n  {\n    (f - d) / (2.0 * w)\n  }\n\n  function HornDzDy(b: real, h: real, w: real): real\n    requires w > 0.0\n  {\n    (h - b) / (2.0 * w)\n  }\n\n  // ==================================================================\n  // 主引理：在平面上 Horn 算子精确恢复 A 和 B\n  // ==================================================================\n  lemma HornExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures HornDzDx(Qd(A, B, C, w), Qf(A, B, C, w), w) == A\n    ensures HornDzDy(Qb(A, B, C, w), Qh(A, B, C, w), w) == B\n  {\n    // 展开 Qd 和 Qf\n    calc {\n      Qf(A, B, C, w) - Qd(A, B, C, w);\n      ==\n      Plane(1.0 * w, 0.0, A, B, C) - Plane(-1.0 * w, 0.0, A, B, C);\n      ==\n      (A * (1.0 * w) + B * 0.0 + C) - (A * (-1.0 * w) + B * 0.0 + C);\n      ==\n      A * w + C - (-A * w + C);\n      ==\n      A * w + A * w;\n      ==\n      2.0 * A * w;\n    }\n    // 因此 DzDx = (2.0 * A * w) / (2.0 * w) = A\n    assert HornDzDx(Qd(A, B, C, w), Qf(A, B, C, w), w) == A;\n\n    // 展开 Qb 和 Qh\n    calc {\n      Qh(A, B, C, w) - Qb(A, B, C, w);\n      ==\n      Plane(0.0, 1.0 * w, A, B, C) - Plane(0.0, -1.0 * w, A, B, C);\n      ==\n      (A * 0.0 + B * (1.0 * w) + C) - (A * 0.0 + B * (-1.0 * w) + C);\n      ==\n      B * w - (-B * w);\n      ==\n      2.0 * B * w;\n    }\n    // 因此 DzDy = (2.0 * B * w) / (2.0 * w) = B\n    assert HornDzDy(Qb(A, B, C, w), Qh(A, B, C, w), w) == B;\n  }\n\n  // ==================================================================\n  // 辅助引理：平移不变性（平面常数项 C 不影响差分）\n  // ==================================================================\n  lemma HornInvariantUnderVerticalShift(A: real, B: real, C1: real, C2: real, w: real)\n    requires w > 0.0\n    ensures HornDzDx(Qd(A, B, C1, w), Qf(A, B, C1, w), w)\n         == HornDzDx(Qd(A, B, C2, w), Qf(A, B, C2, w), w)\n    ensures HornDzDy(Qb(A, B, C1, w), Qh(A, B, C1, w), w)\n         == HornDzDy(Qb(A, B, C2, w), Qh(A, B, C2, w), w)\n  {\n    // 差分时常数项 C 相减抵消\n    assert Qf(A, B, C1, w) - Qd(A, B, C1, w) == Qf(A, B, C2, w) - Qd(A, B, C2, w);\n    assert Qh(A, B, C1, w) - Qb(A, B, C1, w) == Qh(A, B, C2, w) - Qb(A, B, C2, w);\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-001 — Horn slope exact on planes (algebraic core of GPB-019)\\n\";\n  print \"全部由编译期验证: dafny verify P001_horn_slope_exact.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1578,
+    "completion_tokens": 678,
+    "total_tokens": 2256,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1578
+  },
+  "api_id": "01a08b23129d6b16929dd7d4349e71e1",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Finset.Basic\nimport Mathlib.Order.WellFounded\n\nopen Finset\n\nvariable {α : Type*} [Fintype α] [DecidableEq α]\n\n-- A strict descent relation on a finite type\nstructure StrictDescent (succ : α → α) : Prop where\n  strict : ∀ a, succ a ≠ a → succ (succ a) = succ a\n  desc : ∀ a, succ a ≠ a → ∃ (f : α → ℕ), f (succ a) < f a\n\n-- The orbit of a starting point under iteration\ndef orbit (succ : α → α) (start : α) : ℕ → α\n  | 0 => start\n  | n + 1 => succ (orbit succ start n)\n\n-- A fixed point is where succ a = a\ndef isFixedPoint (succ : α → α) (a : α) : Prop := succ a = a\n\n-- The main theorem: under a strict descent successor on a finite set,\n-- every orbit terminates at a fixed point.\ntheorem orbit_terminates_at_fixed_point (succ : α → α) (h : StrictDescent succ) (start : α) :\n    ∃ (n : ℕ), isFixedPoint succ (orbit succ start n) := by\n  -- Define a measure function from the descent condition\n  rcases h.desc start (by\n    intro H\n    have := h.strict start H\n    simp [H] at this) with ⟨f, hf⟩\n  -- But we need a measure for all points, not just start\n  -- Instead, use the finiteness of α to get a well-founded measure\n  have : WellFounded (InvImage (· < · : ℕ → ℕ → Prop) f) :=\n    InvImage.wf f (by infer_instance : WellFounded LT.lt)\n  -- Define relation: a ≺ b if succ b = a and succ a ≠ a\n  let r : α → α → Prop := λ a b => succ b = a ∧ succ a ≠ a\n  have hwf : WellFounded r := by\n    apply Subrelation.wf (λ x y hxy => ?_) this\n    rcases hxy with ⟨hsucc, hneq⟩\n    have := h.desc x hneq\n    rcases this with ⟨g, hg⟩\n    exact hg\n  -- Now show that iterating succ must reach a fixed point\n  refine WellFounded.induction hwf start (λ x ih => ?_)\n  by_cases hx : succ x = x\n  · -- x is already a fixed point\n    refine ⟨0, ?_⟩\n    simp [orbit, isFixedPoint, hx]\n  · -- x is not a fixed point\n    have hstep : r (succ x) x := ⟨rfl, hx⟩\n    rcases ih (succ x) hstep with ⟨n, hn⟩\n    refine ⟨n + 1, ?_⟩\n    simp [orbit, hn]\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,28 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\""
+    ],
+    "rc": 4,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\",\"range\":{\"start\":{\"pos\":1651,\"line\":39,\"character\":17},\"end\":{\"pos\":1652,\"line\":39,\"character\":18}}},\"severity\":2,\"arguments\":[],\"defaultFormatMessage\":\"deprecated style: a semi-colon is not needed here\",\"errorId\":\"p_deprecated_semicolon\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\",\"range\":{\"start\":{\"pos\":1671,\"line\":40,\"character\":17},\"end\":{\"pos\":1672,\"line\":40,\"character\":18}}},\"severity\":2,\"arguments\":[],\"defaultFormatMessage\":\"deprecated style: a semi-colon is not needed here\",\"errorId\":\"p_deprecated_semicolon\",\"source\":\"Parser\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\",\"range\":{\"start\":{\"pos\":4866,\"line\":135,\"character\":62},\"end\":{\"pos\":4867,\"line\":135,\"character\":63}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"the calculation step between the previous line and this line could not be proved\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\",\"range\":{\"start\":{\"pos\":4916,\"line\":137,\"character\":20},\"end\":{\"pos\":4917,\"line\":137,\"character\":21}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"the calculation step between the previous line and this line could not be proved\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\",\"range\":{\"start\":{\"pos\":5602,\"line\":155,\"character\":62},\"end\":{\"pos\":5603,\"line\":155,\"character\":63}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"the calculation step between the previous line and this line could not be proved\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_qw6xnpl8/candidate.dfy\",\"range\":{\"start\":{\"pos\":5654,\"line\":157,\"character\":20},\"end\":{\"pos\":5655,\"line\":157,\"character\":21}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"the calculation step between the previous line and this line could not be proved\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 5 verified, 4 errors\\n\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "failure_code": "F1",
+  "interpret": {
+    "compile_rc": 1,
+    "verify_rc": 1,
+    "failure_code": "F1",
+    "interpreted_from": "parse_errors",
+    "proc_rc": 4
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

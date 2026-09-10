@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5b1d80c9f558cecc7abebaec3f40a41e3aa5f66762cf489a62d60b5d8363feaf",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 239,
+    "completion_tokens": 1120,
+    "total_tokens": 1359,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 239
+  },
+  "api_id": "01a08aa8c7f70ed495703167c6d0e310",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P2 · Iterative repair (verifier feedback)\n// Theorem: Under D8 steepest-descent routing, if none of the eight neighbors\n// is strictly lower than the center, the flow direction is NoFlow (undefined / pit).\n\n// Grid dimensions and types\ntype Grid = array2<int>\ntype Direction = (\n    | North\n    | NorthEast\n    | East\n    | SouthEast\n    | South\n    | SouthWest\n    | West\n    | NorthWest\n    | NoFlow\n)\n\n// Helper: get neighbor coordinates for a given direction\nfunction method NeighborCoord(i: int, j: int, dir: Direction): (int, int)\n    decreases dir\n{\n    match dir\n    case North => (i-1, j)\n    case NorthEast => (i-1, j+1)\n    case East => (i, j+1)\n    case SouthEast => (i+1, j+1)\n    case South => (i+1, j)\n    case SouthWest => (i+1, j-1)\n    case West => (i, j-1)\n    case NorthWest => (i-1, j-1)\n    case NoFlow => (i, j)\n}\n\n// Predicate: Is a neighbor strictly lower than the center?\npredicate IsStrictlyLower(grid: Grid, i: int, j: int, dir: Direction)\n    requires 0 <= i < grid.Length0 && 0 <= j < grid.Length1\n    requires dir != NoFlow\n{\n    var (ni, nj) := NeighborCoord(i, j, dir);\n    0 <= ni < grid.Length0 && 0 <= nj < grid.Length1 &&\n    grid[ni, nj] < grid[i, j]\n}\n\n// Main theorem: If no neighbor is strictly lower, then flow direction is NoFlow.\nmethod D8_NoLowerNeighborImpliesNoFlow(grid: Grid, i: int, j: int)\n    requires 0 <= i < grid.Length0\n    requires 0 <= j < grid.Length1\n    ensures (\n        (forall dir: Direction | dir != NoFlow :: !IsStrictlyLower(grid, i, j, dir))\n        ==> (forall dir: Direction | dir != NoFlow :: !IsStrictlyLower(grid, i, j, dir))\n    )\n{\n    // The theorem is a logical tautology, but we need to show that\n    // under D8 steepest-descent, the chosen direction would be NoFlow.\n    // We'll model the D8 choice explicitly.\n\n    ghost var directions: seq<Direction> := [\n        North, NorthEast, East, SouthEast,\n        South, SouthWest, West, NorthWest\n    ];\n\n    // Assume no neighbor is strictly lower\n    if forall dir: Direction | dir != NoFlow :: !IsStrictlyLower(grid, i, j, dir) {\n        // Then, by definition of D8 steepest-descent, the flow direction is NoFlow.\n        // We can assert that for all directions, the neighbor is not strictly lower.\n        assert forall dir: Direction | dir != NoFlow :: !IsStrictlyLower(grid, i, j, dir);\n    }\n}\n\n// Additional verification: explicit D8 steepest-descent function\nfunction method D8SteepestDescent(grid: Grid, i: int, j: int): Direction\n    requires 0 <= i < grid.Length0\n    requires 0 <= j < grid.Length1\n{\n    var directions: seq<Direction> := [\n        North, NorthEast, East, SouthEast,\n        South, SouthWest, West, NorthWest\n    ];\n    var bestDir: Direction := NoFlow;\n    var bestDrop: int := 0;\n\n    for dir in directions\n        invariant bestDir == NoFlow ==> bestDrop == 0\n        invariant bestDir != NoFlow ==> bestDrop > 0\n    {\n        if IsStrictlyLower(grid, i, j, dir) {\n            var drop := grid[i, j] - grid[NeighborCoord(i, j, dir).0, NeighborCoord(i, j, dir).1];\n            if drop > bestDrop {\n                bestDrop := drop;\n                bestDir := dir;\n            }\n        }\n    }\n    bestDir\n}\n\n// Final theorem: If no neighbor is strictly lower, D8SteepestDescent returns NoFlow.\nlemma D8_NoLowerNeighbor_Implies_NoFlow(grid: Grid, i: int, j: int)\n    requires 0 <= i < grid.Length0\n    requires 0 <= j < grid.Length1\n    ensures (\n        (forall dir: Direction | dir != NoFlow :: !IsStrictlyLower(grid, i, j, dir))\n        ==> D8SteepestDescent(grid, i, j) == NoFlow\n    )\n{\n    if forall dir: Direction | dir != NoFlow :: !IsStrictlyLower(grid, i, j, dir) {\n        // By the loop invariant in D8SteepestDescent, if no neighbor is strictly lower,\n        // bestDir remains NoFlow.\n        assert D8SteepestDescent(grid, i, j) == NoFlow;\n    }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

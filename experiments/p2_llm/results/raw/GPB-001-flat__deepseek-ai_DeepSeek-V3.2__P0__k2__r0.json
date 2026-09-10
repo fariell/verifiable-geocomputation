@@ -1,0 +1,43 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-09",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1613,
+    "completion_tokens": 925,
+    "total_tokens": 2538,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1613
+  },
+  "api_id": "01a0870a6e87636eda762440d04ce524",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope magnitude on a constant 3x3 window is zero\n// Grid spacing w must be positive\n\n// Define a 3x3 window of finite elevations\ndatatype Window = Window(\n  z00: real, z01: real, z02: real,\n  z10: real, z11: real, z12: real,\n  z20: real, z21: real, z22: real\n)\n\n// Horn (1981) finite-difference slope components\nfunction HornDzDx(w: Window, spacing: real): real\n  requires spacing > 0.0\n{\n  ((w.z20 + 2.0*w.z21 + w.z22) - (w.z00 + 2.0*w.z01 + w.z02)) / (8.0 * spacing)\n}\n\nfunction HornDzDy(w: Window, spacing: real): real\n  requires spacing > 0.0\n{\n  ((w.z02 + 2.0*w.z12 + w.z22) - (w.z00 + 2.0*w.z10 + w.z20)) / (8.0 * spacing)\n}\n\n// Slope magnitude squared (avoids sqrt for simpler verification)\nfunction HornSlopeSq(w: Window, spacing: real): real\n  requires spacing > 0.0\n{\n  HornDzDx(w, spacing)*HornDzDx(w, spacing) + HornDzDy(w, spacing)*HornDzDy(w, spacing)\n}\n\n// Main theorem: constant elevation window yields zero slope magnitude\nlemma HornConstantWindowZeroSlope(w: Window, spacing: real)\n  requires spacing > 0.0\n  requires w.z00 == w.z01 && w.z01 == w.z02 &&\n           w.z02 == w.z10 && w.z10 == w.z11 &&\n           w.z11 == w.z12 && w.z12 == w.z20 &&\n           w.z20 == w.z21 && w.z21 == w.z22\n  ensures HornSlopeSq(w, spacing) == 0.0\n{\n  // All elevations are equal\n  var c := w.z00;\n  assert forall i,j :: \n    i in {0,1,2} && j in {0,1,2} ==> \n    match (i,j) {\n      case (0,0) => w.z00 == c\n      case (0,1) => w.z01 == c\n      case (0,2) => w.z02 == c\n      case (1,0) => w.z10 == c\n      case (1,1) => w.z11 == c\n      case (1,2) => w.z12 == c\n      case (2,0) => w.z20 == c\n      case (2,1) => w.z21 == c\n      case (2,2) => w.z22 == c\n    };\n\n  // Compute DzDx numerator\n  var numDx := (w.z20 + 2.0*w.z21 + w.z22) - (w.z00 + 2.0*w.z01 + w.z02);\n  calc {\n    numDx;\n    ==\n    (c + 2.0*c + c) - (c + 2.0*c + c);\n    ==\n    4.0*c - 4.0*c;\n    ==\n    0.0;\n  }\n  assert HornDzDx(w, spacing) == 0.0;\n\n  // Compute DzDy numerator\n  var numDy := (w.z02 + 2.0*w.z12 + w.z22) - (w.z00 + 2.0*w.z10 + w.z20);\n  calc {\n    numDy;\n    ==\n    (c + 2.0*c + c) - (c + 2.0*c + c);\n    ==\n    4.0*c - 4.0*c;\n    ==\n    0.0;\n  }\n  assert HornDzDy(w, spacing) == 0.0;\n\n  // Slope squared is sum of squares of zero components\n  assert HornSlopeSq(w, spacing) == 0.0*0.0 + 0.0*0.0 == 0.0;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null,
+  "semantic": "LIKELY_ALIGNED",
+  "fidelity_label": "LIKELY_ALIGNED",
+  "metric_eligible": true,
+  "backfill_ts_utc": "2026-09-10T07:54:58.011236+00:00"
+}

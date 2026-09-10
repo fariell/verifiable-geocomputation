@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 780,
+    "total_tokens": 1023,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08b119c3713c3b4e41614d25d234c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "-- We define a Fill operator that, given a list of natural numbers,\n-- returns a new list where each element is the maximum of all previous elements (including itself).\n-- This is a \"left-outlet\" fill: it propagates the maximum seen so far from left to right.\n\ndef Fill (a : List ℕ) : List ℕ :=\n  match a with\n  | [] => []\n  | h :: t =>\n      let rec loop (current_max : ℕ) (rest : List ℕ) : List ℕ :=\n        match rest with\n        | [] => [current_max]\n        | x :: xs =>\n            let new_max := max current_max x\n            new_max :: loop new_max xs\n      h :: loop h t\n\n-- The theorem: for all i in the range [0, length (Fill a) - 2], Fill(a)[i] ≤ Fill(a)[i+1]\ntheorem Fill_nondecreasing (a : List ℕ) :\n    ∀ i : ℕ, i + 1 < (Fill a).length → (Fill a).get ⟨i, by omega⟩ ≤ (Fill a).get ⟨i + 1, by omega⟩ := by\n  intro a i hlen\n  unfold Fill at hlen\n  -- We'll prove this by induction on `a`, but we need to track the current maximum.\n  revert i\n  induction' a with h t ih\n  · simp [Fill]\n  · intro i hlen\n    simp [Fill] at hlen\n    -- We'll break into cases on whether i = 0 or i > 0\n    match i with\n    | 0 =>\n        simp [Fill]\n        -- For i=0, we compare the first element with the result of the loop on the tail.\n        -- The loop starts with `h` as current_max.\n        -- We need to show: h ≤ (loop h t)[0] (if the tail is nonempty)\n        cases t\n        · simp at hlen\n        · simp [Fill, loop]\n          have : h ≤ max h (head t) := by\n            exact le_max_left _ _\n          exact this\n    | i+1 =>\n        -- For i+1, we shift the index in the tail.\n        have : i + 1 < (loop h t).length := by\n          simpa [Fill] using hlen\n        -- Now we use the induction hypothesis on the tail, with the current_max = h\n        -- But note: the loop on the tail is exactly `Fill (h :: t)` without the first element.\n        -- Actually, we can prove a lemma about `loop`:\n        --   ∀ current_max rest i, i+1 < (loop current_max rest).length → \n        --        (loop current_max rest)[i] ≤ (loop current_max rest)[i+1]\n        -- We prove this by induction on `rest`.\n        revert h t ih\n        -- General lemma for `loop`\n        intro current_max rest\n        induction' rest with x xs ih_loop generalizing current_max\n        · simp [loop] at hlen; omega\n        · intro i hlen\n          simp [loop] at hlen\n          match i with\n          | 0 =>\n              simp [loop]\n              exact le_max_right _ _\n          | i+1 =>\n              have hlen' : i + 1 < (loop (max current_max x) xs).length := by\n                simpa [loop] using hlen\n              have := ih_loop (max current_max x) i hlen'\n              simp [loop] at this ⊢\n              exact this\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,47 @@
+{
+  "task_id": "GPB-P002-idem",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 1,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "already",
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit": [
+      "fill"
+    ],
+    "miss": [
+      "already",
+      "cells",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit_ratio": 0.0833
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "COMPILE_ONLY",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

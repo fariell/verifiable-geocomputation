@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 255,
+    "completion_tokens": 641,
+    "total_tokens": 896,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 255
+  },
+  "api_id": "01a08b21a8b5c5d94f6dcb18d7abbded",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of 2D local raise step RaiseNbr\n// Theorem: Raising a 4-neighbor from an already-processed cell never decreases\n// any cell elevation, and the neighbor is lifted at least to\n// max(original neighbor, processed cell fill).\n\ndatatype Point = Point(x: int, y: int)\n\nfunction Max(a: real, b: real): real {\n  if a >= b then a else b\n}\n\n// Grid elevations: map from Point to real elevation\ntype Grid = map<Point, real>\n\n// 4-neighbor offsets\nconst neighborOffsets: seq<Point> :=\n  [Point(1, 0), Point(-1, 0), Point(0, 1), Point(0, -1)];\n\n// Predicate: point is inside bounds [0, N) x [0, N)\npredicate InBounds(p: Point, N: int) {\n  0 <= p.x < N && 0 <= p.y < N\n}\n\n// The RaiseNbr operation: raise neighbor q of processed cell p\n// Precondition: p and q are 4-neighbors, p has been processed (filled to some level),\n// and we are raising q's elevation.\n// Postcondition: elevations never decrease, and q is raised to at least\n// max(original q elevation, processed cell p's fill level).\n\nmethod RaiseNbr(grid: Grid, p: Point, q: Point, N: int, fill_p: real) returns (grid': Grid)\n  requires InBounds(p, N) && InBounds(q, N)\n  requires exists off :: off in neighborOffsets && q == Point(p.x + off.x, p.y + off.y)\n  requires grid[p] <= fill_p  // p already processed to at least its original elevation\n  ensures grid' == grid[q := Max(grid[q], fill_p)]\n  ensures forall r: Point :: InBounds(r, N) ==> grid'[r] >= grid[r]\n  ensures grid'[q] >= Max(grid[q], fill_p)\n{\n  // Implementation: raise q to max of its current elevation and fill_p\n  grid' := grid[q := Max(grid[q], fill_p)];\n\n  // Verify postconditions\n  // 1. grid' is exactly grid with q updated\n  assert grid' == grid[q := Max(grid[q], fill_p)];\n\n  // 2. No cell decreases\n  forall r: Point | InBounds(r, N)\n    ensures grid'[r] >= grid[r]\n  {\n    if r == q {\n      assert grid'[r] == Max(grid[q], fill_p) >= grid[q] == grid[r];\n    } else {\n      assert grid'[r] == grid[r];\n    }\n  }\n\n  // 3. q is lifted at least to max(original neighbor, processed cell fill)\n  assert grid'[q] == Max(grid[q], fill_p);\n  assert grid'[q] >= Max(grid[q], fill_p);\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3077,
+    "completion_tokens": 1219,
+    "total_tokens": 4296,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 5
+  },
+  "api_id": "01a08b1e89a81b38427faf81c3eacfc7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1 (partial)\n//  文件 : formal/dafny/PCOMP_1_RaiseNbr.dfy\n//  算子 : Wang & Liu (2016) 填洼的 4‑邻域抬升步骤\n//  覆盖 : GPB-021 的代数部分 (RaiseNbr 单调性与下界)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1_RaiseNbr.dfy\n//  日期 : 2026‑09‑06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  Phase 2 的复合验证 P‑COMP‑1 需要三个代数引理:\n//      (i)   填洼后 4‑邻域无坑 (min(nbr) ≤ cell)\n//      (ii)  平面上的 D8 严格下降 (每步 ≥ 1)\n//      (iii) 5×5 平面内环终止 (≤ 50 步)\n//\n//  本文件处理 (i) 的核心构造块: RaiseNbr 步骤的单调性与下界。\n//  这是 W&L 填洼算法正确性的基石——若抬升步骤本身不保持单调，\n//  后续的流域分析将失去可靠的高程序。\n//\n//  注意: 这里只形式化 RaiseNbr 的局部性质，全局填洼的收敛性\n//  需要额外的归纳论证（见 P‑002‑bis 或 Lean4 形式化）。\n// ===========================================================================\n\nmodule RaiseNbr {\n  // ------------------------------------------------------------------\n  // 类型与常量\n  // ------------------------------------------------------------------\n  type Cell = real\n  const inf: real := 1e308  // 表示未处理的无穷大标记\n\n  // ------------------------------------------------------------------\n  // 算子: RaiseNbr (4‑邻域抬升步骤)\n  // ------------------------------------------------------------------\n  // 输入:\n  //   orig_n   : 邻居的原始高程\n  //   fill_p   : 已处理单元 p 的填后高程\n  // 输出:\n  //   邻居 n 的新高程 = max(orig_n, fill_p)\n  //\n  // 语义: 当算法从已处理的单元 p 扩展到其 4‑邻域 n 时，\n  //       将 n 的高程抬升至 orig_n 与 fill_p 的较大者。\n  // ------------------------------------------------------------------\n  function RaiseNbr(orig_n: Cell, fill_p: Cell): Cell\n    requires fill_p != inf  // 已处理单元必须有有限高程\n  {\n    if orig_n >= fill_p then orig_n else fill_p\n  }\n\n  // ==================================================================\n  // 性质 1: 单调性 (从不降低任何单元的高程)\n  // ==================================================================\n  // 对任意 orig_n 和有效的 fill_p，RaiseNbr 的结果 ≥ orig_n。\n  // 这是填洼算法保持高程下界的关键。\n  // ==================================================================\n  lemma RaiseNbrNeverDecreases(orig_n: Cell, fill_p: Cell)\n    requires fill_p != inf\n    ensures RaiseNbr(orig_n, fill_p) >= orig_n\n  {\n    // 由定义直接得出: max(orig_n, fill_p) ≥ orig_n\n  }\n\n  // ==================================================================\n  // 性质 2: 下界保证 (至少抬升至 max(orig_n, fill_p))\n  // ==================================================================\n  // 实际上，RaiseNbr 的结果就是 max(orig_n, fill_p)。\n  // 我们将其拆为两个方向的不等式，以匹配自然语言描述。\n  // ==================================================================\n  lemma RaiseNbrAtLeastOriginal(orig_n: Cell, fill_p: Cell)\n    requires fill_p != inf\n    ensures RaiseNbr(orig_n, fill_p) >= orig_n\n  {\n    // 同性质1，为完整性重述\n  }\n\n  lemma RaiseNbrAtLeastProcessed(orig_n: Cell, fill_p: Cell)\n    requires fill_p != inf\n    ensures RaiseNbr(orig_n, fill_p) >= fill_p\n  {\n    // 由定义: max(orig_n, fill_p) ≥ fill_p\n  }\n\n  // 综合引理: 抬升后的高程恰好是 max(orig_n, fill_p)\n  lemma RaiseNbrIsMax(orig_n: Cell, fill_p: Cell)\n    requires fill_p != inf\n    ensures RaiseNbr(orig_n, fill_p) ==\n            (if orig_n >= fill_p then orig_n else fill_p)\n  {\n    // 由函数定义直接成立\n  }\n\n  // ==================================================================\n  // 应用示例: 验证一次抬升步骤满足任务要求\n  // ==================================================================\n  method ExampleRaise() {\n    var orig: Cell := 5.0;\n    var fill: Cell := 7.0;\n    assume fill != inf;\n\n    var raised := RaiseNbr(orig, fill);\n    // 验证性质\n    assert raised >= orig;          // 从不降低\n    assert raised >= fill;          // 至少抬升至 fill\n    assert raised == 7.0;           // 恰好是 max(5.0, 7.0)\n    print \"RaiseNbr(5.0, 7.0) = \", raised, \"\\n\";\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P‑COMP‑1 (部分) — RaiseNbr 单调性与下界\\n\";\n  print \"验证: dafny verify PCOMP_1_RaiseNbr.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

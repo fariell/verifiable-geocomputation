@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1697,
+    "completion_tokens": 1320,
+    "total_tokens": 3017,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1697
+  },
+  "api_id": "01a08ab2482f2f2afb23a60313fdce99",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Fin.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Tactic\n\nopen Matrix\n\n/-\n  D8 flow direction on a planar DEM z = A x + B y + C with positive slope.\n  We prove that for interior cells sharing the same (A, B, w) parameters,\n  the D8 flow direction is constant, and translating the elevation datum C\n  does not change the direction.\n-/\n\n/-- D8 neighbor offsets: (dx, dy, squared distance) -/\ndef D8_dirs : List (ℤ × ℤ × ℝ) :=\n  [(1, 0, 1), (1, 1, 2), (0, 1, 1), (-1, 1, 2),\n   (-1, 0, 1), (-1, -1, 2), (0, -1, 1), (1, -1, 2)]\n\n/-- Flow direction as a vector (dx, dy) -/\nabbrev FlowDir := ℤ × ℤ\n\n/-- NoFlow sentinel -/\ndef NoFlow : FlowDir := (0, 0)\n\n/-- D8 flow direction at cell (x, y) given elevation function h -/\ndef D8 (h : ℤ → ℤ → ℝ) (x y : ℤ) : FlowDir :=\n  let e := h x y\n  let candidates := D8_dirs.filterMap (λ (dx, dy, d2) =>\n    let x' := x + dx\n    let y' := y + dy\n    let drop := e - h x' y'\n    if drop > 0 then\n      some ((drop * drop) / d2, (dx, dy))\n    else\n      none)\n  match candidates.maximum? (λ a b => a.1 ≤ b.1) with\n  | some (_, dir) => dir\n  | none => NoFlow\n\n/-- Planar DEM: z = A x + B y + C -/\ndef plane (A B C : ℝ) (x y : ℤ) : ℝ :=\n  A * (x : ℝ) + B * (y : ℝ) + C\n\n/-- Positive slope condition: A > 0 and B ≥ 0, with at least one strictly positive -/\nstructure PosSlope where\n  A : ℝ\n  B : ℝ\n  hA : A > 0\n  hB : B ≥ 0\n\n/-- Interior cell condition: all 8 neighbors are defined (always true for ℤ grid) -/\ndef interior (x y : ℤ) : Prop := True\n\ntheorem D8_plane_constant (ps : PosSlope) (C : ℝ) (x₁ y₁ x₂ y₂ : ℤ) :\n    interior x₁ y₁ → interior x₂ y₂ →\n    D8 (plane ps.A ps.B C) x₁ y₁ = D8 (plane ps.A ps.B C) x₂ y₂ := by\n  intro _ _\n  unfold D8 plane\n  simp only [add_sub_cancel, sub_self, mul_zero, zero_add]\n  have hA : ps.A > 0 := ps.hA\n  have hB : ps.B ≥ 0 := ps.hB\n  -- The drop for neighbor (dx, dy) is A*dx + B*dy (independent of x,y,C)\n  let drop (dx dy : ℤ) : ℝ := ps.A * (dx : ℝ) + ps.B * (dy : ℝ)\n  -- Compute squared drop / distance for each direction\n  let candidates : List (ℝ × FlowDir) :=\n    D8_dirs.filterMap (λ (dx, dy, d2) =>\n      let d := drop dx dy\n      if d > 0 then\n        some ((d * d) / d2, (dx, dy))\n      else\n        none)\n  -- The maximizing direction depends only on A, B, not on (x,y,C)\n  have : ∀ x y, D8 (plane ps.A ps.B C) x y =\n      match candidates.maximum? (λ a b => a.1 ≤ b.1) with\n      | some (_, dir) => dir\n      | none => NoFlow := by\n    intro x y\n    unfold D8\n    congr\n    funext (dx, dy, d2)\n    simp [plane, drop]\n    ring\n  simp [this]\n\ntheorem D8_translation_invariant (ps : PosSlope) (C₁ C₂ : ℝ) (x y : ℤ) :\n    D8 (plane ps.A ps.B C₁) x y = D8 (plane ps.A ps.B C₂) x y := by\n  unfold D8 plane\n  simp only [add_sub_cancel, sub_self, mul_zero, zero_add]\n  -- The drop e - h x' y' = (A*x+B*y+C) - (A*x'+B*y'+C) = A*(x-x') + B*(y-y')\n  -- which is independent of C.\n  congr\n  funext (dx, dy, d2)\n  simp [add_sub_add_left_eq_sub]\n\n/-- Main theorem combining both properties -/\ntheorem D8_plane_properties (ps : PosSlope) (C : ℝ) (x₁ y₁ x₂ y₂ : ℤ) :\n    interior x₁ y₁ → interior x₂ y₂ →\n    D8 (plane ps.A ps.B C) x₁ y₁ = D8 (plane ps.A ps.B C) x₂ y₂ ∧\n    ∀ C', D8 (plane ps.A ps.B C) x₁ y₁ = D8 (plane ps.A ps.B C') x₁ y₁ := by\n  intro h1 h2\n  constructor\n  · exact D8_plane_constant ps C x₁ y₁ x₂ y₂ h1 h2\n  · intro C'\n    exact D8_translation_invariant ps C C' x₁ y₁\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

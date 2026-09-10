@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1591,
+    "completion_tokens": 1566,
+    "total_tokens": 3157,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1591
+  },
+  "api_id": "01a08b18a77e38841d30f68002f4d0f2",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of RaiseNbr property from W&L pit-filling algorithm\n// The property: raising a 4-neighbor from an already-processed cell never decreases\n// any cell elevation, and the neighbor is lifted at least to max(original neighbor,\n// processed cell fill).\n\nmodule PCOMP1_RaiseNbr {\n  // Grid dimensions\n  const rows: int\n  const cols: int\n  ghost predicate ValidGrid() {\n    rows > 0 && cols > 0\n  }\n\n  // Elevation type (real numbers for DEM)\n  type Elevation = real\n\n  // Grid coordinates\n  type Coord = (int, int)\n  predicate InGrid(r: int, c: int) {\n    0 <= r < rows && 0 <= c < cols\n  }\n\n  // 4-neighbor offsets\n  const NBR4: seq<Coord> := [(-1, 0), (1, 0), (0, -1), (0, 1)]\n  predicate Is4Neighbor(p: Coord, q: Coord) {\n    exists dir | 0 <= dir < |NBR4| ::\n      q.0 == p.0 + NBR4[dir].0 && q.1 == p.1 + NBR4[dir].1\n  }\n\n  // Original DEM elevations (immutable)\n  const original: array2<Elevation>\n  ghost predicate ValidOriginal() {\n    original.Length0 == rows && original.Length1 == cols\n  }\n\n  // Fill elevations (mutable during algorithm)\n  var fill: array2<Elevation>\n  ghost predicate ValidFill() {\n    fill.Length0 == rows && fill.Length1 == cols\n  }\n\n  // Processed flag\n  var processed: array2<bool>\n  ghost predicate ValidProcessed() {\n    processed.Length0 == rows && processed.Length1 == cols\n  }\n\n  // State invariant\n  predicate StateInvariant() {\n    ValidGrid() &&\n    ValidOriginal() &&\n    ValidFill() &&\n    ValidProcessed() &&\n    (forall r, c | InGrid(r, c) :: \n      fill[r, c] >= original[r, c])  // Fill never lower than original\n  }\n\n  // The RaiseNbr operation\n  method RaiseNbr(p_r: int, p_c: int, n_r: int, n_c: int)\n    requires StateInvariant()\n    requires InGrid(p_r, p_c) && InGrid(n_r, n_c)\n    requires Is4Neighbor((p_r, p_c), (n_r, n_c))\n    requires processed[p_r, p_c] == true  // p is already processed\n    modifies fill\n    ensures StateInvariant()\n    ensures fill[n_r, n_c] >= old(fill[n_r, n_c])  // Never decreases neighbor\n    ensures fill[n_r, n_c] >= original[n_r, n_c]   // Preserves original lower bound\n    ensures fill[n_r, n_c] >= max(original[n_r, n_c], old(fill[p_r, p_c]))\n    // Additional property: no other cell changes\n    ensures forall r, c | InGrid(r, c) && (r != n_r || c != n_c) ::\n      fill[r, c] == old(fill[r, c])\n  {\n    // Implementation of the W&L rule: max(original[n], fill[p])\n    var newElev := max(original[n_r, n_c], fill[p_r, p_c]);\n    \n    // Update only if it raises the neighbor\n    if newElev > fill[n_r, n_c] {\n      fill[n_r, n_c] := newElev;\n    }\n    \n    // Proof of properties\n    assert fill[n_r, n_c] >= old(fill[n_r, n_c]) by {\n      // Case 1: we updated to newElev, which is >= old(fill[p_r, p_c]) >= ?\n      // Actually simpler: newElev >= original[n_r, n_c] >= old(fill[n_r, n_c]) \n      // by StateInvariant? Wait, StateInvariant says fill >= original, not original >= fill.\n      // Let's do case analysis:\n      if newElev > old(fill[n_r, n_c]) {\n        // We updated\n        assert fill[n_r, n_c] == newElev;\n        // newElev >= original[n_r, n_c] by definition of max\n        // old(fill[n_r, n_c]) >= original[n_r, n_c] by StateInvariant\n        // So newElev >= original[n_r, n_c] <= old(fill[n_r, n_c]) doesn't give ordering.\n        // Actually: newElev = max(original[n_r, n_c], old(fill[p_r, p_c]))\n        // So newElev >= original[n_r, n_c] AND newElev >= old(fill[p_r, p_c])\n        // But we need newElev >= old(fill[n_r, n_c]).\n        // This doesn't necessarily hold! Counterexample: \n        // original[n] = 5, fill[p] = 6, old(fill[n]) = 10.\n        // Then newElev = max(5, 6) = 6, which is < 10.\n        // But the algorithm says \"if newElev > fill[n_r, n_c]\" then update.\n        // So in this case we wouldn't update, and fill[n] stays at 10.\n        // So the property holds because we only update when raising.\n      } else {\n        // We didn't update\n        assert fill[n_r, n_c] == old(fill[n_r, n_c]);\n      }\n    }\n    \n    assert fill[n_r, n_c] >= original[n_r, n_c] by {\n      if newElev > old(fill[n_r, n_c]) {\n        assert fill[n_r, n_c] == newElev;\n        assert newElev >= original[n_r, n_c] by {\n          // max(x, y) >= x\n        }\n      } else {\n        assert fill[n_r, n_c] == old(fill[n_r, n_c]);\n        assert old(fill[n_r, n_c]) >= original[n_r, n_c] by StateInvariant();\n      }\n    }\n    \n    assert fill[n_r, n_c] >= max(original[n_r, n_c], old(fill[p_r, p_c])) by {\n      if newElev > old(fill[n_r, n_c]) {\n        assert fill[n_r, n_c] == newElev;\n        assert newElev == max(original[n_r, n_c], old(fill[p_r, p_c]));\n      } else {\n        assert fill[n_r, n_c] == old(fill[n_r, n_c]);\n        // Since we didn't update, old(fill[n_r, n_c]) >= newElev\n        assert old(fill[n_r, n_c]) >= newElev;\n        assert newElev == max(original[n_r, n_c], old(fill[p_r, p_c]));\n      }\n    }\n  }\n\n  // Helper lemma about max\n  lemma MaxProperty(a: Elevation, b: Elevation)\n    ensures max(a, b) >= a\n    ensures max(a, b) >= b\n  {\n    // Built-in property of max\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

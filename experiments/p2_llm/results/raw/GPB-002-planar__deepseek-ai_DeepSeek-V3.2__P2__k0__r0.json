@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 1478,
+    "total_tokens": 1736,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 258
+  },
+  "api_id": "01a08a6d0b70197f9844d33971a91f8a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference gradient estimation on a planar surface\n// Theorem: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w > 0, the Horn finite-difference estimates DzDx and DzDy\n// recover A and B exactly.\n\nmethod HornPlanarExactRecovery(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w > 0.0\n  ensures DzDx == A && DzDy == B\n{\n  // Define grid points around a central point (x0, y0)\n  var x0 := 0.0;\n  var y0 := 0.0;\n\n  // Sample the planar surface z = A*x + B*y + C at the 3x3 stencil points\n  // Central point\n  var z00 := A * x0 + B * y0 + C;\n  // East and West neighbors\n  var z10 := A * (x0 + w) + B * y0 + C;\n  var zm10 := A * (x0 - w) + B * y0 + C;\n  // North and South neighbors\n  var z01 := A * x0 + B * (y0 + w) + C;\n  var z0m1 := A * x0 + B * (y0 - w) + C;\n  // Diagonal neighbors (used in Horn's method)\n  var z11 := A * (x0 + w) + B * (y0 + w) + C;\n  var zm1m1 := A * (x0 - w) + B * (y0 - w) + C;\n  var z1m1 := A * (x0 + w) + B * (y0 - w) + C;\n  var zm11 := A * (x0 - w) + B * (y0 + w) + C;\n\n  // Horn finite-difference gradient estimation (3x3 Sobel-like kernel)\n  // Dz/Dx estimate\n  DzDx := ( (z11 + 2.0 * z10 + z1m1) - (zm11 + 2.0 * zm10 + zm1m1) ) / (8.0 * w);\n  // Dz/Dy estimate\n  DzDy := ( (z11 + 2.0 * z01 + zm11) - (z1m1 + 2.0 * z0m1 + zm1m1) ) / (8.0 * w);\n\n  // Verification that these simplify to A and B exactly\n  // The following assertions are proved by Dafny's real arithmetic\n  assert DzDx == A by {\n    calc {\n      DzDx;\n      ==\n      ( (z11 + 2.0 * z10 + z1m1) - (zm11 + 2.0 * zm10 + zm1m1) ) / (8.0 * w);\n      ==\n      ( (A*(x0+w) + B*(y0+w) + C + 2.0*(A*(x0+w) + B*y0 + C) + A*(x0+w) + B*(y0-w) + C)\n        - (A*(x0-w) + B*(y0+w) + C + 2.0*(A*(x0-w) + B*y0 + C) + A*(x0-w) + B*(y0-w) + C)\n      ) / (8.0 * w);\n      ==\n      ( (A*x0 + A*w + B*y0 + B*w + C + 2.0*A*x0 + 2.0*A*w + 2.0*B*y0 + 2.0*C + A*x0 + A*w + B*y0 - B*w + C)\n        - (A*x0 - A*w + B*y0 + B*w + C + 2.0*A*x0 - 2.0*A*w + 2.0*B*y0 + 2.0*C + A*x0 - A*w + B*y0 - B*w + C)\n      ) / (8.0 * w);\n      ==\n      ( (4.0*A*x0 + 4.0*A*w + 4.0*B*y0 + 4.0*C)\n        - (4.0*A*x0 - 4.0*A*w + 4.0*B*y0 + 4.0*C)\n      ) / (8.0 * w);\n      ==\n      (8.0 * A * w) / (8.0 * w);\n      ==\n      A;\n    }\n  }\n\n  assert DzDy == B by {\n    calc {\n      DzDy;\n      ==\n      ( (z11 + 2.0 * z01 + zm11) - (z1m1 + 2.0 * z0m1 + zm1m1) ) / (8.0 * w);\n      ==\n      ( (A*(x0+w) + B*(y0+w) + C + 2.0*(A*x0 + B*(y0+w) + C) + A*(x0-w) + B*(y0+w) + C)\n        - (A*(x0+w) + B*(y0-w) + C + 2.0*(A*x0 + B*(y0-w) + C) + A*(x0-w) + B*(y0-w) + C)\n      ) / (8.0 * w);\n      ==\n      ( (A*x0 + A*w + B*y0 + B*w + C + 2.0*A*x0 + 2.0*B*y0 + 2.0*B*w + 2.0*C + A*x0 - A*w + B*y0 + B*w + C)\n        - (A*x0 + A*w + B*y0 - B*w + C + 2.0*A*x0 + 2.0*B*y0 - 2.0*B*w + 2.0*C + A*x0 - A*w + B*y0 - B*w + C)\n      ) / (8.0 * w);\n      ==\n      ( (4.0*A*x0 + 4.0*B*y0 + 4.0*B*w + 4.0*C)\n        - (4.0*A*x0 + 4.0*B*y0 - 4.0*B*w + 4.0*C)\n      ) / (8.0 * w);\n      ==\n      (8.0 * B * w) / (8.0 * w);\n      ==\n      B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 683,
+    "total_tokens": 941,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 258
+  },
+  "api_id": "01a08a70c23eb03724f0925d47dab36c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference gradient estimation on a planar surface\n// Theorem: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w > 0, the Horn finite-difference estimates DzDx and DzDy\n// recover A and B exactly.\n\nmethod HornPlanarExactRecovery(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w > 0.0\n  ensures DzDx == A && DzDy == B\n{\n  // Define a planar surface function\n  function z(x: real, y: real): real\n  {\n    A * x + B * y + C\n  }\n\n  // Horn finite-difference kernel weights for Dz/Dx (central x-difference)\n  // Kernel:\n  // [ -1  0  1 ]\n  // [ -2  0  2 ]\n  // [ -1  0  1 ]   * (1/(8*w))\n  // Sum of weights = 0, linear combination recovers A exactly for plane.\n  \n  // Compute DzDx using Horn kernel\n  DzDx := \n    (1.0/(8.0 * w)) * (\n      -1.0 * z(-w, -w) + 0.0 * z(0.0, -w) + 1.0 * z(w, -w) +\n      -2.0 * z(-w, 0.0) + 0.0 * z(0.0, 0.0) + 2.0 * z(w, 0.0) +\n      -1.0 * z(-w, w) + 0.0 * z(0.0, w) + 1.0 * z(w, w)\n    );\n\n  // Horn finite-difference kernel for Dz/Dy (central y-difference)\n  // Kernel:\n  // [ -1 -2 -1 ]\n  // [  0  0  0 ]\n  // [  1  2  1 ]   * (1/(8*w))\n  \n  // Compute DzDy using Horn kernel\n  DzDy := \n    (1.0/(8.0 * w)) * (\n      -1.0 * z(-w, -w) + -2.0 * z(0.0, -w) + -1.0 * z(w, -w) +\n       0.0 * z(-w, 0.0) +  0.0 * z(0.0, 0.0) +  0.0 * z(w, 0.0) +\n       1.0 * z(-w, w)  +  2.0 * z(0.0, w)  +  1.0 * z(w, w)\n    );\n\n  // The verification relies on Dafny's real arithmetic to confirm\n  // that after substituting z(x,y) = A*x + B*y + C and simplifying,\n  // DzDx simplifies to A and DzDy simplifies to B.\n  // This is an algebraic identity, not an asymptotic approximation.\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

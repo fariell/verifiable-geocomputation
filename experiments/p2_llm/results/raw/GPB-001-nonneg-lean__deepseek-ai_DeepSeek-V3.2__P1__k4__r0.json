@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3029,
+    "completion_tokens": 2152,
+    "total_tokens": 5181,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 85
+  },
+  "api_id": "01a08a52550d55e8e66e9b01f047ab4c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-019\n   文件 : formal/lean4/VeriGIS/HornSlopeNonneg.lean\n   算子 : Horn (1981) 有限差分坡度平方\n   对偶 : formal/dafny/P019_slope_nonnegative.dfy\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  命题：对于任意3×3高程窗口和正网格间距w，Horn坡度平方SlopeSq非负。\n  此性质对任意高程值成立，不仅限于平面表面。\n\n  覆盖：\n    GPB-001 的推论：坡度平方在任意高程下非负\n    与GPB-020（剖面曲率）形成对比：曲率可能为负，但坡度平方始终≥0\n    噪声鲁棒性：即使有噪声，坡度平方仍保持非负\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Analysis.SpecialFunctions.Pow.Real\n\nnamespace VeriGIS.HornSlopeNonneg\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下)，与 `HornSlope` / Dafny P-001 相同。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n-/\n\n/-- Horn (1981) 有限差分坡度平方算子 -/\ndef slopeSq (a b c d e f g h i w : ℝ) : ℝ :=\n  let dzdx := (c + 2 * f + i - (a + 2 * d + g)) / (8 * w)\n  let dzdy := (g + 2 * h + i - (a + 2 * b + c)) / (8 * w)\n  dzdx ^ 2 + dzdy ^ 2\n\n/-- 主定理：对于任意高程和正网格间距，坡度平方非负 -/\ntheorem slopeSq_nonneg (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    0 ≤ slopeSq a b c d e f g h i w := by\n  unfold slopeSq\n  have h8w_pos : 0 < 8 * w := by linarith\n  have h8w_ne_zero : 8 * w ≠ 0 := by linarith\n  have hdzdx_sq_nonneg : 0 ≤ ((c + 2 * f + i - (a + 2 * d + g)) / (8 * w)) ^ 2 :=\n    pow_two_nonneg _\n  have hdzdy_sq_nonneg : 0 ≤ ((g + 2 * h + i - (a + 2 * b + c)) / (8 * w)) ^ 2 :=\n    pow_two_nonneg _\n  linarith\n\n/-- 更强的版本：坡度平方是平方和，因此自动非负 -/\ntheorem slopeSq_eq_sum_squares (a b c d e f g h i w : ℝ) (hw : w ≠ 0) :\n    slopeSq a b c d e f g h i w =\n      ((c + 2 * f + i - (a + 2 * d + g)) / (8 * w)) ^ 2 +\n      ((g + 2 * h + i - (a + 2 * b + c)) / (8 * w)) ^ 2 :=\n  rfl\n\n/-- 零坡度条件：当且仅当两个差分都为零时坡度平方为零 -/\ntheorem slopeSq_eq_zero_iff (a b c d e f g h i w : ℝ) (hw : w > 0) :\n    slopeSq a b c d e f g h i w = 0 ↔\n      c + 2 * f + i = a + 2 * d + g ∧\n      g + 2 * h + i = a + 2 * b + c := by\n  constructor\n  · intro h\n    unfold slopeSq at h\n    have h1 : ((c + 2 * f + i - (a + 2 * d + g)) / (8 * w)) ^ 2 = 0 := by\n      have : 0 ≤ ((c + 2 * f + i - (a + 2 * d + g)) / (8 * w)) ^ 2 := pow_two_nonneg _\n      have : 0 ≤ ((g + 2 * h + i - (a + 2 * b + c)) / (8 * w)) ^ 2 := pow_two_nonneg _\n      linarith\n    have h2 : ((g + 2 * h + i - (a + 2 * b + c)) / (8 * w)) ^ 2 = 0 := by\n      have : 0 ≤ ((c + 2 * f + i - (a + 2 * d + g)) / (8 * w)) ^ 2 := pow_two_nonneg _\n      have : 0 ≤ ((g + 2 * h + i - (a + 2 * b + c)) / (8 * w)) ^ 2 := pow_two_nonneg _\n      linarith\n    have h8w_ne_zero : 8 * w ≠ 0 := by linarith\n    constructor\n    · have : (c + 2 * f + i - (a + 2 * d + g)) / (8 * w) = 0 :=\n        pow_eq_zero h1\n      field_simp [h8w_ne_zero] at this\n      linarith\n    · have : (g + 2 * h + i - (a + 2 * b + c)) / (8 * w) = 0 :=\n        pow_eq_zero h2\n      field_simp [h8w_ne_zero] at this\n      linarith\n  · rintro ⟨h1, h2⟩\n    unfold slopeSq\n    have h8w_ne_zero : 8 * w ≠ 0 := by linarith\n    have hdiff1 : c + 2 * f + i - (a + 2 * d + g) = 0 := by linarith\n    have hdiff2 : g + 2 * h + i - (a + 2 * b + c) = 0 := by linarith\n    simp [hdiff1, hdiff2, h8w_ne_zero]\n\n/-- 平移不变性：所有高程加上常数K，坡度平方不变 -/\ntheorem slopeSq_translation_invariant (a b c d e f g h i w K : ℝ) :\n    slopeSq (a + K) (b + K) (c + K) (d + K) (e + K) (f + K) (g + K) (h + K) (i + K) w =\n    slopeSq a b c d e f g h i w := by\n  unfold slopeSq\n  ring_nf\n\n/-- 缩放不变性：网格间距w缩放，坡度平方按1/w²缩放 -/\ntheorem slopeSq_scaling (a b c d e f g h i w α : ℝ) (hα : α ≠ 0) :\n    slopeSq a b c d e f g h i (α * w) = (1 / α ^ 2) * slopeSq a b c d e f g h i w := by\n  unfold slopeSq\n  field_simp [hα]\n  ring\n\n/-- 与平面表面的关系：在平面上，坡度平方等于解析坡度的平方 -/\ntheorem slopeSq_on_plane (A B C D E F w : ℝ) (hw : w > 0) :\n    let z p q : ℝ := A * (p * w) + B * (q * w) + C * (p * w) * (q * w) + D * (p * w) + E * (q * w) + F\n    slopeSq (z (-1) (-1)) (z 0 (-1)) (z 1 (-1))\n            (z (-1) 0) (z 0 0) (z 1 0)\n            (z (-1) 1) (z 0 1) (z 1 1) w = (A + C * w) ^ 2 + (B + C * w) ^ 2 := by\n  intro z\n  unfold slopeSq z\n  field_simp [show w ≠ 0 from by linarith]\n  ring\n\n/-- 噪声鲁棒性：即使添加任意噪声，坡度平方仍非负 -/\ntheorem slopeSq_with_noise_nonneg (a b c d e f g h i w : ℝ) (hw : w > 0)\n    (δa δb δc δd δe δf δg δh δi : ℝ) :\n    0 ≤ slopeSq (a + δa) (b + δb) (c + δc) (d + δd) (e + δe) (f + δf) (g + δg) (h + δh) (i + δi) w :=\n  slopeSq_nonneg (a + δa) (b + δb) (c + δc) (d + δd) (e + δe) (f + δf) (g + δg) (h + δh) (i + δi) w hw\n\nend\nend VeriGIS.HornSlopeNonneg\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

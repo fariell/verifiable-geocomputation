@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2985,
+    "completion_tokens": 1428,
+    "total_tokens": 4413,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 41
+  },
+  "api_id": "01a08b0f82f579c482f54802cd3bce99",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-COMP-1 (algebraic half)\n   文件 : formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean\n   算子 : 1D 左出口填充 (Wang & Liu 简化版)\n   对偶 : formal/dafny/PCOMP_1.dfy (Dafny 4.11)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n\n   本文件形式化 1D 左出口填充算子的单调性：\n   对于任意输入序列 a，填充结果 Fill(a) 是非递减序列。\n   ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Data.Real.Basic\nimport Mathlib.Data.List.Basic\n\nnamespace VeriGIS.Composition.PitFillingThenWatershed\n\nnoncomputable section\n\n/-!\n  ## 1D 左出口填充算子定义\n\n  给定高程序列 a : List ℝ，从左向右扫描：\n    - 边界条件：左端点保持原值\n    - 递推规则：Fill[i] = max(a[i], Fill[i-1])\n\n  这对应于 2D Wang & Liu 填充在 1D 线性情况下的简化，\n  其中“4-邻域”退化为左邻域。\n-/\n\n/-- 1D 左出口填充算子 -/\ndef fill1D : List ℝ → List ℝ\n  | [] => []\n  | x :: xs =>\n    let rec loop : ℝ → List ℝ → List ℝ\n      | prev, [] => []\n      | prev, y :: ys =>\n        let cur := max y prev\n        cur :: loop cur ys\n    x :: loop x xs\n\n/-!\n  ## 主要定理：填充结果是非递减序列\n\n  定理陈述：对于任意 i < length(fill1D a) - 1，\n  有 fill1D a[i] ≤ fill1D a[i+1]。\n\n  注意：这里使用 List.get 访问元素，需要处理索引边界。\n-/\n\ntheorem fill1D_nondecreasing (a : List ℝ) :\n    ∀ (i : ℕ) (hi : i + 1 < (fill1D a).length),\n      (fill1D a).get ⟨i, by omega⟩ ≤ (fill1D a).get ⟨i + 1, hi⟩ := by\n  intro a\n  -- 情况分析：空序列平凡成立\n  cases a with\n  | nil =>\n    intro i hi\n    exfalso\n    simp [fill1D] at hi\n  | cons x xs =>\n    -- 展开 fill1D 定义\n    simp [fill1D] at *\n    -- 定义辅助函数和不变式\n    let rec loop_prop (prev : ℝ) (xs : List ℝ) :\n        ∀ (i : ℕ) (hi : i + 1 < (loop prev xs).length),\n          (loop prev xs).get ⟨i, by omega⟩ ≤ (loop prev xs).get ⟨i + 1, hi⟩ := by\n      intro prev xs\n      induction xs with\n      | nil =>\n        intro i hi\n        exfalso\n        simp [loop] at hi\n      | cons y ys ih =>\n        intro i hi\n        simp [loop] at *\n        -- 当前填充值 cur = max y prev\n        let cur := max y prev\n        cases i with\n        | zero =>\n          -- 比较第一个元素和第二个元素\n          simp [List.get]\n          exact le_max_right _ _\n        | succ i =>\n          -- 递归情况\n          have hi' : i + 1 < (loop cur ys).length := by\n            simpa using hi\n          exact ih hi'\n    -- 应用辅助引理\n    intro i hi\n    cases i with\n    | zero =>\n      -- 比较第一个元素(x)和第二个元素\n      simp [List.get]\n      cases xs with\n      | nil => exfalso; simp at hi\n      | cons y ys =>\n        simp [loop]\n        exact le_max_right _ _\n    | succ i =>\n      -- 递归情况\n      have hi' : i + 1 < (loop x xs).length := by\n        simpa using hi\n      exact loop_prop x xs i hi'\n\n/-!\n  ## 冒烟测试：验证定义和定理\n-/\n\n-- 测试1：空序列\nexample : fill1D ([] : List ℝ) = [] := by\n  rfl\n\n-- 测试2：单元素序列\nexample : fill1D [3.0] = [3.0] := by\n  norm_num [fill1D]\n\n-- 测试3：简单递增序列\nexample : fill1D [1.0, 2.0, 3.0] = [1.0, 2.0, 3.0] := by\n  norm_num [fill1D]\n\n-- 测试4：有坑的序列\nexample : fill1D [3.0, 1.0, 2.0] = [3.0, 3.0, 3.0] := by\n  norm_num [fill1D]\n\n-- 测试5：定理应用示例\nexample : ∀ (i : ℕ) (hi : i + 1 < (fill1D [3.0, 1.0, 2.0]).length),\n    (fill1D [3.0, 1.0, 2.0]).get ⟨i, by omega⟩ ≤\n    (fill1D [3.0, 1.0, 2.0]).get ⟨i + 1, hi⟩ := by\n  apply fill1D_nondecreasing\n\n/-!\n  ## 结构注记\n\n  1D 左出口填充的单调性证明相对直接，因为递推规则\n    Fill[i] = max(a[i], Fill[i-1])\n  保证了 Fill[i] ≥ Fill[i-1]。\n\n  这对应于 2D Wang & Liu 填充性质 (i) 的特例：\n    \"After W&L fill, every cell with a 4-neighbour has min(nbr) ≤ cell.\"\n  在 1D 中，\"4-neighbour\" 退化为左邻域，\"min(nbr)\" 就是 Fill[i-1]。\n\n  该性质是 P-COMP-1 代数部分的基础，保证了填充后的地形\n  在流向计算中不会产生局部极小值（除了边界）。\n-/\n\nend -- noncomputable section\n\nend VeriGIS.Composition.PitFillingThenWatershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

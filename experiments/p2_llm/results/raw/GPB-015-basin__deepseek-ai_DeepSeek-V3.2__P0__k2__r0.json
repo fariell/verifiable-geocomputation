@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 1365,
+    "total_tokens": 2970,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a08ac856d24ed89b423a8b483ea192",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of watershed uniqueness under deterministic successor function\n// Property: If a deterministic successor function reaches an outlet (fixed point)\n// from the same start cell in any two finite step counts, those outlets are equal.\n\n// Grid dimensions and cell type\ntype Cell = (int, int)\n\n// Deterministic successor function (D8 flow direction)\nfunction Succ(cell: Cell): Cell\n  // Deterministic: for each cell, exactly one successor (or itself if outlet)\n  ensures Succ(cell) == cell || Succ(Succ(cell)) != Succ(cell)  // No trivial cycles of length 2\n\n// Fixed point (outlet) predicate\npredicate IsOutlet(cell: Cell) {\n  Succ(cell) == cell\n}\n\n// Bounded iteration function: apply Succ exactly n times\nfunction StepN(cell: Cell, n: nat): Cell\n  decreases n\n{\n  if n == 0 then cell\n  else StepN(Succ(cell), n - 1)\n}\n\n// Main theorem: uniqueness of outlet reachable in bounded steps\ntheorem WatershedUniqueness(start: Cell, m: nat, n: nat)\n  requires m > 0 && n > 0  // Non-zero step counts\n  requires IsOutlet(StepN(start, m))  // Reaches outlet in m steps\n  requires IsOutlet(StepN(start, n))  // Reaches outlet in n steps\n  ensures StepN(start, m) == StepN(start, n)  // Same outlet\n{\n  // Key lemma: once at an outlet, further steps stay there\n  lemma OutletFixedPoint(cell: Cell, k: nat)\n    requires IsOutlet(cell)\n    ensures StepN(cell, k) == cell\n    decreases k\n  {\n    if k > 0 {\n      OutletFixedPoint(cell, k - 1);\n    }\n  }\n\n  // Without loss of generality, assume m <= n\n  if m <= n {\n    // Apply Succ m times to reach outlet O1\n    var O1 := StepN(start, m);\n    // From O1, apply Succ (n-m) more times to reach O2\n    var O2 := StepN(O1, n - m);\n    // But O1 is outlet, so O2 == O1 by lemma\n    OutletFixedPoint(O1, n - m);\n    assert O2 == O1;\n    // By definition of StepN composition\n    assert StepN(start, n) == StepN(StepN(start, m), n - m) == O2;\n    assert StepN(start, n) == O1 == StepN(start, m);\n  } else {\n    // Symmetric case when n < m\n    var O2 := StepN(start, n);\n    var O1 := StepN(O2, m - n);\n    OutletFixedPoint(O2, m - n);\n    assert O1 == O2;\n    assert StepN(start, m) == StepN(StepN(start, n), m - n) == O1;\n    assert StepN(start, m) == O2 == StepN(start, n);\n  }\n}\n\n// Additional lemma: any cell that reaches an outlet in some steps\n// will reach the same outlet in any larger number of steps\nlemma OutletConsistency(start: Cell, m: nat, n: nat)\n  requires m <= n\n  requires IsOutlet(StepN(start, m))\n  ensures IsOutlet(StepN(start, n))\n  ensures StepN(start, m) == StepN(start, n)\n{\n  WatershedUniqueness(start, m, n);\n}\n\n// Verification of termination condition for planar slope case\n// (Not required by the main theorem but included for context)\npredicate Terminates(start: Cell, bound: nat) {\n  exists k: nat :: k <= bound && IsOutlet(StepN(start, k))\n}\n\n// Counterexample for artificial flat 4-ring (P-006b)\n// Shows that termination is not guaranteed in all cases\nmethod RingCounterexample() returns (succ: Cell -> Cell, start: Cell, bound: nat)\n  ensures forall c: Cell :: succ(c) != c  // No fixed points\n  ensures forall c: Cell :: succ(succ(succ(succ(c)))) == c  // 4-cycle\n  ensures !Terminates(start, bound)  // Does not terminate within bound\n{\n  // Construct 4-cycle successor function\n  succ := (c: Cell) =>\n    match c\n    case (0,0) => (0,1)\n    case (0,1) => (1,1)\n    case (1,1) => (1,0)\n    case (1,0) => (0,0)\n    case _ => c  // Default for other cells (not used in counterexample)\n    ;\n  start := (0,0);\n  bound := 3;  // Less than cycle length\n  \n  // Verify no fixed points\n  assert forall c: Cell :: c == (0,0) || c == (0,1) || c == (1,1) || c == (1,0) || \n    (c != (0,0) && c != (0,1) && c != (1,1) && c != (1,0));\n  assert succ((0,0)) == (0,1) != (0,0);\n  assert succ((0,1)) == (1,1) != (0,1);\n  assert succ((1,1)) == (1,0) != (1,1);\n  assert succ((1,0)) == (0,0) != (1,0);\n  \n  // Verify 4-cycle\n  assert succ(succ(succ(succ((0,0))))) == (0,0);\n  \n  // Verify non-termination within bound\n  assert StepN(start, 0) == (0,0) && !IsOutlet((0,0));\n  assert StepN(start, 1) == (0,1) && !IsOutlet((0,1));\n  assert StepN(start, 2) == (1,1) && !IsOutlet((1,1));\n  assert StepN(start, 3) == (1,0) && !IsOutlet((1,0));\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

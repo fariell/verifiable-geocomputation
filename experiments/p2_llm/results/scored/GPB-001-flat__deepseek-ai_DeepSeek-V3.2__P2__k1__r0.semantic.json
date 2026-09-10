@@ -1,0 +1,61 @@
+{
+  "task_id": "GPB-001-flat",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "SlopeSq"
+  ],
+  "n_gen_names": 1,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "horn",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "slope",
+      "slopesq",
+      "spacing",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "hit": [
+      "elevation",
+      "finite",
+      "horn",
+      "magnitude",
+      "slope",
+      "slopesq",
+      "window",
+      "zero"
+    ],
+    "miss": [
+      "cells",
+      "equivalently",
+      "grid",
+      "identically",
+      "nine",
+      "positive",
+      "share",
+      "spacing",
+      "square",
+      "values"
+    ],
+    "hit_ratio": 0.4444
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

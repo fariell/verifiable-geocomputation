@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 975,
+    "total_tokens": 1233,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 258
+  },
+  "api_id": "01a08a6dcda9342eb2aba13da5cf45fe",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference gradient estimation on a planar surface\n// Theorem: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w > 0, the Horn finite-difference estimates DzDx and DzDy\n// recover A and B exactly.\n\nmethod HornExactRecovery(A: real, B: real, C: real, w: real) \n  returns (DzDx: real, DzDy: real)\n  requires w > 0.0\n  ensures DzDx == A && DzDy == B\n{\n  // Define grid points around center (0,0)\n  var z00 := A*(-w) + B*(-w) + C;  // (-w, -w)\n  var z01 := A*(-w) + B*0.0 + C;   // (-w, 0)\n  var z02 := A*(-w) + B*w + C;     // (-w, w)\n  var z10 := A*0.0 + B*(-w) + C;   // (0, -w)\n  var z11 := A*0.0 + B*0.0 + C;    // (0, 0)\n  var z12 := A*0.0 + B*w + C;      // (0, w)\n  var z20 := A*w + B*(-w) + C;     // (w, -w)\n  var z21 := A*w + B*0.0 + C;      // (w, 0)\n  var z22 := A*w + B*w + C;        // (w, w)\n\n  // Horn finite-difference formulas (weighted central differences)\n  // Dz/Dx ≈ [ (z20 - z00) + 2*(z21 - z01) + (z22 - z02) ] / (8*w)\n  // Dz/Dy ≈ [ (z02 - z00) + 2*(z12 - z10) + (z22 - z20) ] / (8*w)\n  \n  var numDx := (z20 - z00) + 2.0*(z21 - z01) + (z22 - z02);\n  var numDy := (z02 - z00) + 2.0*(z12 - z10) + (z22 - z20);\n  \n  DzDx := numDx / (8.0 * w);\n  DzDy := numDy / (8.0 * w);\n  \n  // Verification that these equal A and B exactly\n  // Expand all terms symbolically:\n  // z20 - z00 = [A*w + B*(-w) + C] - [A*(-w) + B*(-w) + C] = A*w - A*(-w) = 2*A*w\n  // z21 - z01 = [A*w + B*0 + C] - [A*(-w) + B*0 + C] = A*w - A*(-w) = 2*A*w\n  // z22 - z02 = [A*w + B*w + C] - [A*(-w) + B*w + C] = A*w - A*(-w) = 2*A*w\n  // Sum: 2*A*w + 2*(2*A*w) + 2*A*w = (2 + 4 + 2)*A*w = 8*A*w\n  // Divide by 8*w: A\n  \n  // Similarly for Dy:\n  // z02 - z00 = [A*(-w) + B*w + C] - [A*(-w) + B*(-w) + C] = B*w - B*(-w) = 2*B*w\n  // z12 - z10 = [A*0 + B*w + C] - [A*0 + B*(-w) + C] = B*w - B*(-w) = 2*B*w\n  // z22 - z20 = [A*w + B*w + C] - [A*w + B*(-w) + C] = B*w - B*(-w) = 2*B*w\n  // Sum: 2*B*w + 2*(2*B*w) + 2*B*w = 8*B*w\n  // Divide by 8*w: B\n  \n  // Dafny can verify these equalities automatically:\n  assert numDx == 8.0 * A * w;\n  assert numDy == 8.0 * B * w;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

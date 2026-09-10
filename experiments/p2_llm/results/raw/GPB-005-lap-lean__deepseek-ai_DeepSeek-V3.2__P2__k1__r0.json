@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 243,
+    "completion_tokens": 569,
+    "total_tokens": 812,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 243
+  },
+  "api_id": "01a08a7a7ffd75376a9cbf8790211d92",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib\n\n-- Define a grid as a function from ℤ × ℤ to ℝ\ndef Grid := ℤ × ℤ → ℝ\n\n-- Discrete Laplacian for a 3×3 orthogonal neighborhood\n-- Laplacian = sum of (neighbor - center) over orthogonal neighbors\n-- Here we use the 4 orthogonal neighbors: up, down, left, right\ndef discrete_laplacian (g : Grid) (p : ℤ × ℤ) : ℝ :=\n  let (x, y) := p\n  (g (x+1, y) - g (x, y)) + (g (x-1, y) - g (x, y)) +\n  (g (x, y+1) - g (x, y)) + (g (x, y-1) - g (x, y))\n\n-- A center is a discrete local maximum in the orthogonal neighborhood\n-- if its value is ≥ each of the four orthogonal neighbors\ndef is_local_max_orth (g : Grid) (p : ℤ × ℤ) : Prop :=\n  let (x, y) := p\n  g (x, y) ≥ g (x+1, y) ∧\n  g (x, y) ≥ g (x-1, y) ∧\n  g (x, y) ≥ g (x, y+1) ∧\n  g (x, y) ≥ g (x, y-1)\n\n-- Theorem: If the center is a local max in the orthogonal neighborhood,\n-- then the discrete Laplacian at the center is ≤ 0.\ntheorem local_max_implies_laplacian_nonpos (g : Grid) (p : ℤ × ℤ) :\n    is_local_max_orth g p → discrete_laplacian g p ≤ 0 := by\n  intro hmax\n  unfold discrete_laplacian\n  unfold is_local_max_orth at hmax\n  rcases hmax with ⟨h1, h2, h3, h4⟩\n  have h1' : g (p.1 + 1, p.2) - g p ≤ 0 := by linarith\n  have h2' : g (p.1 - 1, p.2) - g p ≤ 0 := by linarith\n  have h3' : g (p.1, p.2 + 1) - g p ≤ 0 := by linarith\n  have h4' : g (p.1, p.2 - 1) - g p ≤ 0 := by linarith\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

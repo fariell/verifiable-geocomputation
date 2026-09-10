@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 255,
+    "completion_tokens": 570,
+    "total_tokens": 825,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 255
+  },
+  "api_id": "01a08b2083bddcce4b73998373ea3f33",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P2 · Iterative repair (verifier feedback)\n// Formalization of the 2D local raise step RaiseNbr property.\n\nmethod RaiseNbrPreservesNonDecreasingAndLifts(\n  elevations: array2<int>,\n  processedRow: int, processedCol: int,\n  neighborRow: int, neighborCol: int,\n  fillHeight: int\n)\n  requires elevations != null\n  requires 0 <= processedRow < elevations.Length0\n  requires 0 <= processedCol < elevations.Length1\n  requires 0 <= neighborRow < elevations.Length0\n  requires 0 <= neighborCol < elevations.Length1\n  requires (neighborRow == processedRow && (neighborCol == processedCol + 1 || neighborCol == processedCol - 1)) ||\n           (neighborCol == processedCol && (neighborRow == processedRow + 1 || neighborRow == processedRow - 1))\n  requires fillHeight >= elevations[processedRow, processedCol]\n  // Precondition: neighbor has not been processed yet (its elevation may be lower)\n  requires elevations[neighborRow, neighborCol] <= elevations[processedRow, processedCol] + 1 // optional bound for realism\n  modifies elevations\n  ensures elevations[neighborRow, neighborCol] >= old(elevations[neighborRow, neighborCol])\n  ensures elevations[neighborRow, neighborCol] >= max(old(elevations[neighborRow, neighborCol]), fillHeight)\n  ensures forall i, j :: 0 <= i < elevations.Length0 && 0 <= j < elevations.Length1 ==>\n             elevations[i, j] >= old(elevations[i, j])\n{\n  // Store old values for postcondition\n  ghost var oldElevations := elevations[.., ..];\n\n  // The RaiseNbr operation: if neighbor is lower than fillHeight, raise it to fillHeight.\n  if elevations[neighborRow, neighborCol] < fillHeight {\n    elevations[neighborRow, neighborCol] := fillHeight;\n  }\n\n  // Postconditions are checked automatically by Dafny.\n  // The first postcondition (non‑decrease) is satisfied because we only increase or leave unchanged.\n  // The second postcondition (lift to at least max(original neighbor, processed cell fill)) holds because:\n  //   - If original neighbor >= fillHeight, we do nothing, and new = original >= max(original, fillHeight).\n  //   - If original neighbor < fillHeight, we set to fillHeight, so new = fillHeight >= max(original, fillHeight).\n  // The third postcondition (global non‑decrease) holds because we only modified one cell and increased it.\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

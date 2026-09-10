@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 250,
+    "completion_tokens": 861,
+    "total_tokens": 1111,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 250
+  },
+  "api_id": "01a08ac36f85f2830858302dcf89dd26",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\nimport Mathlib.Tactic\n\n-- Representing a planar DEM: z = A*x + B*y + C\nstructure PlanarDEM where\n  A : ℝ\n  B : ℝ\n  C : ℝ\n\n-- Grid cell coordinates\nstructure Cell where\n  x : ℤ\n  y : ℤ\n\n-- D8 flow direction as an integer from 1 to 8 (standard encoding)\ninductive D8Direction : Type\n  | E : D8Direction\n  | NE : D8Direction\n  | N : D8Direction\n  | NW : D8Direction\n  | W : D8Direction\n  | SW : D8Direction\n  | S : D8Direction\n  | SE : D8Direction\n\ninstance : ToString D8Direction where\n  toString d := match d with\n    | .E => \"E\"\n    | .NE => \"NE\"\n    | .N => \"N\"\n    | .NW => \"NW\"\n    | .W => \"W\"\n    | .SW => \"SW\"\n    | .S => \"S\"\n    | .SE => \"SE\"\n\n-- Elevation at a cell for a given DEM\ndef elevation (dem : PlanarDEM) (c : Cell) : ℝ :=\n  dem.A * (c.x : ℝ) + dem.B * (c.y : ℝ) + dem.C\n\n-- Slope vector (A, B) must be positive in the sense that at least one component is positive\n-- and the other non‑negative, ensuring a unique steepest descent direction.\ndef positive_slope (dem : PlanarDEM) : Prop :=\n  dem.A > 0 ∧ dem.B ≥ 0 ∨ dem.A ≥ 0 ∧ dem.B > 0\n\n-- D8 flow direction from a cell given a DEM with positive slope\ndef flow_direction (dem : PlanarDEM) (c : Cell) : D8Direction :=\n  if dem.A > 0 then\n    if dem.B > 0 then\n      if dem.A > dem.B then D8Direction.E else D8Direction.N\n    else if dem.B < 0 then\n      if dem.A > -dem.B then D8Direction.E else D8Direction.S\n    else D8Direction.E\n  else if dem.A < 0 then\n    if dem.B > 0 then\n      if -dem.A > dem.B then D8Direction.W else D8Direction.N\n    else if dem.B < 0 then\n      if -dem.A > -dem.B then D8Direction.W else D8Direction.S\n    else D8Direction.W\n  else -- dem.A = 0\n    if dem.B > 0 then D8Direction.N\n    else if dem.B < 0 then D8Direction.S\n    else D8Direction.E -- arbitrary default when slope is zero, but positive_slope excludes this\n\n-- The main theorem: flow direction is invariant under translation of C\ntheorem flow_direction_translation_invariant (dem : PlanarDEM) (hpos : positive_slope dem) (c : Cell) :\n    ∀ (C' : ℝ), flow_direction { dem with C := C' } c = flow_direction dem c := by\n  intro C'\n  unfold flow_direction\n  -- The definition of flow_direction depends only on A and B, not on C.\n  -- Therefore changing C leaves the result unchanged.\n  rfl\n\n-- Additional theorem: flow direction is constant across interior cells\n-- (i.e., independent of x,y) for a fixed (A,B) with positive slope.\ntheorem flow_direction_constant (dem : PlanarDEM) (hpos : positive_slope dem) (c1 c2 : Cell) :\n    flow_direction dem c1 = flow_direction dem c2 := by\n  unfold flow_direction\n  -- The definition does not depend on the cell coordinates, only on A and B.\n  rfl\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

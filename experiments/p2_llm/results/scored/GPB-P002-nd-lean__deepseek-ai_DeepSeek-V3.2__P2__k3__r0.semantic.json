@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 4,
+  "n_gold_names": 15,
+  "keyword_hits": {
+    "keywords": [
+      "defined",
+      "fill",
+      "lean",
+      "left-outlet",
+      "nondecreasing",
+      "operator",
+      "sequence",
+      "yields"
+    ],
+    "hit": [
+      "fill",
+      "left-outlet",
+      "nondecreasing",
+      "operator"
+    ],
+    "miss": [
+      "defined",
+      "lean",
+      "sequence",
+      "yields"
+    ],
+    "hit_ratio": 0.5
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 1126,
+    "total_tokens": 2731,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a08aca1b8b838023c5cc898f875347",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of watershed uniqueness under deterministic D8 flow\n// Property: If a deterministic successor function reaches an outlet (fixed point)\n// from the same start cell in any two finite step counts, those outlets are equal.\n\n// Grid dimensions and cell type\ntype Cell = (int, int)\n\n// Deterministic successor function: given a cell, returns its unique downstream neighbor\n// \"NoFlow\" is represented by returning the cell itself (a fixed point).\nfunction Succ(cell: Cell): Cell\n  // Deterministic: same input always yields same output\n  ensures forall c :: Succ(ccc) == Succ(ccc)  // tautology, emphasizes determinism\n\n// Fixed point definition: cell is an outlet if it maps to itself\npredicate IsOutlet(cell: Cell) {\n  Succ(cell) == cell\n}\n\n// Bounded iteration: apply Succ exactly N times\nfunction StepN(start: Cell, N: int): Cell\n  requires N >= 0\n  decreases N\n{\n  if N == 0 then start\n  else StepN(Succ(start), N - 1)\n}\n\n// Main theorem: if we reach an outlet in two different finite step counts,\n// the outlets must be the same cell.\ntheorem WatershedUniqueness(start: Cell, M: int, N: int)\n  requires M >= 0 && N >= 0\n  requires IsOutlet(StepN(start, M))\n  requires IsOutlet(StepN(start, N))\n  ensures StepN(start, M) == StepN(start, N)\n{\n  // Without loss of generality, assume M <= N\n  if M <= N {\n    // Apply the property that once at an outlet, further steps stay there\n    var outletM := StepN(start, M);\n    assert IsOutlet(outletM);\n    // Lemma: stepping from an outlet yields the same cell\n    assert forall k: int | k >= 0 :: StepN(outletM, k) == outletM by {\n      var k': int := k;\n      while k' > 0\n        invariant StepN(outletM, k') == outletM\n        decreases k'\n      {\n        // Single step from outlet stays at outlet\n        assert Succ(outletM) == outletM;\n        k' := k' - 1;\n      }\n    }\n    // Then StepN(start, N) = StepN(outletM, N-M) = outletM\n    calc {\n      StepN(start, N);\n      == // Split into first M steps and remaining N-M steps\n      StepN(StepN(start, M), N - M);\n      == { assert StepN(start, M) == outletM; }\n      StepN(outletM, N - M);\n      == { assert forall k | 0 <= k :: StepN(outletM, k) == outletM; }\n      outletM;\n      ==\n      StepN(start, M);\n    }\n  } else {\n    // Symmetric case: N <= M\n    WatershedUniqueness(start, N, M);\n  }\n}\n\n// Additional lemma: any cell that reaches an outlet in some finite steps\n// will reach the same outlet in any larger number of steps.\nlemma OutletStable(start: Cell, M: int, N: int)\n  requires M >= 0 && N >= 0\n  requires M <= N\n  requires IsOutlet(StepN(start, M))\n  ensures StepN(start, N) == StepN(start, M)\n{\n  WatershedUniqueness(start, M, N);\n}\n\n// Verification of the 4-ring counterexample from the reference implementation\n// This shows the theorem's precondition (reaching an outlet) is necessary.\nconst RingCells: set<Cell> := {(0,0), (0,1), (1,1), (1,0)}\nfunction RingSucc(cell: Cell): Cell\n  requires cell in RingCells\n{\n  match cell\n    case (0,0) => (0,1)\n    case (0,1) => (1,1)\n    case (1,1) => (1,0)\n    case (1,0) => (0,0)\n}\n\n// In the ring, no cell is an outlet (no fixed point)\nlemma RingNoOutlet()\n  ensures forall c | c in RingCells :: !IsOutlet(c)\n{\n  forall c | c in RingCells\n    ensures !IsOutlet(c)\n  {\n    // By definition of RingSucc, each cell maps to a different cell\n    assert RingSucc(c) != c;\n  }\n}\n\n// The ring satisfies the theorem vacuously because the precondition\n// (reaching an outlet) never holds for any finite steps.\nlemma RingTheoremVacuouslyTrue(start: Cell, M: int, N: int)\n  requires start in RingCells\n  requires M >= 0 && N >= 0\n  ensures IsOutlet(StepN(start, M)) && IsOutlet(StepN(start, N)) ==> \n          StepN(start, M) == StepN(start, N)\n{\n  // The implication holds because the antecedent is always false\n  RingNoOutlet();\n  assert !IsOutlet(StepN(start, M)) || !IsOutlet(StepN(start, N));\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

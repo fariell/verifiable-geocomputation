@@ -1,0 +1,91 @@
+{
+  "model": "deepseek-ai/DeepSeek-V3.2",
+  "slot": "M1",
+  "n_unique_cells": 210,
+  "n_dafny_tasks": 9,
+  "n_lean_tasks": 5,
+  "dafny_only_metrics": {
+    "n_task_prompt": 27,
+    "compile@1": 0.2222222222222222,
+    "verify@1": 0.14814814814814814,
+    "compile@5": 0.4444444444444444,
+    "verify@5": 0.2962962962962963,
+    "n_compile@1": 6,
+    "n_verify@1": 4,
+    "semantic_k0": {
+      "UNCOMPILED": 18,
+      "VERIFIED_NEEDS_HUMAN": 1,
+      "VERIFIED_BUT_DRIFT_SUSPECT": 1,
+      "null": 3,
+      "COMPILE_ONLY": 2,
+      "LIKELY_ALIGNED": 2
+    },
+    "verify_status_k0": {
+      "RAN": 25,
+      "null": 2
+    }
+  },
+  "lean_note": "TOOLCHAIN_MISSING locally; deferred AutoDL; NOT counted in verify@",
+  "lean_k0_status": {
+    "TOOLCHAIN_MISSING": 15
+  },
+  "by_prompt_dafny": {
+    "P0": {
+      "n_task_prompt": 9,
+      "compile@1": 0.1111111111111111,
+      "verify@1": 0.1111111111111111,
+      "compile@5": 0.2222222222222222,
+      "verify@5": 0.2222222222222222,
+      "n_compile@1": 1,
+      "n_verify@1": 1,
+      "semantic_k0": {
+        "LIKELY_ALIGNED": 1,
+        "UNCOMPILED": 6,
+        "null": 2
+      },
+      "verify_status_k0": {
+        "RAN": 8,
+        "null": 1
+      }
+    },
+    "P1": {
+      "n_task_prompt": 9,
+      "compile@1": 0.0,
+      "verify@1": 0.0,
+      "compile@5": 0.2222222222222222,
+      "verify@5": 0.2222222222222222,
+      "n_compile@1": 0,
+      "n_verify@1": 0,
+      "semantic_k0": {
+        "UNCOMPILED": 8,
+        "null": 1
+      },
+      "verify_status_k0": {
+        "RAN": 8,
+        "null": 1
+      }
+    },
+    "P2": {
+      "n_task_prompt": 9,
+      "compile@1": 0.5555555555555556,
+      "verify@1": 0.3333333333333333,
+      "compile@5": 0.8888888888888888,
+      "verify@5": 0.4444444444444444,
+      "n_compile@1": 5,
+      "n_verify@1": 3,
+      "semantic_k0": {
+        "VERIFIED_NEEDS_HUMAN": 1,
+        "COMPILE_ONLY": 2,
+        "UNCOMPILED": 4,
+        "VERIFIED_BUT_DRIFT_SUSPECT": 1,
+        "LIKELY_ALIGNED": 1
+      },
+      "verify_status_k0": {
+        "RAN": 9
+      }
+    }
+  },
+  "honesty": "Lean excluded from verify@ denominators; PROVIDER_ERROR without rc excluded via best-row pick; no fabricated numbers",
+  "verified_but_drifted_cells": 2,
+  "verified_ok_cells": 18
+}
