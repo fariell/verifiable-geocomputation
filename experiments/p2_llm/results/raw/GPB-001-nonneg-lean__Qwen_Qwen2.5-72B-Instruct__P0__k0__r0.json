@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1596,
+    "completion_tokens": 778,
+    "total_tokens": 2374,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1532
+  },
+  "api_id": "01a08b5ff70ec908ced87145f981ef83",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.matrix.notation\nimport tactic.linarith\n\nnamespace GeoProofBench\n\nvariables {n : ℕ} (w : ℝ) (h : matrix (fin 3) (fin 3) ℝ)\n\ndef grid_spacing_pos (w : ℝ) : Prop := w > 0\n\ndef horn_slope_sq (h : matrix (fin 3) (fin 3) ℝ) (w : ℝ) : ℝ :=\n  let dzdx := (h 1 2 - h 1 0) / (2 * w)\n  let dzdy := (h 2 1 - h 0 1) / (2 * w)\n  dzdx^2 + dzdy^2\n\ntheorem horn_slope_sq_nonnegative (w : ℝ) (h : matrix (fin 3) (fin 3) ℝ) (hw : grid_spacing_pos w) :\n  horn_slope_sq w h ≥ 0 :=\nbegin\n  unfold horn_slope_sq,\n  simp only [sub_eq_add_neg, mul_comm, mul_assoc, pow_two, add_nonneg],\n  have h1 : (h 1 2 - h 1 0) / (2 * w) ≥ 0 ∨ (h 1 2 - h 1 0) / (2 * w) < 0, by linarith,\n  have h2 : (h 2 1 - h 0 1) / (2 * w) ≥ 0 ∨ (h 2 1 - h 0 1) / (2 * w) < 0, by linarith,\n  cases h1 with h1_pos h1_neg,\n  cases h2 with h2_pos h2_neg,\n  { -- Case 1: dzdx ≥ 0 and dzdy ≥ 0\n    have h1_sq : ((h 1 2 - h 1 0) / (2 * w))^2 ≥ 0, by linarith,\n    have h2_sq : ((h 2 1 - h 0 1) / (2 * w))^2 ≥ 0, by linarith,\n    linarith [h1_sq, h2_sq] },\n  { -- Case 2: dzdx ≥ 0 and dzdy < 0\n    have h1_sq : ((h 1 2 - h 1 0) / (2 * w))^2 ≥ 0, by linarith,\n    have h2_sq : ((h 2 1 - h 0 1) / (2 * w))^2 ≥ 0, by linarith,\n    linarith [h1_sq, h2_sq] },\n  { -- Case 3: dzdx < 0 and dzdy ≥ 0\n    have h1_sq : ((h 1 2 - h 1 0) / (2 * w))^2 ≥ 0, by linarith,\n    have h2_sq : ((h 2 1 - h 0 1) / (2 * w))^2 ≥ 0, by linarith,\n    linarith [h1_sq, h2_sq] },\n  { -- Case 4: dzdx < 0 and dzdy < 0\n    have h1_sq : ((h 1 2 - h 1 0) / (2 * w))^2 ≥ 0, by linarith,\n    have h2_sq : ((h 2 1 - h 0 1) / (2 * w))^2 ≥ 0, by linarith,\n    linarith [h1_sq, h2_sq] },\nend\n\nend GeoProofBench\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

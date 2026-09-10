@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P003_curvature.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1736,
+    "completion_tokens": 2397,
+    "total_tokens": 4133,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1736
+  },
+  "api_id": "01a08b4078e1ddcbe2834210b23ad31f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of Zevenbergen-Thorne Hessian exactness on quadratic surfaces\n// Quadratic surface: z = A*x^2 + B*y^2 + C*x*y + D*x + E*y + F\n// Sampled on 3x3 window with spacing w > 0\n// ZT Hessian recovers (2A, 2B, C) exactly\n\n// Grid indexing: center cell is (0,0), neighbors at offsets ±w\n// We'll define the 3x3 window coordinates relative to center\n\n// First, define the quadratic surface function\nfunction quadratic(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n  reads\n{\n  A*x*x + B*y*y + C*x*y + D*x + E*y + F\n}\n\n// Zevenbergen-Thorne discrete Hessian formulas\n// For a 3x3 grid with spacing w, centered at (0,0)\n// Indices: (-1,-1) (0,-1) (1,-1)\n//          (-1, 0) (0, 0) (1, 0)\n//          (-1, 1) (0, 1) (1, 1)\n\n// Function to compute ZT Hessian from 9 sampled values\nfunction ZTHessian(\n  z_m1_m1: real, z_0_m1: real, z_1_m1: real,\n  z_m1_0: real,  z_0_0: real,  z_1_0: real,\n  z_m1_1: real,  z_0_1: real,  z_1_1: real,\n  w: real\n): (hxx: real, hyy: real, hxy: real)\n  requires w > 0.0\n{\n  // Second derivatives using central differences\n  var hxx := (z_m1_0 - 2.0*z_0_0 + z_1_0) / (w*w);\n  var hyy := (z_0_m1 - 2.0*z_0_0 + z_0_1) / (w*w);\n  var hxy := (z_m1_m1 - z_1_m1 - z_m1_1 + z_1_1) / (4.0*w*w);\n  (hxx, hyy, hxy)\n}\n\n// Main theorem: For any quadratic surface and any w > 0,\n// the ZT Hessian recovers exactly (2A, 2B, C)\ntheorem ZTHessianExactOnQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures \n    var (hxx, hyy, hxy) := ZTHessian(\n      quadratic(A, B, C, D, E, F, -w, -w),\n      quadratic(A, B, C, D, E, F, 0.0, -w),\n      quadratic(A, B, C, D, E, F, w, -w),\n      quadratic(A, B, C, D, E, F, -w, 0.0),\n      quadratic(A, B, C, D, E, F, 0.0, 0.0),\n      quadratic(A, B, C, D, E, F, w, 0.0),\n      quadratic(A, B, C, D, E, F, -w, w),\n      quadratic(A, B, C, D, E, F, 0.0, w),\n      quadratic(A, B, C, D, E, F, w, w),\n      w\n    );\n    hxx == 2.0*A && hyy == 2.0*B && hxy == C\n{\n  // Expand all 9 sampled values\n  var z_m1_m1 := quadratic(A, B, C, D, E, F, -w, -w);\n  var z_0_m1 := quadratic(A, B, C, D, E, F, 0.0, -w);\n  var z_1_m1 := quadratic(A, B, C, D, E, F, w, -w);\n  var z_m1_0 := quadratic(A, B, C, D, E, F, -w, 0.0);\n  var z_0_0 := quadratic(A, B, C, D, E, F, 0.0, 0.0);\n  var z_1_0 := quadratic(A, B, C, D, E, F, w, 0.0);\n  var z_m1_1 := quadratic(A, B, C, D, E, F, -w, w);\n  var z_0_1 := quadratic(A, B, C, D, E, F, 0.0, w);\n  var z_1_1 := quadratic(A, B, C, D, E, F, w, w);\n  \n  // Compute ZT Hessian\n  var hxx := (z_m1_0 - 2.0*z_0_0 + z_1_0) / (w*w);\n  var hyy := (z_0_m1 - 2.0*z_0_0 + z_0_1) / (w*w);\n  var hxy := (z_m1_m1 - z_1_m1 - z_m1_1 + z_1_1) / (4.0*w*w);\n  \n  // Now prove each component equals the analytic value\n  \n  // Proof for hxx = 2A\n  calc {\n    z_m1_0 - 2.0*z_0_0 + z_1_0;\n    == // Expand z_m1_0\n    (A*(-w)*(-w) + B*0.0*0.0 + C*(-w)*0.0 + D*(-w) + E*0.0 + F) \n    - 2.0*(A*0.0*0.0 + B*0.0*0.0 + C*0.0*0.0 + D*0.0 + E*0.0 + F)\n    + (A*w*w + B*0.0*0.0 + C*w*0.0 + D*w + E*0.0 + F);\n    == // Simplify\n    (A*w*w - D*w + F) - 2.0*F + (A*w*w + D*w + F);\n    == // Combine terms\n    2.0*A*w*w;\n  }\n  assert hxx == 2.0*A*w*w / (w*w) by {\n    // Since w > 0, division is well-defined\n  }\n  assert hxx == 2.0*A;\n  \n  // Proof for hyy = 2B\n  calc {\n    z_0_m1 - 2.0*z_0_0 + z_0_1;\n    == // Expand z_0_m1\n    (A*0.0*0.0 + B*(-w)*(-w) + C*0.0*(-w) + D*0.0 + E*(-w) + F)\n    - 2.0*(A*0.0*0.0 + B*0.0*0.0 + C*0.0*0.0 + D*0.0 + E*0.0 + F)\n    + (A*0.0*0.0 + B*w*w + C*0.0*w + D*0.0 + E*w + F);\n    == // Simplify\n    (B*w*w - E*w + F) - 2.0*F + (B*w*w + E*w + F);\n    == // Combine terms\n    2.0*B*w*w;\n  }\n  assert hyy == 2.0*B*w*w / (w*w);\n  assert hyy == 2.0*B;\n  \n  // Proof for hxy = C\n  calc {\n    z_m1_m1 - z_1_m1 - z_m1_1 + z_1_1;\n    == // Expand z_m1_m1\n    (A*(-w)*(-w) + B*(-w)*(-w) + C*(-w)*(-w) + D*(-w) + E*(-w) + F)\n    - // Subtract z_1_m1\n    (A*w*w + B*(-w)*(-w) + C*w*(-w) + D*w + E*(-w) + F)\n    - // Subtract z_m1_1\n    (A*(-w)*(-w) + B*w*w + C*(-w)*w + D*(-w) + E*w + F)\n    + // Add z_1_1\n    (A*w*w + B*w*w + C*w*w + D*w + E*w + F);\n    == // Expand and group by term type\n    \n    // A terms: A*w² - A*w² - A*w² + A*w² = 0\n    // B terms: B*w² - B*w² - B*w² + B*w² = 0\n    // C terms: C*w² - (-C*w²) - (-C*w²) + C*w² = 4C*w²\n    // D terms: -D*w - D*w + D*w + D*w = 0\n    // E terms: -E*w + E*w - E*w + E*w = 0\n    // F terms: F - F - F + F = 0\n    \n    // Let's compute systematically:\n    var A_terms := A*w*w - A*w*w - A*w*w + A*w*w;\n    var B_terms := B*w*w - B*w*w - B*w*w + B*w*w;\n    var C_terms := C*w*w - (C*w*(-w)) - (C*(-w)*w) + C*w*w;\n    var D_terms := -D*w - D*w + D*w + D*w;\n    var E_terms := -E*w + E*w - E*w + E*w;\n    var F_terms := F - F - F + F;\n    \n    // Simplify C_terms:\n    // C*w*(-w) = -C*w²\n    // C*(-w)*w = -C*w²\n    // So: C*w² - (-C*w²) - (-C*w²) + C*w² = C*w² + C*w² + C*w² + C*w² = 4C*w²\n    C_terms := 4.0*C*w*w;\n    \n    A_terms + B_terms + C_terms + D_terms + E_terms + F_terms;\n    ==\n    4.0*C*w*w;\n  }\n  assert hxy == 4.0*C*w*w / (4.0*w*w);\n  assert hxy == C;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 283,
+    "total_tokens": 1894,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1611
+  },
+  "api_id": "01a08b59898dbf138ba2e4286f3c33ab",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornSlopeIsZeroOnFlat3x3(w: real) returns (slope: real)\n  requires w > 0\n  ensures slope == 0\n{\n  // Define a 3x3 grid with the same elevation value in each cell\n  var elevation: array2<int, real> := new real[3, 3];\n  var z: real := 10.0; // Example elevation value, can be any finite real number\n  for i := 0 to 2\n    for j := 0 to 2\n      elevation[i, j] := z;\n\n  // Compute the Horn (1981) slope magnitude\n  var dzdx: real := (elevation[1, 2] - elevation[1, 0]) / (2 * w);\n  var dzdy: real := (elevation[2, 1] - elevation[0, 1]) / (2 * w);\n  var slopeSq: real := dzdx * dzdx + dzdy * dzdy;\n  slope := slopeSq.sqrt();\n\n  // Since all elevations are the same, dzdx and dzdy should be 0\n  assert dzdx == 0;\n  assert dzdy == 0;\n  assert slopeSq == 0;\n  assert slope == 0;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

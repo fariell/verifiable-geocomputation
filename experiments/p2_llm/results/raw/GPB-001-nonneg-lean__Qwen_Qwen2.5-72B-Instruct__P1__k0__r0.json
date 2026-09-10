@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3050,
+    "completion_tokens": 1093,
+    "total_tokens": 4143,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 2986
+  },
+  "api_id": "01a08b6250696eb1c148b95861402ff6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-019\n   文件 : formal/lean4/VeriGIS/HornSlope.lean\n   算子 : Horn (1981) 3×3 有限差分坡度平方\n   对偶 : formal/dafny/P001_slope.dfy\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明 Horn (1981) 有限差分坡度平方在任意 3x3 高程窗口和正网格间距 w 下非负。\n  这个性质不仅限于平面表面，而是对任意高程表面都成立。\n\n  覆盖:\n    GPB-019  Horn 有限差分坡度平方非负\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.HornSlope\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下),与 `HornSlope` / Dafny P-001 相同。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1,  0)     e        f( 1,  0)\n      g(-1,  1)   h( 0,  1)   i( 1,  1)\n-/\n\ndef dzdx (a d e f : ℝ) : ℝ := (f - a) / 2\ndef dzdy (b e h : ℝ) : ℝ := (h - b) / 2\n\ndef slopeSq (a b c d e f g h i : ℝ) : ℝ := \n  (dzdx a d e f) ^ 2 + (dzdy b e h) ^ 2\n\nlemma sq_ne_zero {w : ℝ} (hw : w ≠ 0) : w ^ 2 ≠ 0 :=\n  pow_ne_zero 2 hw\n\nlemma slopeSq_nonneg (a b c d e f g h i : ℝ) : slopeSq a b c d e f g h i ≥ 0 := by\n  unfold slopeSq dzdx dzdy\n  have : (f - a) / 2 ≥ 0 ∨ (f - a) / 2 < 0 := by linarith\n  have : (h - b) / 2 ≥ 0 ∨ (h - b) / 2 < 0 := by linarith\n  cases' this with h1 h2\n  cases' this with h3 h4\n  -- Case 1: Both dzdx and dzdy are nonnegative\n  have h5 : (f - a) / 2 ≥ 0 ∧ (h - b) / 2 ≥ 0 := ⟨h1, h3⟩\n  have h6 : (dzdx a d e f) ^ 2 ≥ 0 := sq_nonneg (dzdx a d e f)\n  have h7 : (dzdy b e h) ^ 2 ≥ 0 := sq_nonneg (dzdy b e h)\n  exact add_nonneg h6 h7\n  -- Case 2: dzdx is nonnegative, dzdy is negative\n  have h5 : (f - a) / 2 ≥ 0 ∧ (h - b) / 2 < 0 := ⟨h1, h4⟩\n  have h6 : (dzdx a d e f) ^ 2 ≥ 0 := sq_nonneg (dzdx a d e f)\n  have h7 : (dzdy b e h) ^ 2 ≥ 0 := sq_nonneg (dzdy b e h)\n  exact add_nonneg h6 h7\n  -- Case 3: dzdx is negative, dzdy is nonnegative\n  have h5 : (f - a) / 2 < 0 ∧ (h - b) / 2 ≥ 0 := ⟨h2, h3⟩\n  have h6 : (dzdx a d e f) ^ 2 ≥ 0 := sq_nonneg (dzdx a d e f)\n  have h7 : (dzdy b e h) ^ 2 ≥ 0 := sq_nonneg (dzdy b e h)\n  exact add_nonneg h6 h7\n  -- Case 4: Both dzdx and dzdy are negative\n  have h5 : (f - a) / 2 < 0 ∧ (h - b) / 2 < 0 := ⟨h2, h4⟩\n  have h6 : (dzdx a d e f) ^ 2 ≥ 0 := sq_nonneg (dzdx a d e f)\n  have h7 : (dzdy b e h) ^ 2 ≥ 0 := sq_nonneg (dzdy b e h)\n  exact add_nonneg h6 h7\n\nend VeriGIS.HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1596,
+    "completion_tokens": 374,
+    "total_tokens": 1970,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1532
+  },
+  "api_id": "01a08b60cb1507bb202a62bb76de2eb8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.matrix.notation\nimport analysis.normed_space.basic\nimport analysis.special_functions.pow\n\nnamespace HornSlope\n\nvariables {n : ℕ} [decidable_eq n] (w : ℝ) (h : matrix (fin 3) (fin 3) ℝ)\n\n-- Define the Horn slope-square operator for a 3x3 elevation window\ndef horn_slope_sq (h : matrix (fin 3) (fin 3) ℝ) (w : ℝ) : ℝ :=\n  let dzdx := (h 1 2 - h 1 0) / (2 * w),\n      dzdy := (h 2 1 - h 0 1) / (2 * w) in\n  dzdx * dzdx + dzdy * dzdy\n\n-- Prove that the Horn slope-square is nonnegative for any finite 3x3 elevation window and positive grid spacing w\ntheorem horn_slope_sq_nonnegative (h : matrix (fin 3) (fin 3) ℝ) (w : ℝ) (w_pos : w > 0) : 0 ≤ horn_slope_sq h w :=\nbegin\n  unfold horn_slope_sq,\n  let dzdx := (h 1 2 - h 1 0) / (2 * w),\n  let dzdy := (h 2 1 - h 0 1) / (2 * w),\n  have dzdx_sq_nonneg : 0 ≤ dzdx * dzdx := real.mul_self_nonneg dzdx,\n  have dzdy_sq_nonneg : 0 ≤ dzdy * dzdy := real.mul_self_nonneg dzdy,\n  exact real.add_nonneg dzdx_sq_nonneg dzdy_sq_nonneg,\nend\n\nend HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

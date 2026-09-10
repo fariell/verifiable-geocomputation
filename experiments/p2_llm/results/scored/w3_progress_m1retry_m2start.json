@@ -1,0 +1,63 @@
+{
+  "ts": "2026-09-10T20:53+08",
+  "session": "M1_retry + M2_start",
+  "jsonl_lines": 462,
+  "M1": {
+    "model": "deepseek-ai/DeepSeek-V3.2",
+    "unique": 210,
+    "provider_error_remaining": [
+      [
+        "GPB-007-hessian",
+        "P1",
+        3
+      ],
+      [
+        "GPB-011-plane-lean",
+        "P1",
+        2
+      ]
+    ],
+    "dafny_RAN_cells": 134,
+    "cell_level_among_RAN": {
+      "compile_ok": 24,
+      "verify_ok": 18,
+      "n": 134
+    },
+    "task_prompt_k0_dafny": {
+      "n_task_prompt": 27,
+      "compile@1": 0.2222222222222222,
+      "verify@1": 0.14814814814814814,
+      "compile@5": 0.4444444444444444,
+      "verify@5": 0.2962962962962963,
+      "n_c1": 6,
+      "n_v1": 4,
+      "n_c5": 12,
+      "n_v5": 8
+    },
+    "semantic_RAN": {
+      "null": 1,
+      "UNCOMPILED": 109,
+      "LIKELY_ALIGNED": 10,
+      "VERIFIED_BUT_DRIFT_SUSPECT": 2,
+      "VERIFIED_NEEDS_HUMAN": 6,
+      "COMPILE_ONLY": 6
+    },
+    "lean_TOOLCHAIN_MISSING": 74
+  },
+  "M2": {
+    "model": "Qwen/Qwen2.5-72B-Instruct",
+    "unique": 19,
+    "in_progress": true,
+    "verify": {
+      "RAN": 15,
+      "TOOLCHAIN_MISSING": 4
+    },
+    "compile_ok": 0,
+    "verify_ok": 0,
+    "tasks_started": [
+      "GPB-001-flat",
+      "GPB-001-nonneg-lean"
+    ]
+  },
+  "honesty": "Lean excluded from verify@ denominators; cell-level RAN stats ≠ @1; @1=@k0 task×prompt"
+}

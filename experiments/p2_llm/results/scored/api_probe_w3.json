@@ -3,8 +3,8 @@
   "status_code": 200,
   "provider": "siliconflow",
   "endpoint": "https://api.siliconflow.cn/v1/chat/completions",
-  "model_locked": "deepseek-ai/DeepSeek-V3.2",
+  "model_locked": "Qwen/Qwen2.5-72B-Instruct",
   "error_class": null,
   "error": null,
-  "echo": "你好！😊 看起来你发送了一个简单的“ping”，是想测试连接"
+  "echo": "Pong!"
 }

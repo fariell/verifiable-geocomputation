@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P001_horn_slope.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 1068,
+    "total_tokens": 2679,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1611
+  },
+  "api_id": "01a08b3dc0170f3b2bbd83be344a6f60",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference slope operator exactness on a plane\n// Formalization of: On a planar surface z = A*x + B*y + C sampled on a regular grid\n// with spacing w>0, the Horn finite-difference estimates DzDx and DzDy recover A and B exactly.\n\nmodule HornPlaneExactness {\n  // Grid dimensions\n  const N: int\n  const M: int\n  ghost predicate GridSizeValid()\n    reads {}\n    ensures GridSizeValid() ==> N >= 1 && M >= 1\n  {\n    N >= 1 && M >= 1\n  }\n\n  // Grid spacing\n  const w: real\n  axiom w_positive: w > 0.0\n\n  // Plane parameters\n  const A: real\n  const B: real\n  const C: real\n\n  // Elevation function for the plane\n  function elevation(i: int, j: int): real\n    requires 0 <= i < N && 0 <= j < M\n    reads {}\n  {\n    A * (i as real) * w + B * (j as real) * w + C\n  }\n\n  // Horn finite-difference operator (central difference for interior cells)\n  function hornDzDx(i: int, j: int): real\n    requires GridSizeValid()\n    requires 1 <= i < N-1 && 0 <= j < M\n    reads {}\n  {\n    (elevation(i+1, j) - elevation(i-1, j)) / (2.0 * w)\n  }\n\n  function hornDzDy(i: int, j: int): real\n    requires GridSizeValid()\n    requires 0 <= i < N && 1 <= j < M-1\n    reads {}\n  {\n    (elevation(i, j+1) - elevation(i, j-1)) / (2.0 * w)\n  }\n\n  // Main theorem: Horn operator recovers exact slopes A and B for interior cells\n  lemma HornExactOnPlane(i: int, j: int)\n    requires GridSizeValid()\n    requires 1 <= i < N-1 && 1 <= j < M-1\n    ensures hornDzDx(i, j) == A\n    ensures hornDzDy(i, j) == B\n    decreases i, j\n  {\n    // Expand elevation definitions\n    calc == {\n      hornDzDx(i, j);\n      (elevation(i+1, j) - elevation(i-1, j)) / (2.0 * w);\n      // Substitute elevation formula\n      ( (A * ((i+1) as real) * w + B * (j as real) * w + C) -\n        (A * ((i-1) as real) * w + B * (j as real) * w + C) ) / (2.0 * w);\n      // Cancel B*j*w + C terms\n      (A * w * ((i+1) as real - (i-1) as real)) / (2.0 * w);\n      // Simplify (i+1) - (i-1) = 2\n      (A * w * 2.0) / (2.0 * w);\n      // Cancel 2 and w\n      A;\n    }\n\n    calc == {\n      hornDzDy(i, j);\n      (elevation(i, j+1) - elevation(i, j-1)) / (2.0 * w);\n      // Substitute elevation formula\n      ( (A * (i as real) * w + B * ((j+1) as real) * w + C) -\n        (A * (i as real) * w + B * ((j-1) as real) * w + C) ) / (2.0 * w);\n      // Cancel A*i*w + C terms\n      (B * w * ((j+1) as real - (j-1) as real)) / (2.0 * w);\n      // Simplify (j+1) - (j-1) = 2\n      (B * w * 2.0) / (2.0 * w);\n      // Cancel 2 and w\n      B;\n    }\n  }\n\n  // Corollary: The property holds for all interior cells\n  lemma HornExactEverywhere()\n    requires GridSizeValid()\n    ensures forall i, j :: \n      1 <= i < N-1 && 1 <= j < M-1 ==> \n      hornDzDx(i, j) == A && hornDzDy(i, j) == B\n  {\n    forall i, j | 1 <= i < N-1 && 1 <= j < M-1\n      ensures hornDzDx(i, j) == A && hornDzDy(i, j) == B\n    {\n      HornExactOnPlane(i, j);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

@@ -1029,6 +1029,51 @@ task16-W3-live verdict = PASS (M1 partial) / continue W3 for M2–M4
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live) · M1 retry + M2 start
+
+```
+[task]      task16-W3-live / L1 全量(A.13 + A.15.4 分批)
+[step]      1) resume M1 重试 PROVIDER_ERROR stubs(ReadTimeout)
+            2) 启动 M2=Qwen/Qwen2.5-72B-Instruct 全量(后台仍在跑)
+            3) 实测 WSL Dafny 4.11 对 Qwen 产物(非编造)
+[cmd]       $env:P2_LLM_PROVIDER=siliconflow
+            python experiments/p2_llm/harness/run_l1_batch.py --backend openai --require-live \
+              --models deepseek-ai/DeepSeek-V3.2 --prompts P0,P1,P2 --k 5 \
+              --jsonl experiments/p2_llm/results/raw/l1_full_w3_live.jsonl
+            python … --models Qwen/Qwen2.5-72B-Instruct … (same jsonl; pid=17292 alive)
+            wsl -- bash -lc 'dafny /version; dafny verify GPB-001-flat__Qwen_…P0__k0__r0.dfy'
+[rc]        M1_retry=0 (verdict PASS partial); M2=RUNNING; wsl dafny evidence rc=0 (12 type errors → compile_rc=1)
+[key lines]
+  M1_retry: gen=13 skip=195 provider_error_left=2 /210; elapsed_s≈2008; est_spend_delta≈$0.022
+  M1 remaining stubs: GPB-007-hessian P1 k3; GPB-011-plane-lean P1 k2 (both ReadTimeout)
+  M1 Dafny RAN cells=134: compile_ok=24 verify_ok=18  (cell-level; NOT @1)
+  M1 @1 (task×prompt×k0, dafny n=27): compile@1=6/27=0.222; verify@1=4/27=0.148
+  M1 @5 (any of k): compile@5=12/27=0.444; verify@5=8/27=0.296
+  M1 by-prompt verify@1: P0=1/9 P1=0/9 P2=3/9; semantic RAN: see m1_deepseek_v32_partial_metrics.json
+  Lean: still TOOLCHAIN_MISSING (74–78 cells) — NOT counted in verify@; AutoDL deferred
+  M2 progress (snapshot 20:53): unique≈18/210; GPB-001-flat P0–P2 done; nonneg-lean started
+  M2 so far: compile_ok=0 verify_ok=0 (all flat samples UNCOMPILED / type errors)
+  WSL evidence Qwen flat P0k0: "12 resolution/type errors" (real dafny 4.11.0.0)
+  gate.ps1: STATUS=W3/RUNNING + run_l1_batch alive → noop (防双开烧 token)
+[gates]     M1 retry PASS(2 stubs left); Dafny verify path PASS; M2 RUNNING; M3/M4 PENDING;
+            Lean BLOCKED(local); A.13.5 全量未完 → 不进 W3.6
+[verdict]   PASS (partial — M1 nearly complete; M2 in flight)
+[blocker]   (1) 2× M1 ReadTimeout stubs 待下一轮再试
+            (2) Lean/lake 本机缺失 → Lean verify@ 须 AutoDL
+            (3) M2–M4 未跑完; 本段不宣布 W3 完成、不编造跨模型表
+```
+
+改了什么:
+- 改: `docs/CURSOR_INBOX.md` §A → `STATUS: W3/RUNNING` + 进度文案(防 gate 在 batch 存活时再拉起 agent)
+- 新: `experiments/p2_llm/results/scored/m1_deepseek_v32_partial_metrics.json`
+- 新: `experiments/p2_llm/results/scored/w3_progress_m1retry_m2start.json`
+- 改: `experiments/p2_llm/results/raw/l1_full_w3_live.jsonl`(+ M1 重试行 + M2 新行)及对应 raw/scored 产物
+- 未停后台 M2(`python …Qwen…` pid 17292); 未改 papers/(FORM LOCK); 未 git push; 未写 key
+
+task16-W3-live verdict = PASS (partial) / W3/RUNNING (M2 alive)
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4ad5bb6863e850e9dbcf49614acbc628556a5d50b32cfcdd7408c75c3d6d6874",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3209,
+    "completion_tokens": 1152,
+    "total_tokens": 4361,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3209
+  },
+  "api_id": "01a08b5bb38e30b85019289fea371370",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-019\n//  文件 : formal/dafny/P019_slope_consistency.dfy\n//  算子 : Horn (1981) 3x3 一阶差分(坡度)\n//  覆盖 : GPB-019(坡度在平面一致)、平面高程扰动 δ 使坡度误差 ~σ/w\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P019_slope_consistency.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么坡度在平面一致\n//  ----------------------\n//  在任何 3x3 高程窗口中,如果所有九个单元格的高程相同,则 Horn (1981) 坡度\n//  (或其平方 SlopeSq)恒为零。网格间距 w 必须为正。\n//\n//  本文件证明:\n//    1. 平面上 Horn 坡度恒为零。\n//    2. 平面高程扰动 δ 使坡度误差 ~σ/w。\n//\n//  不证:一般 C² 收敛;剖面曲率在梯度为零处的符号。\n//\n// ===========================================================================\n\nmodule HornSlope {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(与 P-001 相同:p 向右,q 向下)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  // -------------------------------------------\n\n  // Horn (1981) 坡度计算\n  function method HornSlope(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    let dzdx = (c - a + 2 * (f - d)) / (8.0 * w),\n        dzdy = (g - c + 2 * (h - b)) / (8.0 * w);\n    (dzdx * dzdx + dzdy * dzdy) ** 0.5\n  }\n\n  // 平面上 Horn 坡度恒为零\n  lemma HornSlopeIsZeroOnFlatSurface(e: real, w: real)\n    requires w > 0.0\n    ensures HornSlope(e, e, e, e, e, e, e, e, e, w) == 0.0\n  {\n    let a = e, b = e, c = e, d = e, f = e, g = e, h = e, i = e;\n    let dzdx = (c - a + 2 * (f - d)) / (8.0 * w),\n        dzdy = (g - c + 2 * (h - b)) / (8.0 * w);\n    assert dzdx == 0.0;\n    assert dzdy == 0.0;\n    assert (dzdx * dzdx + dzdy * dzdy) ** 0.5 == 0.0;\n  }\n\n  // 平面高程扰动 δ 使坡度误差 ~σ/w\n  lemma SlopeErrorGrowsWithNoise(e: real, delta: real, w: real)\n    requires w > 0.0\n    ensures HornSlope(e + delta, e + delta, e + delta, e + delta, e + delta, e + delta, e + delta, e + delta, e + delta, w) == 0.0\n    ensures HornSlope(e, e, e, e, e, e, e, e, e, w) == 0.0\n    ensures HornSlope(e + delta, e, e, e, e, e, e, e, e, w) == (delta / (4.0 * w))\n  {\n    let a = e + delta, b = e, c = e, d = e, f = e, g = e, h = e, i = e;\n    let dzdx = (c - a + 2 * (f - d)) / (8.0 * w),\n        dzdy = (g - c + 2 * (h - b)) / (8.0 * w);\n    assert dzdx == (delta / (4.0 * w));\n    assert dzdy == 0.0;\n    assert (dzdx * dzdx + dzdy * dzdy) ** 0.5 == (delta / (4.0 * w));\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-019 — Horn slope: zero on flat surface + noise contrast\\n\";\n  print \"全部由编译期验证:dafny verify P019_slope_consistency.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 284,
+    "completion_tokens": 384,
+    "total_tokens": 668,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 284
+  },
+  "api_id": "01a08b5e9e86caafc4b5bb120e38a889",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornSlopeIsZero(elev: array2<int>, w: real) returns (slope: real)\n  requires elev != null\n  requires elev.Length0 == 3 && elev.Length1 == 3\n  requires w > 0\n  requires forall i, j :: 0 <= i < 3 && 0 <= j < 3 ==> elev[i][j] == elev[0][0]\n  ensures slope == 0\n{\n  var z00 := elev[0][0];\n  var z01 := elev[0][1];\n  var z02 := elev[0][2];\n  var z10 := elev[1][0];\n  var z11 := elev[1][1];\n  var z12 := elev[1][2];\n  var z20 := elev[2][0];\n  var z21 := elev[2][1];\n  var z22 := elev[2][2];\n\n  var dzdx := (z02 + 2 * z12 + z22 - (z00 + 2 * z10 + z20)) / (8 * w);\n  var dzdy := (z20 + 2 * z21 + z22 - (z00 + 2 * z01 + z02)) / (8 * w);\n\n  slope := dzdx * dzdx + dzdy * dzdy;\n}\n```\n\nThis repair ensures that the method `HornSlopeIsZero` correctly formalizes the Horn (1981) slope magnitude calculation for a 3x3 elevation window where all cells have the same elevation. The precondition now explicitly states that all nine cells in the elevation window must have the same value, and the method ensures that the slope is zero.\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

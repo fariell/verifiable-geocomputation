@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1611,
+    "completion_tokens": 424,
+    "total_tokens": 2035,
+    "prompt_tokens_details": {
+      "cached_tokens": 1600
+    },
+    "prompt_cache_hit_tokens": 1600,
+    "prompt_cache_miss_tokens": 11
+  },
+  "api_id": "01a08b5a42eeb7a89a0b6ed7e08c63ac",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornSlopeIsZeroForFlat3x3(w: real) returns (slope: real)\n  requires w > 0\n  ensures slope == 0\n{\n  // Define a 3x3 grid with all cells having the same elevation\n  var elevation: array2<int, real> := new array2<int, real>(3, 3, (i, j) => 1.0);\n\n  // Define the Horn (1981) slope magnitude formula\n  // SlopeSq = (dzdx^2 + dzdy^2) / (w^2)\n  // For a flat surface, dzdx and dzdy are both 0\n  var dzdx: real := 0.0;\n  var dzdy: real := 0.0;\n\n  // Calculate the slope magnitude\n  slope := (dzdx * dzdx + dzdy * dzdy) / (w * w);\n}\n\n// Define a 2D array type for the elevation grid\nclass array2<T, V> {\n  var data: array<array<V>>;\n  var rows: int;\n  var cols: int;\n\n  constructor(rows: int, cols: int, init: (int, int) -> V)\n    requires rows > 0\n    requires cols > 0\n  {\n    this.rows := rows;\n    this.cols := cols;\n    this.data := new array<array<V>>(rows, (i) => new array<V>(cols, (j) => init(i, j)));\n  }\n\n  method Get(i: int, j: int) returns (v: V)\n    requires 0 <= i < this.rows\n    requires 0 <= j < this.cols\n  {\n    v := this.data[i][j];\n  }\n\n  method Set(i: int, j: int, v: V)\n    requires 0 <= i < this.rows\n    requires 0 <= j < this.cols\n  {\n    this.data[i][j] := v;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

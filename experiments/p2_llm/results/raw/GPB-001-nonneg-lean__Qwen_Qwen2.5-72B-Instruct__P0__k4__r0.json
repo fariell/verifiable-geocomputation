@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1596,
+    "completion_tokens": 510,
+    "total_tokens": 2106,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08b61f9d62ea6808a5ea4aa735bf2",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.matrix.notation\nimport analysis.normed_space.inner_product\nimport analysis.special_functions.pow\n\nopen real\nopen matrix\nopen finset\n\nvariables (w : ℝ) (h : matrix (fin 3) (fin 3) ℝ)\n\n-- Define the Horn slope-square operator for a 3x3 elevation window\ndef horn_slope_sq (h : matrix (fin 3) (fin 3) ℝ) (w : ℝ) : ℝ :=\n  let dzdx := (h 1 2 - h 1 0) / (2 * w) in\n  let dzdy := (h 2 1 - h 0 1) / (2 * w) in\n  dzdx^2 + dzdy^2\n\n-- Define the property that the Horn slope-square is nonnegative\ndef horn_slope_sq_nonnegative (h : matrix (fin 3) (fin 3) ℝ) (w : ℝ) : Prop :=\n  0 ≤ horn_slope_sq h w\n\n-- Prove that for any finite 3x3 elevation window and positive grid spacing w,\n-- the Horn slope-square is nonnegative\ntheorem horn_slope_sq_nonnegative_of_positive_w (h : matrix (fin 3) (fin 3) ℝ) (w : ℝ) (hw : w > 0) :\n  horn_slope_sq_nonnegative h w :=\nbegin\n  -- Unfold the definition of horn_slope_sq\n  unfold horn_slope_sq,\n  -- Simplify the expression\n  simp [pow_two, mul_comm, mul_assoc, add_nonneg],\n  -- Show that both dzdx^2 and dzdy^2 are nonnegative\n  have h1 : 0 ≤ (h 1 2 - h 1 0)^2 / (4 * w^2), from div_nonneg (sq_nonneg (h 1 2 - h 1 0)) (mul_pos (pos_of_gt hw) (pos_of_gt hw)),\n  have h2 : 0 ≤ (h 2 1 - h 0 1)^2 / (4 * w^2), from div_nonneg (sq_nonneg (h 2 1 - h 0 1)) (mul_pos (pos_of_gt hw) (pos_of_gt hw)),\n  -- Add the two nonnegative terms\n  exact add_nonneg h1 h2,\nend\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1596,
+    "completion_tokens": 330,
+    "total_tokens": 1926,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08b60f99be3bb92c45f57d015d207",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.matrix.notation\nimport tactic.linarith\n\nnamespace HornSlope\n\nvariables {n : ℕ} (w : ℝ) [fact (0 < w)]\n\n-- Define a 3x3 elevation window as a 3x3 matrix of real numbers\ndef elevation_window := matrix (fin 3) (fin 3) ℝ\n\n-- Define the Horn slope-square operator\ndef horn_slope_square (h : elevation_window) : ℝ :=\nlet dzdx := (h 1 2 - h 1 0) / (2 * w),\n    dzdy := (h 2 1 - h 0 1) / (2 * w) in\n(dzdx^2 + dzdy^2)\n\n-- Theorem: For any finite 3x3 elevation window and positive grid spacing w, the Horn slope-square is nonnegative\ntheorem horn_slope_square_nonnegative (h : elevation_window) (w_pos : 0 < w) : 0 ≤ horn_slope_square h w :=\nbegin\n  unfold horn_slope_square,\n  let dzdx := (h 1 2 - h 1 0) / (2 * w),\n  let dzdy := (h 2 1 - h 0 1) / (2 * w),\n  have dzdx_sq_nonneg : 0 ≤ dzdx^2 := sq_nonneg dzdx,\n  have dzdy_sq_nonneg : 0 ≤ dzdy^2 := sq_nonneg dzdy,\n  linarith,\nend\n\nend HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}
