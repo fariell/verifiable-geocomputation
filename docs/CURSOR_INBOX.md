@@ -1229,6 +1229,61 @@ grep -rn "concurrency|parallel|ThreadPool|max_workers|--jobs" harness/*.py
 RAN 300 条、`VERIFIED_BUT_DRIFT_SUSPECT` 1 条。**论文里任何数字都必须注明是
 「按唯一 cell 去重」还是「按全部尝试」。**
 
+### A.17.9 优先级重排:M4 换成 R1 后,并发版从"优化"变成"刚需"
+
+秘书 01:2x 巡检实测:
+
+**并发版仍未建**(`harness/run_l1_batch_pool.py` 不存在)。A.17.3 派下去后你先处理了
+probe gate 与 UTF-8 修复,那些没错,但现在并发版的收益变了量级:
+
+| 模型 | 已跑 | 单 cell 实测 | 剩余 | 串行 ETA |
+|---|---|---|---|---|
+| M1 DeepSeek-V3.2 | 210/210 | ~46 s | 0 | done |
+| M2 Qwen2.5-72B | 210/210 | ~46 s | 0 | done |
+| M3 GLM-4-32B | **80**/210 | ~46 s | 130(见下) | — |
+| M4 DeepSeek-**R1** | **12**/210 | **~2.7 min** | 198 | **约 9 小时** |
+
+R1 是推理模型,单 cell 从 46 s 涨到 2.7 min(推理链长)。**M4 串行要跑到明早 10:40**,
+而不是之前估的"明晚完成"。并发 8 路可以压到约 70 分钟。
+
+**执行顺序(按此办理):**
+1. **先写 `run_l1_batch_pool.py` 并用 `--limit 2` 验证正确性** —— 这是 A.17.3/17.4 的
+   内容,未变。**不要中断正在跑的 M4 批次**,让它继续串行。
+2. 并发版验证通过后,**用并发版去跑 M3 的补跑**(下一步)—— 新批次,不涉及中断。
+3. M4 是否中断重启为并发,等并发版验证通过后再定,不要现在动它。
+
+### A.17.10 M3 GLM 熔断留下的是残废数据,必须补题目覆盖
+
+GLM 80 个 cell 只覆盖 **6 个题目**(5 题跑满 15 cell = 3 prompt × 5 k,1 题跑 5 cell),
+**8 个题目完全没碰**:`GPB-011-plane-lean`、`GPB-015-basin`、`GPB-019-quad`、
+`GPB-P002-idem`、`GPB-P002-mono`、`GPB-P002-nd-lean`、`GPB-P002bis-raise`、
+`GPB-T6-terminate-lean`。
+
+同时 GLM 目前 **编译通过 0/80**,且 80 个 cell 里只有 50 个生成了 .dfy(30 个
+`VERIFY_SKIPPED`)。
+
+这既不能证明"GLM 不行"(只跑了前 6 题,存在题目难度偏差),也没法跟跑满 14 题的
+M1/M2 公平对比。**必须补齐 14 题的覆盖**,否则 M3 这一列在论文里没法用。
+
+补跑范围:剩余 8 题 × 3 prompt × k=5 = 120 cells(并发后约 15 分钟)。
+
+注意:GLM 编译通过率大概率仍是 0,**但 0 也是结果** —— "32B 级模型在 GPB 上 0/N 编译
+通过"是一个有说服力的能力门槛结论,前提是题目覆盖完整。补跑不是为了翻盘,是为了让
+"0" 这个结论站得住。
+
+### A.17.11 有 4 条 `VERIFIED_NEEDS_HUMAN`,需要 PI 亲自判
+
+去重后 semantic 分布:`UNCOMPILED` 204、`VERIFY_SKIPPED` 108、**`LIKELY_ALIGNED` 3**、
+**`VERIFIED_NEEDS_HUMAN` 4**、`COMPILE_ONLY` 2、`VERIFIED_BUT_DRIFT_SUSPECT` 1。
+编译通过 31、验证通过 23。
+
+那 4 条 `VERIFIED_NEEDS_HUMAN` 是自动判定拿不准的,**它们很可能就是 drift 的真身**
+—— 而 drift 是本论文的头条指标。请:
+1. 把这 4 条的 task_id / model / prompt_id / sample_index / .dfy 路径**单独列进 OUTBOX**,
+   附一段人工判断该看什么(原命题 vs 证明的命题,哪里对不上)。
+2. **不要替 PI 下结论**,不要自动归类为 ALIGNED 或 DRIFT。这是 PI 的判断权。
+3. 在 PI 判完之前,论文里不许出现任何 semantic fidelity 的百分比。
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
