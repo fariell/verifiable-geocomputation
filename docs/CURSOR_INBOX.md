@@ -1128,6 +1128,86 @@ verify_status / semantic`。
 - 若最终确有子集无法验证,必须在 OUTBOX 明确列出"哪些子集有真实 verify、哪些没有",
   论文只报有真实结果的部分并声明限制。
 
+## §A.17 · 加速:瓶颈是串行等待,不是算力(秘书 2026-09-10 23:5x 实测)
+
+PI 问「能否用 AutoDL 算力加速」。**答案是不能,而且不需要。** 以下是实测数据,
+不要再去折腾上云。
+
+### A.17.1 时间构成的实测分解(单 cell 约 46 秒)
+
+| 环节 | 实测耗时 | 占本地算力 |
+|---|---|---|
+| `dafny verify` 单个 .dfy(WSL,含启动) | **3 秒** | 全部本地 CPU |
+| WSL 子系统冷启动 | ~0 秒(已热) | — |
+| 其余(等远端 LLM 吐 token) | **~43 秒** | **本地 CPU 约 0%** |
+
+命令与输出(秘书实测,非推测):
+
+```
+$ wsl -- bash -lc 'cd ".../results/raw" && dafny verify <file>.dfy 2>&1 | tail -3'
+  12 resolution/type errors detected in ...dfy
+  耗时: 3 秒
+```
+
+**本地算力只占 6%。94% 的时间本地在等 HTTP 响应。** AutoDL 的 GPU/CPU 无法加速
+硅基流动机房里的推理 —— 这是 IO 等待问题,不是计算问题。
+
+### A.17.2 真瓶颈:harness 零并发
+
+```
+grep -rn "concurrency|parallel|ThreadPool|max_workers|--jobs" harness/*.py
+→ 0 命中
+```
+
+`run_l1_batch.py` 是四层嵌套 for(model → task → prompt → sample)全串行,
+`openai_compat.py` 用同步 `httpx.Client(timeout=180.0)`,一次只飞一个请求。
+
+### A.17.3 要做的:并发请求(本机即可,零成本,不要上云)
+
+写一个 **`harness/run_l1_batch_pool.py`**(新建文件,**不要改** `run_l1_batch.py`,
+当前 M3 批次还在跑):
+
+1. 用 `concurrent.futures.ThreadPoolExecutor`,默认 `--workers 8`,可调。
+   这是 IO 密集,线程池足够,**不要用多进程**。
+2. **复用** `run_cell()` 的单元格逻辑与既有的 resume / skip-existing 判定,
+   不要重写生成与校验语义。
+3. jsonl 写入必须**单线程聚合**(主线程收 future 结果后统一 append)或加锁,
+   禁止多线程直接写文件。
+4. 对 429 / rate limit 做指数退避(1s→2s→4s,上限 30s),退避后重试同一 cell;
+   连续 3 次 429 就把 `--workers` 自动降到 4,再不行降到 2,并在 OUTBOX 记录。
+5. verify 阶段**保持串行或小并发(≤4)**即可 —— 它只占 3 秒,并行收益为零,
+   反而会和 WSL 抢 CPU。
+
+### A.17.4 上线前的验证(不可跳过)
+
+先用 `--limit 2 --workers 8` 跑一个小样本,**与串行版已产出的同 cell 结果对照**,
+确认三件事再放开全量:
+- 生成的 .dfy 内容一致(并发没有污染 prompt / 温度 / seed)
+- jsonl 每行 JSON 完整可解析(没有并发写坏行)
+- `metric_eligible` 判定与串行版一致
+
+验证不通过就不要切,继续用串行版跑完。
+
+### A.17.5 预期收益与边界
+
+- 剩 M3 + M4 约 420 cells:串行 5.4 小时 → 8 路并发约 **40 分钟**。
+- 并发后单批更短,**反而更安全**:计划任务有 4 小时硬上限,串行容易中途被杀。
+- 若实测 429 频繁到必须降 workers ≤2,说明并发收益被限流吃掉,那就回到串行,
+  不要硬撑。
+
+### A.17.6 AutoDL 仅在这两种情况才考虑(现在都不是)
+
+1. **要补 Lean 通道时** —— 本机与 WSL 都没有 lake/Lean,而 M2 的 Lean 目前是
+   `TOOLCHAIN_MISSING`。若 PI 决定补 Lean,那时才需要开 AutoDL。
+2. **离线回填规模上千** —— 当前 267 个 .dfy 串行回填 3 秒/个 = 13 分钟,不值得上云。
+
+### A.17.7 顺带提醒(不是指令,是观察)
+
+`completion_tokens` 打满 4096 的比例:DeepSeek 1%(4/424)、Qwen 2%(4/206)、
+**GLM 2/2** —— GLM 才跑 2 条样本不足以下判断,但请在 M3 跑完后统计一次,
+若 GLM 普遍打满说明输出被 `max_tokens` 截断,会导致人为的低通过率,
+那就要调 `max_tokens` 或改 prompt,否则结论不成立。
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
