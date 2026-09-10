@@ -1284,6 +1284,38 @@ M1/M2 公平对比。**必须补齐 14 题的覆盖**,否则 M3 这一列在论�
 2. **不要替 PI 下结论**,不要自动归类为 ALIGNED 或 DRIFT。这是 PI 的判断权。
 3. 在 PI 判完之前,论文里不许出现任何 semantic fidelity 的百分比。
 
+### A.17.12 冷启动恢复(宿主 2026-09-11 01:30 关机,agent 与 M4 批次被强杀)
+
+关机时状态:M4 DeepSeek-R1 批次 pid=8244 跑到 12/210 会被 SIGKILL;
+锁可能残留(孤儿锁自愈会清,已在 09-10 15:46 实战验证有效,不用管)。
+
+**注意:2026-09-10 那次的经验是——开机后计划任务不会自动拉起。**
+`StartWhenAvailable=True` 在实践中没生效,15:46 开机后 gate 一次都没跑,
+直到手动 `Stop-ScheduledTask` + `Start-ScheduledTask` 才恢复。
+PI 已知晓,会在开机后手动重启任务。
+
+**你(下一个 agent)醒来后按此顺序做,顺序不能颠倒:**
+
+1. **先检查 jsonl 完整性**。被强杀可能写坏最后一行。
+   `tail -1 l1_full_w3_live.jsonl` 若不是完整 JSON,截断到最后一条可解析的行
+   (先备份尾部到 `raw/_truncated_<ts>.bak`)。**不要整体重写文件。**
+2. **对账 `.dfy` 与 jsonl**。孤儿 .dfy(有文件但 jsonl 没记录)登记进 jsonl,
+   **不要重新生成**——那些是已经花过钱的资产。
+3. **写 `harness/run_l1_batch_pool.py` 并用 `--limit 2` 验证**(A.17.3/A.17.4)。
+   这是醒来后的**第一优先**,优先级高于继续跑 M4。
+   理由:M4 剩 198 cells × 2.7 min = 9 小时串行,并发后约 70 分钟。
+4. **用并发版跑 M3 GLM 补跑**(A.17.10):8 个未覆盖题目 × 3 prompt × k=5 = 120 cells。
+   这是全新批次,不涉及中断,适合作为并发版的第一次实弹。
+5. **再跑 M4 剩余**(resume 会跳过已完成的 12 个)。
+6. **把 4 条 `VERIFIED_NEEDS_HUMAN` 列进 OUTBOX**(A.17.11),等 PI 判断。
+   **不要自行归类为 ALIGNED 或 DRIFT。**
+
+**红线(同 A.16.4)**
+- 不许清空 `results/` 重开。
+- 不许把 `TOOLCHAIN_MISSING` 计入通过。
+- 不许回填或猜测被强杀中断的 cell。
+- 不许在 PI 判完 4 条 NEEDS_HUMAN 之前写任何 semantic fidelity 百分比。
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
