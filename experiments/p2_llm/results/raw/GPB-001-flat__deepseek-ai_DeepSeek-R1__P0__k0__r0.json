@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1614,
+    "completion_tokens": 3376,
+    "total_tokens": 4990,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2700
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1614
+  },
+  "api_id": "01a08c2f733cd3e270089d93ddf0d93d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope magnitude on constant elevation window\n// Proof that Horn slope magnitude is zero when all elevations are equal\n\nfunction method SlopeSq(z: array2<real>, w: real): real\n  requires z.Length0 == 3 && z.Length1 == 3\n  requires w > 0.0\n{\n  // Horn (1981) finite-difference slope components\n  var dzdx := (z[2,0] + 2*z[2,1] + z[2,2] - z[0,0] - 2*z[0,1] - z[0,2]) / (8.0 * w);\n  var dzdy := (z[0,2] + 2*z[1,2] + z[2,2] - z[0,0] - 2*z[1,0] - z[2,0]) / (8.0 * w);\n  dzdx*dzdx + dzdy*dzdy\n}\n\nlemma HornConstantWindow(z: array2<real>, w: real, c: real)\n  requires z.Length0 == 3 && z.Length1 == 3\n  requires w > 0.0\n  requires forall i,j :: 0 <= i < 3 && 0 <= j < 3 ==> z[i,j] == c\n  ensures SlopeSq(z, w) == 0.0\n{\n  // Numerator calculations for dzdx and dzdy\n  var dx_num := z[2,0] + 2*z[2,1] + z[2,2] - z[0,0] - 2*z[0,1] - z[0,2];\n  var dy_num := z[0,2] + 2*z[1,2] + z[2,2] - z[0,0] - 2*z[1,0] - z[2,0];\n\n  // Substitute constant elevation value\n  assert dx_num == c + 2*c + c - c - 2*c - c by {\n    assert z[2,0] == c && z[2,1] == c && z[2,2] == c;\n    assert z[0,0] == c && z[0,1] == c && z[0,2] == c;\n  }\n  assert dy_num == c + 2*c + c - c - 2*c - c by {\n    assert z[0,2] == c && z[1,2] == c && z[2,2] == c;\n    assert z[0,0] == c && z[1,0] == c && z[2,0] == c;\n  }\n\n  // Simplify to zero\n  assert dx_num == 0.0;\n  assert dy_num == 0.0;\n\n  // Final slope magnitude squared\n  assert SlopeSq(z, w) == (0.0/(8.0*w))*(0.0/(8.0*w)) + (0.0/(8.0*w))*(0.0/(8.0*w));\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1614,
+    "completion_tokens": 6142,
+    "total_tokens": 7756,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5602
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1614
+  },
+  "api_id": "01a08c3675336b92ae2a864251729ac4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function hornSlopeSq(grid: array2<real>, w: real): real\n  requires w > 0.0\n  requires grid.Length0 == 3 && grid.Length1 == 3\n{\n  // Horn (1981) finite-difference slope components\n  var dzdx := ( (grid[0,2] + 2.0*grid[1,2] + grid[2,2]) \n              - (grid[0,0] + 2.0*grid[1,0] + grid[2,0]) ) / (8.0 * w);\n  var dzdy := ( (grid[0,0] + 2.0*grid[0,1] + grid[0,2]) \n              - (grid[2,0] + 2.0*grid[2,1] + grid[2,2]) ) / (8.0 * w);\n  dzdx*dzdx + dzdy*dzdy\n}\n\nlemma hornSlopeZeroOnConstant(grid: array2<real>, w: real)\n  requires w > 0.0\n  requires grid.Length0 == 3 && grid.Length1 == 3\n  requires forall i,j :: 0 <= i < 3 && 0 <= j < 3 ==> grid[i,j] == grid[0,0]\n  ensures hornSlopeSq(grid, w) == 0.0\n{\n  // All values equal to constant c\n  var c := grid[0,0];\n  \n  // dzdx numerator reduces to zero\n  assert ( (grid[0,2] + 2.0*grid[1,2] + grid[2,2]) \n         - (grid[0,0] + 2.0*grid[1,0] + grid[2,0]) ) \n         == (c + 2.0*c + c) - (c + 2.0*c + c) \n         == 0.0;\n         \n  // dzdy numerator reduces to zero\n  assert ( (grid[0,0] + 2.0*grid[0,1] + grid[0,2]) \n         - (grid[2,0] + 2.0*grid[2,1] + grid[2,2]) ) \n         == (c + 2.0*c + c) - (c + 2.0*c + c) \n         == 0.0;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
+}

@@ -1,0 +1,72 @@
+{
+  "model": "deepseek-ai/DeepSeek-R1",
+  "slot": "M4",
+  "ts": "2026-09-11T00:57:46",
+  "unique_raw_json": 3,
+  "jsonl_rows": 3,
+  "status": {
+    "GENERATED": 3
+  },
+  "verify_status": {
+    "RAN": 3
+  },
+  "dafny_RAN": 3,
+  "cell_level_RAN": {
+    "compile_ok": 2,
+    "verify_ok": 1,
+    "n": 3
+  },
+  "task_prompt_partial_dafny": {
+    "n": 1,
+    "compile@1": 0.0,
+    "verify@1": 0.0,
+    "compile@5": 1.0,
+    "verify@5": 1.0,
+    "n_c1": 0,
+    "n_v1": 0,
+    "n_c5": 1,
+    "n_v5": 1,
+    "note": "PARTIAL — denominator is completed task×prompt so far, NOT full 27"
+  },
+  "semantic_RAN": {
+    "UNCOMPILED": 1,
+    "LIKELY_ALIGNED": 1,
+    "COMPILE_ONLY": 1
+  },
+  "pace_note": "~5 min/cell observed; 210 cells estimate ~17h; leave batch running",
+  "cells": [
+    {
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P0",
+      "k": 0,
+      "status": "GENERATED",
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "failure": "F1",
+      "reasoning_tokens": 2700
+    },
+    {
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P0",
+      "k": 1,
+      "status": "GENERATED",
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "failure": null,
+      "reasoning_tokens": 6023
+    },
+    {
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P0",
+      "k": 2,
+      "status": "GENERATED",
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "failure": "F3",
+      "reasoning_tokens": 5602
+    }
+  ]
+}

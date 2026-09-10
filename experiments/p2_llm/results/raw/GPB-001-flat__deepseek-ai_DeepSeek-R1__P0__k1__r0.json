@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "44fa3ce1bfd44c4f6789557c1cd7715b208eeb62983b882a43affde997ea2dcc",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1614,
+    "completion_tokens": 6367,
+    "total_tokens": 7981,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6023
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1614
+  },
+  "api_id": "01a08c31c7cb5dbacd57449edc10730d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope magnitude on constant elevation window\nfunction HornSlopeSq(z00: real, z01: real, z02: real,\n                     z10: real, z11: real, z12: real,\n                     z20: real, z21: real, z22: real, w: real): real\n  requires w > 0.0\n{\n  // Horn (1981) finite-difference slope components\n  var dzdx := (z02 + 2.0*z12 + z22 - z00 - 2.0*z10 - z20) / (8.0 * w);\n  var dzdy := (z00 + 2.0*z01 + z02 - z20 - 2.0*z21 - z22) / (8.0 * w);\n  // Slope magnitude squared\n  dzdx*dzdx + dzdy*dzdy\n}\n\nlemma ZeroSlopeOnConstantWindow(z: real, w: real)\n  requires w > 0.0\n  ensures HornSlopeSq(z, z, z, \n                      z, z, z, \n                      z, z, z, w) == 0.0\n{\n  // Both derivatives evaluate to zero when all elevations are equal\n  assert (z + 2.0*z + z - z - 2.0*z - z) == 0.0;  // dzdx numerator\n  assert (z + 2.0*z + z - z - 2.0*z - z) == 0.0;  // dzdy numerator\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

@@ -10,10 +10,10 @@
 ## §A · 当前活跃任务(读这个)
 
 STATUS: W3/RUNNING  
-UPDATED: 2026-09-11 00:35  
-TASK: **task16-W3 · L1 主实验**(M3 circuit-stop; M4 R1 retry after probe fix)  
-M3 GLM-4-32B: 80/210 stop COMPILE_ZERO_STREAK_20 (valid negative).  
-M4 R1: first probes ReadTimeout on R1-ping; probe now uses V3.2 for reachability. Batch restarting.
+UPDATED: 2026-09-11 00:58  
+TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 circuit-stop; M4 DeepSeek-R1 RUNNING)  
+M4 R1 live: probe gate fixed (V3.2 stand-in); gen timeout 600s; pid=8244.  
+Partial 3/210: GPB-001-flat P0 k1 verify_rc=0 (real). ~5min/cell → ~17h ETA. Lean still TOOLCHAIN_MISSING.
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。  
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:  

@@ -1160,6 +1160,42 @@ task16-W3-live verdict = PASS (M3 incapable) / W3/RUNNING (M4)
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live) · M4 R1 live partial
+
+```
+[task]      task16-W3-live / L1 M4=deepseek-ai/DeepSeek-R1 (A.13 + A.15.4)
+[step]      confirm probe gate; bump R1 gen timeout→600s; batch pid=8244 live; score first cells
+[cmd]       probe_live_api_openai('deepseek-ai/DeepSeek-R1')
+            → live_api_ok=true probe_model=V3.2 model_locked=R1 echo=PONG
+            run_l1_batch … --models deepseek-ai/DeepSeek-R1 --prompts P0,P1,P2 --k 5
+[rc]        probe=0; batch=RUNNING (python pid=8244; shell wrapper earlier exit -1)
+[key lines]
+  M4 unique_raw=3/210 @00:57; GENERATED=3; verify_status RAN=3 (Dafny WSL path live)
+  GPB-001-flat P0 k0: c=1 v=1 F1; reasoning_tokens=2700
+  GPB-001-flat P0 k1: c=0 v=0 PASS; reasoning_tokens=6023  ← first R1 machine-verify hit
+  GPB-001-flat P0 k2: c=0 v=1 F3; reasoning_tokens=5602
+  cell-level RAN: compile_ok=2/3 verify_ok=1/3
+  semantic: UNCOMPILED=1 LIKELY_ALIGNED=1 COMPILE_ONLY=1
+  @1 on completed task×prompt so far (n=1): compile@1=0 verify@1=0; @5 c=1 v=1
+  pace ~5 min/cell → ~17h for 210 — leave overnight; resume-safe; no full-table fab
+  roster still M1 V3.2 / M2 Qwen72B / M3 GLM circuit-stop / M4 R1; Lean TOOLCHAIN_MISSING
+[gates]     M4 probe PASS; M4 RUNNING; Dafny verify on R1 PASS(path);
+            A.13.5 4-model incomplete → STATUS W3/RUNNING (not W3.6)
+[verdict]   PASS (partial — M4 unblocked + 3 live cells + 1 verify hit)
+[blocker]   (1) M4 long ETA — batch left running; (2) Lean AutoDL; (3) no W3 complete yet
+```
+
+改了什么:
+- 改: `experiments/p2_llm/harness/openai_compat.py` — R1 gen timeout 600s (probe V3.2 stand-in already present)
+- 新: `experiments/p2_llm/results/scored/m4_deepseek_r1_partial_metrics.json`
+- 改: jsonl + raw `*DeepSeek-R1*` (3 cells) + verify/semantic sidecars
+- 改: INBOX §A UPDATED 00:58 / M4 RUNNING + real partial numbers; `STATUS: W3/RUNNING`
+- 未停 pid=8244; 未改 papers/(FORM LOCK); 未 git push; 未写 key; 未编造全表 verify@
+
+task16-W3-live verdict = PASS (M4 live partial) / W3/RUNNING (M4 alive)
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 
