@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 754,
+    "total_tokens": 1022,
+    "prompt_tokens_details": {
+      "cached_tokens": 32
+    },
+    "prompt_cache_hit_tokens": 32,
+    "prompt_cache_miss_tokens": 236
+  },
+  "api_id": "01a08bd608bb66af5e87c4d9cdc13dde",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.list.basic\nimport data.vector\nimport tactic\n\nnamespace one_dimensional_fill\n\n-- Define the 1D left-outlet Fill operator\ndef fill (a : list ℕ) : list ℕ := \n  let rec fill' : list ℕ → list ℕ → list ℕ\n  | []     acc := acc.reverse\n  | (h::t) acc := fill' t (max h (acc.head' 0) :: acc)\n  in fill' a []\n\n-- Theorem: The 1D left-outlet Fill operator yields a nondecreasing sequence\ntheorem fill_nondecreasing (a : list ℕ) : ∀ i, i < fill a.length → (fill a).nth i ≤ (fill a).nth (i+1) :=\nbegin\n  intros i hi,\n  -- We need to show that the i-th element is less than or equal to the (i+1)-th element\n  -- in the filled list.\n  -- First, we unfold the definition of `fill` and `fill'`.\n  unfold fill,\n  -- We need to reason about the list produced by `fill'`.\n  -- We will use induction on the list `a`.\n  induction a with h t ih,\n  -- Base case: If `a` is empty, the filled list is also empty, and the theorem holds vacuously.\n  { simp, },\n  -- Inductive step: Assume the theorem holds for `t`, and show it holds for `h::t`.\n  { \n    -- We need to show that the filled list of `h::t` is nondecreasing.\n    -- The filled list of `h::t` is produced by `fill' (h::t) []`.\n    -- We will use the definition of `fill'` to reason about the elements.\n    simp [fill'],\n    -- We need to show that the i-th element of `fill' t (max h 0 :: [])` is less than or equal to the (i+1)-th element.\n    -- We will use the inductive hypothesis on `t`.\n    -- We need to handle the case where `i` is 0 separately.\n    cases i with i,\n    { \n      -- If `i` is 0, we need to show that the first element is less than or equal to the second element.\n      -- The first element is `max h 0`, and the second element is `max (t.head' 0) (max h 0)`.\n      simp [list.nth, list.head'],\n      exact le_max_right _ _,\n    },\n    { \n      -- If `i` is not 0, we need to show that the (i+1)-th element of `fill' t (max h 0 :: [])` is less than or equal to the (i+2)-th element.\n      -- We will use the inductive hypothesis on `t`.\n      -- We need to show that the (i+1)-th element of `fill' t (max h 0 :: [])` is the same as the i-th element of `fill t`.\n      -- And the (i+2)-th element of `fill' t (max h 0 :: [])` is the same as the (i+1)-th element of `fill t`.\n      simp [list.nth, list.head'],\n      rw list.nth_tail,\n      rw list.nth_tail,\n      -- Apply the inductive hypothesis.\n      exact ih _ (lt_of_lt_of_le hi (list.length_tail _ _)),\n    },\n  },\nend\n\nend one_dimensional_fill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

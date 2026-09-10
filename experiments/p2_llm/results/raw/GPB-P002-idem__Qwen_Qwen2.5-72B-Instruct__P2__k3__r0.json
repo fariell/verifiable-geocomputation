@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "344ceb916dac07e97c3b52f3a8371609af11c3828fdf4e865cad24e497832500",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 483,
+    "total_tokens": 752,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 13
+  },
+  "api_id": "01a08bc5a5d515a03c9629b266c31ece",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Fill(a: array<int>) returns (b: array<int>)\n  requires a != null;\n  ensures b != null;\n  ensures b.Length == a.Length;\n  ensures forall i :: 0 <= i < b.Length - 1 ==> b[i] <= b[i + 1];\n{\n  b := new int[a.Length];\n  var maxSoFar := a[0];\n  for i := 0 to a.Length - 1 do\n    invariant 0 <= i <= a.Length;\n    invariant forall j :: 0 <= j < i ==> b[j] == maxSoFar;\n    invariant maxSoFar == max(a[0..i]);\n    b[i] := maxSoFar;\n    if a[i] > maxSoFar then maxSoFar := a[i];\n  }\n}\n\nmethod Raise(a: array<int>) returns (b: array<int>)\n  requires a != null;\n  ensures b != null;\n  ensures b.Length == a.Length;\n  ensures forall i :: 0 <= i < b.Length - 1 ==> b[i] >= b[i + 1];\n{\n  b := new int[a.Length];\n  var minSoFar := a[a.Length - 1];\n  for i := a.Length - 1 to 0 do\n    invariant 0 <= i <= a.Length;\n    invariant forall j :: i < j < a.Length ==> b[j] == minSoFar;\n    invariant minSoFar == min(a[i..a.Length]);\n    b[i] := minSoFar;\n    if a[i] < minSoFar then minSoFar := a[i];\n  }\n}\n\nlemma FillIsIdempotent(a: array<int>)\n  requires a != null;\n  ensures Fill(Fill(a)) == Fill(a);\n{\n  var b := Fill(a);\n  var c := Fill(b);\n  assert forall i :: 0 <= i < a.Length ==> c[i] == b[i];\n}\n\nlemma RaiseFixesNonSpill(a: array<int>)\n  requires a != null;\n  requires forall i :: 0 <= i < a.Length - 1 ==> a[i] >= a[i + 1];\n  ensures Raise(a) == a;\n{\n  var b := Raise(a);\n  assert forall i :: 0 <= i < a.Length ==> b[i] == a[i];\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

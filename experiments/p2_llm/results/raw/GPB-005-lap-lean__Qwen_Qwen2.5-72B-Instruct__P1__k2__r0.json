@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3174,
+    "completion_tokens": 2008,
+    "total_tokens": 5182,
+    "prompt_tokens_details": {
+      "cached_tokens": 3168
+    },
+    "prompt_cache_hit_tokens": 3168,
+    "prompt_cache_miss_tokens": 6
+  },
+  "api_id": "01a08b732deb0571c62e51a18669b640",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-003\n   文件 : formal/lean4/VeriGIS/Curvature.lean\n   算子 : Zevenbergen–Thorne (1987) 3×3 有限差分曲率\n   对偶 : formal/dafny/P003_curvature.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. Dafny 的 `real` 除法要求 `requires w > 0.0`;Lean 的 `ℝ` 除法是全函数\n       (`x / 0 = 0`,由 `inv_zero` 定义)。所以这里的定理把 `w ≠ 0` 写成\n       **假设**而不是前置条件,算子在 w = 0 上仍有定义(只是无意义)。\n       这是两个系统在\"部分函数\"处理上的根本差别,也是双形式化的价值之一:\n       逼我们把\"算子何时有意义\"这件事说清楚,而不是藏在前置条件里。\n\n    2. 证明风格:Dafny 靠 SMT(nlinarith/Z3)自动搜;Lean 靠显式战术\n       (`ring_nf` / `field_simp` / `nlinarith`)。同一条性质在两边自动化的\n       程度差异,本身就是 GeoProofBench 想测量的东西。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Curvature\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  中心元 e 在 Zevenbergen–Thorne 二阶差分中权为 -2,且分母含 w²。\n  这与 Horn 一阶差分不同,后者不依赖中心元 e。\n-/\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- x 方向二阶差分的分子(尚未除以格网间距)。 -/\ndef numHxx (a b c d e f g h i : ℝ) : ℝ := (d + f) - 2 * e\n\n/-- y 方向二阶差分的分子(尚未除以格网间距)。 -/\ndef numHyy (a b c d e f g h i : ℝ) : ℝ := (b + h) - 2 * e\n\n/-- xy 方向二阶差分的分子(尚未除以格网间距)。 -/\ndef numHxy (a b c d e f g h i : ℝ) : ℝ := (a - c - g + i) / 4\n\n/-- ∂²z/∂x² 的 Zevenbergen–Thorne 有限差分估计(1/m²,有量纲) -/\ndef hxx (a b c d e f g h i w : ℝ) : ℝ := numHxx a b c d e f g h i / w^2\n\n/-- ∂²z/∂y² 的 Zevenbergen–Thorne 有限差分估计(1/m²,有量纲) -/\ndef hyy (a b c d e f g h i w : ℝ) : ℝ := numHyy a b c d e f g h i / w^2\n\n/-- ∂²z/∂x∂y 的 Zevenbergen–Thorne 有限差分估计(1/m²,有量纲) -/\ndef hxy (a b c d e f g h i w : ℝ) : ℝ := numHxy a b c d e f g h i / w^2\n\n-- ==========================================================================\n-- 离散局部最大值时,离散 Laplacian <= 0\n-- ==========================================================================\n\ntheorem discrete_laplacian_nonpositive_of_local_max (a b c d e f g h i w : ℝ) (h0 : w ≠ 0) (h1 : e ≥ a) (h2 : e ≥ b) (h3 : e ≥ c) (h4 : e ≥ d) (h5 : e ≥ f) (h6 : e ≥ g) (h7 : e ≥ h) (h8 : e ≥ i) :\n    (hxx a b c d e f g h i w + hyy a b c d e f g h i w) ≤ 0 := by\n  unfold hxx hyy numHxx numHyy\n  field_simp [h0]\n  linarith\n\n-- ==========================================================================\n-- 尺度线性 · 高程整体缩放 k 倍,曲率缩放 k 倍\n-- (单位换算 m → ft 不改变算子结构,只作用于输出)\n-- ==========================================================================\n\ntheorem scale_linear_hxx (a b c d e f g h i w k : ℝ) (h0 : w ≠ 0) :\n    hxx (k * a) (k * b) (k * c) (k * d) (k * e) (k * f) (k * g) (k * h) (k * i) w =\n      k * hxx a b c d e f g h i w := by\n  unfold hxx numHxx\n  field_simp [h0]\n  ring_nf\n\ntheorem scale_linear_hyy (a b c d e f g h i w k : ℝ) (h0 : w ≠ 0) :\n    hyy (k * a) (k * b) (k * c) (k * d) (k * e) (k * f) (k * g) (k * h) (k * i) w =\n      k * hyy a b c d e f g h i w := by\n  unfold hyy numHyy\n  field_simp [h0]\n  ring_nf\n\ntheorem scale_linear_hxy (a b c d e f g h i w k : ℝ) (h0 : w ≠ 0) :\n    hxy (k * a) (k * b) (k * c) (k * d) (k * e) (k * f) (k * g) (k * h) (k * i) w =\n      k * hxy a b c d e f g h i w := by\n  unfold hxy numHxy\n  field_simp [h0]\n  ring_nf\n\n-- ==========================================================================\n-- 冒烟测试(非命题,仅确认算子可计算)\n-- ==========================================================================\n\nexample : hxx 0 0 0 0 0 0 0 0 0 1 = 0 := by norm_num [hxx, numHxx]\nexample : hyy 0 0 0 0 0 0 0 0 0 1 = 0 := by norm_num [hyy, numHyy]\nexample : hxy 0 0 0 0 0 0 0 0 0 1 = 0 := by norm_num [hxy, numHxy]\n\n-- ==========================================================================\n-- 为什么二阶不行(结构注记)\n-- --------------------------------------------------------------------------\n-- 上面各条性质之所以可证,根源有两条,而曲率两条都不满足:\n--\n--   1) 二阶差分的权向量与常数向量不正交(Σw⁺ ≠ Σw⁻)\n--      → 常数项不能精确抵消,平移不变性不成立,平坦面输出不恒为 0。\n--   2) 二阶差分**依赖中心元 e**。\n--      → 中心格点的高程噪声 δ 会进入输出,且经二阶差分放大到 O(δ/w²)。\n--\n-- 设单格高程噪声标准差为 σ,则噪声经二阶差分放大到 O(σ/w²)。w = 30 m 的\n-- SRTM 上,σ ≈ 2–5 m 量级的噪声足以让曲率的信噪比崩塌 —— 这正是\n-- Phase 1 实测 corr = 0.157 的机制。\n--\n-- 结论:坡度的一致性**可以被证明**,曲率的一致性**必须先被定义**\n-- (在什么误差模型、什么尺度和什么正则化下\"一致\")。后者才是\n-- \"可验证空间计算\"真正要回答的问题,也是 P-003 的入口。\n-- ==========================================================================\n\nend -- noncomputable section\n\nend VeriGIS.Curvature\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

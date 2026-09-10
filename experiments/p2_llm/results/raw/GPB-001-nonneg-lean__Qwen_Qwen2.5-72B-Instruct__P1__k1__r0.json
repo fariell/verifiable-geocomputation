@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3050,
+    "completion_tokens": 682,
+    "total_tokens": 3732,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3050
+  },
+  "api_id": "01a08b62ea5175a10162725ac5467db6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-019\n   文件 : formal/lean4/VeriGIS/HornSlope.lean\n   算子 : Horn (1981) 3×3 Slope\n   对偶 : formal/dafny/P001_horn_slope.dfy\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  独立重述,不是翻译。本文件证明 Horn (1981) 有限差分坡度算子在任意 3x3 高程窗口\n  和正网格间距 w 下是非负的。这适用于任意高程，而不仅仅是平面。\n\n  覆盖:\n    GPB-019  Horn 坡度平方非负\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\nimport Mathlib.Analysis.Convex.Function\nimport Mathlib.Data.Real.Basic\n\nnamespace VeriGIS.HornSlope\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下),与 `HornSlope` / Dafny P-001 相同。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1,  0)     e        f( 1,  0)\n      g(-1,  1)   h( 0,  1)   i( 1,  1)\n-/\n\ndef dzdx (a d e f : ℝ) (w : ℝ) : ℝ := (f - d) / (2 * w)\ndef dzdy (a b c e : ℝ) (w : ℝ) : ℝ := (c - a) / (2 * w)\n\ndef slopeSq (a b c d e f g h i : ℝ) (w : ℝ) : ℝ :=\n  (dzdx a d e f w) ^ 2 + (dzdy a b c e w) ^ 2\n\nlemma sq_ne_zero {w : ℝ} (hw : w ≠ 0) : w ^ 2 ≠ 0 :=\n  pow_ne_zero 2 hw\n\nlemma two_sq_ne_zero {w : ℝ} (hw : w ≠ 0) : (2 * w) ^ 2 ≠ 0 := by\n  rw [sq, mul_ne_zero]\n  exact two_ne_zero\n  exact hw\n\ntheorem slopeSq_nonneg (a b c d e f g h i w : ℝ) (hw : w > 0) :\n  slopeSq a b c d e f g h i w ≥ 0 := by\n  have h2w : (2 * w) > 0 := by linarith\n  have h2w2 : (2 * w) ^ 2 > 0 := by linarith\n  unfold slopeSq dzdx dzdy\n  rw [sq, sq, add_nonneg]\n  apply sq_nonneg\n  apply sq_nonneg\n\nend\nend VeriGIS.HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

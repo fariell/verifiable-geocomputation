@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3292,
+    "completion_tokens": 799,
+    "total_tokens": 4091,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3292
+  },
+  "api_id": "01a08bc1c8f53425469c1f1cdfd3b95e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-002\n//  文件 : formal/dafny/P002_pit_filling.dfy\n//  算子 : 1D 填洼 (Fill)\n//  覆盖 : GPB-026(填洼的幂等性)、GPB-026(填洼的固定点性质)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P002_pit_filling.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  填洼操作是数字高程模型 (DEM) 处理中的一个基本步骤,用于消除地形中的洼地。\n//  本文件证明填洼操作在 1D 左出口特化下的幂等性和固定点性质,这些性质对于\n//  理解和验证填洼算法在更复杂地形中的行为至关重要。\n//\n//  幂等性 (Idempotence): Fill(Fill(a)) = Fill(a)\n//  固定点 (Fixed Point): 如果 a[i] 不向左溢出,则 Fill(a)[i] = a[i]\n//\n// ===========================================================================\n\nmodule PitFilling {\n\n  // 1D 填洼操作\n  function Fill(a: seq<int>): seq<int> {\n    var out: seq<int> := a;\n    for i := 1 to |a| - 1 {\n      out[i] := max(out[i], out[i - 1]);\n    }\n    return out;\n  }\n\n  // 幂等性引理\n  lemma Idempotent(a: seq<int>)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    var b := Fill(a);\n    var c := Fill(b);\n    assert b == c;\n  }\n\n  // 固定点引理\n  lemma FixedPoint(a: seq<int>, i: int)\n    requires 0 <= i < |a|\n    requires a[i] >= a[i - 1] || i == 0\n    ensures Fill(a)[i] == a[i]\n  {\n    var b := Fill(a);\n    if i == 0 {\n      assert b[i] == a[i];\n    } else {\n      assert b[i] == max(a[i], a[i - 1]);\n      assert a[i] >= a[i - 1];\n      assert b[i] == a[i];\n    }\n  }\n\n  // 测试用例\n  method TestCases() {\n    var cases: seq<seq<int>> := [\n      [5, 5, 5, 5],  // 平面\n      [3, 1, 4],     // 坑\n      [0, 1, 2, 3],  // 斜坡\n      [3, 1, 0]      // 级联\n    ];\n\n    for case in cases {\n      var filled := Fill(case);\n      var filledTwice := Fill(filled);\n      print \"Case: \", case, \"\\n\";\n      print \"Filled: \", filled, \"\\n\";\n      print \"Filled Twice: \", filledTwice, \"\\n\";\n      assert filled == filledTwice;\n    }\n  }\n\n  // 主方法\n  method Main() {\n    print \"GeoProofBench P-002 — 1D 填洼算子的幂等性和固定点性质\\n\";\n    print \"全部由编译期验证:dafny verify P002_pit_filling.dfy\\n\";\n    TestCases();\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

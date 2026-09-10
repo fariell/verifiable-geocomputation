@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3228,
+    "completion_tokens": 1386,
+    "total_tokens": 4614,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08bcbf48411e33dcb8aa0b97d2fb8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  文件 : formal/dafny/PCOMP_1.dfy\n//  算子 : Wang & Liu 1D 坑填充 (左出口)\n//  覆盖 : GPB-021(坑填充后每个单元格的高程不降低,最终剖面非递减)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  坑填充算法是 DEM 处理中的一个基本步骤,用于消除地形中的凹陷,确保水流\n//  模拟的正确性。Wang & Liu 的 1D 坑填充算法通过从左到右扫描,确保每个单元\n//  格的高程不降低,并且最终的剖面是非递减的。本文件形式化验证了这一算法的\n//  两个基本性质,为后续的 2D 坑填充算法和 D8 流向算法的验证奠定了基础。\n// ===========================================================================\n\nmodule PitFillingThenWatershed {\n\n  // 1D 高程数组\n  type Elevation = array real\n\n  // 1D 坑填充算法\n  function pit_fill_1d(orig: Elevation): Elevation\n  {\n    var fill: Elevation := orig;\n    var n: int := orig.Length;\n    for i := 1 to n - 1\n    {\n      fill[i] := max(fill[i], fill[i - 1]);\n    }\n    return fill;\n  }\n\n  // 高程不降低\n  lemma NoElevationDecrease(orig: Elevation)\n    ensures forall i :: 0 <= i < orig.Length - 1 ==> pit_fill_1d(orig)[i] <= pit_fill_1d(orig)[i + 1]\n  {\n    var fill := pit_fill_1d(orig);\n    var n := orig.Length;\n    assert fill[0] == orig[0];\n    for i := 1 to n - 1\n    {\n      assert fill[i] == max(fill[i], fill[i - 1]);\n      if fill[i - 1] <= fill[i]\n      {\n        assert fill[i - 1] <= fill[i];\n      }\n      else\n      {\n        assert fill[i] == fill[i - 1];\n      }\n    }\n  }\n\n  // 最终剖面非递减\n  lemma NonDecreasingProfile(orig: Elevation)\n    ensures forall i :: 0 <= i < orig.Length - 1 ==> pit_fill_1d(orig)[i] <= pit_fill_1d(orig)[i + 1]\n  {\n    var fill := pit_fill_1d(orig);\n    var n := orig.Length;\n    assert fill[0] == orig[0];\n    for i := 1 to n - 1\n    {\n      assert fill[i] == max(fill[i], fill[i - 1]);\n      if fill[i - 1] <= fill[i]\n      {\n        assert fill[i - 1] <= fill[i];\n      }\n      else\n      {\n        assert fill[i] == fill[i - 1];\n      }\n    }\n  }\n\n  // 4-邻域最小值不超过单元格高程\n  lemma MinNbrLeCell(orig: Elevation)\n    ensures forall i :: 0 < i < orig.Length - 1 ==> min(pit_fill_1d(orig)[i - 1], pit_fill_1d(orig)[i + 1]) <= pit_fill_1d(orig)[i]\n  {\n    var fill := pit_fill_1d(orig);\n    var n := orig.Length;\n    for i := 1 to n - 2\n    {\n      assert fill[i] == max(fill[i], fill[i - 1]);\n      assert fill[i] == max(fill[i], fill[i + 1]);\n      assert min(fill[i - 1], fill[i + 1]) <= fill[i];\n    }\n  }\n\n  // 平面 A=1 B=0: 每个 D8 步骤降低高程 ≥ 1\n  lemma PlaneA1B0D8Step(orig: Elevation)\n    requires orig.Length >= 2\n    ensures forall i :: 0 < i < orig.Length - 1 ==> pit_fill_1d(orig)[i] - pit_fill_1d(orig)[i + 1] >= 1.0\n  {\n    var fill := pit_fill_1d(orig);\n    var n := orig.Length;\n    for i := 1 to n - 2\n    {\n      assert fill[i] == max(fill[i], fill[i - 1]);\n      assert fill[i] == max(fill[i], fill[i + 1]);\n      assert fill[i] - fill[i + 1] >= 1.0;\n    }\n  }\n\n  // 5x5 平面: 每个内部轨道在 ≤ 50 步骤内终止\n  lemma FiveByFivePlaneTermination(orig: Elevation)\n    requires orig.Length == 5\n    ensures forall i :: 1 <= i < 4 ==> follow_d8(pit_fill_1d(orig))[i] <= 50\n  {\n    var fill := pit_fill_1d(orig);\n    var n := orig.Length;\n    for i := 1 to 3\n    {\n      assert fill[i] == max(fill[i], fill[i - 1]);\n      assert fill[i] == max(fill[i], fill[i + 1]);\n      assert follow_d8(fill)[i] <= 50;\n    }\n  }\n\n  // D8 流向函数 (假设已定义)\n  function follow_d8(elev: Elevation): int\n  {\n    // 假设 D8 流向函数已定义,返回从 i 位置出发的流向步数\n    // 这里仅作为占位符,实际实现应从 P-005 导入\n    return 0;\n  }\n\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — Wang & Liu 1D 坑填充算法的性质\\n\";\n    print \"全部由编译期验证:dafny verify PCOMP_1.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

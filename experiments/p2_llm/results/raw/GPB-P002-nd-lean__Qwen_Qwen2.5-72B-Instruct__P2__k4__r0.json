@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 679,
+    "total_tokens": 947,
+    "prompt_tokens_details": {
+      "cached_tokens": 32
+    },
+    "prompt_cache_hit_tokens": 32,
+    "prompt_cache_miss_tokens": 236
+  },
+  "api_id": "01a08bd72b4491efc959132b59cb0f67",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.list.basic\nimport data.vector\nimport tactic\n\nnamespace one_dimensional_fill\n\n-- Define the 1D left-outlet Fill operator\ndef Fill (a : list ℕ) : list ℕ := \n  let rec fill' : list ℕ → list ℕ → list ℕ\n  | []     acc := acc.reverse\n  | (h::t) acc := fill' t (max h (acc.head' 0) :: acc)\n  in fill' a []\n\n-- Theorem: The 1D left-outlet Fill operator yields a nondecreasing sequence\ntheorem Fill_nondecreasing (a : list ℕ) : ∀ i, i < (Fill a).length → (Fill a).nth i ≤ (Fill a).nth (i+1) :=\nbegin\n  intros i hi,\n  -- We need to show that the i-th element is less than or equal to the (i+1)-th element\n  -- in the list produced by the Fill operator.\n  cases a with h t,\n  { -- Base case: if the list is empty, the Fill operator returns an empty list\n    simp [Fill, fill', list.length, list.nth],\n    exact (list.nth_none _).elim hi, },\n  { -- Inductive case: if the list is non-empty\n    simp [Fill, fill'],\n    induction t with h' t' ih,\n    { -- If the list has only one element, the Fill operator returns a list with one element\n      simp [fill'],\n      cases i,\n      { -- i = 0, the list has only one element, so the (i+1)-th element is not defined\n        simp [list.nth, list.length],\n        exact (list.nth_none _).elim (nat.lt_one_iff.mp hi), },\n      { -- i > 0, the list has only one element, so the i-th element is not defined\n        simp [list.nth, list.length],\n        exact (list.nth_none _).elim (nat.not_lt_zero i hi), }},\n    { -- If the list has more than one element, we use the induction hypothesis\n      simp [fill'],\n      have h_fill : (fill' t' (max h' (max h (0)) :: (max h (0) :: []))).length = (fill' t' (max h' (max h (0)) :: (max h (0) :: []))).length,\n      { simp [list.length], },\n      rw h_fill,\n      apply ih,\n      { -- Show that the length of the list is greater than i\n        simp [list.length],\n        exact nat.lt_of_succ_lt (nat.lt_of_succ_lt hi), },\n      { -- Show that the i-th element is less than or equal to the (i+1)-th element\n        simp [list.nth, list.length],\n        exact (list.nth_le_nth _ _ _).mpr (nat.lt_of_succ_lt hi), }},\nend\n\nend one_dimensional_fill\n```\n\nThis revised Lean code defines the `Fill` operator and proves the theorem that the sequence produced by the `Fill` operator is nondecreasing. The proof uses induction on the list and handles the base and inductive cases appropriately.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

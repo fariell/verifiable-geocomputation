@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "ec578a84868b8b3f6cf5c26bc9fa5c9d78e46b6456451698e11daa292093e204",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 289,
+    "completion_tokens": 236,
+    "total_tokens": 525,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 225
+  },
+  "api_id": "01a08bcd10213b8ce7a8e2b08201f9b9",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Fill(orig: array<int>) returns (Fill: array<int>)\n  requires orig != null;\n  requires orig.Length > 0;\n  ensures Fill != null;\n  ensures Fill.Length == orig.Length;\n  ensures Fill[0] == orig[0];\n  ensures forall i :: 0 < i < Fill.Length ==> Fill[i] == max(orig[i], Fill[i-1]);\n  ensures forall i :: 0 <= i < Fill.Length - 1 ==> Fill[i] <= Fill[i+1];\n{\n  Fill := new int[orig.Length];\n  Fill[0] := orig[0];\n  var i := 1;\n  while i < Fill.Length\n    invariant 0 <= i <= Fill.Length;\n    invariant forall j :: 0 <= j < i ==> Fill[j] == max(orig[j], Fill[j-1]);\n    invariant forall j :: 0 <= j < i - 1 ==> Fill[j] <= Fill[j+1];\n    decreases Fill.Length - i;\n  {\n    Fill[i] := max(orig[i], Fill[i-1]);\n    i := i + 1;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

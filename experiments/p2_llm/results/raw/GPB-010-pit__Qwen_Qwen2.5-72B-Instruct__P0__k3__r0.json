@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1682,
+    "completion_tokens": 1225,
+    "total_tokens": 2907,
+    "prompt_tokens_details": {
+      "cached_tokens": 1664
+    },
+    "prompt_cache_hit_tokens": 1664,
+    "prompt_cache_miss_tokens": 18
+  },
+  "api_id": "01a08b8f0cfa0ac593c0e80bb0b2c738",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method D8At(h: array2<int>, r: int, c: int) returns (best: string)\n  requires h != null\n  requires 0 <= r < h.Height\n  requires 0 <= c < h.Width\n  ensures (best == \"NoFlow\" || best == \"E\" || best == \"SE\" || best == \"S\" || best == \"SW\" || best == \"W\" || best == \"NW\" || best == \"N\" || best == \"NE\")\n{\n  var e := h[r, c];\n  var best_p := 0.0;\n  best := \"NoFlow\";\n\n  for name, dp, dq, dist2 in [\n    (\"E\", 1, 0, 1.0),\n    (\"SE\", 1, 1, 2.0),\n    (\"S\", 0, 1, 1.0),\n    (\"SW\", -1, 1, 2.0),\n    (\"W\", -1, 0, 1.0),\n    (\"NW\", -1, -1, 2.0),\n    (\"N\", 0, -1, 1.0),\n    (\"NE\", 1, -1, 2.0)\n  ] {\n    var rr := r + dq;\n    var cc := c + dp;\n    if 0 <= rr < h.Height && 0 <= cc < h.Width {\n      var drop := e - h[rr, cc];\n      if drop > 0 {\n        var p := (drop * drop) / dist2;\n        if best == \"NoFlow\" || p > best_p {\n          best := name;\n          best_p := p;\n        }\n      }\n    }\n  }\n}\n\nmethod PitFlow(h: array2<int>, r: int, c: int) returns (flow: string)\n  requires h != null\n  requires 0 <= r < h.Height\n  requires 0 <= c < h.Width\n  ensures (flow == \"NoFlow\" || flow == \"E\" || flow == \"SE\" || flow == \"S\" || flow == \"SW\" || flow == \"W\" || flow == \"NW\" || flow == \"N\" || flow == \"NE\")\n{\n  var e := h[r, c];\n  var all_neighbors_lower := true;\n\n  for name, dp, dq, dist2 in [\n    (\"E\", 1, 0, 1.0),\n    (\"SE\", 1, 1, 2.0),\n    (\"S\", 0, 1, 1.0),\n    (\"SW\", -1, 1, 2.0),\n    (\"W\", -1, 0, 1.0),\n    (\"NW\", -1, -1, 2.0),\n    (\"N\", 0, -1, 1.0),\n    (\"NE\", 1, -1, 2.0)\n  ] {\n    var rr := r + dq;\n    var cc := c + dp;\n    if 0 <= rr < h.Height && 0 <= cc < h.Width {\n      if h[rr, cc] < e {\n        all_neighbors_lower := false;\n        break;\n      }\n    }\n  }\n\n  if all_neighbors_lower {\n    flow := \"NoFlow\";\n  } else {\n    flow := D8At(h, r, c);\n  }\n}\n\nlemma D8PitNoFlow(h: array2<int>, r: int, c: int)\n  requires h != null\n  requires 0 <= r < h.Height\n  requires 0 <= c < h.Width\n  requires forall name, dp, dq, dist2 :: (name, dp, dq, dist2) in [\n    (\"E\", 1, 0, 1.0),\n    (\"SE\", 1, 1, 2.0),\n    (\"S\", 0, 1, 1.0),\n    (\"SW\", -1, 1, 2.0),\n    (\"W\", -1, 0, 1.0),\n    (\"NW\", -1, -1, 2.0),\n    (\"N\", 0, -1, 1.0),\n    (\"NE\", 1, -1, 2.0)\n  ] && 0 <= r + dq < h.Height && 0 <= c + dp < h.Width ==> h[r + dq, c + dp] >= h[r, c]\n  ensures PitFlow(h, r, c) == \"NoFlow\"\n{\n  var e := h[r, c];\n  var all_neighbors_lower := true;\n\n  for name, dp, dq, dist2 in [\n    (\"E\", 1, 0, 1.0),\n    (\"SE\", 1, 1, 2.0),\n    (\"S\", 0, 1, 1.0),\n    (\"SW\", -1, 1, 2.0),\n    (\"W\", -1, 0, 1.0),\n    (\"NW\", -1, -1, 2.0),\n    (\"N\", 0, -1, 1.0),\n    (\"NE\", 1, -1, 2.0)\n  ] {\n    var rr := r + dq;\n    var cc := c + dp;\n    if 0 <= rr < h.Height && 0 <= cc < h.Width {\n      assert h[rr, cc] >= e;  // By the precondition\n      all_neighbors_lower := false;\n    }\n  }\n\n  assert all_neighbors_lower;  // All neighbors are not strictly lower\n  assert PitFlow(h, r, c) == \"NoFlow\";  // By the definition of PitFlow\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

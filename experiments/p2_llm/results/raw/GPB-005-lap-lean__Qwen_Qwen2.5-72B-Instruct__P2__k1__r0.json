@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 507,
+    "total_tokens": 775,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 12
+  },
+  "api_id": "01a08b77a2c4563691f57c45a01a509b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.matrix.notation\nimport analysis.calculus.fderiv\nimport analysis.special_functions.pow\nimport data.real.basic\n\nvariables {α : Type*} [decidable_eq α] [fintype α] [linear_ordered_field α]\n\ndef discrete_laplacian (M : matrix (fin 3) (fin 3) α) (i j : fin 3) : α :=\n  M i j - (M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1)) / 4\n\ndef is_discrete_local_maximum (M : matrix (fin 3) (fin 3) α) (i j : fin 3) : Prop :=\n  M i j ≥ M (i - 1) j ∧\n  M i j ≥ M (i + 1) j ∧\n  M i j ≥ M i (j - 1) ∧\n  M i j ≥ M i (j + 1)\n\ntheorem discrete_laplacian_le_zero_of_local_maximum (M : matrix (fin 3) (fin 3) α) (i j : fin 3) (h : is_discrete_local_maximum M i j) :\n  discrete_laplacian M i j ≤ 0 :=\nbegin\n  have h1 : M i j - (M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1)) / 4 ≤ 0,\n  { rw le_zero_iff_nonpos,\n    apply sub_nonpos,\n    apply le_div_of_le_mul,\n    { exact h.1 },\n    { exact h.2 },\n    { exact h.3 },\n    { exact h.4 },\n    { exact (mul_one (4 : α)).symm },\n  exact h1,\nend\n```\n\nThis Lean code defines the discrete Laplacian and the condition for a discrete local maximum in a 3x3 matrix. The theorem `discrete_laplacian_le_zero_of_local_maximum` states that if the center cell of a 3x3 window is a discrete local maximum, then the discrete Laplacian at the center is less than or equal to zero. The proof uses the properties of the local maximum to show that the discrete Laplacian is non-positive.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

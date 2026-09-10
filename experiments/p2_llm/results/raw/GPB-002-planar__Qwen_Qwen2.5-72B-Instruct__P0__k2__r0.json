@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1613,
+    "completion_tokens": 1182,
+    "total_tokens": 2795,
+    "prompt_tokens_details": {
+      "cached_tokens": 1600
+    },
+    "prompt_cache_hit_tokens": 1600,
+    "prompt_cache_miss_tokens": 13
+  },
+  "api_id": "01a08b67854261b0057d138eb2ba3dac",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornSlopeConsistencyOnPlane(A: real, B: real, C: real, w: real) returns (DzDx: real, DzDy: real)\n  requires w > 0\n  ensures DzDx == A\n  ensures DzDy == B\n{\n  // Define the planar surface function\n  function z(x: real, y: real): real {\n    A * x + B * y + C\n  }\n\n  // Define the Horn finite-difference estimates\n  function HornDzDx(x: real, y: real, w: real): real {\n    (z(x + w, y) - z(x - w, y)) / (2 * w)\n  }\n\n  function HornDzDy(x: real, y: real, w: real): real {\n    (z(x, y + w) - z(x, y - w)) / (2 * w)\n  }\n\n  // Choose a point (x0, y0) on the grid\n  var x0: real := 0.0;\n  var y0: real := 0.0;\n\n  // Compute the Horn finite-difference estimates at (x0, y0)\n  DzDx := HornDzDx(x0, y0, w);\n  DzDy := HornDzDy(x0, y0, w);\n\n  // Prove that the Horn estimates recover A and B exactly\n  assert DzDx == A;\n  assert DzDy == B;\n}\n\n// Proof of the Horn finite-difference estimates recovering A and B exactly\nlemma HornSlopeConsistencyProof(A: real, B: real, C: real, w: real)\n  requires w > 0\n{\n  // Define the planar surface function\n  function z(x: real, y: real): real {\n    A * x + B * y + C\n  }\n\n  // Define the Horn finite-difference estimates\n  function HornDzDx(x: real, y: real, w: real): real {\n    (z(x + w, y) - z(x - w, y)) / (2 * w)\n  }\n\n  function HornDzDy(x: real, y: real, w: real): real {\n    (z(x, y + w) - z(x, y - w)) / (2 * w)\n  }\n\n  // Choose a point (x0, y0) on the grid\n  var x0: real := 0.0;\n  var y0: real := 0.0;\n\n  // Compute the Horn finite-difference estimates at (x0, y0)\n  var DzDx: real := HornDzDx(x0, y0, w);\n  var DzDy: real := HornDzDy(x0, y0, w);\n\n  // Prove that the Horn estimates recover A and B exactly\n  assert DzDx == A;\n  assert DzDy == B;\n\n  // Proof for DzDx\n  assert HornDzDx(x0, y0, w) == (z(x0 + w, y0) - z(x0 - w, y0)) / (2 * w);\n  assert (z(x0 + w, y0) - z(x0 - w, y0)) / (2 * w) == (A * (x0 + w) + B * y0 + C - (A * (x0 - w) + B * y0 + C)) / (2 * w);\n  assert (A * (x0 + w) + B * y0 + C - (A * (x0 - w) + B * y0 + C)) / (2 * w) == (A * x0 + A * w + B * y0 + C - A * x0 + A * w - B * y0 - C) / (2 * w);\n  assert (A * x0 + A * w + B * y0 + C - A * x0 + A * w - B * y0 - C) / (2 * w) == (2 * A * w) / (2 * w);\n  assert (2 * A * w) / (2 * w) == A;\n\n  // Proof for DzDy\n  assert HornDzDy(x0, y0, w) == (z(x0, y0 + w) - z(x0, y0 - w)) / (2 * w);\n  assert (z(x0, y0 + w) - z(x0, y0 - w)) / (2 * w) == (A * x0 + B * (y0 + w) + C - (A * x0 + B * (y0 - w) + C)) / (2 * w);\n  assert (A * x0 + B * (y0 + w) + C - A * x0 - B * (y0 - w) - C) / (2 * w) == (B * y0 + B * w + C - B * y0 + B * w - C) / (2 * w);\n  assert (B * y0 + B * w + C - B * y0 + B * w - C) / (2 * w) == (2 * B * w) / (2 * w);\n  assert (2 * B * w) / (2 * w) == B;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

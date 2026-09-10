@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3058,
+    "completion_tokens": 1680,
+    "total_tokens": 4738,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 2994
+  },
+  "api_id": "01a08bef65b3b19d520dfb8f42686c30",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : Watershed under D8 flow\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. Dafny 的 `real` 除法要求 `requires w > 0.0`;Lean 的 `ℝ` 除法是全函数\n       (`x / 0 = 0`,由 `inv_zero` 定义)。所以这里的定理把 `w ≠ 0` 写成\n       **假设**而不是前置条件,算子在 w = 0 上仍有定义(只是无意义)。\n       这是两个系统在\"部分函数\"处理上的根本差别,也是双形式化的价值之一:\n       逼我们把\"算子何时有意义\"这件事说清楚,而不是藏在前置条件里。\n\n    2. 证明风格:Dafny 靠 SMT(nlinarith/Z3)自动搜;Lean 靠显式战术\n       (`ring_nf` / `field_simp` / `nlinarith`)。同一条性质在两边自动化的\n       程度差异,本身就是 GeoProofBench 想测量的东西。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Array\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Watershed\n\n-- ==========================================================================\n-- D8 流向定义\n-- ==========================================================================\n\n/-- D8 流向定义,返回下一个流向的坐标。 -/\ndef d8At (h : Array (Array ℝ)) (r c : Nat) : Option (Nat × Nat) := do\n  let (dp, dq) := DIRS.find? (λ (dname, dp, dq, dist2) => dname == d8AtName h r c) |>.get!\n  let nr := r + dq\n  let nc := c + dp\n  if 0 ≤ nr ∧ nr < h.size.1 ∧ 0 ≤ nc ∧ nc < h.size.2 then\n    return (nr, nc)\n  else\n    return none\n\n/-- D8 流向名称定义,返回流向的名称。 -/\ndef d8AtName (h : Array (Array ℝ)) (r c : Nat) : String := \n  let neighbors := [(r-1, c-1), (r-1, c), (r-1, c+1), (r, c+1), (r+1, c+1), (r+1, c), (r+1, c-1), (r, c-1)]\n  let slopes := neighbors.map (λ (nr, nc) => if 0 ≤ nr ∧ nr < h.size.1 ∧ 0 ≤ nc ∧ nc < h.size.2 then h[nr][nc] - h[r][c] else 0)\n  let minSlope := slopes.min\n  let minIndex := slopes.indexOf minSlope\n  DIRS[minIndex].1\n\n-- ==========================================================================\n-- 严格下降后继\n-- ==========================================================================\n\n/-- 严格下降后继定义,返回下一个严格下降的坐标。 -/\ndef strictDescentSucc (h : Array (Array ℝ)) (r c : Nat) : Option (Nat × Nat) := do\n  let (nr, nc) := d8At h r c |>.get!\n  if h[nr][nc] < h[r][c] then\n    return (nr, nc)\n  else\n    return none\n\n-- ==========================================================================\n-- 终止于固定点\n-- ==========================================================================\n\n/-- 每个轨道最终终止于一个固定点。 -/\ntheorem orbitTerminatesAtFixedPoint (h : Array (Array ℝ)) (r c : Nat) (max_steps : Nat) :\n  ∃ (fixedPoint : Nat × Nat), (∀ (n : Nat), n < max_steps → (strictDescentSucc h r c).recOn (λ (nr, nc) => strictDescentSucc h nr nc) (λ _ => (r, c)) n = fixedPoint := by\n  -- 使用归纳法证明\n  induction max_steps with max_steps ih\n  -- 基础情况: max_steps = 0\n  case zero => \n    use (r, c)\n    intro n h\n    rw [ih]\n    simp\n  -- 归纳步骤: max_steps > 0\n  case succ =>\n    have h_next := strictDescentSucc h r c\n    cases h_next with\n    -- 如果没有严格下降的后继,则 (r, c) 本身是固定点\n    case none =>\n      use (r, c)\n      intro n h\n      simp\n    -- 如果有严格下降的后继,则递归调用归纳假设\n    case some (nr, nc) =>\n      have ih' := ih (nr, nc)\n      use (nr, nc)\n      intro n h\n      rw [ih']\n      simp\n\n-- ==========================================================================\n-- 人工构造的平坦 4-环\n-- ==========================================================================\n\n/-- 人工构造的平坦 4-环,轨道不会终止。 -/\ndef flat4Ring (h : Array (Array ℝ)) (r c : Nat) (max_steps : Nat) : Option (Nat × Nat) := do\n  let path := [(r, c)]\n  for _ in [0:max_steps] do\n    let (nr, nc) := RING_SUCC[(r, c)] |>.get!\n    if (nr, nc) = (r, c) then\n      return (nr, nc)\n    else\n      path := path.push (nr, nc)\n      if path.size ≠ path.toSet.size then\n        return (nr, nc)\n  return none\n\n/-- 人工构造的平坦 4-环,轨道不会终止。 -/\ntheorem flat4RingDoesNotTerminate (h : Array (Array ℝ)) (r c : Nat) (max_steps : Nat) :\n  ¬ (∃ (fixedPoint : Nat × Nat), (∀ (n : Nat), n < max_steps → (flat4Ring h r c).recOn (λ (nr, nc) => flat4Ring h nr nc) (λ _ => (r, c)) n = fixedPoint) := by\n  -- 构造一个反例\n  let h := Array.ofFn (λ _ => Array.ofFn (λ _ => 0))\n  let r := 0\n  let c := 0\n  let max_steps := 4\n  have h_path := flat4Ring h r c max_steps\n  cases h_path with\n  case none =>\n    -- 如果路径为空,则不存在固定点\n    intro h_fixed\n    cases h_fixed with\n    case exists (fixedPoint, h_fixedPoint) =>\n      have h_path_fixed := h_fixedPoint 0\n      contradiction\n  case some (nr, nc) =>\n    -- 如果路径不为空,则检查路径是否包含重复点\n    have h_path := flat4Ring h r c max_steps\n    cases h with\n    case some (path, h_path) =>\n      have h_path_size := path.size\n      have h_path_set_size := path.toSet.size\n      have h_path_size_ne_set_size : h_path_size ≠ h_path_set_size := by\n        simp\n        norm_num\n      contradiction\n\nend -- noncomputable section\n\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

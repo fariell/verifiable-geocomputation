@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 660,
+    "total_tokens": 918,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 258
+  },
+  "api_id": "01a08bf846e84695131a71d787927051",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.finset\nimport tactic\n\nvariables {α : Type*} [fintype α] [decidable_eq α]\n\n-- Define a strict descent successor function\ndef strict_descent_successor (s : α → α) (lt : α → α → Prop) [is_strict_order α lt] : Prop :=\n  ∀ x, lt x (s x)\n\n-- Define a fixed point\ndef is_fixed_point (s : α → α) (x : α) : Prop := s x = x\n\n-- Define the orbit of a point under a function\ndef orbit (s : α → α) (x : α) : set α := {y | ∃ n : ℕ, s^[n] x = y}\n\n-- Define the termination of an orbit at a fixed point\ndef terminates_at_fixed_point (s : α → α) (x : α) : Prop :=\n  ∃ y ∈ orbit s x, is_fixed_point s y\n\n-- The main theorem: Under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem strict_descent_terminates (s : α → α) (lt : α → α → Prop) [is_strict_order α lt] (h : strict_descent_successor s lt) (x : α) :\n  terminates_at_fixed_point s x :=\nbegin\n  -- Use the well-foundedness of the strict order to find a minimal element in the orbit\n  let orbit_set := orbit s x,\n  have h_finite : orbit_set.finite := finset.finite_to_set (finset.image (λ n, s^[n] x) finset.univ),\n  have h_well_founded : well_founded lt := is_strict_order.well_founded lt,\n  let min_element := @well_founded.min α lt h_well_founded (λ y, y ∈ orbit_set) (h_finite.to_finset),\n  have h_min : min_element ∈ orbit_set := well_founded.min_mem _ _ _,\n  have h_min_prop : ∀ y ∈ orbit_set, lt y min_element → false := well_founded.min_unique _ _ _,\n\n  -- Show that the minimal element is a fixed point\n  cases h_min with n h_n,\n  rw is_fixed_point at h_min_prop,\n  have h_s_n : s^[n] x = min_element := h_n,\n  have h_s_n1 : s^[n+1] x = s (s^[n] x) := rfl,\n  rw h_s_n at h_s_n1,\n  have h_not_lt : lt min_element (s min_element) → false := h_min_prop (s^[n+1] x) (by rw h_s_n1; exact h (s^[n] x)),\n  exact h_not_lt (h min_element),\nend\n```\n\nThis Lean code formalizes the theorem that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point. The proof uses the well-foundedness of the strict order to find a minimal element in the orbit and shows that this minimal element must be a fixed point.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

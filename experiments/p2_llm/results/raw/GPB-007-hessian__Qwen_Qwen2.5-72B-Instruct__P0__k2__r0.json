@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1703,
+    "completion_tokens": 2219,
+    "total_tokens": 3922,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 7
+  },
+  "api_id": "01a08b7c819806586aa6cb9f807cce4e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Main() {\n  var A: real := 1.0;\n  var B: real := 1.0;\n  var C: real := 1.0;\n  var D: real := 1.0;\n  var E: real := 1.0;\n  var F: real := 1.0;\n  var w: real := 1.0;\n  var x: real := 0.0;\n  var y: real := 0.0;\n\n  var hxx, hyy, hxy := ZT_Hessian(A, B, C, D, E, F, w, x, y);\n  assert hxx == 2 * A;\n  assert hyy == 2 * B;\n  assert hxy == C;\n}\n\nmethod ZT_Hessian(A: real, B: real, C: real, D: real, E: real, F: real, w: real, x: real, y: real) returns (hxx: real, hyy: real, hxy: real)\n  requires w > 0\n  ensures hxx == 2 * A\n  ensures hyy == 2 * B\n  ensures hxy == C\n{\n  var h: array2<real> := new array2<real>(3, 3);\n  for i: int | 0 <= i < 3\n    for j: int | 0 <= j < 3\n      h[i, j] := A * (x + i * w) * (x + i * w) + B * (y + j * w) * (y + j * w) + C * (x + i * w) * (y + j * w) + D * (x + i * w) + E * (y + j * w) + F;\n\n  var hp: array2<real> := new array2<real>(5, 5);\n  for i: int | 0 <= i < 5\n    for j: int | 0 <= j < 5\n      hp[i, j] := h[i - 1, j - 1];\n\n  var a: real := hp[1, 1];\n  var b: real := hp[1, 2];\n  var c: real := hp[1, 3];\n  var d: real := hp[2, 1];\n  var e: real := hp[2, 2];\n  var f: real := hp[2, 3];\n  var g: real := hp[3, 1];\n  var hh: real := hp[3, 2];\n  var i: real := hp[3, 3];\n\n  hxx := (d - 2.0 * e + f) / (w * w);\n  hyy := (b - 2.0 * e + hh) / (w * w);\n  hxy := (a - c - g + i) / (4.0 * w * w);\n}\n\nlemma QuadraticSurfaceHessian(A: real, B: real, C: real, D: real, E: real, F: real, w: real, x: real, y: real)\n  requires w > 0\n  ensures ZT_Hessian(A, B, C, D, E, F, w, x, y) == (2 * A, 2 * B, C)\n{\n  var h: array2<real> := new array2<real>(3, 3);\n  for i: int | 0 <= i < 3\n    for j: int | 0 <= j < 3\n      h[i, j] := A * (x + i * w) * (x + i * w) + B * (y + j * w) * (y + j * w) + C * (x + i * w) * (y + j * w) + D * (x + i * w) + E * (y + j * w) + F;\n\n  var hp: array2<real> := new array2<real>(5, 5);\n  for i: int | 0 <= i < 5\n    for j: int | 0 <= j < 5\n      hp[i, j] := h[i - 1, j - 1];\n\n  var a: real := hp[1, 1];\n  var b: real := hp[1, 2];\n  var c: real := hp[1, 3];\n  var d: real := hp[2, 1];\n  var e: real := hp[2, 2];\n  var f: real := hp[2, 3];\n  var g: real := hp[3, 1];\n  var hh: real := hp[3, 2];\n  var i: real := hp[3, 3];\n\n  var hxx: real := (d - 2.0 * e + f) / (w * w);\n  var hyy: real := (b - 2.0 * e + hh) / (w * w);\n  var hxy: real := (a - c - g + i) / (4.0 * w * w);\n\n  // Prove hxx == 2 * A\n  assert d == A * (x + 1 * w) * (x + 1 * w) + B * (y + 1 * w) * (y + 1 * w) + C * (x + 1 * w) * (y + 1 * w) + D * (x + 1 * w) + E * (y + 1 * w) + F;\n  assert e == A * (x + 1 * w) * (x + 1 * w) + B * (y + 1 * w) * (y + 1 * w) + C * (x + 1 * w) * (y + 1 * w) + D * (x + 1 * w) + E * (y + 1 * w) + F;\n  assert f == A * (x + 1 * w) * (x + 1 * w) + B * (y + 2 * w) * (y + 2 * w) + C * (x + 1 * w) * (y + 2 * w) + D * (x + 1 * w) + E * (y + 2 * w) + F;\n  assert d - 2.0 * e + f == A * (2 * w * w) + B * (0) + C * (0) + D * (0) + E * (0) + F * (0);\n  assert hxx == 2 * A;\n\n  // Prove hyy == 2 * B\n  assert b == A * (x + 1 * w) * (x + 1 * w) + B * (y + 1 * w) * (y + 1 * w) + C * (x + 1 * w) * (y + 1 * w) + D * (x + 1 * w) + E * (y + 1 * w) + F;\n  assert e == A * (x + 1 * w) * (x + 1 * w) + B * (y + 1 * w) * (y + 1 * w) + C * (x + 1 * w) * (y + 1 * w) + D * (x + 1 * w) + E * (y + 1 * w) + F;\n  assert hh == A * (x + 1 * w) * (x + 1 * w) + B * (y + 2 * w) * (y + 2 * w) + C * (x + 1 * w) * (y + 2 * w) + D * (x + 1 * w) + E * (y + 2 * w) + F;\n  assert b - 2.0 * e + hh == A * (0) + B * (2 * w * w) + C * (0) + D * (0) + E * (0) + F * (0);\n  assert hyy == 2 * B;\n\n  // Prove hxy == C\n  assert a == A * (x + 0 * w) * (x + 0 * w) + B * (y + 1 * w) * (y + 1 * w) + C * (x + 0 * w) * (y + 1 * w) + D * (x + 0 * w) + E * (y + 1 * w) + F;\n  assert c == A * (x + 2 * w) * (x + 2 * w) + B * (y + 1 * w) * (y + 1 * w) + C * (x + 2 * w) * (y + 1 * w) + D * (x + 2 * w) + E * (y + 1 * w) + F;\n  assert g == A * (x + 1 * w) * (x + 1 * w) + B * (y + 0 * w) * (y + 0 * w) + C * (x + 1 * w) * (y + 0 * w) + D * (x + 1 * w) + E * (y + 0 * w) + F;\n  assert i == A * (x + 2 * w) * (x + 2 * w) + B * (y + 2 * w) * (y + 2 * w) + C * (x + 2 * w) * (y + 2 * w) + D * (x + 2 * w) + E * (y + 2 * w) + F;\n  assert a - c - g + i == A * (0) + B * (0) + C * (4 * w * w) + D * (0) + E * (0) + F * (0);\n  assert hxy == C;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

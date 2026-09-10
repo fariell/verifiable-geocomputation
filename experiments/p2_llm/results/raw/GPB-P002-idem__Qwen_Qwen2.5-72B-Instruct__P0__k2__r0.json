@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1650,
+    "completion_tokens": 783,
+    "total_tokens": 2433,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "prompt_cache_hit_tokens": 96,
+    "prompt_cache_miss_tokens": 1554
+  },
+  "api_id": "01a08bc0a2df6019d9648f74f7ae7b84",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method fill_1d(a: array<int>) returns (out: array<int>)\n  requires a != null;\n  ensures out.Length == a.Length;\n  ensures forall i :: 0 <= i < out.Length ==> out[i] == max(a[0..i]);\n{\n  out := a.Clone();\n  for i := 1 to out.Length - 1\n    invariant forall j :: 0 <= j < i ==> out[j] == max(a[0..j]);\n  {\n    out[i] := max(out[i], out[i - 1]);\n  }\n}\n\nmethod max(x: int, y: int) returns (z: int)\n  ensures z == if x > y then x else y;\n{\n  if x > y then return x else return y;\n}\n\nmethod pit_fill_idempotent(a: array<int>) returns (result: bool)\n  requires a != null;\n  ensures result == (fill_1d(fill_1d(a)) == fill_1d(a));\n{\n  var b := fill_1d(a);\n  var c := fill_1d(b);\n  result := b == c;\n}\n\nmethod raise_fixed_point(a: array<int>) returns (result: bool)\n  requires a != null;\n  ensures result == (forall i :: 0 <= i < a.Length ==> a[i] >= a[i - 1] ==> fill_1d(a)[i] == a[i]);\n{\n  result := true;\n  for i := 1 to a.Length - 1\n    invariant forall j :: 0 <= j < i ==> a[j] >= a[j - 1] ==> fill_1d(a)[j] == a[j];\n  {\n    if a[i] >= a[i - 1] && fill_1d(a)[i] != a[i] {\n      result := false;\n      break;\n    }\n  }\n}\n\nmethod main()\n{\n  var a := new int[3];\n  a[0] := 3;\n  a[1] := 1;\n  a[2] := 4;\n\n  var b := new int[4];\n  b[0] := 0;\n  b[1] := 1;\n  b[2] := 2;\n  b[3] := 3;\n\n  var c := new int[3];\n  c[0] := 3;\n  c[1] := 1;\n  c[2] := 0;\n\n  var d := new int[4];\n  d[0] := 5;\n  d[1] := 5;\n  d[2] := 5;\n  d[3] := 5;\n\n  var cases := [a, b, c, d];\n  var expected := [new int[3]{3, 3, 4}, new int[4]{0, 1, 2, 3}, new int[3]{3, 3, 3}, new int[4]{5, 5, 5, 5}];\n\n  for i := 0 to cases.Length - 1\n  {\n    var a := cases[i];\n    var e := expected[i];\n    var f := fill_1d(a);\n    assert f == e; // This should be checked by the user or another method to ensure correctness\n    var g := fill_1d(f);\n    assert g == f; // This should be checked by the user or another method to ensure correctness\n  }\n\n  var idempotent := pit_fill_idempotent(a);\n  var fixed_point := raise_fixed_point(a);\n\n  print \"Idempotent: \", idempotent, \"\\n\";\n  print \"Fixed Point: \", fixed_point, \"\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

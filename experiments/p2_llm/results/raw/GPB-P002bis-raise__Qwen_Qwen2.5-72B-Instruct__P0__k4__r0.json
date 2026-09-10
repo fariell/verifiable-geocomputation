@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1573,
+    "completion_tokens": 1258,
+    "total_tokens": 2831,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 5
+  },
+  "api_id": "01a08bdb0a4f52a2a7d987b3e4c0bd78",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "predicate Is4Neighbor((r1: int, c1: int), (r2: int, c2: int), rows: int, cols: int)\n  requires 0 <= r1 < rows\n  requires 0 <= c1 < cols\n  requires 0 <= r2 < rows\n  requires 0 <= c2 < cols\n{\n  (r1 == r2 && (c1 == c2 - 1 || c1 == c2 + 1)) || (c1 == c2 && (r1 == r2 - 1 || r1 == r2 + 1))\n}\n\nmethod RaiseNbr(h: array2<float>, fill: array2<float>, r: int, c: int)\n  requires h != null\n  requires fill != null\n  requires h.Rows == fill.Rows\n  requires h.Cols == fill.Cols\n  requires 0 <= r < h.Rows\n  requires 0 <= c < h.Cols\n  modifies fill\n{\n  var originalElevation := h[r, c];\n  var processedElevation := fill[r, c];\n  fill[r, c] := max(originalElevation, processedElevation);\n}\n\nlemma RaiseNbrPreservesElevation(h: array2<float>, fill: array2<float>, r: int, c: int)\n  requires h != null\n  requires fill != null\n  requires h.Rows == fill.Rows\n  requires h.Cols == fill.Cols\n  requires 0 <= r < h.Rows\n  requires 0 <= c < h.Cols\n  ensures forall r2, c2 :: 0 <= r2 < h.Rows && 0 <= c2 < h.Cols ==> fill[r2, c2] >= h[r2, c2]\n{\n  var originalElevation := h[r, c];\n  var processedElevation := fill[r, c];\n  var newElevation := max(originalElevation, processedElevation);\n\n  assert newElevation >= originalElevation;\n  assert newElevation >= processedElevation;\n\n  // Prove that the elevation of the neighbor is lifted at least to max(original neighbor, processed cell fill)\n  assert forall r2, c2 :: 0 <= r2 < h.Rows && 0 <= c2 < h.Cols && Is4Neighbor((r2, c2), (r, c), h.Rows, h.Cols) ==> fill[r2, c2] >= max(h[r2, c2], fill[r, c]);\n\n  // Prove that raising a 4-neighbor never decreases any cell elevation\n  assert forall r2, c2 :: 0 <= r2 < h.Rows && 0 <= c2 < h.Cols ==> fill[r2, c2] >= h[r2, c2];\n}\n\nmethod PitFill2D(h: array2<float>) returns (fill: array2<float>)\n  requires h != null\n  ensures fill != null\n  ensures fill.Rows == h.Rows\n  ensures fill.Cols == h.Cols\n  ensures forall r, c :: 0 <= r < h.Rows && 0 <= c < h.Cols ==> fill[r, c] >= h[r, c]\n{\n  var rows := h.Rows;\n  var cols := h.Cols;\n  fill := new float[rows, cols];\n\n  // Initialize fill with infinity\n  for r := 0 to rows - 1 do\n    for c := 0 to cols - 1 do\n      fill[r, c] := infinity;\n\n  // Seed the boundary cells\n  for r := 0 to rows - 1 do\n  {\n    RaiseNbr(h, fill, r, 0);\n    RaiseNbr(h, fill, r, cols - 1);\n  }\n\n  for c := 0 to cols - 1 do\n  {\n    RaiseNbr(h, fill, 0, c);\n    RaiseNbr(h, fill, rows - 1, c);\n  }\n\n  // Process the interior cells\n  var heap: seq<(float, int, int)> := [];\n  for r := 0 to rows - 1 do\n  {\n    for c := 0 to cols - 1 do\n    {\n      if fill[r, c] < infinity\n      {\n        heap := heap + [(fill[r, c], r, c)];\n      }\n    }\n  }\n\n  while |heap| > 0\n  {\n    var (elevation, r, c) := heap[0];\n    heap := heap[1..];\n\n    for (dr, dc) in [(-1, 0), (1, 0), (0, -1), (0, 1)]\n    {\n      var r2 := r + dr;\n      var c2 := c + dc;\n\n      if 0 <= r2 < rows && 0 <= c2 < cols && fill[r2, c2] == infinity\n      {\n        RaiseNbr(h, fill, r2, c2);\n        heap := heap + [(fill[r2, c2], r2, c2)];\n      }\n    }\n  }\n\n  // Ensure the property holds for all cells\n  assert forall r, c :: 0 <= r < h.Rows && 0 <= c < h.Cols ==> fill[r, c] >= h[r, c];\n}\n\nlemma PitFill2DPreservesElevation(h: array2<float>, fill: array2<float>)\n  requires h != null\n  requires fill != null\n  requires h.Rows == fill.Rows\n  requires h.Cols == fill.Cols\n  ensures forall r, c :: 0 <= r < h.Rows && 0 <= c < h.Cols ==> fill[r, c] >= h[r, c]\n{\n  // Prove the property for all cells\n  assert forall r, c :: 0 <= r < h.Rows && 0 <= c < h.Cols ==> fill[r, c] >= h[r, c];\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3058,
+    "completion_tokens": 1642,
+    "total_tokens": 4700,
+    "prompt_tokens_details": {
+      "cached_tokens": 3040
+    },
+    "prompt_cache_hit_tokens": 3040,
+    "prompt_cache_miss_tokens": 18
+  },
+  "api_id": "01a08bf34f4ccc852bacfd5a37da55ff",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : Watershed under D8 flow\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明在严格下降的 D8 流向规则下,每个轨道最终都会终止于一个不动点。\n  证明使用自然数度量的良基性/递减风格论证。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Watershed\n\n-- ==========================================================================\n-- D8 流向规则定义\n-- ==========================================================================\n\n/-- D8 流向规则的方向数组 -/\ndef DIRS : Array (String × Int × Int × Nat) := #[\n  (\"N\", 0, -1, 1),\n  (\"NE\", 1, -1, 2),\n  (\"E\", 1, 0, 1),\n  (\"SE\", 1, 1, 2),\n  (\"S\", 0, 1, 1),\n  (\"SW\", -1, 1, 2),\n  (\"W\", -1, 0, 1),\n  (\"NW\", -1, -1, 2)\n]\n\n/-- 获取 (r, c) 位置的 D8 流向方向 -/\ndef d8_at (h : Array (Array Nat)) (r c : Nat) : Option (String × Int × Int) := do\n  let mut min_val := h[r][c]\n  let mut min_dir := \"NoFlow\"\n  for (dir, dp, dq, _) in DIRS do\n    let nr := r + dq\n    let nc := c + dp\n    if 0 ≤ nr ∧ nr < h.size ∧ 0 ≤ nc ∧ nc < h[r].size then\n      if h[nr][nc] < min_val then\n        min_val := h[nr][nc]\n        min_dir := dir\n  if min_dir ≠ \"NoFlow\" then\n    return (min_dir, dp, dq)\n  else\n    return none\n\n/-- 获取 D8 流向方向的 Δp 和 Δq -/\ndef delta (dir : String) : Option (Int × Int) := do\n  for (dname, dp, dq, _) in DIRS do\n    if dname = dir then\n      return (dp, dq)\n  return none\n\n-- ==========================================================================\n-- 轨道终止于不动点的证明\n-- ==========================================================================\n\n/-- 在严格下降的 D8 流向规则下,每个轨道最终都会终止于一个不动点。 -/\ntheorem orbit_terminates_at_fixed_point (h : Array (Array Nat)) (r c : Nat) (max_steps : Nat) :\n  (∀ (nr nc : Nat), 0 ≤ nr ∧ nr < h.size ∧ 0 ≤ nc ∧ nc < h[r].size → h[nr][nc] < h[r][c] →\n    ∃ (dir : String) (dp dq : Int), d8_at h nr nc = some (dir, dp, dq) ∧\n    (r + dq, c + dp) ≠ (nr, nc)) →\n  (∃ (fixed_r fixed_c : Nat), 0 ≤ fixed_r ∧ fixed_r < h.size ∧ 0 ≤ fixed_c ∧ fixed_c < h[r].size ∧\n    (d8_at h fixed_r fixed_c = none ∨ d8_at h fixed_r fixed_c = some (\"NoFlow\", 0, 0))) := by\n  -- 使用自然数度量的良基性/递减风格论证\n  let h_size := h.size\n  let h_row_size := h[0].size\n  let mut current_r := r\n  let mut current_c := c\n  let mut steps := 0\n  let mut visited := #[(r, c)]\n  while steps < max_steps do\n    match d8_at h current_r current_c with\n    | none => return (current_r, current_c, 0 ≤ current_r, current_r < h_size, 0 ≤ current_c, current_c < h_row_size, true)\n    | some (dir, dp, dq) =>\n      let (next_r, next_c) := (current_r + dq, current_c + dp)\n      if 0 ≤ next_r ∧ next_r < h_size ∧ 0 ≤ next_c ∧ next_c < h_row_size then\n        if h[next_r][next_c] < h[current_r][current_c] then\n          if visited.contains (next_r, next_c) then\n            return (current_r, current_c, 0 ≤ current_r, current_r < h_size, 0 ≤ current_c, current_c < h_row_size, false)\n          else\n            visited := visited.push (next_r, next_c)\n            current_r := next_r\n            current_c := next_c\n            steps := steps + 1\n        else\n          return (current_r, current_c, 0 ≤ current_r, current_r < h_size, 0 ≤ current_c, current_c < h_row_size, true)\n      else\n        return (current_r, current_c, 0 ≤ current_r, current_r < h_size, 0 ≤ current_c, current_c < h_row_size, true)\n  return (current_r, current_c, 0 ≤ current_r, current_r < h_size, 0 ≤ current_c, current_c < h_row_size, true)\n\n-- ==========================================================================\n-- 平坦 4-环的反例\n-- ==========================================================================\n\n/-- 构造一个平坦的 4-环,证明轨道不会终止。 -/\ndef flat_4_ring : Array (Array Nat) := #[\n  #[0, 0],\n  #[0, 0]\n]\n\n/-- 平坦 4-环的 D8 流向规则 -/\ndef RING_SUCC : (Int × Int) → (Int × Int) := fun (r, c) => match (r, c) with\n  | (0, 0) => (0, 1)\n  | (0, 1) => (1, 1)\n  | (1, 1) => (1, 0)\n  | (1, 0) => (0, 0)\n  | _ => (0, 0)\n\n/-- 平坦 4-环的轨道不会终止。 -/\ntheorem flat_4_ring_no_fixed_point (max_steps : Nat) :\n  ¬ (∃ (fixed_r fixed_c : Nat), 0 ≤ fixed_r ∧ fixed_r < 2 ∧ 0 ≤ fixed_c ∧ fixed_c < 2 ∧\n    (d8_at flat_4_ring fixed_r fixed_c = none ∨ d8_at flat_4_ring fixed_r fixed_c = some (\"NoFlow\", 0, 0))) := by\n  -- 通过构造反例来证明\n  let start := (0, 0)\n  let mut current := start\n  let mut steps := 0\n  while steps < max_steps do\n    let (next_r, next_c) := RING_SUCC current\n    if (next_r, next_c) = start then\n      return false\n    else\n      current := (next_r, next_c)\n      steps := steps + 1\n  return false\n\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

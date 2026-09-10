@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1564,
+    "completion_tokens": 1666,
+    "total_tokens": 3230,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08beaa9eafd8e6dec8cda873699b4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.nat.basic\nimport data.set.finite\nimport data.array.basic\nimport tactic.well_founded\n\nnamespace VeriGIS\n\n-- Define the type for grid cells\ndef Cell := ℕ × ℕ\n\n-- Define the type for a grid (Digital Elevation Model)\ndef Grid := array (array ℕ)\n\n-- Define the D8 direction set\ndef D8Directions := { \"N\", \"NE\", \"E\", \"SE\", \"S\", \"SW\", \"W\", \"NW\" }\n\n-- Function to get the D8 direction at a cell\ndef d8_at (h : Grid) (r c : ℕ) : option string :=\n  if r = 0 ∨ c = 0 ∨ r = h.size - 1 ∨ c = h[0].size - 1 then\n    none\n  else\n    let current_height := h[r][c] in\n    let directions := [\n      (\"N\",  r - 1, c),\n      (\"NE\", r - 1, c + 1),\n      (\"E\",  r, c + 1),\n      (\"SE\", r + 1, c + 1),\n      (\"S\",  r + 1, c),\n      (\"SW\", r + 1, c - 1),\n      (\"W\",  r, c - 1),\n      (\"NW\", r - 1, c - 1)\n    ] in\n    let min_dir := directions.filter (λ d, d.2 < h.size ∧ d.3 < h[0].size).foldl (λ acc d, if h[d.2][d.3] < current_height ∧ (acc = none ∨ h[d.2][d.3] < h[(acc.get!).2][(acc.get!).3] then some d else acc) none in\n    min_dir.map (λ d, d.1)\n\n-- Function to get the delta for a D8 direction\ndef delta (d : string) : option (ℕ × ℕ) :=\n  match d with\n  | \"N\"  => some (0, -1)\n  | \"NE\" => some (1, -1)\n  | \"E\"  => some (1, 0)\n  | \"SE\" => some (1, 1)\n  | \"S\"  => some (0, 1)\n  | \"SW\" => some (-1, 1)\n  | \"W\"  => some (-1, 0)\n  | \"NW\" => some (-1, -1)\n  | _    => none\n  end\n\n-- Function to follow the D8 path from a cell\ndef follow_d8 (h : Grid) (r c : ℕ) (max_steps : ℕ) : option (bool × Cell × list Cell) :=\n  let rec follow (r c : ℕ) (path : list Cell) (steps : ℕ) : option (bool × Cell × list Cell) :=\n    if steps = 0 then\n      none\n    else\n      match d8_at h r c with\n      | none => some (true, (r, c), path)\n      | some d =>\n        match delta d with\n        | none => none\n        | some (dp, dq) =>\n          let nr := r + dq, nc := c + dp in\n          if nr < 0 ∨ nc < 0 ∨ nr ≥ h.size ∨ nc ≥ h[0].size then\n            some (true, (r, c), path)\n          else\n            let new_path := (r, c) :: path in\n            if new_path.length ≠ new_path.to_finset.card then\n              some (false, (nr, nc), new_path)\n            else\n              follow nr nc new_path (steps - 1)\n        end\n      end\n  in\n  follow r c [(r, c)] max_steps\n\n-- Define a strict descent successor relation\ndef strict_descent_successor (h : Grid) (r c : ℕ) (nr nc : ℕ) : Prop :=\n  h[nr][nc] < h[r][c] ∧ (d8_at h r c = some (D8Directions.find (λ d, delta d = some (nr - r, nc - c))))\n\n-- Define a fixed point\ndef is_fixed_point (h : Grid) (r c : ℕ) : Prop :=\n  d8_at h r c = none\n\n-- Define the orbit of a cell\ndef orbit (h : Grid) (r c : ℕ) : set Cell :=\n  { (nr, nc) | strict_descent_successor h r c nr nc }\n\n-- Define the property that every orbit terminates at a fixed point\ntheorem every_orbit_terminates_at_fixed_point (h : Grid) (r c : ℕ) (h_finite : finite (orbit h r c)) :\n  ∃ (nr nc : ℕ), is_fixed_point h nr nc ∧ (r, c) ∈ orbit h nr nc :=\nbegin\n  -- Define a measure function for the height of the cell\n  let measure : Cell → ℕ := λ (r, c), h[r][c],\n\n  -- Prove that the measure function is well-founded\n  have measure_wf : well_founded measure,\n  { apply nat.lt_wf },\n\n  -- Prove that the strict descent successor relation is well-founded\n  have strict_descent_wf : well_founded (λ (r c : ℕ) (nr nc : ℕ), strict_descent_successor h r c nr nc),\n  { apply well_founded Relation.well_founded_of_has_decreasing,\n    intros r c,\n    use measure,\n    intros nr nc,\n    split,\n    { exact strict_descent_successor.1 },\n    { exact measure_wf } },\n\n  -- Use the well-founded induction principle to prove the theorem\n  apply well_founded.induction strict_descent_wf (r, c),\n  intros r c ih,\n  cases d8_at h r c with d,\n  { -- If there is no successor, then (r, c) is a fixed point\n    use r, use c,\n    split,\n    { exact is_fixed_point.1 },\n    { exact set.mem_of_eq (r, c) (r, c) (eq.refl (r, c)) } },\n  { -- If there is a successor, then follow the path\n    cases delta d with dp dq,\n    { -- If the delta is not defined, then (r, c) is a fixed point\n      use r, use c,\n      split,\n      { exact is_fixed_point.1 },\n      { exact set.mem_of_eq (r, c) (r, c) (eq.refl (r, c)) } },\n    { -- If the delta is defined, then follow the path\n      let nr := r + dq, nc := c + dp,\n      have h_orbit : (nr, nc) ∈ orbit h r c,\n      { exact set.mem_of_eq (nr, nc) (nr, nc) (eq.refl (nr, nc)) },\n      have h_finite_orbit : finite (orbit h nr nc),\n      { exact h_finite.subset (set.singleton_subset_iff.1 h_orbit) },\n      have ih' : ∃ (nrr nrc : ℕ), is_fixed_point h nrr nrc ∧ (nr, nc) ∈ orbit h nrr nrc,\n      { exact ih nr nc h_finite_orbit },\n      cases ih' with nrr nrc,\n      use nrr, use nrc,\n      split,\n      { exact is_fixed_point.1 },\n      { exact set.mem_of_mem_of_subset h_orbit (set.singleton_subset_iff.1 (set.mem_of_eq (nr, nc) (nr, nc) (eq.refl (nr, nc)))) } }\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

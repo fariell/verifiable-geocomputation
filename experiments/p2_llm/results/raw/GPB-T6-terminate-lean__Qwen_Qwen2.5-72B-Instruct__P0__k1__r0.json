@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1564,
+    "completion_tokens": 1856,
+    "total_tokens": 3420,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1500
+  },
+  "api_id": "01a08be65179786d705f9cc0e1a0ecb8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.finset\nimport data.array.basic\nimport tactic.well_founded\n\nnamespace VeriGIS\n\n-- Define the type for a grid cell\ndef Cell := ℕ × ℕ\n\n-- Define the type for a grid\ndef Grid := array (array ℕ)\n\n-- Define the D8 direction set\ndef D8Directions := { \"N\", \"NE\", \"E\", \"SE\", \"S\", \"SW\", \"W\", \"NW\" }\n\n-- Function to get the D8 direction at a cell\ndef d8_at (h : Grid) (r c : ℕ) : option string :=\n  if r = 0 ∨ c = 0 ∨ r = h.size - 1 ∨ c = h[0].size - 1 then\n    none\n  else\n    let neighbors := [\n      (r - 1, c), (r - 1, c + 1), (r, c + 1), (r + 1, c + 1),\n      (r + 1, c), (r + 1, c - 1), (r, c - 1), (r - 1, c - 1)\n    ] in\n    let neighbor_values := neighbors.map (λ (nr, nc), h[nr][nc]) in\n    let min_value := neighbor_values.min in\n    let min_index := neighbor_values.index_of min_value in\n    match min_index with\n    | 0 := some \"N\"\n    | 1 := some \"NE\"\n    | 2 := some \"E\"\n    | 3 := some \"SE\"\n    | 4 := some \"S\"\n    | 5 := some \"SW\"\n    | 6 := some \"W\"\n    | 7 := some \"NW\"\n    | _ := none\n    end\n\n-- Function to get the delta for a D8 direction\ndef delta (d : string) : option (ℕ × ℕ) :=\n  match d with\n  | \"N\"  := some (0, -1)\n  | \"NE\" := some (1, -1)\n  | \"E\"  := some (1, 0)\n  | \"SE\" := some (1, 1)\n  | \"S\"  := some (0, 1)\n  | \"SW\" := some (-1, 1)\n  | \"W\"  := some (-1, 0)\n  | \"NW\" := some (-1, -1)\n  | _    := none\n  end\n\n-- Function to follow the D8 path from a cell\ndef follow_d8 (h : Grid) (r c : ℕ) (max_steps : ℕ) : option (bool × Cell × list Cell) :=\n  let rec follow (r c : ℕ) (path : list Cell) (steps : ℕ) : option (bool × Cell × list Cell) :=\n    if steps = 0 then\n      none\n    else\n      match d8_at h r c with\n      | none := some (true, (r, c), path)\n      | some d :=\n        match delta d with\n        | none := some (true, (r, c), path)\n        | some (dp, dq) :=\n          let nr := r + dq in\n          let nc := c + dp in\n          if nr < h.size ∧ nc < h[0].size ∧ nr ≥ 0 ∧ nc ≥ 0 then\n            if path.contains (nr, nc) then\n              some (false, (nr, nc), path)\n            else\n              follow nr nc ((nr, nc) :: path) (steps - 1)\n          else\n            some (true, (r, c), path)\n        end\n      end\n  in\n  follow r c [(r, c)] max_steps\n\n-- Define a strict descent successor relation\ndef strict_descent_successor (h : Grid) (r c : ℕ) (nr nc : ℕ) : Prop :=\n  h[nr][nc] < h[r][c] ∧ (nr, nc) ∈ (d8_at h r c).map (λ d, (delta d).get_or_else (r, c))\n\n-- Define a fixed point\ndef is_fixed_point (h : Grid) (r c : ℕ) : Prop :=\n  (d8_at h r c).is_none\n\n-- Define an orbit\ndef orbit (h : Grid) (r c : ℕ) : list Cell :=\n  let rec follow (r c : ℕ) (path : list Cell) : list Cell :=\n    match d8_at h r c with\n    | none := path\n    | some d :=\n      match delta d with\n      | none := path\n      | some (dp, dq) :=\n        let nr := r + dq in\n        let nc := c + dp in\n        if nr < h.size ∧ nc < h[0].size ∧ nr ≥ 0 ∧ nc ≥ 0 then\n          follow nr nc ((nr, nc) :: path)\n        else\n          path\n      end\n    end\n  in\n  follow r c [(r, c)]\n\n-- Define a finite cell set\ndef finite_cell_set (h : Grid) : Prop :=\n  h.size < ∞ ∧ h[0].size < ∞\n\n-- Define a well-founded relation\ndef well_founded_strict_descent (h : Grid) : Prop :=\n  well_founded (λ (r c : ℕ) (nr nc : ℕ), strict_descent_successor h r c nr nc)\n\n-- Define a measure for the well-founded relation\ndef descent_measure (h : Grid) (r c : ℕ) : ℕ :=\n  h[r][c]\n\n-- Prove that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem orbit_terminates_at_fixed_point (h : Grid) (r c : ℕ) (h_fin : finite_cell_set h) :\n  ∃ (fr fc : ℕ), is_fixed_point h fr fc ∧ (fr, fc) ∈ orbit h r c :=\nbegin\n  -- Define the well-founded relation\n  have h_well_founded : well_founded_strict_descent h,\n  { apply well_founded.wf,\n    intros r c,\n    apply nat.lt_wf,\n    intros nr nc,\n    exact strict_descent_successor h r c nr nc,\n    intros,\n    exact descent_measure h r c,\n  },\n\n  -- Use the well-founded induction principle\n  apply h_well_founded.induction (λ (r c : ℕ), ∃ (fr fc : ℕ), is_fixed_point h fr fc ∧ (fr, fc) ∈ orbit h r c),\n  intros r c ih,\n  -- Base case: if the cell is a fixed point, the orbit terminates at the cell\n  by_cases h_fixed : is_fixed_point h r c,\n  { use r, use c,\n    split,\n    exact h_fixed,\n    exact (r, c) :: orbit h r c,\n  },\n  -- Inductive step: if the cell is not a fixed point, follow the D8 path\n  { have h_not_fixed : ¬ is_fixed_point h r c,\n    exact h_fixed,\n    have h_d8 : ∃ (d : string), d8_at h r c = some d,\n    { rw is_fixed_point at h_not_fixed,\n      exact h_not_fixed,\n    },\n    cases h_d8 with d h_d8,\n    have h_delta : ∃ (dp dq : ℕ), delta d = some (dp, dq),\n    { rw h_d8,\n      exact (delta d).is_some,\n    },\n    cases h_delta with dp dq h_delta,\n    let nr := r + dq,\n    let nc := c + dp,\n    have h_strict_descent : strict_descent_successor h r c nr nc,\n    { split,\n      { rw h_d8,\n        rw h_delta,\n        exact h[nr][nc] < h[r][c],\n      },\n      { rw h_d8,\n        rw h_delta,\n        exact (nr, nc) ∈ (d8_at h r c).map (λ d, (delta d).get_or_else (r, c)),\n      },\n    },\n    -- Apply the inductive hypothesis to the next cell\n    have h_next : ∃ (fr fc : ℕ), is_fixed_point h fr fc ∧ (fr, fc) ∈ orbit h nr nc,\n    { exact ih nr nc h_strict_descent,\n    },\n    cases h_next with fr fc h_next,\n    use fr, use fc,\n    split,\n    { exact h_next.left },\n    { exact (r, c) :: h_next.right },\n  },\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

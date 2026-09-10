@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1589,
+    "completion_tokens": 1761,
+    "total_tokens": 3350,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1525
+  },
+  "api_id": "01a08ba65793a2f40872fd7af7a72338",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "predicate IsInBounds(h: array2<int>, r: int, c: int) {\n    0 <= r < h.Rows && 0 <= c < h.Cols\n}\n\nfunction method D8At(h: array2<int>, r: int, c: int): (dir: string, dp: int, dq: int) {\n    if h[r, c] == -1 {\n        (\"NoFlow\", 0, 0)\n    } else {\n        var minDir: string := \"NoFlow\";\n        var minDelta: int := 1000000;\n        for (dr, dc) in DIRS {\n            if IsInBounds(h, r + dr, c + dc) && h[r + dr, c + dc] < h[r, c] {\n                var delta: int := h[r, c] - h[r + dr, c + dc];\n                if delta < minDelta {\n                    minDir := dr.ToString() + dc.ToString();\n                    minDelta := delta;\n                }\n            }\n        }\n        (minDir, minDelta / 10, minDelta % 10)\n    }\n}\n\npredicate IsUniqueOutlet(h: array2<int>, r: int, c: int, maxSteps: int) {\n    var (dir, dp, dq) := D8At(h, r, c);\n    if dir == \"NoFlow\" || !IsInBounds(h, r + dp, c + dq) {\n        true\n    } else {\n        var path: seq<(int, int)> := [ (r, c) ];\n        var currentR: int := r;\n        var currentC: int := c;\n        var steps: int := 0;\n        while steps < maxSteps\n            invariant 0 <= steps <= maxSteps\n            invariant IsInBounds(h, currentR, currentC)\n            invariant |path| == steps + 1\n            invariant forall i, j :: 0 <= i < j < |path| ==> path[i] != path[j]\n        {\n            (dir, dp, dq) := D8At(h, currentR, currentC);\n            if dir == \"NoFlow\" || !IsInBounds(h, currentR + dp, currentC + dq) {\n                break;\n            }\n            currentR := currentR + dp;\n            currentC := currentC + dq;\n            path := path + [ (currentR, currentC) ];\n            steps := steps + 1;\n        }\n        var outlet: (int, int) := (currentR, currentC);\n        forall r2, c2 :: 0 <= r2 < h.Rows && 0 <= c2 < h.Cols && (r2, c2) == (r, c) ==>\n            var (dir2, dp2, dq2) := D8At(h, r2, c2);\n            if dir2 == \"NoFlow\" || !IsInBounds(h, r2 + dp2, c2 + dq2) {\n                (r2, c2) == outlet\n            } else {\n                var path2: seq<(int, int)> := [ (r2, c2) ];\n                var currentR2: int := r2;\n                var currentC2: int := c2;\n                var steps2: int := 0;\n                while steps2 < maxSteps\n                    invariant 0 <= steps2 <= maxSteps\n                    invariant IsInBounds(h, currentR2, currentC2)\n                    invariant |path2| == steps2 + 1\n                    invariant forall i, j :: 0 <= i < j < |path2| ==> path2[i] != path2[j]\n                {\n                    (dir2, dp2, dq2) := D8At(h, currentR2, currentC2);\n                    if dir2 == \"NoFlow\" || !IsInBounds(h, currentR2 + dp2, currentC2 + dq2) {\n                        break;\n                    }\n                    currentR2 := currentR2 + dp2;\n                    currentC2 := currentC2 + dq2;\n                    path2 := path2 + [ (currentR2, currentC2) ];\n                    steps2 := steps2 + 1;\n                }\n                (currentR2, currentC2) == outlet\n            }\n    }\n}\n\nlemma WatershedUniqueness(h: array2<int>, r: int, c: int, maxSteps: int)\n    requires IsInBounds(h, r, c)\n    requires maxSteps > 0\n    ensures IsUniqueOutlet(h, r, c, maxSteps)\n{\n    var (dir, dp, dq) := D8At(h, r, c);\n    if dir == \"NoFlow\" || !IsInBounds(h, r + dp, c + dq) {\n        // If the first step is a NoFlow or out of bounds, the outlet is the start cell.\n        assert IsUniqueOutlet(h, r, c, maxSteps);\n    } else {\n        var path: seq<(int, int)> := [ (r, c) ];\n        var currentR: int := r;\n        var currentC: int := c;\n        var steps: int := 0;\n        while steps < maxSteps\n            invariant 0 <= steps <= maxSteps\n            invariant IsInBounds(h, currentR, currentC)\n            invariant |path| == steps + 1\n            invariant forall i, j :: 0 <= i < j < |path| ==> path[i] != path[j]\n        {\n            (dir, dp, dq) := D8At(h, currentR, currentC);\n            if dir == \"NoFlow\" || !IsInBounds(h, currentR + dp, currentC + dq) {\n                break;\n            }\n            currentR := currentR + dp;\n            currentC := currentC + dq;\n            path := path + [ (currentR, currentC) ];\n            steps := steps + 1;\n        }\n        var outlet: (int, int) := (currentR, currentC);\n\n        // Prove that any other path starting from the same cell (r, c) reaches the same outlet.\n        forall r2, c2 :: 0 <= r2 < h.Rows && 0 <= c2 < h.Cols && (r2, c2) == (r, c) ==>\n            var (dir2, dp2, dq2) := D8At(h, r2, c2);\n            if dir2 == \"NoFlow\" || !IsInBounds(h, r2 + dp2, c2 + dq2) {\n                // If the first step is a NoFlow or out of bounds, the outlet is the start cell.\n                assert (r2, c2) == outlet;\n            } else {\n                var path2: seq<(int, int)> := [ (r2, c2) ];\n                var currentR2: int := r2;\n                var currentC2: int := c2;\n                var steps2: int := 0;\n                while steps2 < maxSteps\n                    invariant 0 <= steps2 <= maxSteps\n                    invariant IsInBounds(h, currentR2, currentC2)\n                    invariant |path2| == steps2 + 1\n                    invariant forall i, j :: 0 <= i < j < |path2| ==> path2[i] != path2[j]\n                {\n                    (dir2, dp2, dq2) := D8At(h, currentR2, currentC2);\n                    if dir2 == \"NoFlow\" || !IsInBounds(h, currentR2 + dp2, currentC2 + dq2) {\n                        break;\n                    }\n                    currentR2 := currentR2 + dp2;\n                    currentC2 := currentC2 + dq2;\n                    path2 := path2 + [ (currentR2, currentC2) ];\n                    steps2 := steps2 + 1;\n                }\n                assert (currentR2, currentC2) == outlet;\n            }\n    }\n}\n\nconst DIRS: set<(int, int)> := { (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1) };\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

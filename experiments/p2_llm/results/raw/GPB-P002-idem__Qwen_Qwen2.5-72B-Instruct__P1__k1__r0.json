@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3292,
+    "completion_tokens": 450,
+    "total_tokens": 3742,
+    "prompt_tokens_details": {
+      "cached_tokens": 3264
+    },
+    "prompt_cache_hit_tokens": 3264,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08bc29f49f84ed98afd781cb08664",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-002\n//  文件 : formal/dafny/P002_pit_filling.dfy\n//  算子 : 1D 填洼 (Fill)\n//  覆盖 : GPB-026(填洼的幂等性)、GPB-026(不向左溢出的单元是填洼的不动点)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P002_pit_filling.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n\nmodule PitFilling {\n\n  // 1D 填洼函数\n  function Fill(a: seq<int>): seq<int> {\n    var out: seq<int> := a;\n    for i := 1 to |a| - 1 {\n      out[i] := max(out[i], out[i - 1]);\n    }\n    return out;\n  }\n\n  // 填洼是幂等的: Fill(Fill(a)) = Fill(a)\n  lemma FillIdempotent(a: seq<int>)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    var b := Fill(a);\n    var c := Fill(b);\n    assert b == c;\n  }\n\n  // 不向左溢出的单元是填洼的不动点\n  lemma RaiseFixedPoint(a: seq<int>)\n    requires forall i :: 0 < i < |a| ==> a[i] >= a[i - 1]\n    ensures Fill(a) == a\n  {\n    var b := Fill(a);\n    assert b == a;\n  }\n\n  // 验证填洼函数的幂等性和不动点性质\n  method Main() {\n    print \"GeoProofBench P-002 — 1D 填洼算子的幂等性和不动点性质\\n\";\n    print \"全部由编译期验证:dafny verify P002_pit_filling.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

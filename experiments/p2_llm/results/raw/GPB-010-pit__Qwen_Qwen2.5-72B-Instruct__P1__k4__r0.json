@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3324,
+    "completion_tokens": 2016,
+    "total_tokens": 5340,
+    "prompt_tokens_details": {
+      "cached_tokens": 3296
+    },
+    "prompt_cache_hit_tokens": 3296,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08b946f0974afffad45bb612ef062",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡下降路径\n//  覆盖 : GPB-010 (坑无流)、GPB-011 (平面流方向一致)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  D8 算法是数字高程模型(DEM)中常用的流路径算法,其核心在于确定每个格点\n//  的最陡下降方向。当中心格点的高程不低于其所有邻居时,该格点被视为\"坑\"\n//  (pit),没有明确的流方向。本文件证明了在 D8 算法下,如果一个 3x3 窗口的\n//  中心格点不低于其所有邻居,则该中心格点的流方向为 NoFlow。\n//\n//  这一性质对于理解 DEM 中的流路径算法至关重要,因为它确保了算法在处理\n//  坑时的一致性和合理性。此外,这一性质的证明也为后续更复杂的流路径\n//  算法(如曲率)提供了基础。\n// ===========================================================================\n\nmodule D8SteepestDescent {\n\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  // 注意:中心元 e 在 D8 算法中是关键,必须出现在算子签名里。\n\n  // 定义 D8 流方向\n  datatype Direction = NoFlow | E | SE | S | SW | W | NW | N | NE\n\n  // 计算 D8 流方向\n  function D8Direction(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real): Direction\n  {\n    if e <= a && e <= b && e <= c && e <= d && e <= f && e <= g && e <= h && e <= i {\n      return NoFlow\n    } else {\n      var bestDir: Direction := NoFlow;\n      var bestDrop: real := 0.0;\n      if e - a > bestDrop { bestDir, bestDrop := E, e - a; }\n      if e - b > bestDrop { bestDir, bestDrop := SE, e - b; }\n      if e - c > bestDrop { bestDir, bestDrop := S, e - c; }\n      if e - d > bestDrop { bestDir, bestDrop := SW, e - d; }\n      if e - f > bestDrop { bestDir, bestDrop := W, e - f; }\n      if e - g > bestDrop { bestDir, bestDrop := NW, e - g; }\n      if e - h > bestDrop { bestDir, bestDrop := N, e - h; }\n      if e - i > bestDrop { bestDir, bestDrop := NE, e - i; }\n      return bestDir;\n    }\n  }\n\n  // 定理:如果中心格点不低于其所有邻居,则流方向为 NoFlow\n  lemma D8NoFlow(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real)\n    requires e >= a && e >= b && e >= c && e >= d && e >= f && e >= g && e >= h && e >= i\n    ensures D8Direction(a, b, c, d, e, f, g, h, i) == NoFlow\n  {\n    // 由于 e 不低于任何邻居,根据 D8Direction 的定义,流方向应为 NoFlow\n    assert D8Direction(a, b, c, d, e, f, g, h, i) == NoFlow;\n  }\n\n  // 定理:在平面 A>0 B=0 上,每个内部格点的流方向为 W\n  lemma PlaneWestFlow(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real)\n    requires a == e - 0.4 && b == e - 0.4 && c == e - 0.4 && d == e - 0.4 && f == e - 0.4 && g == e - 0.4 && h == e - 0.4 && i == e - 0.4\n    ensures D8Direction(a, b, c, d, e, f, g, h, i) == W\n  {\n    // 由于 e - f > 0 且 e - f > e - x (x 为其他邻居),流方向应为 W\n    assert e - f > 0.0;\n    assert e - f > e - a;\n    assert e - f > e - b;\n    assert e - f > e - c;\n    assert e - f > e - d;\n    assert e - f > e - g;\n    assert e - f > e - h;\n    assert e - f > e - i;\n    assert D8Direction(a, b, c, d, e, f, g, h, i) == W;\n  }\n\n  // 定理:在平面 A=B>0 上,每个内部格点的流方向为 NW\n  lemma PlaneNorthWestFlow(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real)\n    requires a == e - 0.4 * 1.414 && b == e - 0.4 * 1.414 && c == e - 0.4 * 1.414 && d == e - 0.4 * 1.414 && f == e - 0.4 * 1.414 && g == e - 0.4 * 1.414 && h == e - 0.4 * 1.414 && i == e - 0.4 * 1.414\n    ensures D8Direction(a, b, c, d, e, f, g, h, i) == NW\n  {\n    // 由于 e - g > 0 且 e - g > e - x (x 为其他邻居),流方向应为 NW\n    assert e - g > 0.0;\n    assert e - g > e - a;\n    assert e - g > e - b;\n    assert e - g > e - c;\n    assert e - g > e - d;\n    assert e - g > e - f;\n    assert e - g > e - h;\n    assert e - g > e - i;\n    assert D8Direction(a, b, c, d, e, f, g, h, i) == NW;\n  }\n\n  // 主方法:验证 D8 算法的性质\n  method Main() {\n    print \"GeoProofBench P-005 — D8 算法的性质\\n\";\n    print \"全部由编译期验证:dafny verify P005_d8.dfy\\n\";\n\n    // 测试坑无流\n    var pitFlow = D8Direction(1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0);\n    assert pitFlow == NoFlow;\n\n    // 测试平面 A>0 B=0 的流方向\n    var planeWest = D8Direction(0.6, 0.6, 0.6, 0.6, 1.0, 0.6, 0.6, 0.6, 0.6);\n    assert planeWest == W;\n\n    // 测试平面 A=B>0 的流方向\n    var planeNorthWest = D8Direction(0.6 * 1.414, 0.6 * 1.414, 0.6 * 1.414, 0.6 * 1.414, 1.0, 0.6 * 1.414, 0.6 * 1.414, 0.6 * 1.414, 0.6 * 1.414);\n    assert planeNorthWest == NW;\n\n    print \"所有测试通过\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

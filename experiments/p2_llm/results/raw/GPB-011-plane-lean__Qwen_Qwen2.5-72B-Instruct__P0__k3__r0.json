@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1695,
+    "completion_tokens": 1166,
+    "total_tokens": 2861,
+    "prompt_tokens_details": {
+      "cached_tokens": 1664
+    },
+    "prompt_cache_hit_tokens": 1664,
+    "prompt_cache_miss_tokens": 31
+  },
+  "api_id": "01a08b9948f3cd7d152bc6a9d65967a9",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.array.basic\nimport data.matrix.notation\nimport tactic\n\nnamespace VeriGIS\n\n-- Define the type for the grid\ndef Grid (n m : ℕ) := matrix (fin n) (fin m) ℝ\n\n-- Define the D8 flow directions\ninductive D8Direction\n| E | SE | S | SW | W | NW | N | NE | NoFlow\n\n-- Define the function to calculate the D8 flow direction at a given cell\ndef d8_at (h : Grid n m) (r c : ℕ) : D8Direction :=\nif r = 0 ∨ r = n - 1 ∨ c = 0 ∨ c = m - 1 then D8Direction.NoFlow\nelse\n  let e := h r c in\n  let best := (D8Direction.NoFlow, 0.0) in\n  let best_p := (drop : ℝ, dist2 : ℝ) → drop * drop / dist2 in\n  let DIRS : list (D8Direction × ℤ × ℤ × ℝ) :=\n    [(D8Direction.E, 1, 0, 1.0),\n     (D8Direction.SE, 1, 1, 2.0),\n     (D8Direction.S, 0, 1, 1.0),\n     (D8Direction.SW, -1, 1, 2.0),\n     (D8Direction.W, -1, 0, 1.0),\n     (D8Direction.NW, -1, -1, 2.0),\n     (D8Direction.N, 0, -1, 1.0),\n     (D8Direction.NE, 1, -1, 2.0)] in\n  let best_dir := DIRS.foldl (λ best dir, \n    let (name, dp, dq, dist2) := dir in\n    let rr := r + dq in\n    let cc := c + dp in\n    if 0 ≤ rr ∧ rr < n ∧ 0 ≤ cc ∧ cc < m then\n      let drop := e - h rr cc in\n      if drop > 0 then\n        let p := best_p drop dist2 in\n        if p > (best_p (snd best) (snd best)) then (name, drop) else best\n      else best\n    else best) best in\n  fst best_dir\n\n-- Define the function to create a planar DEM grid\ndef plane_grid (A B C : ℝ) (n m : ℕ) : Grid n m :=\nλ r c, A * (r : ℝ) + B * (c : ℝ) + C\n\n-- Define the function to get the flow direction for all interior cells\ndef interior_flows (h : Grid n m) : list (D8Direction) :=\nlist.pmap (λ r, list.pmap (λ c, d8_at h r c) (list.range (m - 2) |>.map (λ i, i + 1))) (list.range (n - 2) |>.map (λ i, i + 1)) |>.join\n\n-- Define the property to be proven\ntheorem d8_flow_direction_constant_on_plane (A B C : ℝ) (n m : ℕ) (h : Grid n m) (h' : Grid n m) :\n  A > 0 ∧ B > 0 → (h = plane_grid A B C n m) → (h' = plane_grid A B (C + 1) n m) →\n  interior_flows h = interior_flows h' :=\nbegin\n  assume A_pos B_pos h_eq h'_eq,\n  rw h_eq at h'_eq,\n  rw h'_eq,\n  -- Simplify the problem by showing that the flow direction is determined by the relative\n  -- differences in elevation, which are unchanged by a constant translation in C.\n  have h_diff : ∀ r c, h r c - h (r + 1) c = h' r c - h' (r + 1) c,\n  { intros r c,\n    simp [plane_grid, h_eq, h'_eq],\n    ring, },\n  have h'_diff : ∀ r c, h r c - h r (c + 1) = h' r c - h' r (c + 1),\n  { intros r c,\n    simp [plane_grid, h_eq, h'_eq],\n    ring, },\n  -- Show that the flow direction is the same for all interior cells\n  have flow_eq : ∀ r c, 0 < r ∧ r < n - 1 → 0 < c ∧ c < m - 1 → d8_at h r c = d8_at h' r c,\n  { intros r c r_in c_in,\n    -- Use the definition of d8_at and the fact that the differences are the same\n    simp [d8_at, h_diff, h'_diff, r_in, c_in],\n    -- The flow direction is determined by the maximum drop, which is the same for both grids\n    congr,\n    -- The list of directions and their corresponding drops and distances are the same\n    congr,\n    -- The best direction and its corresponding drop are the same\n    congr, },\n  -- Use the flow_eq to show that the interior flows are the same\n  simp [interior_flows, flow_eq],\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 812,
+    "total_tokens": 1080,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 12
+  },
+  "api_id": "01a08b78d86ccd88c437a01c14dc649a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.matrix.notation\nimport analysis.calculus.fderiv\nimport analysis.special_functions.pow\nimport data.real.basic\n\nvariables {α : Type*} [decidable_eq α] [fintype α] [linear_ordered_field α]\n\ndef discrete_laplacian (M : matrix (fin 3) (fin 3) α) (i j : fin 3) : α :=\n  M i j - (M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1)) / 4\n\ndef is_discrete_local_max (M : matrix (fin 3) (fin 3) α) (i j : fin 3) : Prop :=\n  M i j ≥ M (i - 1) j ∧ M i j ≥ M (i + 1) j ∧ M i j ≥ M i (j - 1) ∧ M i j ≥ M i (j + 1)\n\ntheorem discrete_laplacian_le_zero_of_local_max (M : matrix (fin 3) (fin 3) α) (i j : fin 3) (h : is_discrete_local_max M i j) :\n  discrete_laplacian M i j ≤ 0 :=\nbegin\n  have h1 : M i j - (M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1)) / 4 ≤ 0,\n  { rw [sub_le_iff_le_add, div_four],\n    have h2 : M i j ≤ M i j + (M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1)) / 4,\n    { refine le_add_of_nonneg_right _,\n      have h3 : (M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1)) / 4 ≥ 0,\n      { refine div_nonneg _ (by norm_num),\n        have h4 : M (i - 1) j + M (i + 1) j + M i (j - 1) + M i (j + 1) ≥ 0,\n        { refine add_nonneg (add_nonneg _ _) _,\n          { exact le_trans (h.1.1) (le_refl (M i j)) },\n          { exact le_trans (h.1.2) (le_refl (M i j)) },\n          { exact le_trans (h.2.1) (le_refl (M i j)) },\n          { exact le_trans (h.2.2) (le_refl (M i j)) } } },\n      exact h2 },\n  exact h1,\nend\n\nlemma div_four (a b c d : α) : (a + b + c + d) / 4 = (a + b + c + d) * (1 / 4) :=\nby { rw [div_eq_mul_one_div, one_div_four], norm_num }\n\nlemma one_div_four : (1 : α) / 4 = 1 / 4 :=\nby norm_num\n```\n\nThis Lean code defines the discrete Laplacian and the condition for a discrete local maximum in a 3x3 grid. It then proves the theorem that if the center cell is a discrete local maximum, the discrete Laplacian at the center is less than or equal to zero. The proof uses the properties of linear ordered fields and the definition of the discrete Laplacian to show that the center cell's value is less than or equal to the average of its neighbors, which is a key step in the proof.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1573,
+    "completion_tokens": 1565,
+    "total_tokens": 3138,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "prompt_cache_hit_tokens": 96,
+    "prompt_cache_miss_tokens": 1477
+  },
+  "api_id": "01a08bd7b88a705df9f072427174392e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "predicate Is4Neighbor((r1: int, c1: int), (r2: int, c2: int))\n  requires 0 <= r1 < rows\n  requires 0 <= c1 < cols\n  requires 0 <= r2 < rows\n  requires 0 <= c2 < cols\n{\n  (r1 == r2 + 1 && c1 == c2) ||\n  (r1 == r2 - 1 && c1 == c2) ||\n  (r1 == r2 && c1 == c2 + 1) ||\n  (r1 == r2 && c1 == c2 - 1)\n}\n\npredicate IsBoundary(r: int, c: int)\n  requires 0 <= r < rows\n  requires 0 <= c < cols\n{\n  r == 0 || r == rows - 1 || c == 0 || c == cols - 1\n}\n\npredicate IsInterior(r: int, c: int)\n  requires 0 <= r < rows\n  requires 0 <= c < cols\n{\n  0 < r < rows - 1 && 0 < c < cols - 1\n}\n\nfunction method Max(a: real, b: real): real\n{\n  if a > b then a else b\n}\n\npredicate IsPitFilled(h: array2<real>, fill: array2<real>)\n  requires h != null\n  requires fill != null\n  requires h.Dim0 == fill.Dim0\n  requires h.Dim1 == fill.Dim1\n{\n  forall r, c | 0 <= r < h.Dim0 && 0 <= c < h.Dim1 :: \n    (IsBoundary(r, c) ==> fill[r, c] == h[r, c]) &&\n    (IsInterior(r, c) ==> \n      forall r2, c2 | Is4Neighbor((r, c), (r2, c2)) :: \n        fill[r2, c2] <= fill[r, c] && fill[r, c] >= Max(h[r, c], fill[r2, c2])\n    )\n}\n\nmethod RaiseNbr(h: array2<real>, fill: array2<real>, r: int, c: int)\n  modifies fill\n  requires h != null\n  requires fill != null\n  requires h.Dim0 == fill.Dim0\n  requires h.Dim1 == fill.Dim1\n  requires 0 <= r < h.Dim0\n  requires 0 <= c < h.Dim1\n  requires IsInterior(r, c)\n  requires IsPitFilled(h, fill)\n  ensures IsPitFilled(h, fill)\n  ensures forall r2, c2 | Is4Neighbor((r, c), (r2, c2)) :: fill[r2, c2] >= fill[r2, c2]@pre\n  ensures fill[r, c] >= Max(h[r, c], fill[r, c]@pre)\n{\n  var originalElevation := h[r, c];\n  var processedCellFill := fill[r, c];\n  var newElevation := Max(originalElevation, processedCellFill);\n\n  fill[r, c] := newElevation;\n\n  // Ensure that the neighbor is lifted at least to max(original neighbor, processed cell fill)\n  forall r2, c2 | Is4Neighbor((r, c), (r2, c2)) {\n    fill[r2, c2] := Max(fill[r2, c2], newElevation);\n  }\n}\n\nmethod PitFill2D(h: array2<real>) returns (fill: array2<real>)\n  requires h != null\n  ensures IsPitFilled(h, fill)\n{\n  var rows := h.Dim0;\n  var cols := h.Dim1;\n  fill := new real[rows, cols];\n\n  // Initialize fill with infinity\n  for r := 0 to rows - 1 {\n    for c := 0 to cols - 1 {\n      fill[r, c] := infinity;\n    }\n  }\n\n  // Seed the boundary cells\n  for r := 0 to rows - 1 {\n    if IsBoundary(r, 0) {\n      fill[r, 0] := h[r, 0];\n    }\n    if IsBoundary(r, cols - 1) {\n      fill[r, cols - 1] := h[r, cols - 1];\n    }\n  }\n  for c := 0 to cols - 1 {\n    if IsBoundary(0, c) {\n      fill[0, c] := h[0, c];\n    }\n    if IsBoundary(rows - 1, c) {\n      fill[rows - 1, c] := h[rows - 1, c];\n    }\n  }\n\n  // Use a priority queue to process cells\n  var heap := new Heap<(real, int, int)>();\n  for r := 0 to rows - 1 {\n    for c := 0 to cols - 1 {\n      if IsBoundary(r, c) {\n        heap.Add((fill[r, c], r, c));\n      }\n    }\n  }\n\n  while !heap.IsEmpty {\n    var (elevation, r, c) := heap.RemoveMin();\n    for (dr, dc) in NBR4 {\n      var r2 := r + dr;\n      var c2 := c + dc;\n      if 0 <= r2 < rows && 0 <= c2 < cols && fill[r2, c2] == infinity {\n        fill[r2, c2] := Max(h[r2, c2], elevation);\n        heap.Add((fill[r2, c2], r2, c2));\n      }\n    }\n  }\n}\n\nconst NBR4: set<(int, int)> := { (-1, 0), (1, 0), (0, -1), (0, 1) };\nconst infinity: real := 1000000000000.0; // A large number representing infinity\n\nlemma PitFill2DPreservesElevation(h: array2<real>, fill: array2<real>, r: int, c: int)\n  requires h != null\n  requires fill != null\n  requires h.Dim0 == fill.Dim0\n  requires h.Dim1 == fill.Dim1\n  requires 0 <= r < h.Dim0\n  requires 0 <= c < h.Dim1\n  requires IsInterior(r, c)\n  requires IsPitFilled(h, fill)\n{\n  var originalElevation := h[r, c];\n  var processedCellFill := fill[r, c];\n  var newElevation := Max(originalElevation, processedCellFill);\n\n  // Ensure that the neighbor is lifted at least to max(original neighbor, processed cell fill)\n  forall r2, c2 | Is4Neighbor((r, c), (r2, c2)) {\n    assert fill[r2, c2] >= fill[r2, c2]@pre;\n    assert fill[r2, c2] >= Max(h[r2, c2], fill[r, c]@pre);\n  }\n\n  // Ensure that the processed cell fill is not decreased\n  assert fill[r, c] >= processedCellFill;\n  assert fill[r, c] >= Max(h[r, c], fill[r, c]@pre);\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

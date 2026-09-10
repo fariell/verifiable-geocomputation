@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1565,
+    "completion_tokens": 491,
+    "total_tokens": 2056,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 29
+  },
+  "api_id": "01a08bd12da69c4df535c0e2b4b42006",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.array.basic\nimport data.real.basic\nimport tactic\n\nnamespace VeriGIS\n\nsection PitFilling\n\nvariables {α : Type*} [linear_order α] [decidable_eq α]\n\ndef Fill (a : array α) : array α :=\n  let n := a.size in\n  let fill := array.mk n (λ i, if i = 0 ∨ i = n - 1 then a[i] else ⊤) in\n  let visited := array.mk n (λ i, false) in\n  let rec seed (i : ℕ) : unit :=\n    if visited[i] then ()\n    else do\n      fill[i] := a[i],\n      visited[i] := true,\n      if i > 0 then seed (i - 1),\n      if i < n - 1 then seed (i + 1)\n  seed 0;\n  seed (n - 1);\n  fill\n\ndef nondecreasing (a : array α) : Prop :=\n  ∀ i, i < a.size - 1 → a[i] ≤ a[i + 1]\n\nlemma Fill_nondecreasing (a : array α) : nondecreasing (Fill a) :=\nbegin\n  let n := a.size,\n  let fill := Fill a,\n  intros i hi,\n  have h0 : i < n - 1, from hi,\n  have h1 : i + 1 < n, from nat.lt_of_lt_of_le hi (nat.pred_le_pred (nat.lt_succ_self n)),\n  have h2 : fill[i] = a[i] ∨ fill[i] = ⊤, from if_pos (or.inl (eq.refl i)),\n  have h3 : fill[i + 1] = a[i + 1] ∨ fill[i + 1] = ⊤, from if_pos (or.inr (eq.refl (i + 1))),\n  cases h2 with h2 h2,\n  { cases h3 with h3 h3,\n    { exact le_refl (a[i]) },\n    { exact le_top (a[i]) } },\n  { cases h3 with h3 h3,\n    { exact le_top (a[i + 1]) },\n    { exact le_top (a[i]) } }\nend\n\nend PitFilling\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

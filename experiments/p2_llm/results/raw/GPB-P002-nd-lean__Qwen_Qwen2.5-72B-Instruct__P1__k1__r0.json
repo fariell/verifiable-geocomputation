@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3059,
+    "completion_tokens": 983,
+    "total_tokens": 4042,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 2995
+  },
+  "api_id": "01a08bd29a2dc5ae64ef1a63dfc7e842",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-021\n   文件 : formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean\n   算子 : 1D left-outlet Fill\n   对偶 : formal/dafny/PCOMP_1.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. 本文件使用 Lean 的数学库和战术来证明性质,而不是依赖于 Dafny 的 SMT 自动化。\n    2. 证明风格:Lean 靠显式战术(`induction`, `cases`, `simp`, `linarith`等)。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Array.Basic\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Composition\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- 1D left-outlet Fill 操作符定义 -/\ndef pitFill1D (a : Array ℝ) : Array ℝ := \n  let fill := a.map (fun x => x)\n  let mut queue := Std.PriorityQueue.empty (fun x y => x < y)\n  for i in [0:a.size] do\n    if i = 0 then\n      queue := queue.push (0, a[i])\n    else\n      let minNbr := if i > 0 then a[i-1] else a[i]\n      if a[i] < minNbr then\n        fill := fill.set! i minNbr\n        queue := queue.push (i, minNbr)\n  while let some (idx, val) := queue.popMin? do\n    if idx + 1 < a.size then\n      let nextVal := fill[idx + 1]\n      let minNbr := if idx + 1 > 0 then fill[idx] else fill[idx + 1]\n      if nextVal < minNbr then\n        fill := fill.set! (idx + 1) minNbr\n        queue := queue.push (idx + 1, minNbr)\n  fill\n\n-- ==========================================================================\n-- 算子性质\n-- ==========================================================================\n\n/-- 1D left-outlet Fill 操作符产生非递减序列 -/\ntheorem pitFill1D_nondecreasing (a : Array ℝ) (i : Nat) (h : i < a.size - 1) :\n  (pitFill1D a)[i] ≤ (pitFill1D a)[i+1] := by\n  let fill := pitFill1D a\n  induction i with i hi\n  case zero =>\n    simp [pitFill1D, Array.get, Array.set, Array.map, Array.size]\n    linarith\n  case succ =>\n    simp [pitFill1D, Array.get, Array.set, Array.map, Array.size]\n    cases h : i < a.size - 1\n    case true =>\n      have h1 : (pitFill1D a)[i] ≤ (pitFill1D a)[i+1] := hi\n      have h2 : (pitFill1D a)[i+1] ≤ (pitFill1D a)[i+2] := by\n        simp [pitFill1D, Array.get, Array.set, Array.map, Array.size]\n        linarith\n      linarith [h1, h2]\n    case false =>\n      simp [pitFill1D, Array.get, Array.set, Array.map, Array.size]\n      linarith\n\n-- ==========================================================================\n-- 冒烟测试(非命题,仅确认算子可计算)\n-- ==========================================================================\n\nexample : (pitFill1D #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])[3] = 3 := by\n  simp [pitFill1D, Array.get, Array.set, Array.map, Array.size]\n  norm_num\n\nexample : (pitFill1D #[10, 9, 8, 7, 6, 5, 4, 3, 2, 1])[3] = 10 := by\n  simp [pitFill1D, Array.get, Array.set, Array.map, Array.size]\n  norm_num\n\nend -- noncomputable section\n\nend VeriGIS.Composition\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

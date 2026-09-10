@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3211,
+    "completion_tokens": 999,
+    "total_tokens": 4210,
+    "prompt_tokens_details": {
+      "cached_tokens": 1760
+    },
+    "prompt_cache_hit_tokens": 1760,
+    "prompt_cache_miss_tokens": 1451
+  },
+  "api_id": "01a08b68c1f40d4efb93139dd36b9473",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-019\n//  文件 : formal/dafny/P019_horn_slope.dfy\n//  算子 : Horn (1981) 有限差分估计\n//  覆盖 : GPB-019(平面精确恢复)、噪声对比\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P019_horn_slope.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n\nmodule HornSlope {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(与 P-001 相同:p 向右,q 向下)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // Horn 有限差分估计:\n  //   DzDx = (f - d) / (2 * w)\n  //   DzDy = (h - b) / (2 * w)\n  // -------------------------------------------\n\n  function method DzDx(d: real, f: real, w: real): real\n    requires w > 0.0\n  {\n    (f - d) / (2.0 * w)\n  }\n\n  function method DzDy(b: real, h: real, w: real): real\n    requires w > 0.0\n  {\n    (h - b) / (2.0 * w)\n  }\n\n  // ------------------------------------------------------------------\n  // 平面 z = A*x + B*y + C 上的 Horn 有限差分估计\n  // -------------------------------------------\n  lemma HornSlopeExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures DzDx(C - A * w, C + A * w, w) == A\n    ensures DzDy(C - B * w, C + B * w, w) == B\n  {\n    assert (C + A * w - (C - A * w)) / (2.0 * w) == A;\n    assert (C + B * w - (C - B * w)) / (2.0 * w) == B;\n  }\n\n  // ------------------------------------------------------------------\n  // 噪声对比:中心高程扰动 δ 使 DzDx 和 DzDy 改变\n  // -------------------------------------------\n  lemma NoiseImpactOnHornSlope(A: real, B: real, C: real, w: real, δ: real)\n    requires w > 0.0\n    ensures DzDx(C - A * w + δ, C + A * w + δ, w) == DzDx(C - A * w, C + A * w, w) + δ / w\n    ensures DzDy(C - B * w + δ, C + B * w + δ, w) == DzDy(C - B * w, C + B * w, w) + δ / w\n  {\n    assert (C + A * w + δ - (C - A * w + δ)) / (2.0 * w) == A;\n    assert (C + B * w + δ - (C - B * w + δ)) / (2.0 * w) == B;\n  }\n\n  // ------------------------------------------------------------------\n  // Phase 1 错误模板:平面 z = A*x + B*y + C 上的 DzDx 和 DzDy\n  // -------------------------------------------\n  lemma Phase1StencilExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures DzDx(C - A * w, C + A * w, w) == A\n    ensures DzDy(C - B * w, C + B * w, w) == B\n  {\n    HornSlopeExactOnPlane(A, B, C, w);\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-019 — Horn Slope: planar exactness + noise impact\\n\";\n  print \"全部由编译期验证:dafny verify P019_horn_slope.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

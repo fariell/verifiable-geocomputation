@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1748,
+    "completion_tokens": 1937,
+    "total_tokens": 3685,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "prompt_cache_hit_tokens": 96,
+    "prompt_cache_miss_tokens": 1652
+  },
+  "api_id": "01a08bb222f0ea97af1a403b5ccdd54f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornDzDx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real) returns (slope: real)\n  requires w > 0\n{\n  slope := ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w);\n}\n\nmethod HornDzDy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real) returns (slope: real)\n  requires w > 0\n{\n  slope := ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * w);\n}\n\nmethod SampleQuad(w: real, p: real, q: real) returns (z: real)\n  requires w > 0\n{\n  var A: real := 0.3;\n  var B: real := -0.2;\n  var C: real := 5.0;\n  var D: real := 0.05;\n  var E: real := -0.04;\n  var F: real := 0.02;\n  var x: real := p * w;\n  var y: real := q * w;\n  z := A * x + B * y + C + D * x * x + E * x * y + F * y * y;\n}\n\nmethod WindowQuad(w: real) returns (pts: map<string, real>)\n  requires w > 0\n{\n  pts := {\n    \"a\" := SampleQuad(w, -1.0, -1.0),\n    \"b\" := SampleQuad(w, 0.0, -1.0),\n    \"c\" := SampleQuad(w, 1.0, -1.0),\n    \"d\" := SampleQuad(w, -1.0, 0.0),\n    \"f\" := SampleQuad(w, 1.0, 0.0),\n    \"g\" := SampleQuad(w, -1.0, 1.0),\n    \"h\" := SampleQuad(w, 0.0, 1.0),\n    \"i\" := SampleQuad(w, 1.0, 1.0)\n  };\n}\n\nmethod CubicXWindow(G: real, w: real) returns (pts: map<string, real>)\n  requires w > 0\n{\n  pts := {\n    \"a\" := G * (-1.0 * w) ** 3,\n    \"b\" := G * (0.0 * w) ** 3,\n    \"c\" := G * (1.0 * w) ** 3,\n    \"d\" := G * (-1.0 * w) ** 3,\n    \"f\" := G * (1.0 * w) ** 3,\n    \"g\" := G * (-1.0 * w) ** 3,\n    \"h\" := G * (0.0 * w) ** 3,\n    \"i\" := G * (1.0 * w) ** 3\n  };\n}\n\nlemma HornExactOnQuadratics(w: real, A: real, B: real, D: real, E: real, F: real)\n  requires w > 0\n  ensures HornDzDx(WindowQuad(w)[\"a\"], WindowQuad(w)[\"b\"], WindowQuad(w)[\"c\"], WindowQuad(w)[\"d\"], WindowQuad(w)[\"f\"], WindowQuad(w)[\"g\"], WindowQuad(w)[\"h\"], WindowQuad(w)[\"i\"], w) == A\n  ensures HornDzDy(WindowQuad(w)[\"a\"], WindowQuad(w)[\"b\"], WindowQuad(w)[\"c\"], WindowQuad(w)[\"d\"], WindowQuad(w)[\"f\"], WindowQuad(w)[\"g\"], WindowQuad(w)[\"h\"], WindowQuad(w)[\"i\"], w) == B\n{\n  var pts := WindowQuad(w);\n  var a := pts[\"a\"];\n  var b := pts[\"b\"];\n  var c := pts[\"c\"];\n  var d := pts[\"d\"];\n  var f := pts[\"f\"];\n  var g := pts[\"g\"];\n  var h := pts[\"h\"];\n  var i := pts[\"i\"];\n\n  // Prove HornDzDx == A\n  assert a == A * (-w) + B * (-w) + C + D * (-w) * (-w) + E * (-w) * (-w) + F * (-w) * (-w);\n  assert b == A * 0.0 + B * (-w) + C + D * 0.0 * 0.0 + E * 0.0 * (-w) + F * (-w) * (-w);\n  assert c == A * w + B * (-w) + C + D * w * w + E * w * (-w) + F * (-w) * (-w);\n  assert d == A * (-w) + B * 0.0 + C + D * (-w) * (-w) + E * (-w) * 0.0 + F * 0.0 * 0.0;\n  assert f == A * w + B * 0.0 + C + D * w * w + E * w * 0.0 + F * 0.0 * 0.0;\n  assert g == A * (-w) + B * w + C + D * (-w) * (-w) + E * (-w) * w + F * w * w;\n  assert h == A * 0.0 + B * w + C + D * 0.0 * 0.0 + E * 0.0 * w + F * w * w;\n  assert i == A * w + B * w + C + D * w * w + E * w * w + F * w * w;\n\n  var dzdx := ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w);\n  assert dzdx == A;\n\n  // Prove HornDzDy == B\n  var dzdy := ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * w);\n  assert dzdy == B;\n}\n\nlemma CubicRemainderAtOrigin(G: real, w: real)\n  requires w > 0\n  ensures HornDzDx(CubicXWindow(G, w)[\"a\"], CubicXWindow(G, w)[\"b\"], CubicXWindow(G, w)[\"c\"], CubicXWindow(G, w)[\"d\"], CubicXWindow(G, w)[\"f\"], CubicXWindow(G, w)[\"g\"], CubicXWindow(G, w)[\"h\"], CubicXWindow(G, w)[\"i\"], w) - 0.0 == G * w * w\n{\n  var pts := CubicXWindow(G, w);\n  var a := pts[\"a\"];\n  var b := pts[\"b\"];\n  var c := pts[\"c\"];\n  var d := pts[\"d\"];\n  var f := pts[\"f\"];\n  var g := pts[\"g\"];\n  var h := pts[\"h\"];\n  var i := pts[\"i\"];\n\n  // Calculate the Horn DzDx for the cubic surface\n  var dzdx := ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w);\n\n  // Simplify the expression\n  assert a == G * (-w) ** 3;\n  assert b == G * 0.0 ** 3;\n  assert c == G * w ** 3;\n  assert d == G * (-w) ** 3;\n  assert f == G * w ** 3;\n  assert g == G * (-w) ** 3;\n  assert h == G * 0.0 ** 3;\n  assert i == G * w ** 3;\n\n  assert dzdx == (G * w ** 3 + 2.0 * G * w ** 3 + G * w ** 3 - (G * (-w) ** 3 + 2.0 * G * (-w) ** 3 + G * (-w) ** 3)) / (8.0 * w);\n  assert dzdx == (4.0 * G * w ** 3 - (-4.0 * G * w ** 3)) / (8.0 * w);\n  assert dzdx == 8.0 * G * w ** 3 / (8.0 * w);\n  assert dzdx == G * w ** 2;\n\n  // The remainder at the origin is G * w^2\n  assert dzdx - 0.0 == G * w * w;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

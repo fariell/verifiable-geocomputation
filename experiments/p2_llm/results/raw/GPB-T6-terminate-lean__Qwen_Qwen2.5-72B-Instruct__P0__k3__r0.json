@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1564,
+    "completion_tokens": 1202,
+    "total_tokens": 2766,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1500
+  },
+  "api_id": "01a08be92e309a3a11e32d037ead137d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.nat.basic\nimport data.set.finite\nimport data.array.basic\nimport tactic.well_founded\n\nnamespace VeriGIS\n\n-- Define the type for grid cells\nstructure Cell where\n  r : ℕ\n  c : ℕ\n\n-- Define the type for a grid\nstructure Grid where\n  height : ℕ\n  width : ℕ\n  values : array (array ℕ)\n\n-- Define the D8 direction set\ndef DIRS : list (string × ℕ × ℕ × ℕ) := [\n  (\"N\", 0, -1, 1),\n  (\"NE\", 1, -1, 2),\n  (\"E\", 1, 0, 1),\n  (\"SE\", 1, 1, 2),\n  (\"S\", 0, 1, 1),\n  (\"SW\", -1, 1, 2),\n  (\"W\", -1, 0, 1),\n  (\"NW\", -1, -1, 2)\n]\n\n-- Function to get the D8 direction at a cell\ndef d8_at (h : Grid) (r c : ℕ) : option string :=\n  if r = 0 ∨ r = h.height - 1 ∨ c = 0 ∨ c = h.width - 1 then\n    none\n  else\n    let current_value := h.values[r][c] in\n    let directions := DIRS.filter (λ d, 0 ≤ r + d.2 ∧ r + d.2 < h.height ∧ 0 ≤ c + d.3 ∧ c + d.3 < h.width) in\n    let min_value := directions.map (λ d, h.values[r + d.2][c + d.3]).min in\n    directions.find? (λ d, h.values[r + d.2][c + d.3] = min_value).map (λ d, d.1)\n\n-- Function to get the successor cell in the D8 direction\ndef d8_succ (h : Grid) (cell : Cell) : option Cell :=\n  d8_at h cell.r cell.c >>= λ d, some { r := cell.r + (_delta d).2, c := cell.c + (_delta d).3 }\n\n-- Function to get the delta for a given direction\ndef _delta (d : string) : option (ℕ × ℕ) :=\n  DIRS.find? (λ x, x.1 = d).map (λ x, (x.3, x.2))\n\n-- Define the orbit of a cell\ndef orbit (h : Grid) (cell : Cell) : stream (option Cell) :=\n  stream.iterate (d8_succ h) (some cell)\n\n-- Define the termination of an orbit\ndef terminates_at_fixed_point (h : Grid) (cell : Cell) : Prop :=\n  ∃ n : ℕ, orbit h cell n = some cell\n\n-- Define a strict descent successor\ndef strict_descent_succ (h : Grid) (cell : Cell) : Prop :=\n  ∃ d, d8_at h cell.r cell.c = some d ∧ h.values[cell.r][cell.c] > h.values[cell.r + (_delta d).2][cell.c + (_delta d).3]\n\n-- Define a finite cell set\ndef finite_cell_set (h : Grid) : Prop :=\n  h.height > 0 ∧ h.width > 0\n\n-- Define a measure for the orbit\ndef orbit_measure (h : Grid) (cell : Cell) : ℕ :=\n  h.values[cell.r][cell.c]\n\n-- Prove that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem orbit_terminates_at_fixed_point (h : Grid) (cell : Cell) (h_finite : finite_cell_set h) (h_strict : strict_descent_succ h cell) :\n  terminates_at_fixed_point h cell :=\nbegin\n  -- Define the well-founded relation\n  let wf := well_founded.wf (λ c1 c2, orbit_measure h c1 < orbit_measure h c2),\n  -- Prove that the orbit measure is well-founded\n  have h_wf : well_founded (λ c1 c2, orbit_measure h c1 < orbit_measure h c2),\n  { apply nat.lt_wf },\n  -- Prove that the orbit terminates at a fixed point using the well-founded relation\n  have h_orbit : ∃ n, orbit h cell n = some cell,\n  { apply well_founded.fix,\n    intros n h_orbit,\n    cases h_orbit with c h_orbit,\n    cases h_orbit with h_orbit_eq h_orbit_ne,\n    -- If the orbit reaches a fixed point, we are done\n    exact ⟨n, h_orbit_eq⟩,\n    -- If the orbit does not reach a fixed point, use the strict descent property\n    cases h_strict with d h_strict,\n    cases h_strict with h_strict_dir h_strict_val,\n    have h_next := d8_succ h cell,\n    cases h_next with next_cell h_next,\n    -- The next cell has a strictly lower value\n    have h_next_val := h_strict_val,\n    -- The orbit measure is strictly decreasing\n    have h_decreases := nat.lt_of_le_of_ne (le_refl (orbit_measure h cell)) (λ h_eq, h_orbit_ne (eq.refl (some cell))),\n    -- Use the well-founded relation to show that the orbit must terminate\n    exact h_wf h_decreases },\n  -- Extract the termination point\n  cases h_orbit with n h_orbit,\n  exact ⟨n, h_orbit⟩,\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

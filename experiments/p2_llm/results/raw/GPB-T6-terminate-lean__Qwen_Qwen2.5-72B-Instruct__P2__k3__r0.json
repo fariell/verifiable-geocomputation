@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 956,
+    "total_tokens": 1214,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 2
+  },
+  "api_id": "01a08bfa9ba04f296da7df466ec6bd5c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.finset\nimport tactic\n\nvariables {α : Type*} [fintype α] [decidable_eq α]\n\n-- Define a strict descent successor\ndef strict_descent_successor (s : α → α) (lt : α → α → Prop) [is_strict_order α lt] : Prop :=\n∀ x, lt x (s x)\n\n-- Define a fixed point\ndef is_fixed_point (s : α → α) (x : α) : Prop :=\ns x = x\n\n-- Define the orbit of a point under a successor function\ndef orbit (s : α → α) (x : α) : set α :=\n{x' | ∃ n : ℕ, x' = nat.iterate s n x}\n\n-- Define the termination of an orbit at a fixed point\ndef terminates_at_fixed_point (s : α → α) (x : α) : Prop :=\n∃ y : α, is_fixed_point s y ∧ y ∈ orbit s x\n\n-- The main theorem: Under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem strict_descent_terminates (s : α → α) (lt : α → α → Prop) [is_strict_order α lt] (h : strict_descent_successor s lt) :\n  ∀ x : α, terminates_at_fixed_point s x :=\nbegin\n  -- Use the well-foundedness of the strict order to define a measure\n  let measure := λ x : α, (finset.univ.filter (λ y, lt y x)).card,\n  -- Prove that the measure is a well-founded relation\n  have measure_wf : well_founded (λ x y, measure x < measure y),\n  { refine well_founded_of_has_no_infinite_descending_seq _,\n    intros x seq hseq,\n    have hseq_finite : ¬(∃ (seq : ℕ → α), ∀ n, measure (seq n) < measure (seq (n + 1))),\n    { by_contra hseq_infinite,\n      cases hseq_infinite with seq hseq_infinite,\n      have hseq_injective : function.injective seq,\n      { intros m n hmn,\n        rw [← hmn, nat.iterate_eq_iff_eq (measure_wf.rel) (measure (seq m)) (measure (seq n))],\n        exact hseq_infinite m },\n      have hseq_finite_range : fintype (set.range seq),\n      { apply fintype.of_injective seq hseq_injective },\n      have hseq_infinite_range : ¬fintype (set.range seq),\n      { exact fintype.not_fintype_of_infinite (set.infinite_of_infinite_subseq (λ n, seq n) (λ n, seq (n + 1)) hseq_infinite) },\n      contradiction },\n  -- Use the well-foundedness of the measure to show that every orbit terminates\n  intros x,\n  use x,\n  split,\n  { -- Show that x is a fixed point or there exists a y in the orbit of x such that y is a fixed point\n    by_cases hfp : is_fixed_point s x,\n    { exact hfp },\n    { -- If x is not a fixed point, then s x is in the orbit of x and has a smaller measure\n      have h_orbit : s x ∈ orbit s x,\n      { use 1, refl },\n      have h_measure : measure (s x) < measure x,\n      { rw measure, simp only [finset.card_lt_card, finset.mem_filter, finset.mem_univ],\n        exact ⟨lt x (s x), h⟩ },\n      -- Use the well-foundedness of the measure to find a fixed point in the orbit of s x\n      have h_terminates : terminates_at_fixed_point s (s x),\n      { exact well_founded.induction measure_wf h_measure (λ y hy, terminates_at_fixed_point s y) },\n      cases h_terminates with y hy,\n      exact ⟨y, hy.1, hy.2⟩ } },\n  { -- Show that x is in its own orbit\n    use 0, refl }\nend\n```\n\nThis Lean code defines the necessary concepts and proves the theorem that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point. The proof uses a measure function based on the cardinality of the set of elements strictly less than a given element, and leverages the well-foundedness of this measure to show that the orbit must eventually terminate at a fixed point.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

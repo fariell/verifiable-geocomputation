@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3324,
+    "completion_tokens": 1382,
+    "total_tokens": 4706,
+    "prompt_tokens_details": {
+      "cached_tokens": 1792
+    },
+    "prompt_cache_hit_tokens": 1792,
+    "prompt_cache_miss_tokens": 1532
+  },
+  "api_id": "01a08b9011e35bde1273f6500fcfd6b0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡下降路径\n//  覆盖 : GPB-010 (坑无流)、GPB-011 (平面流方向一致)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  D8 算法是数字高程模型(DEM)中常用的流路径算法。本文件证明了在 D8\n//  算法下,如果中心格点的所有八个邻居都不严格低于中心格点,则流方向\n//  为 NoFlow(未定义 / 坑)。这是 D8 算法的一个基本性质,对于理解算法\n//  的行为和验证其正确性至关重要。\n// ===========================================================================\n\nmodule D8SteepestDescent {\n\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  // 注意:中心元 e 在 D8 算法中的权为 1,出现在算子签名里。\n\n  // 定义 D8 流方向\n  datatype Direction = NoFlow | E | SE | S | SW | W | NW | N | NE\n\n  // 定义 3x3 窗口\n  type Grid = array2<real>\n\n  // 获取 3x3 窗口的中心值\n  function Center(grid: Grid, r: int, c: int): real\n    requires 0 <= r < grid.Height\n    requires 0 <= c < grid.Width\n  {\n    grid[r, c]\n  }\n\n  // 获取 3x3 窗口的邻居值\n  function Neighbor(grid: Grid, r: int, c: int, dr: int, dc: int): real\n    requires 0 <= r < grid.Height\n    requires 0 <= c < grid.Width\n    requires 0 <= r + dr < grid.Height\n    requires 0 <= c + dc < grid.Width\n  {\n    grid[r + dr, c + dc]\n  }\n\n  // 计算 D8 流方向\n  function D8Direction(grid: Grid, r: int, c: int): Direction\n    requires 0 <= r < grid.Height\n    requires 0 <= c < grid.Width\n  {\n    var e = Center(grid, r, c);\n    var best: Direction := NoFlow;\n    var best_p: real := 0.0;\n\n    for name, dp, dq, dist2 in [\n      (E, 1, 0, 1.0),\n      (SE, 1, 1, 2.0),\n      (S, 0, 1, 1.0),\n      (SW, -1, 1, 2.0),\n      (W, -1, 0, 1.0),\n      (NW, -1, -1, 2.0),\n      (N, 0, -1, 1.0),\n      (NE, 1, -1, 2.0)\n    ] {\n      var rr = r + dq;\n      var cc = c + dp;\n      if 0 <= rr < grid.Height && 0 <= cc < grid.Width {\n        var drop = e - Neighbor(grid, r, c, dp, dq);\n        if drop > 0 {\n          var p = (drop * drop) / dist2;\n          if best == NoFlow || p > best_p {\n            best, best_p := name, p;\n          }\n        }\n      }\n    }\n\n    best\n  }\n\n  // 定理:如果所有邻居都不严格低于中心,则流方向为 NoFlow\n  lemma D8NoFlow(grid: Grid, r: int, c: int)\n    requires 0 <= r < grid.Height\n    requires 0 <= c < grid.Width\n    requires forall dp, dq :: |dp| <= 1 && |dq| <= 1 && (dp != 0 || dq != 0) ==>\n      Neighbor(grid, r, c, dp, dq) >= Center(grid, r, c)\n    ensures D8Direction(grid, r, c) == NoFlow\n  {\n    var e = Center(grid, r, c);\n    var best: Direction := NoFlow;\n    var best_p: real := 0.0;\n\n    for name, dp, dq, dist2 in [\n      (E, 1, 0, 1.0),\n      (SE, 1, 1, 2.0),\n      (S, 0, 1, 1.0),\n      (SW, -1, 1, 2.0),\n      (W, -1, 0, 1.0),\n      (NW, -1, -1, 2.0),\n      (N, 0, -1, 1.0),\n      (NE, 1, -1, 2.0)\n    ] {\n      var rr = r + dq;\n      var cc = c + dp;\n      if 0 <= rr < grid.Height && 0 <= cc < grid.Width {\n        var drop = e - Neighbor(grid, r, c, dp, dq);\n        assert drop <= 0; // 由前提条件保证\n        assert best == NoFlow; // 由于 drop <= 0, best 不会改变\n      }\n    }\n\n    assert best == NoFlow;\n  }\n\n  method Main() {\n    print \"GeoProofBench P-005 — D8 坑无流定理\\n\";\n    print \"全部由编译期验证:dafny verify P005_d8.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

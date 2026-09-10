@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1650,
+    "completion_tokens": 825,
+    "total_tokens": 2475,
+    "prompt_tokens_details": {
+      "cached_tokens": 1632
+    },
+    "prompt_cache_hit_tokens": 1632,
+    "prompt_cache_miss_tokens": 18
+  },
+  "api_id": "01a08bc1509af109272cfd2493b33eaa",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method fill_1d(a: array<int>) returns (out: array<int>)\n  requires a != null;\n  ensures out.Length == a.Length;\n  ensures forall i :: 0 <= i < out.Length ==> out[i] == max(a[0..i]);\n{\n  out := a.Clone();\n  for i := 1 to out.Length - 1\n    invariant forall j :: 0 <= j < i ==> out[j] == max(a[0..j]);\n  {\n    out[i] := max(out[i], out[i - 1]);\n  }\n}\n\nmethod max(x: int, y: int) returns (z: int)\n  ensures z == if x > y then x else y;\n{\n  if x > y then return x; else return y;\n}\n\nmethod pit_fill_idempotent(a: array<int>) returns (result: bool)\n  requires a != null;\n  ensures result == (fill_1d(fill_1d(a)) == fill_1d(a));\n{\n  var b := fill_1d(a);\n  var c := fill_1d(b);\n  result := b == c;\n}\n\nmethod raise_fixed_point(a: array<int>) returns (result: bool)\n  requires a != null;\n  ensures result == (forall i :: 0 <= i < a.Length ==> a[i] >= a[i - 1] ==> raise_1d(a)[i] == a[i]);\n{\n  result := forall i :: 0 <= i < a.Length ==> a[i] >= a[i - 1] ==> raise_1d(a)[i] == a[i];\n}\n\nmethod raise_1d(a: array<int>) returns (out: array<int>)\n  requires a != null;\n  ensures out.Length == a.Length;\n  ensures forall i :: 0 <= i < out.Length ==> out[i] >= a[i];\n  ensures forall i :: 0 < i < out.Length ==> out[i] >= out[i - 1];\n{\n  out := a.Clone();\n  for i := 1 to out.Length - 1\n    invariant forall j :: 0 <= j < i ==> out[j] >= a[j];\n    invariant forall j :: 0 < j < i ==> out[j] >= out[j - 1];\n  {\n    out[i] := max(out[i], out[i - 1]);\n  }\n}\n\nlemma pit_fill_idempotent_lemma(a: array<int>)\n  requires a != null;\n  ensures fill_1d(fill_1d(a)) == fill_1d(a);\n{\n  var b := fill_1d(a);\n  var c := fill_1d(b);\n  assert c.Length == a.Length;\n  assert forall i :: 0 <= i < c.Length ==> c[i] == max(b[i], b[i - 1]);\n  assert forall i :: 0 <= i < b.Length ==> b[i] == max(a[0..i]);\n  assert forall i :: 0 <= i < c.Length ==> c[i] == max(max(a[0..i]), max(a[0..i-1]));\n  assert forall i :: 0 <= i < c.Length ==> c[i] == max(a[0..i]);\n  assert c == b;\n}\n\nlemma raise_fixed_point_lemma(a: array<int>)\n  requires a != null;\n  ensures forall i :: 0 <= i < a.Length ==> a[i] >= a[i - 1] ==> raise_1d(a)[i] == a[i];\n{\n  var out := raise_1d(a);\n  assert out.Length == a.Length;\n  assert forall i :: 0 <= i < out.Length ==> out[i] >= a[i];\n  assert forall i :: 0 < i < out.Length ==> out[i] >= out[i - 1];\n  assert forall i :: 0 <= i < a.Length ==> a[i] >= a[i - 1] ==> out[i] == a[i];\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

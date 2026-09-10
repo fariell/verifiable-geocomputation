@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3324,
+    "completion_tokens": 2468,
+    "total_tokens": 5792,
+    "prompt_tokens_details": {
+      "cached_tokens": 1792
+    },
+    "prompt_cache_hit_tokens": 1792,
+    "prompt_cache_miss_tokens": 1532
+  },
+  "api_id": "01a08b9265adcb8bfe5ca950e4a99d55",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡下降路径\n//  覆盖 : GPB-010(坑洼无流)、GPB-011(平面流方向一致)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  D8 算法在 DEM (数字高程模型) 中用于确定水流方向。如果中心格点的高程\n//  不低于其所有八个邻居,则水流方向为 NoFlow (无流)。这一性质对于理解\n//  和验证 DEM 中的水流路径至关重要,因为它确保了在局部最低点(坑洼)处\n//  水流不会错误地流向任何方向。\n//\n// ===========================================================================\n\nmodule D8SteepestDescent {\n\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  // 注意:中心元 e 在 D8 算法中是关键,必须出现在算子签名里。\n\n  // 定义 D8 方向\n  datatype Direction = E | SE | S | SW | W | NW | N | NE | NoFlow\n\n  // 定义 3x3 窗口\n  type Grid = array2<real>\n\n  // 获取 D8 方向\n  function D8Direction(h: Grid, r: int, c: int): Direction\n    requires h != null\n    requires 0 <= r < h.Height\n    requires 0 <= c < h.Width\n  {\n    var e: real := h[r, c];\n    var best: Direction := NoFlow;\n    var best_p: real := 0.0;\n\n    for name, dp, dq, dist2 in [\n      (E, 1, 0, 1.0),\n      (SE, 1, 1, 2.0),\n      (S, 0, 1, 1.0),\n      (SW, -1, 1, 2.0),\n      (W, -1, 0, 1.0),\n      (NW, -1, -1, 2.0),\n      (N, 0, -1, 1.0),\n      (NE, 1, -1, 2.0)\n    ] do\n      var rr: int := r + dq;\n      var cc: int := c + dp;\n      if 0 <= rr < h.Height && 0 <= cc < h.Width {\n        var drop: real := e - h[rr, cc];\n        if drop > 0 {\n          var p: real := (drop * drop) / dist2;\n          if best == NoFlow || p > best_p {\n            best := name;\n            best_p := p;\n          }\n        }\n      }\n\n    return best;\n  }\n\n  // 坑洼无流\n  lemma PitHasNoFlow(h: Grid, r: int, c: int)\n    requires h != null\n    requires 0 <= r < h.Height\n    requires 0 <= c < h.Width\n    requires h[r, c] <= h[r-1, c-1] && h[r, c] <= h[r-1, c] && h[r, c] <= h[r-1, c+1] &&\n             h[r, c] <= h[r, c-1] && h[r, c] <= h[r, c+1] &&\n             h[r, c] <= h[r+1, c-1] && h[r, c] <= h[r+1, c] && h[r, c] <= h[r+1, c+1]\n    ensures D8Direction(h, r, c) == NoFlow\n  {\n    var e: real := h[r, c];\n    for name, dp, dq, dist2 in [\n      (E, 1, 0, 1.0),\n      (SE, 1, 1, 2.0),\n      (S, 0, 1, 1.0),\n      (SW, -1, 1, 2.0),\n      (W, -1, 0, 1.0),\n      (NW, -1, -1, 2.0),\n      (N, 0, -1, 1.0),\n      (NE, 1, -1, 2.0)\n    ] do\n      var rr: int := r + dq;\n      var cc: int := c + dp;\n      if 0 <= rr < h.Height && 0 <= cc < h.Width {\n        assert e <= h[rr, cc];  // 由前提条件保证\n        assert e - h[rr, cc] <= 0;  // 由前提条件保证\n        assert (e - h[rr, cc]) * (e - h[rr, cc]) / dist2 <= 0;  // 由前提条件保证\n      }\n  }\n\n  // 平面流方向一致\n  lemma PlaneFlowIsConstant(h: Grid, A: real, B: real, C: real)\n    requires h != null\n    requires h.Height >= 3 && h.Width >= 3\n    requires A > 0 && B == 0\n    ensures forall r, c :: 0 < r < h.Height - 1 && 0 < c < h.Width - 1 ==> D8Direction(h, r, c) == W\n  {\n    // 平面方程: z = A * x + B * y + C\n    // 由于 B == 0, 平面沿 y 方向无变化,沿 x 方向有变化\n    // 因此,内部格点的水流方向应为 W (向西)\n\n    forall r, c | 0 < r < h.Height - 1 && 0 < c < h.Width - 1\n      ensures D8Direction(h, r, c) == W\n    {\n      var e: real := A * c + C;\n      for name, dp, dq, dist2 in [\n        (E, 1, 0, 1.0),\n        (SE, 1, 1, 2.0),\n        (S, 0, 1, 1.0),\n        (SW, -1, 1, 2.0),\n        (W, -1, 0, 1.0),\n        (NW, -1, -1, 2.0),\n        (N, 0, -1, 1.0),\n        (NE, 1, -1, 2.0)\n      ] do\n        var rr: int := r + dq;\n        var cc: int := c + dp;\n        if 0 <= rr < h.Height && 0 <= cc < h.Width {\n          var z: real := A * cc + C;\n          assert e - z == A * (c - cc);  // 由平面方程保证\n          if name == W {\n            assert c - cc > 0;  // 向西方向, c > cc\n            assert e - z > 0;  // 由于 A > 0, c > cc, e - z > 0\n          } else {\n            assert c - cc <= 0;  // 其他方向, c <= cc\n            assert e - z <= 0;  // 由于 A > 0, c <= cc, e - z <= 0\n          }\n        }\n    }\n  }\n\n  // 平面流方向一致 (A = B > 0)\n  lemma PlaneFlowIsConstantAB(h: Grid, A: real, B: real, C: real)\n    requires h != null\n    requires h.Height >= 3 && h.Width >= 3\n    requires A > 0 && B > 0\n    ensures forall r, c :: 0 < r < h.Height - 1 && 0 < c < h.Width - 1 ==> D8Direction(h, r, c) == NW\n  {\n    // 平面方程: z = A * x + B * y + C\n    // 由于 A > 0 且 B > 0, 平面沿 x 和 y 方向都有变化\n    // 因此,内部格点的水流方向应为 NW (西北方向)\n\n    forall r, c | 0 < r < h.Height - 1 && 0 < c < h.Width - 1\n      ensures D8Direction(h, r, c) == NW\n    {\n      var e: real := A * c + B * r + C;\n      for name, dp, dq, dist2 in [\n        (E, 1, 0, 1.0),\n        (SE, 1, 1, 2.0),\n        (S, 0, 1, 1.0),\n        (SW, -1, 1, 2.0),\n        (W, -1, 0, 1.0),\n        (NW, -1, -1, 2.0),\n        (N, 0, -1, 1.0),\n        (NE, 1, -1, 2.0)\n      ] do\n        var rr: int := r + dq;\n        var cc: int := c + dp;\n        if 0 <= rr < h.Height && 0 <= cc < h.Width {\n          var z: real := A * cc + B * rr + C;\n          assert e - z == A * (c - cc) + B * (r - rr);  // 由平面方程保证\n          if name == NW {\n            assert c - cc > 0;  // 向西方向, c > cc\n            assert r - rr > 0;  // 向北方向, r > rr\n            assert e - z > 0;  // 由于 A > 0, B > 0, c > cc, r > rr, e - z > 0\n          } else {\n            assert c - cc <= 0 || r - rr <= 0;  // 其他方向, c <= cc 或 r <= rr\n            assert e - z <= 0;  // 由于 A > 0, B > 0, c <= cc 或 r <= rr, e - z <= 0\n          }\n        }\n    }\n  }\n\n  // 主方法\n  method Main() {\n    print \"GeoProofBench P-005 — D8 最陡下降路径的三条性质\\n\";\n    print \"全部由编译期验证:dafny verify P005_d8.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

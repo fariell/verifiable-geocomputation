@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 276,
+    "completion_tokens": 1277,
+    "total_tokens": 1553,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 20
+  },
+  "api_id": "01a08ba4d179fea6125f2ca524eb721b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.matrix.notation\nimport tactic.linarith\n\n-- Define the D8 flow direction function\ndef D8_flow_direction (A B : ℝ) (x y : ℤ) : ℤ :=\n  if A * x + B * y < 0 then\n    if A * x + B * y < -1 / 2 then\n      if A * x + B * y < -1 then\n        if A * x + B * y < -3 / 2 then\n          1\n        else\n          2\n      else\n        if A * x + B * y < -1 / 2 then\n          4\n        else\n          8\n    else\n      if A * x + B * y < 0 then\n        16\n      else\n        32\n  else\n    if A * x + B * y < 1 / 2 then\n      if A * x + B * y < 1 then\n        if A * x + B * y < 3 / 2 then\n          64\n        else\n          128\n      else\n        if A * x + B * y < 1 / 2 then\n          256\n        else\n          512\n    else\n      1024\n\n-- Define the DEM function\ndef DEM (A B C : ℝ) (x y : ℤ) : ℝ := A * x + B * y + C\n\n-- Theorem: D8 flow direction is constant across interior cells that share the same (A, B, w)\n-- where w is the width of the cell, and translating the elevation datum C does not change the direction.\ntheorem D8_flow_direction_constant (A B : ℝ) (x y : ℤ) (C1 C2 : ℝ) (w : ℤ) :\n  D8_flow_direction A B x y = D8_flow_direction A B (x + w) (y + w) :=\nbegin\n  -- Simplify the expression for the flow direction\n  simp [D8_flow_direction],\n  -- Show that the condition A * x + B * y < 0 is equivalent to A * (x + w) + B * (y + w) < 0\n  have h1 : A * x + B * y < 0 ↔ A * (x + w) + B * (y + w) < 0,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Show that the condition A * x + B * y < -1 / 2 is equivalent to A * (x + w) + B * (y + w) < -1 / 2\n  have h2 : A * x + B * y < -1 / 2 ↔ A * (x + w) + B * (y + w) < -1 / 2,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Show that the condition A * x + B * y < -1 is equivalent to A * (x + w) + B * (y + w) < -1\n  have h3 : A * x + B * y < -1 ↔ A * (x + w) + B * (y + w) < -1,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Show that the condition A * x + B * y < -3 / 2 is equivalent to A * (x + w) + B * (y + w) < -3 / 2\n  have h4 : A * x + B * y < -3 / 2 ↔ A * (x + w) + B * (y + w) < -3 / 2,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Show that the condition A * x + B * y < 1 / 2 is equivalent to A * (x + w) + B * (y + w) < 1 / 2\n  have h5 : A * x + B * y < 1 / 2 ↔ A * (x + w) + B * (y + w) < 1 / 2,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Show that the condition A * x + B * y < 1 is equivalent to A * (x + w) + B * (y + w) < 1\n  have h6 : A * x + B * y < 1 ↔ A * (x + w) + B * (y + w) < 1,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Show that the condition A * x + B * y < 3 / 2 is equivalent to A * (x + w) + B * (y + w) < 3 / 2\n  have h7 : A * x + B * y < 3 / 2 ↔ A * (x + w) + B * (y + w) < 3 / 2,\n  { split,\n    { intro h, linarith },\n    { intro h, linarith } },\n  -- Use the equivalences to show that the flow direction is the same\n  rw [h1, h2, h3, h4, h5, h6, h7],\nend\n```\n\nThis Lean code formalizes the theorem that the D8 flow direction is constant across interior cells that share the same (A, B, w) and that translating the elevation datum C does not change the direction. The proof uses the `linarith` tactic to show that the conditions determining the flow direction are equivalent for the original and translated cells.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

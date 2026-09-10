@@ -1074,6 +1074,38 @@ task16-W3-live verdict = PASS (partial) / W3/RUNNING (M2 alive)
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live) · M2 Qwen DONE
+
+```
+[task]      task16-W3-live / L1 M2 批次收尾(A.15.4)
+[step]      后台 M1-retry+M2 作业结束(exit 0); 写 M2 真实指标; 启动 M3
+[cmd]       run_l1_batch … --models Qwen/Qwen2.5-72B-Instruct --prompts P0,P1,P2 --k 5
+            (log: M2_rc=0; elapsed_s≈10684; est_spend_usd≈0.335)
+[rc]        0 (verdict PASS, partial=true pct_done=98.1)
+[key lines]
+  M2 unique cells=210/210; gen=206; PROVIDER_ERROR=4 (all ReadTimeout)
+  M2 Dafny RAN=132: compile_ok=1 verify_ok=0  (cell-level)
+  M2 @1 (task×prompt×k0 dafny n=27): compile@1=0/27; verify@1=0/27
+  M2 @5: compile@5=1/27; verify@5=0/27
+  semantic RAN: UNCOMPILED=131 COMPILE_ONLY=1
+  Lean TOOLCHAIN_MISSING=74 — excluded from verify@
+  remaining timeout stubs: hessian P0k1 / P1k0 / P1k1; T6-terminate-lean P1k0
+  M1+M2 complete → kick M3=THUDM/GLM-4-32B-0414 (STATUS stays W3/RUNNING)
+[gates]     M2 batch PASS(partial 4 stubs); Dafny path PASS; Lean BLOCKED; M3/M4 PENDING
+[verdict]   PASS (partial — 2/4 models)
+[blocker]   (1) 4× M2 ReadTimeout stubs; (2) Lean verify@ AutoDL; (3) M3/M4 未跑 → 不进 W3.6
+```
+
+改了什么:
+- 新: `experiments/p2_llm/results/scored/m2_qwen72b_partial_metrics.json`
+- 改: INBOX §A UPDATED→23:44; TASK=M1+M2 done / M3 starting; `STATUS: W3/RUNNING`
+- 改: jsonl + raw/scored Qwen 产物(210 cells); 启动 M3 后台 batch
+未改 papers/; 未 git push; 未编造 verify@
+
+task16-W3-live verdict = PASS (M2 done) / W3/RUNNING (M3 next)
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

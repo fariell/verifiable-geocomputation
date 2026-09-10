@@ -1,0 +1,60 @@
+{
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "slot": "M2",
+  "unique": 210,
+  "status": {
+    "GENERATED": 206,
+    "PROVIDER_ERROR": 4
+  },
+  "verify_status": {
+    "RAN": 132,
+    "TOOLCHAIN_MISSING": 74,
+    "None": 4
+  },
+  "dafny_RAN": 132,
+  "cell_level_RAN": {
+    "compile_ok": 1,
+    "verify_ok": 0,
+    "n": 132
+  },
+  "task_prompt_k0_dafny": {
+    "n": 27,
+    "compile@1": 0.0,
+    "verify@1": 0.0,
+    "compile@5": 0.037037037037037035,
+    "verify@5": 0.0,
+    "n_c1": 0,
+    "n_v1": 0
+  },
+  "semantic_RAN": {
+    "UNCOMPILED": 131,
+    "COMPILE_ONLY": 1
+  },
+  "provider_error": [
+    [
+      "GPB-007-hessian",
+      "P0",
+      1,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadT"
+    ],
+    [
+      "GPB-007-hessian",
+      "P1",
+      0,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadT"
+    ],
+    [
+      "GPB-007-hessian",
+      "P1",
+      1,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadT"
+    ],
+    [
+      "GPB-T6-terminate-lean",
+      "P1",
+      0,
+      "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadT"
+    ]
+  ],
+  "est_spend_usd_batch": 0.3353
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 455,
+    "total_tokens": 723,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 12
+  },
+  "api_id": "01a08b788a4ee7b84572b3fc28dcb0e1",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.matrix.notation\nimport analysis.calculus.fderiv\nimport analysis.special_functions.pow\nimport data.real.basic\n\nvariables {α : Type*} [decidable_eq α] [fintype α] [linear_ordered_field α]\n\ndef discrete_laplacian (M : matrix (fin 3) (fin 3) α) (i j : fin 3) : α :=\n  M i j - (M (i + 1) j + M (i - 1) j + M i (j + 1) + M i (j - 1)) / 4\n\ndef is_discrete_local_max (M : matrix (fin 3) (fin 3) α) (i j : fin 3) : Prop :=\n  M i j ≥ M (i + 1) j ∧ M i j ≥ M (i - 1) j ∧ M i j ≥ M i (j + 1) ∧ M i j ≥ M i (j - 1)\n\ntheorem discrete_laplacian_of_local_max (M : matrix (fin 3) (fin 3) α) (i j : fin 3) (h : is_discrete_local_max M i j) :\n  discrete_laplacian M i j ≤ 0 :=\nbegin\n  have h1 : M i j - (M (i + 1) j + M (i - 1) j + M i (j + 1) + M i (j - 1)) / 4 ≤ 0,\n  { rw [sub_le_iff_le_add, div_le_iff (by norm_num : 0 < 4)],\n    linarith [h.1, h.2, h.3, h.4] },\n  exact h1,\nend\n```\n\nThis Lean code defines the discrete Laplacian and the condition for a discrete local maximum in a 3x3 matrix. It then proves the theorem that if the center cell is a discrete local maximum, the discrete Laplacian at the center is less than or equal to 0. The proof uses the `linarith` tactic to handle the arithmetic inequalities.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

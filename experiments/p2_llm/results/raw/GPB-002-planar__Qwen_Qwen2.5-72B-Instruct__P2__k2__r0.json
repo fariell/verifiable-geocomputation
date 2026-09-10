@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 286,
+    "completion_tokens": 281,
+    "total_tokens": 567,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 30
+  },
+  "api_id": "01a08b6e1282a66afa070caf709f452f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method HornFiniteDifference(A: real, B: real, C: real, w: real) returns (DzDx: real, DzDy: real)\n  requires w > 0\n  ensures DzDx == A\n  ensures DzDy == B\n{\n  // Define the grid points\n  var x0: real := 0.0;\n  var y0: real := 0.0;\n  var x1: real := x0 + w;\n  var y1: real := y0 + w;\n\n  // Sample the planar surface at these points\n  var z00: real := A * x0 + B * y0 + C;\n  var z10: real := A * x1 + B * y0 + C;\n  var z01: real := A * x0 + B * y1 + C;\n  var z11: real := A * x1 + B * y1 + C;\n\n  // Compute the finite differences\n  DzDx := (z10 - z00) / w;\n  DzDy := (z01 - z00) / w;\n\n  // Verify the results\n  assert DzDx == A;\n  assert DzDy == B;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

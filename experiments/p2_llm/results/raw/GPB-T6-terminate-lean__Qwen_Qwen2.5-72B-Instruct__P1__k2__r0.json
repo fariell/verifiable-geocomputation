@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3058,
+    "completion_tokens": 1693,
+    "total_tokens": 4751,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 2994
+  },
+  "api_id": "01a08bf12a501611e9e8ab0076dd062e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : Watershed under D8 flow\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. Dafny 的 `real` 除法要求 `requires w > 0.0`;Lean 的 `ℝ` 除法是全函数\n       (`x / 0 = 0`,由 `inv_zero` 定义)。所以这里的定理把 `w ≠ 0` 写成\n       **假设**而不是前置条件,算子在 w = 0 上仍有定义(只是无意义)。\n       这是两个系统在\"部分函数\"处理上的根本差别,也是双形式化的价值之一:\n       逼我们把\"算子何时有意义\"这件事说清楚,而不是藏在前置条件里。\n\n    2. 证明风格:Dafny 靠 SMT(nlinarith/Z3)自动搜;Lean 靠显式战术\n       (`ring_nf` / `field_simp` / `nlinarith`)。同一条性质在两边自动化的\n       程度差异,本身就是 GeoProofBench 想测量的东西。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Nat.Basic\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Watershed\n\n-- ==========================================================================\n-- D8 流向定义\n-- ==========================================================================\n\n/-- D8 流向定义: 8 个可能的方向 -/\ninductive D8Direction\n  | NoFlow\n  | N\n  | NE\n  | E\n  | SE\n  | S\n  | SW\n  | W\n  | NW\n\n/-- D8 流向的坐标变化 -/\ndef delta (d : D8Direction) : (ℤ × ℤ) :=\n  match d with\n  | D8Direction.NoFlow => (0, 0)\n  | D8Direction.N => (0, -1)\n  | D8Direction.NE => (1, -1)\n  | D8Direction.E => (1, 0)\n  | D8Direction.SE => (1, 1)\n  | D8Direction.S => (0, 1)\n  | D8Direction.SW => (-1, 1)\n  | D8Direction.W => (-1, 0)\n  | D8Direction.NW => (-1, -1)\n\n/-- D8 流向函数: 给定高程矩阵 h 和坐标 (r, c), 返回流向方向 -/\ndef d8_at (h : Array (Array ℝ)) (r c : ℕ) : D8Direction :=\n  -- 这里假设 d8_at 的具体实现已经定义,并且是确定性的\n  sorry\n\n-- ==========================================================================\n-- 终止性证明\n-- ==========================================================================\n\n/-- 严格下降后继关系: 如果 (r', c') 是 (r, c) 的 D8 流向,且 h(r', c') < h(r, c) -/\ndef strictDescentSuccessor (h : Array (Array ℝ)) (r c r' c' : ℕ) : Prop :=\n  d8_at h r c = D8Direction.ofNat (r' - r, c' - c) ∧ h[r'][c'] < h[r][c]\n\n/-- 终止性定理: 在有限单元集上,每个轨道在严格下降后继关系下终止于一个固定点 -/\ntheorem orbit_terminates_at_fixed_point (h : Array (Array ℝ)) (r c : ℕ) (h_bounds : ∀ r' c', 0 ≤ r' ∧ r' < h.size.1 ∧ 0 ≤ c' ∧ c' < h.size.2 → h[r'][c'] ≤ h[r][c]) :\n  ∃ (r' c' : ℕ), (r', c') = (r, c) ∨ strictDescentSuccessor h r c r' c' →\n  ∃ (r'' c'' : ℕ), (r'', c'') = (r, c) ∨ strictDescentSuccessor h r' c' r'' c'' →\n  ∃ (r''' c''' : ℕ), (r''', c''') = (r, c) ∨ strictDescentSuccessor h r'' c'' r''' c''' →\n  -- 递归终止条件\n  (r, c) = (r', c') ∨ (r, c) = (r'', c'') ∨ (r, c) = (r''', c''') ∨\n  strictDescentSuccessor h r''' c''' r' c' :=\n  sorry\n\n-- ==========================================================================\n-- 平面坡度: 每个内部轨道终止;每个单元有一个出口\n-- ==========================================================================\n\n/-- 平面坡度 DEM: 每个内部轨道终止;每个单元有一个出口 -/\ntheorem plane_slope_orbit_terminates (h : Array (Array ℝ)) (r c : ℕ) (h_bounds : ∀ r' c', 0 ≤ r' ∧ r' < h.size.1 ∧ 0 ≤ c' ∧ c' < h.size.2 → h[r'][c'] ≤ h[r][c]) :\n  ∃ (r' c' : ℕ), (r', c') = (r, c) ∨ strictDescentSuccessor h r c r' c' :=\n  sorry\n\n-- ==========================================================================\n-- 坑 DEM: 坑单元是 NoFlow; 剩余单元仍有唯一出口\n-- ==========================================================================\n\n/-- 坑 DEM: 坑单元是 NoFlow; 剩余单元仍有唯一出口 -/\ntheorem pit_dem_orbit_terminates (h : Array (Array ℝ)) (r c : ℕ) (pit : h[r][c] = 0) :\n  d8_at h r c = D8Direction.NoFlow ∨\n  ∃ (r' c' : ℕ), (r', c') = (r, c) ∨ strictDescentSuccessor h r c r' c' :=\n  sorry\n\n-- ==========================================================================\n-- 人工平坦 4-环: 轨道超出步数限制 (没有固定点)\n-- ==========================================================================\n\n/-- 人工平坦 4-环: 轨道超出步数限制 (没有固定点) -/\ntheorem flat_4_ring_no_fixed_point (h : Array (Array ℝ)) (r c : ℕ) (flat_ring : ∀ (r' c') ∈ RING, h[r'][c'] = h[r][c]) :\n  ¬ (∃ (r' c' : ℕ), (r', c') = (r, c) ∨ strictDescentSuccessor h r c r' c') :=\n  sorry\n\n-- ==========================================================================\n-- 辅助定义\n-- ==========================================================================\n\n/-- 4-环定义 -/\ndef RING : Set (ℕ × ℕ) := {(0, 0), (0, 1), (1, 1), (1, 0)}\n\n-- ==========================================================================\n-- 辅助定理\n-- ==========================================================================\n\n/-- 辅助定理: 4-环的后继关系 -/\ntheorem RING_succ (start : ℕ × ℕ) (max_steps : ℕ) :\n  ¬ (∃ (r' c' : ℕ), (r', c') = start ∨ strictDescentSuccessor h start.1 start.2 r' c') :=\n  sorry\n\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 258,
+    "completion_tokens": 1203,
+    "total_tokens": 1461,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 2
+  },
+  "api_id": "01a08bf91e20149ef4e3f560f907dcdb",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.finset\nimport tactic\n\nvariables {α : Type*} [fintype α] [decidable_eq α]\n\n-- Define a strict descent successor function\ndef strict_descent_successor (f : α → α) (lt : α → α → Prop) : Prop :=\n  ∀ x, f x ≠ x → lt (f x) x\n\n-- Define a fixed point\ndef is_fixed_point (f : α → α) (x : α) : Prop := f x = x\n\n-- Define the orbit of a point under a function\ndef orbit (f : α → α) (x : α) : set α := {y | ∃ n : ℕ, f^[n] x = y}\n\n-- Define a measure function that decreases along the orbit\ndef measure (f : α → α) (lt : α → α → Prop) (x : α) : ℕ :=\n  finset.univ.filter (λ y, y ∈ orbit f x).card\n\n-- The main theorem: Under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem strict_descent_orbit_terminates (f : α → α) (lt : α → α → Prop) (h : strict_descent_successor f lt) :\n  ∀ x : α, ∃ y : α, is_fixed_point f y ∧ y ∈ orbit f x :=\nbegin\n  -- Use well-founded induction on the measure function\n  refine well_founded.induction (measure_wf f lt) _,\n  -- Assume the induction hypothesis\n  intros x ih,\n  -- If x is a fixed point, we are done\n  by_cases hfx : f x = x,\n  { use x, split, exact hfx, exact ⟨0, hfx⟩ },\n  -- Otherwise, use the strict descent property\n  { have hlt : lt (f x) x := h x hfx,\n    -- Apply the induction hypothesis to f x\n    have ih_fx : ∃ y : α, is_fixed_point f y ∧ y ∈ orbit f (f x),\n      from ih (f x) (measure_decreases f lt x hfx),\n    -- Extract the fixed point from the induction hypothesis\n    cases ih_fx with y hy,\n    use y, split, exact hy.1, exact ⟨1, hy.2⟩ },\nend\n\n-- Lemma: The measure function is well-founded\nlemma measure_wf (f : α → α) (lt : α → α → Prop) : well_founded (λ x y, measure f lt x < measure f lt y) :=\nbegin\n  -- Use the well-foundedness of the natural numbers\n  apply nat.lt_wf,\n  -- Show that the measure function decreases\n  intros x y hxy,\n  -- If y is in the orbit of x, then the measure of y is less than the measure of x\n  rw measure,\n  rw measure,\n  -- Use the fact that the orbit of y is a subset of the orbit of x, minus x itself\n  apply finset.card_lt_card,\n  -- Show that the orbit of y is a subset of the orbit of x\n  apply finset.subset_of_mem_of_subset (finset.mem_univ y),\n  -- Show that the orbit of y is a proper subset of the orbit of x\n  apply finset.proper_subset_of_subset_of_ne (finset.subset_of_mem_of_subset (finset.mem_univ x)),\n  -- Show that x is not in the orbit of y\n  intros hxy',\n  -- If x were in the orbit of y, then the measure of y would not be less than the measure of x\n  have hxy'' : measure f lt y < measure f lt x := hxy,\n  -- This leads to a contradiction\n  exact lt_irrefl (measure f lt x) (lt_trans hxy'' (measure_decreases f lt x hfx)),\nend\n\n-- Lemma: The measure function decreases along the orbit\nlemma measure_decreases (f : α → α) (lt : α → α → Prop) (x : α) (hfx : f x ≠ x) : measure f lt (f x) < measure f lt x :=\nbegin\n  -- The measure of f x is the cardinality of the orbit of f x\n  rw measure,\n  -- The measure of x is the cardinality of the orbit of x\n  rw measure,\n  -- The orbit of f x is a subset of the orbit of x, minus x itself\n  apply finset.card_lt_card,\n  -- Show that the orbit of f x is a subset of the orbit of x\n  apply finset.subset_of_mem_of_subset (finset.mem_univ (f x)),\n  -- Show that the orbit of f x is a proper subset of the orbit of x\n  apply finset.proper_subset_of_subset_of_ne (finset.subset_of_mem_of_subset (finset.mem_univ x)),\n  -- Show that x is not in the orbit of f x\n  intros hxy,\n  -- If x were in the orbit of f x, then f x would be a fixed point\n  have hfix : is_fixed_point f (f x) := hxy.2,\n  -- This contradicts the strict descent property\n  exact hfx (hfix.1),\nend\n```\n\nThis Lean code formalizes the theorem that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point. It uses a well-founded induction on a measure function that counts the number of elements in the orbit of a point, ensuring that the measure decreases with each step in the orbit, which justifies the termination at a fixed point.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

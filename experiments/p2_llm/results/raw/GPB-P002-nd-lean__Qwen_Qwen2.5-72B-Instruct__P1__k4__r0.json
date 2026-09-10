@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3059,
+    "completion_tokens": 1040,
+    "total_tokens": 4099,
+    "prompt_tokens_details": {
+      "cached_tokens": 3040
+    },
+    "prompt_cache_hit_tokens": 3040,
+    "prompt_cache_miss_tokens": 19
+  },
+  "api_id": "01a08bd577061312fc24d25beeefa3a9",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-021\n   文件 : formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean\n   算子 : 1D left-outlet Fill\n   对偶 : formal/dafny/PCOMP_1.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. 本文件使用 Lean 的数学库和战术来证明性质,而不是依赖 SMT 求解器。\n    2. 证明风格:Lean 靠显式战术(`induction`, `rw`, `simp`, `linarith`等)。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Array.Basic\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Composition\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- 1D left-outlet Fill 操作符定义 -/\ndef pitFill1D (a : Array ℝ) : Array ℝ := \n  let fill := a.map (fun x => x)\n  let rows := a.size\n  let visited := Array.mk rows false\n  let heap := PriorityQueue.empty (fun (x y : ℝ × Nat × Nat) => x.1 < y.1)\n  let seed (i : Nat) : Unit := \n    if visited[i] then () else\n      fill[i] := a[i]\n      visited[i] := true\n      heap.push (fill[i], i, i)\n  for i in [0:rows] do\n    seed i\n  while let some (z, r, c) := heap.pop do\n    for (dr, dc) in [(-1, 0), (1, 0)] do\n      let nr := r + dr\n      if 0 ≤ nr ∧ nr < rows then\n        if ¬ visited[nr] then\n          fill[nr] := max (a[nr]) (fill[r])\n          visited[nr] := true\n          heap.push (fill[nr], nr, nr)\n  fill\n\n-- ==========================================================================\n-- 算子性质\n-- ==========================================================================\n\n/-- 1D left-outlet Fill 操作符产生非递减序列 -/\ntheorem pitFill1D_nondecreasing (a : Array ℝ) (i : Nat) (h : i + 1 < a.size) :\n  pitFill1D a[i] ≤ pitFill1D a[i + 1] := by\n  let fill := pitFill1D a\n  let rows := a.size\n  let visited := Array.mk rows false\n  let heap := PriorityQueue.empty (fun (x y : ℝ × Nat × Nat) => x.1 < y.1)\n  let seed (i : Nat) : Unit := \n    if visited[i] then () else\n      fill[i] := a[i]\n      visited[i] := true\n      heap.push (fill[i], i, i)\n  for i in [0:rows] do\n    seed i\n  while let some (z, r, c) := heap.pop do\n    for (dr, dc) in [(-1, 0), (1, 0)] do\n      let nr := r + dr\n      if 0 ≤ nr ∧ nr < rows then\n        if ¬ visited[nr] then\n          fill[nr] := max (a[nr]) (fill[r])\n          visited[nr] := true\n          heap.push (fill[nr], nr, nr)\n  -- 证明 fill[i] ≤ fill[i + 1]\n  have h_visited : visited[i] ∧ visited[i + 1], from\n    (by simp [visited, seed, rows, a.size, i, h]; linarith)\n  have h_fill : fill[i] ≤ fill[i + 1], from\n    (by simp [fill, pitFill1D, h_visited, i, h]; linarith)\n  exact h_fill\n\n-- ==========================================================================\n-- 冒烟测试(非命题,仅确认算子可计算)\n-- ==========================================================================\n\nexample : pitFill1D #[0, 1, 2, 3, 4] = #[0, 1, 2, 3, 4] := by\n  simp [pitFill1D]\n\nexample : pitFill1D #[4, 3, 2, 1, 0] = #[4, 4, 4, 4, 4] := by\n  simp [pitFill1D]\n\nend -- noncomputable section\n\nend VeriGIS.Composition\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

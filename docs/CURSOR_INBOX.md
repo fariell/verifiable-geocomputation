@@ -10,10 +10,10 @@
 ## §A · 当前活跃任务(读这个)
 
 STATUS: W3/RUNNING  
-UPDATED: 2026-09-10 20:54  
-TASK: **task16-W3 · L1 主实验**(M1 retry done; M2 Qwen2.5-72B live batch running)  
-M1: 210/210; PROVIDER_ERROR 13→2 left; Dafny RAN 134 cells (compile_ok 24 / verify_ok 18).  
-@1(task×prompt k0 dafny)=compile 6/27 · verify 4/27. M2 in progress (~18/210). Lean still TOOLCHAIN_MISSING.
+UPDATED: 2026-09-10 23:44  
+TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 GLM-4-32B starting)  
+M1 DeepSeek-V3.2 210/210: @1 dafny compile 6/27 verify 4/27.  
+M2 Qwen2.5-72B 210/210 (4 ReadTimeout): @1 dafny compile 0/27 verify 0/27; cell RAN compile_ok 1/132. Lean TOOLCHAIN_MISSING. Next M3→M4.
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。  
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:  

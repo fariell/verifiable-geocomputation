@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3211,
+    "completion_tokens": 1844,
+    "total_tokens": 5055,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 11
+  },
+  "api_id": "01a08b6cbc45b08e705894cb0580bd8e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-019\n//  文件 : formal/dafny/P019_horn_slope.dfy\n//  算子 : Horn (1981) 有限差分斜率估计\n//  覆盖 : GPB-019(平面精确恢复)、噪声对比\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P019_horn_slope.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  本文件证明 Horn (1981) 有限差分斜率估计在平面 z = A*x + B*y + C 上\n//  精确恢复 A 和 B (代数上为真,不是渐近一致)。\n//  同时,提供噪声对比,说明为什么一阶导数可证而二阶导数不可证。\n//\n// ===========================================================================\n\nmodule HornSlope {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(与 P-001 相同:p 向右,q 向下)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // Horn 有限差分斜率估计:\n  //   DzDx = (f - d) / (2 * w)\n  //   DzDy = (h - b) / (2 * w)\n  // ------------------------------------------------------------------\n\n  function method DzDx(d: real, f: real, w: real): real\n    requires w > 0.0\n  {\n    (f - d) / (2.0 * w)\n  }\n\n  function method DzDy(b: real, h: real, w: real): real\n    requires w > 0.0\n  {\n    (h - b) / (2.0 * w)\n  }\n\n  // ------------------------------------------------------------------\n  // 平面 z = A*x + B*y + C 上的 Horn 有限差分斜率估计\n  // ------------------------------------------------------------------\n\n  function method PlaneZ(d: real, f: real, b: real, h: real, A: real, B: real, C: real, w: real): (real, real)\n    requires w > 0.0\n  {\n    (A * d + B * 0.0 + C, A * f + B * 0.0 + C, A * 0.0 + B * b + C, A * 0.0 + B * h + C)\n  }\n\n  lemma HornSlopeExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures DzDx(PlaneZ(-1.0, 1.0, 0.0, 0.0, A, B, C, w).0, PlaneZ(-1.0, 1.0, 0.0, 0.0, A, B, C, w).1, w) == A\n    ensures DzDy(PlaneZ(0.0, 0.0, -1.0, 1.0, A, B, C, w).2, PlaneZ(0.0, 0.0, -1.0, 1.0, A, B, C, w).3, w) == B\n  {\n    var d, f, b, h := PlaneZ(-1.0, 1.0, -1.0, 1.0, A, B, C, w);\n    assert d == A * (-1.0) + C;\n    assert f == A * 1.0 + C;\n    assert b == B * (-1.0) + C;\n    assert h == B * 1.0 + C;\n\n    assert DzDx(d, f, w) == (f - d) / (2.0 * w);\n    assert DzDx(d, f, w) == (A * 1.0 + C - (A * (-1.0) + C)) / (2.0 * w);\n    assert DzDx(d, f, w) == (A * 2.0) / (2.0 * w);\n    assert DzDx(d, f, w) == A;\n\n    assert DzDy(b, h, w) == (h - b) / (2.0 * w);\n    assert DzDy(b, h, w) == (B * 1.0 + C - (B * (-1.0) + C)) / (2.0 * w);\n    assert DzDy(b, h, w) == (B * 2.0) / (2.0 * w);\n    assert DzDy(b, h, w) == B;\n  }\n\n  // ------------------------------------------------------------------\n  // 噪声对比: i.i.d. 高程噪声\n  // ------------------------------------------------------------------\n\n  function method AddNoise(z: real, delta: real): real\n  {\n    z + delta\n  }\n\n  lemma SlopeErrorGrowsWithNoise(A: real, B: real, C: real, w: real, delta: real)\n    requires w > 0.0\n    ensures DzDx(AddNoise(PlaneZ(-1.0, 1.0, 0.0, 0.0, A, B, C, w).0, delta),\n                AddNoise(PlaneZ(-1.0, 1.0, 0.0, 0.0, A, B, C, w).1, delta), w) == A - (2.0 * delta) / (2.0 * w)\n    ensures DzDy(AddNoise(PlaneZ(0.0, 0.0, -1.0, 1.0, A, B, C, w).2, delta),\n                AddNoise(PlaneZ(0.0, 0.0, -1.0, 1.0, A, B, C, w).3, delta), w) == B - (2.0 * delta) / (2.0 * w)\n  {\n    var d, f, b, h := PlaneZ(-1.0, 1.0, -1.0, 1.0, A, B, C, w);\n    var d_noisy := AddNoise(d, delta);\n    var f_noisy := AddNoise(f, delta);\n    var b_noisy := AddNoise(b, delta);\n    var h_noisy := AddNoise(h, delta);\n\n    assert DzDx(d_noisy, f_noisy, w) == (f_noisy - d_noisy) / (2.0 * w);\n    assert DzDx(d_noisy, f_noisy, w) == (f + delta - (d + delta)) / (2.0 * w);\n    assert DzDx(d_noisy, f_noisy, w) == (f - d) / (2.0 * w);\n    assert DzDx(d_noisy, f_noisy, w) == A - (2.0 * delta) / (2.0 * w);\n\n    assert DzDy(b_noisy, h_noisy, w) == (h_noisy - b_noisy) / (2.0 * w);\n    assert DzDy(b_noisy, h_noisy, w) == (h + delta - (b + delta)) / (2.0 * w);\n    assert DzDy(b_noisy, h_noisy, w) == (h - b) / (2.0 * w);\n    assert DzDy(b_noisy, h_noisy, w) == B - (2.0 * delta) / (2.0 * w);\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-019 — Horn Slope: exact on planes + noise contrast\\n\";\n  print \"全部由编译期验证:dafny verify P019_horn_slope.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1564,
+    "completion_tokens": 1128,
+    "total_tokens": 2692,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08be7d2283af7bda99c6bf3c11ae6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.finset\nimport data.array.basic\nimport tactic.well_founded\n\nnamespace VeriGIS\n\n-- Define the type for a grid cell\ndef Cell := ℕ × ℕ\n\n-- Define the type for a grid\ndef Grid := array (array ℕ)\n\n-- Define the D8 direction set\ndef D8Directions := fin 8\n\n-- Define the D8 direction mapping\ndef d8Delta : D8Directions → Cell\n| 0 := (0, -1)\n| 1 := (1, -1)\n| 2 := (1, 0)\n| 3 := (1, 1)\n| 4 := (0, 1)\n| 5 := (-1, 1)\n| 6 := (-1, 0)\n| 7 := (-1, -1)\n\n-- Define the D8 successor function\ndef d8Successor (h : Grid) (r c : ℕ) : option Cell :=\nlet n := h.size in\nif r < n.1 ∧ c < n.2 then\n  let minDir := (finset.univ : finset D8Directions).min (λ d, h (r + (d8Delta d).1) (c + (d8Delta d).2)) in\n  if minDir.is_none then none else\n  let minDir := minDir.get! in\n  if h (r + (d8Delta minDir).1) (c + (d8Delta minDir).2) < h r c then\n    some (r + (d8Delta minDir).1, c + (d8Delta minDir).2)\n  else none\nelse none\n\n-- Define the orbit of a cell under the D8 successor function\ndef orbit (h : Grid) (r c : ℕ) : stream Cell :=\nstream.corec (λ p, match d8Successor h p.1 p.2 with\n| some (nr, nc) := (nr, nc) :: orbit h nr nc\n| none := []\n\n-- Define the termination of an orbit\ndef terminatesAt (h : Grid) (r c : ℕ) : option Cell :=\nlet or := orbit h r c in\nor.find? (λ p, d8Successor h p.1 p.2 = none)\n\n-- Define the fixed point of a cell\ndef isFixedPoint (h : Grid) (r c : ℕ) : Prop :=\nd8Successor h r c = none\n\n-- Define the well-founded relation for the D8 successor function\ndef d8WellFounded (h : Grid) : well_founded (λ p q, d8Successor h p.1 p.2 = some q) :=\nbegin\n  -- Define a measure function that decreases with each step\n  let measure : Cell → ℕ := λ (r, c), h r c,\n  -- Prove that the measure function is well-founded\n  apply well_founded.intro,\n  intros p q hq,\n  -- Unfold the measure function and the D8 successor function\n  unfold measure,\n  -- Use the definition of the D8 successor function to show that the measure decreases\n  cases hq with nr nc,\n  cases d8Successor h p.1 p.2 with q' hq',\n  { -- If there is no successor, the measure does not change\n    refl },\n  { -- If there is a successor, the measure decreases\n    have hdec : h q'.1 q'.2 < h p.1 p.2,\n    { -- Use the definition of the D8 successor function to show that the height decreases\n      cases hq' with d hd,\n      rw hd,\n      exact (finset.univ : finset D8Directions).min_le (λ d, h (p.1 + (d8Delta d).1) (p.2 + (d8Delta d).2) d },\n    -- Show that the measure decreases\n    exact nat.lt_of_le_of_ne (le_refl (h p.1 p.2)) (ne_of_lt hdec) }\nend\n\n-- Prove that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem orbitTerminatesAtFixedPoint (h : Grid) (r c : ℕ) : terminatesAt h r c ≠ none → isFixedPoint h (terminatesAt h r c).get :=\nbegin\n  -- Assume the orbit terminates at some point\n  intros hterm,\n  -- Let p be the point where the orbit terminates\n  let p := (terminatesAt h r c).get hterm,\n  -- Show that p is a fixed point\n  have hfixed : d8Successor h p.1 p.2 = none,\n  { -- Use the definition of terminatesAt to show that p has no successor\n    rw terminatesAt,\n    cases stream.find? (λ p, d8Successor h p.1 p.2 = none) (orbit h r c) with q hq,\n    { -- If the orbit does not terminate, contradiction\n      exfalso,\n      exact hterm },\n    { -- If the orbit terminates at q, then q must be a fixed point\n      exact hq } },\n  -- Conclude that p is a fixed point\n  exact hfixed\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

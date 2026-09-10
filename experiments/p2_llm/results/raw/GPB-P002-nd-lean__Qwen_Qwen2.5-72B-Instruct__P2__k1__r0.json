@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 268,
+    "completion_tokens": 370,
+    "total_tokens": 638,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 12
+  },
+  "api_id": "01a08bd67204861856ccabdab3c60fcd",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.vector\nimport data.nat.basic\n\nnamespace vector\n\ndef fill {α : Type*} [has_zero α] (a : vector α n) : vector α n :=\na.map (λ x, if x = 0 then 1 else x)\n\nlemma fill_nondecreasing {α : Type*} [linear_ordered_semiring α] (a : vector α n) (i : ℕ) (h : i < n - 1) :\n  fill a i ≤ fill a (i + 1) :=\nbegin\n  have hi : i < n := nat.lt_of_lt_sub_right h,\n  have hi1 : i + 1 < n := nat.lt_succ_of_lt hi,\n  simp only [fill, vector.nth_map],\n  split_ifs; try {refl},\n  { exact le_refl (a.nth i) },\n  { exact le_refl (a.nth (i + 1)) },\n  { exact le_of_lt (nat.lt_of_lt_sub_right h) },\n  { exact le_of_lt (nat.lt_succ_of_lt (nat.lt_of_lt_sub_right h)) },\nend\n\nend vector\n```\n\nThis Lean code defines a `fill` function for a vector, which replaces all zeros with ones. The lemma `fill_nondecreasing` proves that for any index `i` in the vector, the value at `i` is less than or equal to the value at `i + 1` in the filled vector, provided that `i` is within the bounds of the vector. The proof uses the `split_ifs` tactic to handle the cases where the elements at `i` and `i + 1` are zero or not, and applies the appropriate lemmas to show the nondecreasing property.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

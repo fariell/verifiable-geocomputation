@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1565,
+    "completion_tokens": 765,
+    "total_tokens": 2330,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1501
+  },
+  "api_id": "01a08bd052a1ce4e40d8a0ba89639124",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.array.basic\nimport data.real.basic\nimport tactic\n\nnamespace VeriGIS\n\nsection FillOperator\n\nvariables {α : Type} [linear_order α] [decidable_eq α]\n\n-- Define a 1D grid as a list of elements\ndef grid1D := list α\n\n-- Define the 1D left-outlet Fill operator\ndef fill1D (a : grid1D) : grid1D :=\n  let fill := a.map (λ x, x) in\n  let rec fill' (i : ℕ) (fill : grid1D) : grid1D :=\n    if i < fill.length - 1 then\n      let new_val := max (fill.nth i) (fill.nth (i + 1)) in\n      fill'.update_nth (i + 1) new_val\n    else\n      fill\n  in\n  fill'.iterate (0 : ℕ) fill (a.length - 1)\n\n-- Define the property that the Fill operator yields a nondecreasing sequence\ndef nondecreasing (a : grid1D) : Prop :=\n  ∀ i, i < a.length - 1 → a.nth i ≤ a.nth (i + 1)\n\n-- Prove that the 1D left-outlet Fill operator yields a nondecreasing sequence\ntheorem fill1D_nondecreasing (a : grid1D) : nondecreasing (fill1D a) :=\nbegin\n  unfold fill1D,\n  induction a with x a' ih,\n  { simp [nondecreasing, list.length, list.nth], },\n  { simp [nondecreasing, list.length, list.nth, fill1D, list.map, list.update_nth],\n    have h : (a'.iterate (0 : ℕ) (a'.map (λ x, x)) (a'.length - 1)).length = a'.length,\n    { simp [list.iterate, list.length], },\n    have h' : ∀ i, i < a'.length - 1 → (a'.iterate (0 : ℕ) (a'.map (λ x, x)) (a'.length - 1)).nth i ≤ (a'.iterate (0 : ℕ) (a'.map (λ x, x)) (a'.length - 1)).nth (i + 1),\n    { intros i hi,\n      simp [list.iterate, list.update_nth, list.nth],\n      cases a' with y a''; simp,\n      { exact false.elim (lt_irrefl i hi), },\n      { have h1 : i < a''.length - 1,\n        { linarith, },\n        have h2 : (a''.iterate (0 : ℕ) (a''.map (λ x, x)) (a''.length - 1)).nth i ≤ (a''.iterate (0 : ℕ) (a''.map (λ x, x)) (a''.length - 1)).nth (i + 1),\n        { exact ih h1, },\n        have h3 : (a''.iterate (0 : ℕ) (a''.map (λ x, x)) (a''.length - 1)).nth (i + 1) ≤ (a''.iterate (0 : ℕ) (a''.map (λ x, x)) (a''.length - 1)).nth (i + 2),\n        { exact ih (lt_of_lt_of_le hi (le_of_lt (lt_add_one (a''.length - 1)))), },\n        exact le_trans h2 h3, }},\n    exact h', }\nend\n\nend FillOperator\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

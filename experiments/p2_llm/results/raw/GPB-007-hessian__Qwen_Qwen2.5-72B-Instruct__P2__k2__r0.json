@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 291,
+    "completion_tokens": 717,
+    "total_tokens": 1008,
+    "prompt_tokens_details": {
+      "cached_tokens": 288
+    },
+    "prompt_cache_hit_tokens": 288,
+    "prompt_cache_miss_tokens": 3
+  },
+  "api_id": "01a08b8c9f0d8ab3ddcda21efd34d4a4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method ZevenbergenThorneHessian(A: real, B: real, C: real, D: real, E: real, F: real, w: real) returns (h11: real, h22: real, h12: real)\n  requires w > 0\n  ensures h11 == 2 * A\n  ensures h22 == 2 * B\n  ensures h12 == C\n{\n  // Define the 3x3 window points\n  var x0 := 0.0;\n  var y0 := 0.0;\n  var x1 := w;\n  var y1 := w;\n  var x2 := 2 * w;\n  var y2 := 2 * w;\n\n  // Compute the z values at the 3x3 window points\n  var z00 := A * x0 * x0 + B * y0 * y0 + C * x0 * y0 + D * x0 + E * y0 + F;\n  var z01 := A * x0 * x0 + B * y1 * y1 + C * x0 * y1 + D * x0 + E * y1 + F;\n  var z02 := A * x0 * x0 + B * y2 * y2 + C * x0 * y2 + D * x0 + E * y2 + F;\n  var z10 := A * x1 * x1 + B * y0 * y0 + C * x1 * y0 + D * x1 + E * y0 + F;\n  var z11 := A * x1 * x1 + B * y1 * y1 + C * x1 * y1 + D * x1 + E * y1 + F;\n  var z12 := A * x1 * x1 + B * y2 * y2 + C * x1 * y2 + D * x1 + E * y2 + F;\n  var z20 := A * x2 * x2 + B * y0 * y0 + C * x2 * y0 + D * x2 + E * y0 + F;\n  var z21 := A * x2 * x2 + B * y1 * y1 + C * x2 * y1 + D * x2 + E * y1 + F;\n  var z22 := A * x2 * x2 + B * y2 * y2 + C * x2 * y2 + D * x2 + E * y2 + F;\n\n  // Compute the discrete Hessian\n  h11 := (z00 + z20 - 2 * z10 + z02 + z22 - 2 * z12) / (w * w);\n  h22 := (z00 + z02 - 2 * z01 + z20 + z22 - 2 * z21) / (w * w);\n  h12 := (z02 + z20 - z00 - z22) / (4 * w * w);\n\n  // Verify the results\n  assert h11 == 2 * A;\n  assert h22 == 2 * B;\n  assert h12 == C;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

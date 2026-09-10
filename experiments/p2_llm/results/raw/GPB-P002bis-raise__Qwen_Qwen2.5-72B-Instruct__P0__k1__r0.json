@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1573,
+    "completion_tokens": 665,
+    "total_tokens": 2238,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "prompt_cache_hit_tokens": 96,
+    "prompt_cache_miss_tokens": 1477
+  },
+  "api_id": "01a08bd8783931abdc00a322a92abd19",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PCOMP_1 {\n\n  // Define the grid and its properties\n  type Elevation = real\n  type Grid = array2<Elevation>\n\n  // Define the 4-neighborhood\n  const NBR4: set<(int, int)> := { (-1, 0), (1, 0), (0, -1), (0, 1) }\n\n  // Define the function to get the 4-neighbors of a cell\n  function method Get4Neighbors(grid: Grid, r: int, c: int): set<(int, int)>\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n  {\n    { (nr, nc) | (dr, dc) in NBR4 :: 0 <= nr < grid.Rows && 0 <= nc < grid.Cols }\n  }\n\n  // Define the function to get the elevation of a cell\n  function method GetElevation(grid: Grid, r: int, c: int): Elevation\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n  {\n    grid[r, c]\n  }\n\n  // Define the function to raise a 4-neighbor\n  method RaiseNbr(grid: Grid, r: int, c: int, fill: Elevation)\n    modifies grid\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires fill >= GetElevation(grid, r, c)\n  {\n    for (dr, dc) in NBR4 {\n      var nr := r + dr;\n      var nc := c + dc;\n      if 0 <= nr < grid.Rows && 0 <= nc < grid.Cols {\n        var originalElevation := GetElevation(grid, nr, nc);\n        var newElevation := max(originalElevation, fill);\n        grid[nr, nc] := newElevation;\n      }\n    }\n  }\n\n  // Define the property to be proven\n  lemma LocalRaiseStepPreservesElevation(grid: Grid, r: int, c: int, fill: Elevation)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires fill >= GetElevation(grid, r, c)\n  {\n    var originalGrid := grid;\n    RaiseNbr(grid, r, c, fill);\n    forall nr, nc | (nr, nc) in Get4Neighbors(grid, r, c) {\n      assert GetElevation(grid, nr, nc) >= GetElevation(originalGrid, nr, nc);\n      assert GetElevation(grid, nr, nc) >= max(GetElevation(originalGrid, nr, nc), fill);\n    }\n  }\n\n  // Define the main theorem\n  theorem MainTheorem(grid: Grid, r: int, c: int, fill: Elevation)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires fill >= GetElevation(grid, r, c)\n  {\n    LocalRaiseStepPreservesElevation(grid, r, c, fill);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

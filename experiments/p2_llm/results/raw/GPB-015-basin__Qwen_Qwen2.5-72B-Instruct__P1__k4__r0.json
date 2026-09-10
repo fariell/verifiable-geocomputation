@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3231,
+    "completion_tokens": 1533,
+    "total_tokens": 4764,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 31
+  },
+  "api_id": "01a08baf2ea2382f88f5fbe6631eb762",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 确定性 D8 流向下的流域唯一性\n//  覆盖 : GPB-015(流域唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  在确定性 D8 流向模型下,从同一个起点出发,如果在有限步数内到达了出口(固定点),\n//  则这些出口是相同的。这一性质确保了在确定性模型下,每个单元格的流域是唯一的。\n//  本文件通过定义有限迭代步数 stepN 来形式化这一性质,并证明其正确性,不依赖于\n//  SMT 递归搜索固定点。\n// ===========================================================================\n\nmodule WatershedUniqueness {\n\n  // D8 流向方向\n  const DIRS: (string, int, int, int)[8] = [\n    (\"N\", 0, -1, 1), (\"NE\", 1, -1, 2), (\"E\", 1, 0, 1),\n    (\"SE\", 1, 1, 2), (\"S\", 0, 1, 1), (\"SW\", -1, 1, 2),\n    (\"W\", -1, 0, 1), (\"NW\", -1, -1, 2)\n  ];\n\n  // 获取 D8 流向\n  function d8_at(h: array2<int>, r: int, c: int): (string, int, int) {\n    var min_slope: int := 1000000;\n    var min_dir: (string, int, int) := (\"NoFlow\", 0, 0);\n    for (name, dp, dq, dist2) in DIRS {\n      var nr: int := r + dq;\n      var nc: int := c + dp;\n      if 0 <= nr < h.Length0 && 0 <= nc < h.Length1 {\n        var slope: int := h[r, c] - h[nr, nc];\n        if slope < min_slope {\n          min_slope := slope;\n          min_dir := (name, dp, dq);\n        }\n      }\n    }\n    return min_dir;\n  }\n\n  // 有限步数迭代\n  function stepN(h: array2<int>, r: int, c: int, max_steps: int): (bool, (int, int), seq<(int, int)>) {\n    var path: seq<(int, int)> := [ (r, c) ];\n    for i: int | 0 <= i < max_steps {\n      var (name, dp, dq) := d8_at(h, r, c);\n      if name == \"NoFlow\" {\n        return (true, (r, c), path);\n      }\n      var nr: int := r + dq;\n      var nc: int := c + dp;\n      if !(0 <= nr < h.Length0 && 0 <= nc < h.Length1) {\n        return (true, (r, c), path);\n      }\n      r := nr;\n      c := nc;\n      path := path + [ (r, c) ];\n      if |path| != |path.Distinct| {\n        return (false, (r, c), path);\n      }\n    }\n    return (false, (r, c), path);\n  }\n\n  // 流域唯一性引理\n  lemma WatershedUniqueness(h: array2<int>, r: int, c: int, max_steps1: int, max_steps2: int)\n    requires 0 <= r < h.Length0\n    requires 0 <= c < h.Length1\n    requires max_steps1 > 0\n    requires max_steps2 > 0\n    ensures stepN(h, r, c, max_steps1).1 == stepN(h, r, c, max_steps2).1\n  {\n    var (reached1, outlet1, path1) := stepN(h, r, c, max_steps1);\n    var (reached2, outlet2, path2) := stepN(h, r, c, max_steps2);\n\n    // 如果在 max_steps1 步内到达了出口,则在 max_steps2 步内也应到达同一出口\n    if reached1 {\n      assert outlet1 == outlet2;\n    } else {\n      // 如果在 max_steps1 步内没有到达出口,则在 max_steps2 步内也不会到达出口\n      assert !reached2;\n    }\n  }\n\n  // 平面坡度测试\n  method TestPlanarSlope() {\n    var h: array2<int> := new int[5, 5];\n    for i: int | 0 <= i < 5 {\n      for j: int | 0 <= j < 5 {\n        h[i, j] := i + j;\n      }\n    }\n    var (reached, outlet, path) := stepN(h, 2, 2, 10);\n    assert reached;\n    assert outlet == (4, 4);\n  }\n\n  // 坑 DEM 测试\n  method TestPitDEM() {\n    var h: array2<int> := new int[5, 5];\n    for i: int | 0 <= i < 5 {\n      for j: int | 0 <= j < 5 {\n        h[i, j] := 10 - (i - 2) * (i - 2) - (j - 2) * (j - 2);\n      }\n    }\n    h[2, 2] := 0; // 坑\n    var (reached, outlet, path) := stepN(h, 2, 2, 10);\n    assert reached;\n    assert outlet == (2, 2);\n  }\n\n  // 人工平坦 4-环测试\n  method TestFlat4Ring() {\n    var h: array2<int> := new int[5, 5];\n    for i: int | 0 <= i < 5 {\n      for j: int | 0 <= j < 5 {\n        h[i, j] := 0;\n      }\n    }\n    var (reached, outlet, path) := stepN(h, 0, 0, 4);\n    assert !reached;\n  }\n\n  method Main() {\n    print \"GeoProofBench P-006 — 确定性 D8 流向下的流域唯一性\\n\";\n    print \"全部由编译期验证:dafny verify P006_watershed.dfy\\n\";\n    TestPlanarSlope();\n    TestPitDEM();\n    TestFlat4Ring();\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

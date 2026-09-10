@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1573,
+    "completion_tokens": 853,
+    "total_tokens": 2426,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "prompt_cache_hit_tokens": 96,
+    "prompt_cache_miss_tokens": 1477
+  },
+  "api_id": "01a08bd8d74c9ecb45d343ca9abbc333",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "predicate Is4Neighbor(grid: array2<float>, r: int, c: int, nr: int, nc: int)\n  requires 0 <= r < grid.Height && 0 <= c < grid.Width\n  requires 0 <= nr < grid.Height && 0 <= nc < grid.Width\n{\n  (r == nr && (c == nc + 1 || c == nc - 1)) || (c == nc && (r == nr + 1 || r == nr - 1))\n}\n\nmethod RaiseNbr(grid: array2<float>, r: int, c: int, fill: array2<float>)\n  requires 0 <= r < grid.Height && 0 <= c < grid.Width\n  requires fill.Length0 == grid.Length0 && fill.Length1 == grid.Length1\n  modifies fill\n{\n  var originalElevation := grid[r, c];\n  var processedElevation := fill[r, c];\n  for dr, dc in NBR4 do\n    var nr := r + dr;\n    var nc := c + dc;\n    if 0 <= nr < grid.Height && 0 <= nc < grid.Width then\n      fill[nr, nc] := max(fill[nr, nc], processedElevation);\n}\n\nlemma RaiseNbrPreservesElevation(grid: array2<float>, r: int, c: int, fill: array2<float>)\n  requires 0 <= r < grid.Height && 0 <= c < grid.Width\n  requires fill.Length0 == grid.Length0 && fill.Length1 == grid.Width\n  ensures forall nr, nc :: 0 <= nr < grid.Height && 0 <= nc < grid.Width ==> fill[nr, nc] >= grid[nr, nc]\n{\n  var originalFill := fill;\n  RaiseNbr(grid, r, c, fill);\n  assert forall nr, nc :: 0 <= nr < grid.Height && 0 <= nc < grid.Width ==> fill[nr, nc] >= originalFill[nr, nc];\n  assert forall nr, nc :: 0 <= nr < grid.Height && 0 <= nc < grid.Width ==> originalFill[nr, nc] >= grid[nr, nc];\n}\n\nlemma RaiseNbrLiftsNeighbor(grid: array2<float>, r: int, c: int, fill: array2<float>)\n  requires 0 <= r < grid.Height && 0 <= c < grid.Width\n  requires fill.Length0 == grid.Length0 && fill.Length1 == grid.Width\n  ensures forall nr, nc :: Is4Neighbor(grid, r, c, nr, nc) ==> fill[nr, nc] >= max(grid[nr, nc], fill[r, c])\n{\n  var originalFill := fill;\n  RaiseNbr(grid, r, c, fill);\n  assert forall nr, nc :: Is4Neighbor(grid, r, c, nr, nc) ==> fill[nr, nc] >= max(originalFill[nr, nc], fill[r, c]);\n  assert forall nr, nc :: Is4Neighbor(grid, r, c, nr, nc) ==> originalFill[nr, nc] >= grid[nr, nc];\n}\n\nconst NBR4: set<(int, int)> := { (-1, 0), (1, 0), (0, -1), (0, 1) };\n\nmethod main() {\n  var grid: array2<float> := new float[5, 5];\n  var fill: array2<float> := new float[5, 5];\n  for r := 0 to 4 do\n    for c := 0 to 4 do\n      grid[r, c] := 0.0;\n      fill[r, c] := 0.0;\n  fill[2, 2] := 1.0;\n  RaiseNbr(grid, 2, 2, fill);\n  assert forall nr, nc :: Is4Neighbor(grid, 2, 2, nr, nc) ==> fill[nr, nc] >= max(grid[nr, nc], fill[2, 2]);\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

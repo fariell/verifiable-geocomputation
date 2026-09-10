@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3231,
+    "completion_tokens": 1745,
+    "total_tokens": 4976,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 3167
+  },
+  "api_id": "01a08ba9a3aed3a2b68b70dd2efc10ad",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : D8 流向\n//  覆盖 : GPB-015 (流域唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  流域划分是地理信息系统中的基本问题,其核心在于确定每个格点的流向。\n//  D8 算法是一种常用的确定性算法,它基于 8 个方向的坡度来决定流向。\n//  本文件证明了 D8 算法的一个重要性质:如果从同一个起点出发,在有限步数内\n//  到达同一个出水口,那么这个出水口是唯一的。这为 D8 算法的正确性和一致性\n//  提供了理论基础。\n//\n// ===========================================================================\n\nmodule WatershedUniqueness {\n\n  // D8 方向定义\n  const DIRS: seq<(string, int, int)> := [ (\"N\", 0, -1), (\"NE\", 1, -1), (\"E\", 1, 0), (\"SE\", 1, 1),\n                                          (\"S\", 0, 1), (\"SW\", -1, 1), (\"W\", -1, 0), (\"NW\", -1, -1) ];\n\n  // 获取 D8 方向\n  function _delta(name: string): (int, int)\n  {\n    for dname, dp, dq in DIRS\n      if dname == name\n        return (dp, dq);\n    return (0, 0); // 默认返回 (0, 0) 表示 NoFlow\n  }\n\n  // 获取 D8 流向\n  function d8_at(h: array2<real>, r: int, c: int): string\n  {\n    var max_slope: real := -1.0;\n    var max_dir: string := \"NoFlow\";\n    for dp, dq in [ (-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1) ]\n      if 0 <= r + dp < h.Height && 0 <= c + dq < h.Width\n        var slope: real := (h[r + dp, c + dq] - h[r, c]) / real.FromInt(dp * dp + dq * dq);\n        if slope > max_slope\n          max_slope := slope;\n          max_dir := DIRS[dp + 1 + (dq + 1) * 3].0; // 8 个方向的索引\n    return max_dir;\n  }\n\n  // 有限步数内跟随 D8 流向\n  function follow_d8(h: array2<real>, r: int, c: int, max_steps: int): (bool, (int, int), seq<(int, int)>)\n  {\n    var path: seq<(int, int)> := [ (r, c) ];\n    for i: int | 0 <= i < max_steps\n      var d: string := d8_at(h, r, c);\n      if d == \"NoFlow\"\n        return (true, (r, c), path);\n      var dp, dq := _delta(d);\n      var nr, nc := r + dq, c + dp;\n      if 0 <= nr < h.Height && 0 <= nc < h.Width\n        r, c := nr, nc;\n        path := path + [ (r, c) ];\n        if |path| != |path.Distinct()|\n          return (false, (r, c), path);\n    return (false, (r, c), path);\n  }\n\n  // 确定性 D8 算法的流域唯一性\n  lemma WatershedUniqueness(h: array2<real>, r: int, c: int, max_steps: int)\n    requires 0 <= r < h.Height\n    requires 0 <= c < h.Width\n    requires max_steps > 0\n    ensures (forall n1, n2 :: 0 <= n1 < max_steps && 0 <= n2 < max_steps ==>\n             let (ok1, outlet1, path1) := follow_d8(h, r, c, n1),\n                 (ok2, outlet2, path2) := follow_d8(h, r, c, n2)\n             in ok1 && ok2 ==> outlet1 == outlet2)\n  {\n    // 证明思路:使用归纳法证明,如果在 n1 步和 n2 步内都到达出水口,则出水口相同\n    // 基础情况: n1 = 0 或 n2 = 0,此时出水口为起点 (r, c)\n    if max_steps == 1\n    {\n      var (ok1, outlet1, path1) := follow_d8(h, r, c, 0);\n      var (ok2, outlet2, path2) := follow_d8(h, r, c, 0);\n      assert ok1 && ok2 ==> outlet1 == outlet2;\n    }\n    else\n    {\n      // 归纳假设:对于所有小于 max_steps 的步数,出水口唯一\n      var (ok1, outlet1, path1) := follow_d8(h, r, c, max_steps - 1);\n      var (ok2, outlet2, path2) := follow_d8(h, r, c, max_steps - 1);\n      assert ok1 && ok2 ==> outlet1 == outlet2;\n\n      // 归纳步骤:证明在 max_steps 步内出水口唯一\n      var (ok3, outlet3, path3) := follow_d8(h, r, c, max_steps);\n      if ok3\n      {\n        // 如果在 max_steps 步内到达出水口,则出水口与 max_steps - 1 步内的出水口相同\n        assert ok1 && ok2 ==> outlet3 == outlet1;\n      }\n    }\n  }\n\n  // 人工构造的 4-环 (P-006b)\n  const RING: seq<(int, int)> := [ (0, 0), (0, 1), (1, 1), (1, 0) ];\n  const RING_SUCC: map<(int, int), (int, int)> := [ (0, 0) |-> (0, 1), (0, 1) |-> (1, 1), (1, 1) |-> (1, 0), (1, 0) |-> (0, 0) ];\n\n  // 4-环的 D8 流向\n  lemma RingD8(h: array2<real>)\n    requires h.Height == 2\n    requires h.Width == 2\n    ensures (forall r, c :: (r, c) in RING ==>\n             let (ok, outlet, path) := follow_d8(h, r, c, |RING|)\n             in !ok)\n  {\n    // 证明思路:构造一个平坦的 4-环,使得 D8 流向无法在有限步数内终止\n    for r, c in RING\n    {\n      var (ok, outlet, path) := follow_d8(h, r, c, |RING|);\n      assert !ok;\n    }\n  }\n\n  method Main() {\n    print \"GeoProofBench P-006 — D8 流向的流域唯一性\\n\";\n    print \"全部由编译期验证:dafny verify P006_watershed.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

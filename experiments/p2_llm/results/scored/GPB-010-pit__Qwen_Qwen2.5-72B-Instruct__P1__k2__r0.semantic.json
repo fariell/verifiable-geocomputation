@@ -1,0 +1,47 @@
+{
+  "task_id": "GPB-010-pit",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 4,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "center",
+      "direction",
+      "eight",
+      "flow",
+      "lower",
+      "neighbors",
+      "noflow",
+      "none",
+      "routing",
+      "steepest-descent",
+      "strictly",
+      "undefined"
+    ],
+    "hit": [
+      "direction",
+      "eight",
+      "flow",
+      "noflow"
+    ],
+    "miss": [
+      "center",
+      "lower",
+      "neighbors",
+      "none",
+      "routing",
+      "steepest-descent",
+      "strictly",
+      "undefined"
+    ],
+    "hit_ratio": 0.3333
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

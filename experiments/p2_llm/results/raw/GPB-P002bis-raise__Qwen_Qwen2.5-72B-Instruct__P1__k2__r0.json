@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3215,
+    "completion_tokens": 1700,
+    "total_tokens": 4915,
+    "prompt_tokens_details": {
+      "cached_tokens": 1792
+    },
+    "prompt_cache_hit_tokens": 1792,
+    "prompt_cache_miss_tokens": 1423
+  },
+  "api_id": "01a08bdf029dc99155d49bc62a4ab0ec",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  文件 : formal/dafny/PCOMP_1.dfy\n//  算子 : 2D 局部提升 RaiseNbr\n//  覆盖 : GPB-021(局部提升 4-邻域不降低高程)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  在局部提升步骤中,提升 4-邻域的高程不会降低任何单元格的高程,并且邻域单元格\n//  的高程至少被提升到 max(原始邻域高程, 处理单元格的填充值)。这一性质确保了\n//  填洼过程中的高程一致性,是验证空间计算中填洼算法正确性的基础。\n// ===========================================================================\n\nmodule PCOMP_1 {\n\n  // 4-邻域定义\n  const NBR4: (int, int)[] := [(-1, 0), (1, 0), (0, -1), (0, 1)];\n\n  // 2D 网格类型\n  type Grid = array2 real;\n\n  // 获取 4-邻域\n  function method Get4Neighbors(grid: Grid, r: int, c: int): (real, real, real, real)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires 0 < r < grid.Rows - 1\n    requires 0 < c < grid.Cols - 1\n  {\n    (grid[r-1, c], grid[r+1, c], grid[r, c-1], grid[r, c+1])\n  }\n\n  // 局部提升函数\n  function method RaiseNbr(grid: Grid, r: int, c: int, fill: real): Grid\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires 0 < r < grid.Rows - 1\n    requires 0 < c < grid.Cols - 1\n    requires fill >= 0.0\n  {\n    var (n1, n2, n3, n4) := Get4Neighbors(grid, r, c);\n    var newGrid := grid;\n    newGrid[r-1, c] := max(n1, fill);\n    newGrid[r+1, c] := max(n2, fill);\n    newGrid[r, c-1] := max(n3, fill);\n    newGrid[r, c+1] := max(n4, fill);\n    newGrid\n  }\n\n  // 局部提升不降低高程\n  lemma RaiseNbrDoesNotDecreaseElevation(grid: Grid, r: int, c: int, fill: real)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires 0 < r < grid.Rows - 1\n    requires 0 < c < grid.Cols - 1\n    requires fill >= 0.0\n    ensures forall i, j :: 0 <= i < grid.Rows && 0 <= j < grid.Cols ==>\n      RaiseNbr(grid, r, c, fill)[i, j] >= grid[i, j]\n  {\n    var (n1, n2, n3, n4) := Get4Neighbors(grid, r, c);\n    var newGrid := RaiseNbr(grid, r, c, fill);\n\n    // 检查中心单元格\n    assert newGrid[r, c] == grid[r, c];\n\n    // 检查 4-邻域\n    assert newGrid[r-1, c] == max(n1, fill) >= grid[r-1, c];\n    assert newGrid[r+1, c] == max(n2, fill) >= grid[r+1, c];\n    assert newGrid[r, c-1] == max(n3, fill) >= grid[r, c-1];\n    assert newGrid[r, c+1] == max(n4, fill) >= grid[r, c+1];\n\n    // 检查其他单元格\n    forall i, j | 0 <= i < grid.Rows && 0 <= j < grid.Cols\n      ensures newGrid[i, j] >= grid[i, j]\n    {\n      if i == r && j == c {\n        // 中心单元格保持不变\n        assert newGrid[i, j] == grid[i, j];\n      } else if (i == r-1 && j == c) || (i == r+1 && j == c) || (i == r && j == c-1) || (i == r && j == c+1) {\n        // 4-邻域单元格提升\n        assert newGrid[i, j] == max(grid[i, j], fill) >= grid[i, j];\n      } else {\n        // 其他单元格保持不变\n        assert newGrid[i, j] == grid[i, j];\n      }\n    }\n  }\n\n  // 局部提升提升邻域到 max(原始邻域, 处理单元格的填充值)\n  lemma RaiseNbrLiftsToMax(grid: Grid, r: int, c: int, fill: real)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    requires 0 < r < grid.Rows - 1\n    requires 0 < c < grid.Cols - 1\n    requires fill >= 0.0\n    ensures forall i, j :: 0 <= i < grid.Rows && 0 <= j < grid.Cols ==>\n      (i == r-1 && j == c) || (i == r+1 && j == c) || (i == r && j == c-1) || (i == r && j == c+1) ==>\n      newGrid[i, j] == max(grid[i, j], fill)\n  {\n    var (n1, n2, n3, n4) := Get4Neighbors(grid, r, c);\n    var newGrid := RaiseNbr(grid, r, c, fill);\n\n    // 检查 4-邻域\n    assert newGrid[r-1, c] == max(n1, fill);\n    assert newGrid[r+1, c] == max(n2, fill);\n    assert newGrid[r, c-1] == max(n3, fill);\n    assert newGrid[r, c+1] == max(n4, fill);\n\n    // 检查其他单元格\n    forall i, j | 0 <= i < grid.Rows && 0 <= j < grid.Cols\n      ensures (i == r-1 && j == c) || (i == r+1 && j == c) || (i == r && j == c-1) || (i == r && j == c+1) ==>\n        newGrid[i, j] == max(grid[i, j], fill)\n    {\n      if (i == r-1 && j == c) || (i == r+1 && j == c) || (i == r && j == c-1) || (i == r && j == c+1) {\n        assert newGrid[i, j] == max(grid[i, j], fill);\n      }\n    }\n  }\n\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — 2D 局部提升 RaiseNbr 的性质\\n\";\n    print \"全部由编译期验证:dafny verify PCOMP_1.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

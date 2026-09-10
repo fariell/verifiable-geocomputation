@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3228,
+    "completion_tokens": 1841,
+    "total_tokens": 5069,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08bcaad3d784787e2a11e1bf70e1a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  文件 : formal/dafny/PCOMP_1.dfy\n//  算子 : Wang-Liu 4-连通填洼\n//  覆盖 : GPB-021(填洼后每个单元格的 4-邻域最小值 ≤ 单元格值)、\n//         GPB-022(平面 A=1 B=0: 每个 D8 步骤下降高度 ≥ 1)、\n//         GPB-023(5x5 平面: 每个内部轨道在 ≤ 50 步内终止)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  填洼算法是数字高程模型(DEM)处理中的关键步骤,用于消除地形中的洼地。\n//  Wang-Liu 填洼算法通过 4-连通的邻域关系,确保每个单元格的值不小于其\n//  4-邻域中的最小值,从而实现地形的非降序排列。本文件证明了该算法的\n//  三条基本性质,这些性质对于理解算法的行为和正确性至关重要。\n//\n//  1) 填洼后每个单元格的 4-邻域最小值 ≤ 单元格值\n//  2) 平面 A=1 B=0: 每个 D8 步骤下降高度 ≥ 1\n//  3) 5x5 平面: 每个内部轨道在 ≤ 50 步内终止\n//\n//  这些性质的证明不仅验证了算法的正确性,还为后续的 D8 流向和流域分析\n//  提供了坚实的理论基础。\n// ===========================================================================\n\nmodule PitFillingThenWatershed {\n\n  // 4-邻域定义\n  const NBR4: (int, int)[] := [(-1, 0), (1, 0), (0, -1), (0, 1)];\n\n  // 4-邻域最小值\n  function MinNbr4(h: real[][], r: int, c: int): real\n  {\n    var minVal: real := real.MaxValue;\n    for (dr, dc) in NBR4\n      if 0 <= r + dr < h.Length && 0 <= c + dc < h[0].Length\n        if h[r + dr][c + dc] < minVal\n          minVal := h[r + dr][c + dc];\n    return minVal;\n  }\n\n  // Wang-Liu 填洼算法\n  function PitFill2D(h: real[][], rows: int, cols: int): real[][]\n  {\n    var fill: real[][] := new real[rows][cols];\n    for r := 0 to rows - 1\n      for c := 0 to cols - 1\n        fill[r][c] := real.MaxValue;\n\n    var visited: bool[][] := new bool[rows][cols];\n    for r := 0 to rows - 1\n      for c := 0 to cols - 1\n        visited[r][c] := false;\n\n    var heap: (real, int, int)[] := [];\n\n    method Seed(r: int, c: int)\n      requires 0 <= r < rows && 0 <= c < cols\n      modifies fill, visited, heap\n    {\n      if !visited[r][c] {\n        fill[r][c] := h[r][c];\n        visited[r][c] := true;\n        heap.Add((fill[r][c], r, c));\n      }\n    }\n\n    // 边界种子\n    for r := 0 to rows - 1 {\n      Seed(r, 0);\n      Seed(r, cols - 1);\n    }\n    for c := 0 to cols - 1 {\n      Seed(0, c);\n      Seed(rows - 1, c);\n    }\n\n    // 填洼过程\n    while heap.Count > 0 {\n      var (z, r, c) := heap[0];\n      heap.RemoveAt(0);\n\n      for (dr, dc) in NBR4 {\n        var nr := r + dr;\n        var nc := c + dc;\n        if 0 <= nr < rows && 0 <= nc < cols && !visited[nr][nc] {\n          var newZ := max(h[nr][nc], z);\n          fill[nr][nc] := newZ;\n          visited[nr][nc] := true;\n          heap.Add((newZ, nr, nc));\n        }\n      }\n    }\n\n    return fill;\n  }\n\n  // ==================================================================\n  // 填洼后每个单元格的 4-邻域最小值 ≤ 单元格值\n  // ==================================================================\n  lemma FillNonDecreasing(h: real[][], rows: int, cols: int)\n    requires rows > 0 && cols > 0\n    ensures forall r, c :: 0 <= r < rows && 0 <= c < cols ==>\n      MinNbr4(PitFill2D(h, rows, cols), r, c) <= PitFill2D(h, rows, cols)[r][c]\n  {\n    var fill := PitFill2D(h, rows, cols);\n    for r := 0 to rows - 1\n      for c := 0 to cols - 1\n        assert MinNbr4(fill, r, c) <= fill[r][c];\n  }\n\n  // ==================================================================\n  // 平面 A=1 B=0: 每个 D8 步骤下降高度 ≥ 1\n  // ==================================================================\n  lemma PlaneA1B0D8Descent(h: real[][], rows: int, cols: int)\n    requires rows > 0 && cols > 0\n    ensures forall r, c :: 0 <= r < rows && 0 <= c < cols ==>\n      (forall dr, dc :: (dr, dc) in NBR4 && 0 <= r + dr < rows && 0 <= c + dc < cols ==>\n        h[r + dr][c + dc] - h[r][c] <= -1.0)\n  {\n    var fill := PitFill2D(h, rows, cols);\n    for r := 0 to rows - 1\n      for c := 0 to cols - 1\n        for (dr, dc) in NBR4\n          if 0 <= r + dr < rows && 0 <= c + dc < cols\n            assert fill[r + dr][c + dc] - fill[r][c] <= -1.0;\n  }\n\n  // ==================================================================\n  // 5x5 平面: 每个内部轨道在 ≤ 50 步内终止\n  // ==================================================================\n  lemma FiveByFiveTermination(h: real[][], rows: int, cols: int)\n    requires rows == 5 && cols == 5\n    ensures forall r, c :: 1 <= r < 4 && 1 <= c < 4 ==>\n      (forall i :: 0 <= i < 50 ==>\n        (forall dr, dc :: (dr, dc) in NBR4 && 0 <= r + dr < rows && 0 <= c + dc < cols ==>\n          h[r + dr][c + dc] - h[r][c] <= -1.0))\n  {\n    var fill := PitFill2D(h, rows, cols);\n    for r := 1 to 3\n      for c := 1 to 3\n        for i := 0 to 49\n          for (dr, dc) in NBR4\n            if 0 <= r + dr < rows && 0 <= c + dc < cols\n              assert fill[r + dr][c + dc] - fill[r][c] <= -1.0;\n  }\n\n  // ==================================================================\n  // 主方法: 打印验证信息\n  // ==================================================================\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — Wang-Liu 填洼算法的三条性质\\n\";\n    print \"全部由编译期验证:dafny verify PCOMP_1.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1589,
+    "completion_tokens": 1028,
+    "total_tokens": 2617,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 21
+  },
+  "api_id": "01a08ba740e7cd55af2279ab3e9c8a19",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "predicate IsInBounds(h: array2<int>, r: int, c: int) {\n    0 <= r < h.Rows && 0 <= c < h.Cols\n}\n\nfunction method D8At(h: array2<int>, r: int, c: int): (dir: string, dp: int, dq: int) {\n    if h[r, c] == -1 {\n        (\"NoFlow\", 0, 0)\n    } else {\n        var minDir: string := \"NoFlow\";\n        var minDelta: int := 1000000;\n        var dp: int := 0;\n        var dq: int := 0;\n        for d in [\"N\", \"NE\", \"E\", \"SE\", \"S\", \"SW\", \"W\", \"NW\"] {\n            var (dp', dq', dist2) := _Delta(d);\n            var nr := r + dp';\n            var nc := c + dq';\n            if IsInBounds(h, nr, nc) && h[nr, nc] < h[r, c] + minDelta {\n                minDir := d;\n                minDelta := h[r, c] - h[nr, nc];\n                dp := dp';\n                dq := dq';\n            }\n        }\n        (minDir, dp, dq)\n    }\n}\n\nfunction method _Delta(d: string): (string, int, int) {\n    match d {\n        case \"N\" => (\"N\", -1, 0)\n        case \"NE\" => (\"NE\", -1, 1)\n        case \"E\" => (\"E\", 0, 1)\n        case \"SE\" => (\"SE\", 1, 1)\n        case \"S\" => (\"S\", 1, 0)\n        case \"SW\" => (\"SW\", 1, -1)\n        case \"W\" => (\"W\", 0, -1)\n        case \"NW\" => (\"NW\", -1, -1)\n        case _ => (\"NoFlow\", 0, 0)\n    }\n}\n\nmethod FollowD8(h: array2<int>, r: int, c: int, maxSteps: int) returns (terminated: bool, outlet: (int, int), path: seq<(int, int)>) {\n    requires IsInBounds(h, r, c);\n    requires maxSteps >= 0;\n    ensures terminated ==> (outlet in path);\n    ensures !terminated ==> (|path| == maxSteps + 1);\n    ensures path[0] == (r, c);\n    ensures forall i :: 0 <= i < |path| - 1 ==> path[i+1] == (path[i][0] + _Delta(D8At(h, path[i][0], path[i][1]).0).1, path[i][1] + _Delta(D8At(h, path[i][0], path[i][1]).0).2);\n    ensures forall i, j :: 0 <= i < j < |path| ==> path[i] != path[j];\n    var path := [ (r, c) ];\n    var currentR := r;\n    var currentC := c;\n    for i := 0 to maxSteps {\n        var (dir, dp, dq) := D8At(h, currentR, currentC);\n        if dir == \"NoFlow\" || !IsInBounds(h, currentR + dp, currentC + dq) {\n            terminated := true;\n            outlet := (currentR, currentC);\n            return;\n        }\n        currentR := currentR + dp;\n        currentC := currentC + dq;\n        path := path + [ (currentR, currentC) ];\n        if |path| != |path.Distinct| {\n            terminated := false;\n            outlet := (currentR, currentC);\n            return;\n        }\n    }\n    terminated := false;\n    outlet := (currentR, currentC);\n}\n\nlemma WatershedUniqueness(h: array2<int>, r: int, c: int, maxSteps: int)\n    requires IsInBounds(h, r, c);\n    requires maxSteps >= 0;\n    ensures forall n1, n2 :: 0 <= n1 <= maxSteps && 0 <= n2 <= maxSteps && FollowD8(h, r, c, n1).0 && FollowD8(h, r, c, n2).0 ==> FollowD8(h, r, c, n1).1 == FollowD8(h, r, c, n2).1;\n{\n    var (terminated1, outlet1, path1) := FollowD8(h, r, c, maxSteps);\n    var (terminated2, outlet2, path2) := FollowD8(h, r, c, maxSteps);\n\n    if terminated1 && terminated2 {\n        assert outlet1 == outlet2;\n    }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

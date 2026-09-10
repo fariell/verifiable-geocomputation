@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1703,
+    "completion_tokens": 684,
+    "total_tokens": 2387,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1703
+  },
+  "api_id": "01a08b7956f254c580d64af388a54d3f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Main() {\n  var A: real := 1.0;\n  var B: real := 1.0;\n  var C: real := 1.0;\n  var D: real := 0.0;\n  var E: real := 0.0;\n  var F: real := 0.0;\n  var w: real := 1.0;\n\n  assert w > 0;\n\n  var h := new array2<real>(3, 3);\n  for i := 0 to 2 {\n    for j := 0 to 2 {\n      h[i, j] := A * i * i + B * j * j + C * i * j + D * i + E * j + F;\n    }\n  }\n\n  var hxx, hyy, hxy := NumericZT(h, w, w);\n\n  assert hxx == 2.0 * A;\n  assert hyy == 2.0 * B;\n  assert hxy == C;\n}\n\nmethod NumericZT(h: array2<real>, dx: real, dy: real) returns (hxx: real, hyy: real, hxy: real) {\n  assert dx > 0 && dy > 0;\n\n  var hp := new array2<real>(5, 5);\n  for i := 0 to 4 {\n    for j := 0 to 4 {\n      if i >= 1 && i <= 3 && j >= 1 && j <= 3 {\n        hp[i, j] := h[i - 1, j - 1];\n      } else {\n        hp[i, j] := h[0, 0]; // Edge padding with the first element\n      }\n    }\n  }\n\n  var a := hp[0, 0];\n  var b := hp[0, 1];\n  var c := hp[0, 2];\n  var d := hp[1, 0];\n  var e := hp[1, 1];\n  var f := hp[1, 2];\n  var g := hp[2, 0];\n  var hh := hp[2, 1];\n  var i := hp[2, 2];\n\n  hxx := (d - 2.0 * e + f) / dx ** 2;\n  hyy := (b - 2.0 * e + hh) / dy ** 2;\n  hxy := (a - c - g + i) / (4.0 * dx * dy);\n\n  return hxx, hyy, hxy;\n}\n\nmethod ProfileCurv(hxx: real, hyy: real, hxy: real, dzdx: real, dzdy: real) returns (curv: real) {\n  var denom := (dzdx ** 2 + dzdy ** 2) ** 1.5;\n  if denom > 1e-9 {\n    curv := (hxx * dzdx ** 2 + 2.0 * hxy * dzdx * dzdy + hyy * dzdy ** 2) / denom;\n  } else {\n    curv := 0.0;\n  }\n  return curv;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

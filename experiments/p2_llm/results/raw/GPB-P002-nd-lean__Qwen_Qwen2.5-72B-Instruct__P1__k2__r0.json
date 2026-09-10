@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3059,
+    "completion_tokens": 1167,
+    "total_tokens": 4226,
+    "prompt_tokens_details": {
+      "cached_tokens": 3040
+    },
+    "prompt_cache_hit_tokens": 3040,
+    "prompt_cache_miss_tokens": 19
+  },
+  "api_id": "01a08bd38cf0c2d08b9a4cdb803a1b0f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-021\n   文件 : formal/lean4/VeriGIS/Composition/PitFillingThenWatershed.lean\n   算子 : 1D 左出口填充 (Left-outlet Fill)\n   对偶 : formal/dafny/PCOMP_1.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件是 Dafny 版本的**独立**重述 —— 不是翻译。两处必须注意的差异:\n\n    1. 本文件关注的是 1D 左出口填充算子的非递减性质。\n    2. 证明风格:Lean 靠显式战术(`ring_nf` / `field_simp` / `nlinarith`)。\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Array\nimport Mathlib.Tactic\n\nnamespace VeriGIS.Composition\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- 1D 左出口填充算子定义 -/\ndef pitFill1D (a : Array ℝ) : Array ℝ := \n  let fill := a.map (fun x => x)\n  let visited := a.map (fun _ => false)\n  let heap := PriorityQueue.empty (fun (x y : ℝ) => x < y)\n  let seed (i : Nat) : Unit := \n    if visited[i] then () else\n      fill[i] := a[i]\n      visited[i] := true\n      heap.push (fill[i], i)\n  for i in [0 : a.size] do\n    seed i\n  while let some (z, i) := heap.pop do\n    for j in [i - 1, i + 1] do\n      if 0 ≤ j ∧ j < a.size ∧ ¬visited[j] then\n        fill[j] := max (a[j]) (fill[i])\n        visited[j] := true\n        heap.push (fill[j], j)\n  fill\n\n-- ==========================================================================\n-- 非递减性质\n-- ==========================================================================\n\ntheorem pitFill1D_nondecreasing (a : Array ℝ) (i : Nat) (h : i + 1 < a.size) :\n  pitFill1D a[i] ≤ pitFill1D a[i + 1] := by\n  -- 证明思路: 通过分析填充过程,确保每个元素的填充值不小于其左侧元素的填充值。\n  -- 由于填充过程是从左到右进行的,并且每个元素的填充值是其原始值和左侧已填充值的最大值,\n  -- 因此可以保证填充后的数组是非递减的。\n  let fill := pitFill1D a\n  let visited := a.map (fun _ => false)\n  let heap := PriorityQueue.empty (fun (x y : ℝ) => x < y)\n  let seed (i : Nat) : Unit := \n    if visited[i] then () else\n      fill[i] := a[i]\n      visited[i] := true\n      heap.push (fill[i], i)\n  for i in [0 : a.size] do\n    seed i\n  while let some (z, i) := heap.pop do\n    for j in [i - 1, i + 1] do\n      if 0 ≤ j ∧ j < a.size ∧ ¬visited[j] then\n        fill[j] := max (a[j]) (fill[i])\n        visited[j] := true\n        heap.push (fill[j], j)\n  -- 通过归纳法证明非递减性质\n  induction i with i hi\n  case zero =>\n    -- 基础情况: i = 0\n    simp [pitFill1D, Array.get, Array.size]\n    exact le_refl (pitFill1D a[0])\n  case succ =>\n    -- 归纳步骤: 假设 i 时成立,证明 i + 1 时也成立\n    simp [pitFill1D, Array.get, Array.size]\n    have h_fill : fill[i] ≤ fill[i + 1] := \n      if h_visited : visited[i + 1] then\n        -- 如果 i + 1 已经被访问过,则 fill[i + 1] 是其原始值或左侧已填充值的最大值\n        have h_max : fill[i + 1] = max (a[i + 1]) (fill[i]) := \n          if h_visited_i : visited[i] then\n            -- 如果 i 也被访问过,则 fill[i + 1] 是其原始值或 fill[i] 的最大值\n            by simp [pitFill1D, Array.get, Array.size, h_visited, h_visited_i]\n          else\n            -- 如果 i 未被访问过,则 fill[i + 1] 是其原始值\n            by simp [pitFill1D, Array.get, Array.size, h_visited, h_visited_i]\n        by rw [h_max]; exact le_max_right _ _\n      else\n        -- 如果 i + 1 未被访问过,则 fill[i + 1] 是其原始值\n        by simp [pitFill1D, Array.get, Array.size, h_visited]\n    exact h_fill\n\nend VeriGIS.Composition\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

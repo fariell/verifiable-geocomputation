@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1564,
+    "completion_tokens": 1313,
+    "total_tokens": 2877,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1500
+  },
+  "api_id": "01a08be4ea1cccb47641c11d32808b78",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.nat.basic\nimport data.array.basic\nimport data.set.finite\nimport tactic\n\nnamespace VeriGIS\n\n-- Define the grid and its properties\nstructure Grid (α : Type*) :=\n  (height : ℕ)\n  (width : ℕ)\n  (cells : array (height * width) α)\n\n-- Define the D8 direction set\ninductive D8Direction\n| NoFlow\n| North\n| Northeast\n| East\n| Southeast\n| South\n| Southwest\n| West\n| Northwest\n\n-- Define the D8 direction mapping\ndef D8Delta : D8Direction → ℤ × ℤ\n| NoFlow := (0, 0)\n| North := (0, -1)\n| Northeast := (1, -1)\n| East := (1, 0)\n| Southeast := (1, 1)\n| South := (0, 1)\n| Southwest := (-1, 1)\n| West := (-1, 0)\n| Northwest := (-1, -1)\n\n-- Define the D8 successor function\ndef d8Successor (h : Grid ℕ) (r c : ℕ) : D8Direction :=\n  let neighbors := [(r, c - 1), (r + 1, c - 1), (r + 1, c), (r + 1, c + 1), (r, c + 1), (r - 1, c + 1), (r - 1, c), (r - 1, c - 1)]\n  let valid_neighbors := neighbors.filter (λ p, 0 ≤ p.1 ∧ p.1 < h.height ∧ 0 ≤ p.2 ∧ p.2 < h.width)\n  let min_neighbor := valid_neighbors.min (λ p q, h.cells.get (p.1 * h.width + p.2) < h.cells.get (q.1 * h.width + q.2))\n  if min_neighbor.is_some then\n    match min_neighbor.get with\n    | (r', c') := if h.cells.get (r * h.width + c) > h.cells.get (r' * h.width + c') then\n      match (r' - r, c' - c) with\n      | (0, -1) := North\n      | (1, -1) := Northeast\n      | (1, 0) := East\n      | (1, 1) := Southeast\n      | (0, 1) := South\n      | (-1, 1) := Southwest\n      | (-1, 0) := West\n      | (-1, -1) := Northwest\n      | _ := NoFlow\n    end\n  else NoFlow\n\n-- Define the orbit of a cell under the D8 successor function\ndef orbit (h : Grid ℕ) (r c : ℕ) : stream (ℕ × ℕ) :=\n  let rec follow (r c : ℕ) : stream (ℕ × ℕ) :=\n    (r, c) :: (match d8Successor h r c with\n      | NoFlow := stream.nil\n      | dir := let (dp, dq) := D8Delta dir in follow (r + dq) (c + dp)\n      end)\n  follow r c\n\n-- Define the termination of an orbit\ndef orbitTerminates (h : Grid ℕ) (r c : ℕ) : Prop :=\n  ∃ (n : ℕ), orbit h r c n = (r, c)\n\n-- Define the fixed point of an orbit\ndef orbitFixedPoint (h : Grid ℕ) (r c : ℕ) : Prop :=\n  d8Successor h r c = NoFlow\n\n-- Define the strict descent property\ndef strictDescent (h : Grid ℕ) (r c : ℕ) : Prop :=\n  let (dp, dq) := D8Delta (d8Successor h r c) in\n  0 < h.cells.get (r * h.width + c) - h.cells.get ((r + dq) * h.width + (c + dp))\n\n-- Prove that under a strict descent successor on a finite cell set, every orbit terminates at a fixed point\ntheorem orbitTerminatesAtFixedPoint (h : Grid ℕ) (r c : ℕ) (h_strict : strictDescent h r c) :\n  orbitTerminates h r c → orbitFixedPoint h r c :=\nbegin\n  intros h_term,\n  cases h_term with n h_term,\n  induction n with n ih,\n  { simp [orbit, h_term], exact h_strict },\n  { simp [orbit, h_term],\n    cases d8Successor h r c with dir,\n    { exact h_term },\n    { let (dp, dq) := D8Delta dir,\n      have h_next : orbit h (r + dq) (c + dp) n = (r + dq, c + dp), from ih,\n      simp [orbit, h_next],\n      exact h_strict },\n  end\n\n-- Define the 4-ring example\ndef ringExample : Grid ℕ :=\n{ height := 2,\n  width := 2,\n  cells := array.of_fn (λ i, if i = 0 ∨ i = 3 then 10 else 0) }\n\n-- Prove that the 4-ring example does not terminate\ntheorem ringExampleDoesNotTerminate : ¬ orbitTerminates ringExample 0 0 4 :=\nbegin\n  intro h_term,\n  cases h_term with n h_term,\n  induction n with n ih,\n  { simp [orbit, h_term], exact (D8Delta North = (0, -1)) },\n  { simp [orbit, h_term],\n    cases d8Successor ringExample 0 0 with dir,\n    { exact (D8Delta North = (0, -1)) },\n    { let (dp, dq) := D8Delta dir,\n      have h_next : orbit ringExample (0 + dq) (0 + dp) n = (0 + dq, 0 + dp), from ih,\n      simp [orbit, h_next],\n      exact (D8Delta North = (0, -1)) },\n  end\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

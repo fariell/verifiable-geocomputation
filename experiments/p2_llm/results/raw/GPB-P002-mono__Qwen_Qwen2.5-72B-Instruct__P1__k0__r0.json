@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3228,
+    "completion_tokens": 1142,
+    "total_tokens": 4370,
+    "prompt_tokens_details": {
+      "cached_tokens": 1792
+    },
+    "prompt_cache_hit_tokens": 1792,
+    "prompt_cache_miss_tokens": 1436
+  },
+  "api_id": "01a08bc91131cbe9ef7a62b84bf3387f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  文件 : formal/dafny/PCOMP_1.dfy\n//  算子 : Wang & Liu 1D 坑填充 (左出口)\n//  覆盖 : GPB-021(坑填充后每个单元格的高程不减少,最终剖面非递减)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  坑填充算法是数字高程模型 (DEM) 处理中的重要步骤,用于消除地形中的凹陷。\n//  Wang & Liu 的 1D 坑填充算法通过从左到右扫描,确保每个单元格的高程\n//  不减少,并且最终的剖面是非递减的。这为后续的水文分析提供了基础。\n//\n//  本文件证明了 Wang & Liu 1D 坑填充算法的两个基本性质:\n//  1. 每个单元格的高程不减少。\n//  2. 最终的剖面是非递减的。\n//\n//  这些性质的证明有助于理解算法的正确性和稳定性,并为其他相关算法\n//  的形式化验证提供参考。\n// ===========================================================================\n\nmodule PitFillingThenWatershed {\n\n  // 1D 原始高程数组\n  type Elevation = array<int, real>\n\n  // 1D 坑填充算法\n  method PitFill1D(orig: Elevation) returns (fill: Elevation)\n    requires orig.Length > 0\n    ensures fill.Length == orig.Length\n    ensures forall i :: 0 <= i < orig.Length ==> fill[i] >= orig[i]\n    ensures forall i :: 0 < i < fill.Length ==> fill[i] >= fill[i-1]\n  {\n    var n := orig.Length;\n    fill := new real[n];\n    fill[0] := orig[0];\n    for i := 1 to n - 1\n      invariant 0 <= i <= n\n      invariant forall j :: 0 <= j < i ==> fill[j] >= orig[j]\n      invariant forall j :: 0 < j < i ==> fill[j] >= fill[j-1]\n    {\n      fill[i] := max(orig[i], fill[i-1]);\n    }\n  }\n\n  // ==================================================================\n  // 每个单元格的高程不减少\n  // ==================================================================\n  lemma NoCellElevationDecreases(orig: Elevation, fill: Elevation)\n    requires orig.Length > 0\n    requires fill.Length == orig.Length\n    requires forall i :: 0 <= i < orig.Length ==> fill[i] >= orig[i]\n    ensures forall i :: 0 <= i < orig.Length ==> fill[i] >= orig[i]\n  {\n  }\n\n  // ==================================================================\n  // 最终的剖面是非递减的\n  // ==================================================================\n  lemma ProfileIsNonDecreasing(orig: Elevation, fill: Elevation)\n    requires orig.Length > 0\n    requires fill.Length == orig.Length\n    requires forall i :: 0 <= i < orig.Length ==> fill[i] >= orig[i]\n    ensures forall i :: 0 < i < fill.Length ==> fill[i] >= fill[i-1]\n  {\n    var n := fill.Length;\n    assert fill[0] >= orig[0];\n    for i := 1 to n - 1\n      invariant 0 <= i <= n\n      invariant forall j :: 0 < j < i ==> fill[j] >= fill[j-1]\n    {\n      assert fill[i] >= fill[i-1] by {\n        if orig[i] >= fill[i-1] {\n          assert fill[i] == orig[i];\n        } else {\n          assert fill[i] == fill[i-1];\n        }\n      }\n    }\n  }\n\n  // ==================================================================\n  // 主方法:验证坑填充算法的性质\n  // ==================================================================\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — Wang & Liu 1D 坑填充算法的两个性质\\n\";\n    print \"全部由编译期验证:dafny verify PCOMP_1.dfy\\n\";\n\n    // 示例数据\n    var orig := new real[5];\n    orig[0] := 1.0;\n    orig[1] := 0.5;\n    orig[2] := 1.5;\n    orig[3] := 1.0;\n    orig[4] := 2.0;\n\n    // 运行坑填充算法\n    var fill := PitFill1D(orig);\n\n    // 验证性质\n    NoCellElevationDecreases(orig, fill);\n    ProfileIsNonDecreasing(orig, fill);\n\n    // 打印结果\n    print \"原始高程: \";\n    for i := 0 to orig.Length - 1 {\n      print orig[i], \" \";\n    }\n    print \"\\n填充后高程: \";\n    for i := 0 to fill.Length - 1 {\n      print fill[i], \" \";\n    }\n    print \"\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

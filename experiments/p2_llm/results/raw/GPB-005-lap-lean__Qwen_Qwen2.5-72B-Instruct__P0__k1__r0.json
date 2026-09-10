@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1680,
+    "completion_tokens": 443,
+    "total_tokens": 2123,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1616
+  },
+  "api_id": "01a08b6f493be85e82ade7254802644a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.matrix.notation\nimport tactic.linarith\n\nnamespace VeriGIS\n\n-- Define a 3x3 grid of real numbers\ndef Grid3x3 := matrix (fin 3) (fin 3) ℝ\n\n-- Define the center cell of a 3x3 grid\ndef center (g : Grid3x3) : ℝ := g 1 1\n\n-- Define the orthogonal neighbors of the center cell in a 3x3 grid\ndef north (g : Grid3x3) : ℝ := g 0 1\ndef south (g : Grid3x3) : ℝ := g 2 1\ndef east (g : Grid3x3) : ℝ := g 1 2\ndef west (g : Grid3x3) : ℝ := g 1 0\n\n-- Define the discrete Laplacian at the center cell of a 3x3 grid\ndef discreteLaplacian (g : Grid3x3) : ℝ := (north g + south g + east g + west g - 4 * center g)\n\n-- Property: If the center cell is a discrete local maximum, then the discrete Laplacian at the center is <= 0\ntheorem discreteLocalMax_implies_nonPositiveLaplacian (g : Grid3x3) :\n  (center g ≥ north g) ∧ (center g ≥ south g) ∧ (center g ≥ east g) ∧ (center g ≥ west g) →\n  discreteLaplacian g ≤ 0 :=\nbegin\n  intros h,\n  have h1 := h.1,\n  have h2 := h.2,\n  have h3 := h.3,\n  have h4 := h.4,\n  have h5 : north g + south g + east g + west g ≤ 4 * center g,\n  { linarith },\n  have h6 : north g + south g + east g + west g - 4 * center g ≤ 0,\n  { linarith },\n  exact h6,\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

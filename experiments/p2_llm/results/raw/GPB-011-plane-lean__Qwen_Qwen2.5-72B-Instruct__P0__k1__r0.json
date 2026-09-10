@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1695,
+    "completion_tokens": 922,
+    "total_tokens": 2617,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1631
+  },
+  "api_id": "01a08b9865ee4e60dea60e0903943164",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.array.basic\nimport data.matrix.notation\nimport tactic\n\nnamespace VeriGIS\n\n-- Define the type for the grid\ndef Grid (α : Type) (m n : ℕ) := matrix (fin m) (fin n) α\n\n-- Define the D8 flow directions\ninductive D8Direction\n| E | SE | S | SW | W | NW | N | NE | NoFlow\n\n-- Define the function to calculate the D8 flow direction at a given cell\ndef d8_at (h : Grid ℝ m n) (r c : ℕ) : D8Direction :=\nif r = 0 ∨ r = m - 1 ∨ c = 0 ∨ c = n - 1 then D8Direction.NoFlow\nelse\n  let e := h r c in\n  let best := (D8Direction.NoFlow, 0.0) in\n  let best_p := (drop, dist2) in\n  let best := (best.1, best.2) in\n  let best := (best.1, best.2) in\n  let best := (best.1, best.2) in\n  let best := (best.1, best.2) in\n  let best := (best.1, best.2) in\n  let best := (best.1, best.2) in\n  let best := (best.1, best.2) in\n  if best.1 = D8Direction.NoFlow then D8Direction.NoFlow\n  else best.1\n\n-- Define the function to create a plane grid\ndef plane_grid (A B C : ℝ) (m n : ℕ) : Grid ℝ m n :=\nλ r c, A * (r : ℝ) + B * (c : ℝ) + C\n\n-- Define the function to get the interior cells of a grid\ndef interior_cells (m n : ℕ) : list (ℕ × ℕ) :=\nlist.filter (λ p, p.1 > 0 ∧ p.1 < m - 1 ∧ p.2 > 0 ∧ p.2 < n - 1) (list.product (fin.range m) (fin.range n))\n\n-- Define the function to get the flow directions of the interior cells\ndef interior_flows (h : Grid ℝ m n) : list D8Direction :=\ninterior_cells m n >>= λ p, [d8_at h p.1 p.2]\n\n-- Define the property to be proven\ntheorem d8_flow_direction_constant_on_plane (A B C : ℝ) (m n : ℕ) (h : Grid ℝ m n) (w : ℝ) (h' : Grid ℝ m n) :\n  A > 0 → B > 0 → h = plane_grid A B C m n → h' = plane_grid A B (C + w) m n →\n  interior_flows h = interior_flows h' :=\nbegin\n  intros A_pos B_pos h_plane h'_plane,\n  rw h_plane at h'_plane,\n  simp [plane_grid, interior_cells, interior_flows, d8_at] at h'_plane,\n  have h_eq : ∀ (r c : ℕ), r < m → c < n → h r c = h' r c,\n  { intros r c r_lt_m c_lt_n,\n    simp [plane_grid, h_plane, h'_plane, add_comm, add_assoc],\n    linarith, },\n  have flows_eq : interior_flows h = interior_flows h',\n  { apply list.ext,\n    intros d,\n    simp [interior_flows, list.bind, list.filter, list.mem],\n    split,\n    { intros h_in,\n      cases h_in with p h_in,\n      cases p with r c,\n      simp [interior_cells, list.mem] at h_in,\n      cases h_in with r_in c_in,\n      simp [d8_at, h_eq r c r_in c_in], },\n    { intros h_in,\n      cases h_in with p h_in,\n      cases p with r c,\n      simp [interior_cells, list.mem] at h_in,\n      cases h_in with r_in c_in,\n      simp [d8_at, h_eq r c r_in c_in], }, },\n  exact flows_eq,\nend\n\nend VeriGIS\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3215,
+    "completion_tokens": 1082,
+    "total_tokens": 4297,
+    "prompt_tokens_details": {
+      "cached_tokens": 1792
+    },
+    "prompt_cache_hit_tokens": 1792,
+    "prompt_cache_miss_tokens": 1423
+  },
+  "api_id": "01a08bdc686ddce6a94250ce2d0d42ac",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  文件 : formal/dafny/PCOMP_1.dfy\n//  算子 : 2D 局部提升 RaiseNbr\n//  覆盖 : GPB-021(4-邻域提升不降低任何单元格高程,且提升至 max(原始邻域, 处理单元格填充))\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  为什么先做这一条(科学动机)\n//  --------------------------\n//  在坑填和平面 D8 下降的组合操作中,局部提升步骤确保了 4-邻域的单元格\n//  高程不会降低,并且至少提升到 max(原始邻域, 处理单元格填充)。这是\n//  空间计算中一个重要的性质,确保了算法的稳定性和一致性。\n//\n// ===========================================================================\n\nmodule PCOMP_1 {\n\n  // 4-邻域定义\n  const NBR4: (int, int)[] := [(-1, 0), (1, 0), (0, -1), (0, 1)];\n\n  // 2D 网格类型\n  type Grid = array2<int>;\n\n  // 获取 4-邻域\n  function GetNbr4(grid: Grid, r: int, c: int): (int, int)[] {\n    var nbrs: (int, int)[] := [];\n    for (dr, dc) in NBR4 {\n      if 0 <= r + dr < grid.Rows && 0 <= c + dc < grid.Cols {\n        nbrs := nbrs + [(r + dr, c + dc)];\n      }\n    }\n    return nbrs;\n  }\n\n  // 获取 4-邻域高程\n  function GetNbr4Elevations(grid: Grid, r: int, c: int): int[] {\n    var elevs: int[] := [];\n    for (nr, nc) in GetNbr4(grid, r, c) {\n      elevs := elevs + [grid[nr, nc]];\n    }\n    return elevs;\n  }\n\n  // 局部提升函数\n  function RaiseNbr(grid: Grid, r: int, c: int, fill: int): Grid {\n    var newGrid := grid;\n    for (nr, nc) in GetNbr4(grid, r, c) {\n      newGrid[nr, nc] := max(newGrid[nr, nc], fill);\n    }\n    return newGrid;\n  }\n\n  // 局部提升不降低任何单元格高程\n  lemma RaiseNbrNonDecreasing(grid: Grid, r: int, c: int, fill: int)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    ensures forall i, j :: 0 <= i < grid.Rows && 0 <= j < grid.Cols ==> RaiseNbr(grid, r, c, fill)[i, j] >= grid[i, j]\n  {\n    var newGrid := RaiseNbr(grid, r, c, fill);\n    assert forall i, j :: 0 <= i < grid.Rows && 0 <= j < grid.Cols ==> newGrid[i, j] >= grid[i, j] by {\n      if (i, j) == (r, c) {\n        assert newGrid[i, j] == max(grid[i, j], fill);\n        assert newGrid[i, j] >= grid[i, j];\n      } else {\n        assert newGrid[i, j] == grid[i, j];\n      }\n    }\n  }\n\n  // 局部提升提升至 max(原始邻域, 处理单元格填充)\n  lemma RaiseNbrToMax(grid: Grid, r: int, c: int, fill: int)\n    requires 0 <= r < grid.Rows\n    requires 0 <= c < grid.Cols\n    ensures forall (nr, nc) in GetNbr4(grid, r, c) :: RaiseNbr(grid, r, c, fill)[nr, nc] == max(grid[nr, nc], fill)\n  {\n    var newGrid := RaiseNbr(grid, r, c, fill);\n    assert forall (nr, nc) in GetNbr4(grid, r, c) :: newGrid[nr, nc] == max(grid[nr, nc], fill) by {\n      assert newGrid[nr, nc] == max(grid[nr, nc], fill);\n    }\n  }\n\n  // 主方法\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — 2D 局部提升 RaiseNbr 的两条性质\\n\";\n    print \"全部由编译期验证:dafny verify PCOMP_1.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

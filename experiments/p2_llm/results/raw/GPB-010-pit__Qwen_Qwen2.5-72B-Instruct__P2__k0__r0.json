@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5b1d80c9f558cecc7abebaec3f40a41e3aa5f66762cf489a62d60b5d8363feaf",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 263,
+    "completion_tokens": 450,
+    "total_tokens": 713,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 199
+  },
+  "api_id": "01a08b956a982a7fb9ecc068a8ff70f2",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method SteepestDescentFlowDirection(elevation: array2<int>, x: int, y: int) returns (flowDirection: int)\n  requires 0 <= x < elevation.Width && 0 <= y < elevation.Height;\n  requires elevation != null;\n  ensures (flowDirection == 8) ==>\n    forall dx, dy :: -1 <= dx <= 1 && -1 <= dy <= 1 && (dx != 0 || dy != 0) ==>\n      elevation[x, y] <= elevation[x + dx, y + dy];\n{\n  var minElevation := elevation[x, y];\n  var minDx := 0;\n  var minDy := 0;\n\n  for dx in -1..1 do\n    for dy in -1..1 do\n      if dx != 0 || dy != 0 {\n        var nx := x + dx;\n        var ny := y + dy;\n        if 0 <= nx < elevation.Width && 0 <= ny < elevation.Height {\n          if elevation[nx, ny] < minElevation {\n            minElevation := elevation[nx, ny];\n            minDx := dx;\n            minDy := dy;\n          }\n        }\n      }\n\n  if minDx == 0 && minDy == 0 {\n    flowDirection := 8; // NoFlow\n  } else {\n    flowDirection := 4 * (minDy + 1) + (minDx + 1);\n  }\n}\n\nmethod CheckSteepestDescentFlowDirection(elevation: array2<int>, x: int, y: int)\n  requires 0 <= x < elevation.Width && 0 <= y < elevation.Height;\n  requires elevation != null;\n{\n  var flowDirection := SteepestDescentFlowDirection(elevation, x, y);\n  assert (flowDirection == 8) ==>\n    forall dx, dy :: -1 <= dx <= 1 && -1 <= dy <= 1 && (dx != 0 || dy != 0) ==>\n      elevation[x, y] <= elevation[x + dx, y + dy];\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

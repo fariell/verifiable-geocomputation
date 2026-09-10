@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "Qwen/Qwen2.5-72B-Instruct",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1573,
+    "completion_tokens": 1010,
+    "total_tokens": 2583,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 5
+  },
+  "api_id": "01a08bd9cdcafa00bc81cf1c28b6b55b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module RaiseNbrProperty {\n\n  // Define a 2D grid as a map from (row, col) pairs to elevations\n  type Grid = map<(int, int), real>;\n\n  // Define the 4-neighborhood of a cell\n  const NBR4: set<(int, int)> := {(-1, 0), (1, 0), (0, -1), (0, 1)};\n\n  // Function to get the 4-neighbors of a cell (r, c) within a grid of size (rows, cols)\n  function method GetNeighbors(rows: int, cols: int, r: int, c: int): set<(int, int)> {\n    { (nr, nc) | (nr, nc) in NBR4 && 0 <= r + nr < rows && 0 <= c + nc < cols }\n  }\n\n  // Function to get the elevation of a cell (r, c) in the grid\n  function method Elevation(grid: Grid, r: int, c: int): real {\n    grid[r, c]\n  }\n\n  // Function to get the original elevation of a cell (r, c) in the grid\n  function method OriginalElevation(grid: Grid, r: int, c: int): real {\n    grid[r, c]\n  }\n\n  // Function to get the elevation of a cell (r, c) after processing\n  function method ProcessedElevation(grid: Grid, r: int, c: int): real {\n    grid[r, c]\n  }\n\n  // Function to raise a neighbor (nr, nc) from a processed cell (r, c)\n  method RaiseNbr(grid: Grid, rows: int, cols: int, r: int, c: int, nr: int, nc: int) returns (newGrid: Grid) {\n    requires 0 <= r < rows && 0 <= c < cols;\n    requires (nr, nc) in GetNeighbors(rows, cols, r, c);\n    requires 0 <= nr < rows && 0 <= nc < cols;\n    ensures newGrid == grid ++ [(nr, nc) -> max(OriginalElevation(grid, nr, nc), ProcessedElevation(grid, r, c))];\n    ensures forall i, j | 0 <= i < rows && 0 <= j < cols :: (i, j) != (nr, nc) ==> newGrid[i, j] == grid[i, j];\n    ensures Elevation(newGrid, nr, nc) >= Elevation(grid, nr, nc);\n    ensures Elevation(newGrid, nr, nc) >= Elevation(grid, r, c);\n\n    newGrid := grid;\n    newGrid[nr, nc] := max(OriginalElevation(grid, nr, nc), ProcessedElevation(grid, r, c));\n  }\n\n  // Lemma to prove the property: raising a 4-neighbor from an already-processed cell\n  // never decreases any cell elevation, and the neighbor is lifted at least to max(original neighbor, processed cell fill)\n  lemma LocalRaiseStepPreservesElevation(grid: Grid, rows: int, cols: int, r: int, c: int, nr: int, nc: int) {\n    requires 0 <= r < rows && 0 <= c < cols;\n    requires (nr, nc) in GetNeighbors(rows, cols, r, c);\n    requires 0 <= nr < rows && 0 <= nc < cols;\n    var newGrid := RaiseNbr(grid, rows, cols, r, c, nr, nc);\n    assert Elevation(newGrid, nr, nc) >= Elevation(grid, nr, nc);\n    assert Elevation(newGrid, nr, nc) >= Elevation(grid, r, c);\n  }\n\n  // Function to check if a grid satisfies the property for all cells and their neighbors\n  function method CheckGridProperty(grid: Grid, rows: int, cols: int): bool {\n    forall r, c, nr, nc | 0 <= r < rows && 0 <= c < cols && (nr, nc) in GetNeighbors(rows, cols, r, c) :: \n      Elevation(RaiseNbr(grid, rows, cols, r, c, nr, nc), nr, nc) >= Elevation(grid, nr, nc) &&\n      Elevation(RaiseNbr(grid, rows, cols, r, c, nr, nc), nr, nc) >= Elevation(grid, r, c)\n  }\n\n  // Lemma to prove the property for the entire grid\n  lemma GridRaiseNbrPreservesElevation(grid: Grid, rows: int, cols: int) {\n    requires 0 < rows && 0 < cols;\n    assert CheckGridProperty(grid, rows, cols);\n  }\n\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}
