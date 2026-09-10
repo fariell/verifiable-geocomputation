@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3080,
+    "completion_tokens": 1164,
+    "total_tokens": 4244,
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 8
+  },
+  "api_id": "01a08c163508dcb183212154f5ee3d5f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module HornSlope {\n  // Horn (1981) finite-difference slope operators\n  // DzDx = (f - d) / (2w)  (centered difference in x)\n  // DzDy = (h - b) / (2w)  (centered difference in y)\n  \n  method DzDx(d: real, f: real, w: real) returns (slope_x: real)\n    requires w > 0.0\n    ensures slope_x == (f - d) / (2.0 * w)\n  {\n    return (f - d) / (2.0 * w);\n  }\n  \n  method DzDy(b: real, h: real, w: real) returns (slope_y: real)\n    requires w > 0.0\n    ensures slope_y == (h - b) / (2.0 * w)\n  {\n    return (h - b) / (2.0 * w);\n  }\n  \n  // Planar surface z = A*x + B*y + C\n  // Sampled at grid points with spacing w\n  function Q(A: real, B: real, C: real, x: real, y: real) : real\n    ensures Q(A, B, C, x, y) == A * x + B * y + C\n  {\n    return A * x + B * y + C;\n  }\n  \n  // Grid points for Horn's 3x3 stencil\n  // Centered at (0,0) with spacing w\n  function Qd(A: real, B: real, C: real, w: real) : real\n    ensures Qd(A, B, C, w) == Q(A, B, C, -w, 0.0)\n  {\n    return A * (-w) + B * 0.0 + C;\n  }\n  \n  function Qf(A: real, B: real, C: real, w: real) : real\n    ensures Qf(A, B, C, w) == Q(A, B, C, w, 0.0)\n  {\n    return A * w + B * 0.0 + C;\n  }\n  \n  function Qb(A: real, B: real, C: real, w: real) : real\n    ensures Qb(A, B, C, w) == Q(A, B, C, 0.0, -w)\n  {\n    return A * 0.0 + B * (-w) + C;\n  }\n  \n  function Qh(A: real, B: real, C: real, w: real) : real\n    ensures Qh(A, B, C, w) == Q(A, B, C, 0.0, w)\n  {\n    return A * 0.0 + B * w + C;\n  }\n  \n  // Theorem: Horn's finite-difference operators recover A and B exactly on planes\n  lemma PlanarExact(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures DzDx(Qd(A, B, C, w), Qf(A, B, C, w), w) == A\n    ensures DzDy(Qb(A, B, C, w), Qh(A, B, C, w), w) == B\n  {\n    // Compute DzDx\n    var slope_x := DzDx(Qd(A, B, C, w), Qf(A, B, C, w), w);\n    assert slope_x == (Qf(A, B, C, w) - Qd(A, B, C, w)) / (2.0 * w);\n    assert Qf(A, B, C, w) - Qd(A, B, C, w) == (A * w + B * 0.0 + C) - (A * (-w) + B * 0.0 + C);\n    assert Qf(A, B, C, w) - Qd(A, B, C, w) == 2.0 * A * w;\n    assert slope_x == (2.0 * A * w) / (2.0 * w);\n    assert slope_x == A;\n    \n    // Compute DzDy\n    var slope_y := DzDy(Qb(A, B, C, w), Qh(A, B, C, w), w);\n    assert slope_y == (Qh(A, B, C, w) - Qb(A, B, C, w)) / (2.0 * w);\n    assert Qh(A, B, C, w) - Qb(A, B, C, w) == (A * 0.0 + B * w + C) - (A * 0.0 + B * (-w) + C);\n    assert Qh(A, B, C, w) - Qb(A, B, C, w) == 2.0 * B * w;\n    assert slope_y == (2.0 * B * w) / (2.0 * w);\n    assert slope_y == B;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench GPB-019 — Horn slope exactness on planes\\n\";\n  print \"全部由编译期验证:dafny verify HornSlope.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

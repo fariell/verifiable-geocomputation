@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2962,
+    "completion_tokens": 357,
+    "total_tokens": 3319,
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 18
+  },
+  "api_id": "01a08c0e1a76a8ec68b2e91451a3b504",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.Slope\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下),与 `HornSlope` / Dafny P-001 相同。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1,  0)     e        f( 1,  0)\n      g(-1,  1)   h( 0,  1)   i( 1,  1)\n-/\n\ndef dzdx (d e f : ℝ) : ℝ := (f - d) / 2\ndef dzdy (b e h : ℝ) : ℝ := (h - b) / 2\ndef slopeSq (d e f b h w : ℝ) : ℝ := (dzdx d e f / w) ^ 2 + (dzdy b e h / w) ^ 2\n\n/-- For any finite 3x3 elevation window and positive grid spacing w, the Horn slope-square\nSlopeSq is nonnegative. This must hold for arbitrary elevations, not only planar surfaces. -/\ntheorem slopeSq_nonneg\n    (d e f b h w : ℝ) (hw : 0 < w) :\n    0 ≤ slopeSq d e f b h w := by\n  have : 0 ≤ (dzdx d e f / w) ^ 2 := sq_nonneg _\n  have : 0 ≤ (dzdy b e h / w) ^ 2 := sq_nonneg _\n  linarith [hw]\n\nend VeriGIS.Slope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

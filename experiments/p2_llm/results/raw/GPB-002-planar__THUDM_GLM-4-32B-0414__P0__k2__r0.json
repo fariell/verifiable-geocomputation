@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1559,
+    "completion_tokens": 1192,
+    "total_tokens": 2751,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 23
+  },
+  "api_id": "01a08c123d8011736bd5a95fea1489e3",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// File: horn_slope_exactness.dfy\n// Proves that Horn's finite-difference estimates DzDx and DzDy recover the exact\n// coefficients A and B from a planar surface z = A*x + B*y + C on a regular grid.\n\nmodule HornSlopeExactness {\n  import opened Real\n  import opened Sequences\n  import opened Integers\n  import opened Sequences.Integers\n\n  // A regular grid with spacing w > 0\n  type Grid = seq<int>  // Represents a 1D grid; 2D grid is seq<seq<int>>\n\n  // Horn's finite-difference estimates for partial derivatives\n  function DzDx(grid: Grid, w: real, i: int, j: int): real {\n    // Horn's forward difference for dz/dx\n    (grid[i+1][j] - grid[i][j]) / w\n  }\n\n  function DzDy(grid: Grid, w: real, i: int, j: int): real {\n    // Horn's forward difference for dz/dy\n    (grid[i][j+1] - grid[i][j]) / w\n  }\n\n  // A planar surface z = A*x + B*y + C\n  function PlanarSurface(A: real, B: real, C: real, x: real, y: real): real {\n    A * x + B * y + C\n  }\n\n  // Sample a planar surface on a regular grid\n  function SamplePlanarSurface(A: real, B: real, C: real, w: real, n: int, m: int): Grid {\n    // n rows, m columns\n    // Grid indices are 0..n-1, 0..m-1\n    // Grid values are z = A*x + B*y + C where x = i*w, y = j*w\n    // Returns a 2D grid (seq<seq<real>>)\n    var grid := new seq<real>[n];\n    for i := 0 to n {\n      grid[i] := new real[m];\n      for j := 0 to m {\n        grid[i][j] := PlanarSurface(A, B, C, i*w, j*w);\n      }\n    }\n    return grid;\n  }\n\n  // Theorem: Horn's finite-difference estimates recover the exact coefficients\n  // from a planar surface on a regular grid.\n  lemma HornSlopeExactness(A: real, B: real, C: real, w: real, n: int, m: int)\n    requires w > 0\n    requires n >= 2 && m >= 2  // Need at least 2x2 grid for differences\n    requires forall i, j :: 0 <= i < n && 0 <= j < m ==> \n      SamplePlanarSurface(A, B, C, w, n, m)[i][j] == A * (i * w) + B * (j * w) + C\n    ensures forall i, j :: 0 <= i < n-1 && 0 <= j < m-1 ==>\n      DzDx(SamplePlanarSurface(A, B, C, w, n, m), w, i, j) == A\n    ensures forall i, j :: 0 <= i < n-1 && 0 <= j < m-1 ==>\n      DzDy(SamplePlanarSurface(A, B, C, w, n, m), w, i, j) == B\n  {\n    // Proof by direct calculation\n    forall i, j | 0 <= i < n-1 && 0 <= j < m-1\n    {\n      // Calculate DzDx\n      var z1 := SamplePlanarSurface(A, B, C, w, n, m)[i][j];\n      var z2 := SamplePlanarSurface(A, B, C, w, n, m)[i+1][j];\n      var dzdx := (z2 - z1) / w;\n      assert dzdx == (A * ((i+1)*w) + B * (j*w) + C - (A * (i*w) + B * (j*w) + C)) / w;\n      assert dzdx == (A * w) / w;\n      assert dzdx == A;\n\n      // Calculate DzDy\n      z1 := SamplePlanarSurface(A, B, C, w, n, m)[i][j];\n      z2 := SamplePlanarSurface(A, B, C, w, n, m)[i][j+1];\n      var dzdy := (z2 - z1) / w;\n      assert dzdy == (A * (i*w) + B * ((j+1)*w) + C - (A * (i*w) + B * (j*w) + C)) / w;\n      assert dzdy == (B * w) / w;\n      assert dzdy == B;\n    }\n  }\n\n  // Example usage\n  method Main()\n  {\n    var A := 1.0;\n    var B := 2.0;\n    var C := 3.0;\n    var w := 1.0;\n    var n := 5;\n    var m := 5;\n\n    // Verify the theorem for these parameters\n    HornSlopeExactness(A, B, C, w, n, m);\n\n    print \"Theorem verified: Horn's finite-difference estimates recover the exact coefficients from a planar surface.\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

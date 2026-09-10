@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "fd2794d37f8c2b4e57722e1f3a7cbaeabc65731dfceb63eda8f1cddbdf98644e",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3206,
+    "completion_tokens": 1936,
+    "total_tokens": 5142,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 6
+  },
+  "api_id": "01a08c1ece55e757fb9c4117db982eca",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module ZevenbergenThorneHessian {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // 注意:中心元 e 在 ZT 二阶差分中的权为 -2,出现在算子签名里。\n  // ------------------------------------------------------------------\n\n  // ---- 二阶差分分子(尚未除以格网间距平方)----\n  function NumHxx(a: real, b: real, c: real, d: real, e: real,\n                 f: real, g: real, h: real, i: real): real\n  { d - 2.0 * e + f }\n\n  function NumHyy(a: real, b: real, c: real, d: real, e: real,\n                 f: real, g: real, h: real, i: real): real\n  { b - 2.0 * e + h }\n\n  function NumHxy(a: real, b: real, c: real, d: real, e: real,\n                 f: real, g: real, h: real, i: real): real\n  { a - c - g + i }\n\n  // ---- ZT Hessian 算子(除以 w² 或 w⁴)----\n  function Hxx(a: real, b: real, c: real, d: real, e: real,\n              f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  { NumHxx(a, b, c, d, e, f, g, h, i) / (w * w) }\n\n  function Hyy(a: real, b: real, c: real, d: real, e: real,\n              f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  { NumHyy(a, b, c, d, e, f, g, h, i) / (w * w) }\n\n  function Hxy(a: real, b: real, c: real, d: real, e: real,\n              f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  { NumHxy(a, b, c, d, e, f, g, h, i) / (4.0 * w * w) }\n\n  // ==================================================================\n  // 定理:二次曲面上的精确恢复\n  // ------------------------------------------------------------------\n  // 在二次曲面 z = A x² + B y² + C xy + Dx + Ey + F 上采样,\n  // ZT 离散 Hessian 精确恢复二阶导数 (2A, 2B, C)。\n  // ------------------------------------------------------------------\n  // 证明思路:\n  // 1. 将二次曲面在中心点 (0,0) 处展开为 3x3 窗口的高程值\n  // 2. 代入 ZT 算子计算 Hxx, Hyy, Hxy\n  // 3. 验证结果等于 2A, 2B, C\n  // ==================================================================\n  lemma QuadraticRecovery(A: real, B: real, C: real, D: real, E: real, F: real,\n                         w: real)\n    requires w > 0.0\n    // 构造二次曲面在 3x3 窗口上的采样值\n    // 中心点 (0,0) 对应 e = F\n    // 其他点按二次曲面公式计算\n    // 注意:这里假设窗口中心在原点,且格网间距为 w\n    // 实际 DEM 中可能需要坐标变换,但数学性质不变\n    ensures Hxx(a, b, c, d, e, f, g, h, i, w) == 2.0 * A\n    ensures Hyy(a, b, c, d, e, f, g, h, i, w) == 2.0 * B\n    ensures Hxy(a, b, c, d, e, f, g, h, i, w) == C\n  {\n    // 计算二次曲面在 3x3 窗口上的采样值\n    var a := A * (-w)^2 + B * (-w)^2 + C * (-w)*(-w) + D * (-w) + E * (-w) + F;\n    var b := A * (0)^2 + B * (-w)^2 + C * (0)*(-w) + D * (0) + E * (-w) + F;\n    var c := A * (w)^2 + B * (-w)^2 + C * (w)*(-w) + D * (w) + E * (-w) + F;\n    var d := A * (-w)^2 + B * (0)^2 + C * (-w)*(0) + D * (-w) + E * (0) + F;\n    var e := A * (0)^2 + B * (0)^2 + C * (0)*(0) + D * (0) + E * (0) + F;\n    var f := A * (w)^2 + B * (0)^2 + C * (w)*(0) + D * (w) + E * (0) + F;\n    var g := A * (-w)^2 + B * (w)^2 + C * (-w)*(w) + D * (-w) + E * (w) + F;\n    var h := A * (0)^2 + B * (w)^2 + C * (0)*(w) + D * (0) + E * (w) + F;\n    var i := A * (w)^2 + B * (w)^2 + C * (w)*(w) + D * (w) + E * (w) + F;\n\n    // 验证 Hxx = 2A\n    assert NumHxx(a, b, c, d, e, f, g, h, i) == 2.0 * A * (w * w);\n    assert Hxx(a, b, c, d, e, f, g, h, i, w) == 2.0 * A;\n\n    // 验证 Hyy = 2B\n    assert NumHyy(a, b, c, d, e, f, g, h, i) == 2.0 * B * (w * w);\n    assert Hyy(a, b, c, d, e, f, g, h, i, w) == 2.0 * B;\n\n    // 验证 Hxy = C\n    assert NumHxy(a, b, c, d, e, f, g, h, i) == 4.0 * C * (w * w);\n    assert Hxy(a, b, c, d, e, f, g, h, i, w) == C;\n  }\n\n  // ==================================================================\n  // 结构注记:为什么 ZT 能精确恢复二次曲面\n  // ------------------------------------------------------------------\n  // ZT 算子能精确恢复二次曲面二阶导数的根本原因:\n  //\n  // 1. 二次曲面在局部是二次多项式,其泰勒展开就是自身\n  // 2. ZT 算子是二阶差分算子,其设计使得:\n  //    - Hxx 算子对 x² 项的系数有精确的 2 倍放大\n  //    - Hyy 算子对 y² 项的系数有精确的 2 倍放大\n  //    - Hxy 算子对 xy 项的系数有精确的 1 倍放大\n  // 3. 线性项 Dx + Ey 在二阶差分中完全抵消\n  // 4. 常数项 F 在二阶差分中完全抵消\n  //\n  // 这与 Horn 坡度算子类似,但 ZT 算子显式依赖中心元 e,\n  // 这使得它在噪声传播上与一阶算子有本质区别。\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-003 — Zevenbergen-Thorne Hessian on quadratic surfaces\\n\";\n  print \"全部由编译期验证:dafny verify P003_curvature.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

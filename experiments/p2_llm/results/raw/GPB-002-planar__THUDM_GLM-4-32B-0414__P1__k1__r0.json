@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3080,
+    "completion_tokens": 1092,
+    "total_tokens": 4172,
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 8
+  },
+  "api_id": "01a08c15d34c2314881d4c7a4b216b4d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module HornSlope {\n  // Horn (1981) finite-difference slope operators\n  method DzDx(a: real, b: real, c: real, w: real) returns (dx: real)\n    requires w > 0.0\n    ensures dx == (c - a) / (2.0 * w)\n  {\n    return (c - a) / (2.0 * w);\n  }\n\n  method DzDy(b: real, e: real, h: real, w: real) returns (dy: real)\n    requires w > 0.0\n    ensures dy == (h - b) / (2.0 * w)\n  {\n    return (h - b) / (2.0 * w);\n  }\n\n  // Planar surface generator: z = A*x + B*y + C\n  method PlanarSurface(A: real, B: real, C: real, x: real, y: real) returns (z: real)\n  {\n    return A * x + B * y + C;\n  }\n\n  // Grid point evaluation for planar surface\n  method GridPoint(A: real, B: real, C: real, x: real, y: real, w: real, i: int, j: int) returns (z: real)\n    requires w > 0.0\n  {\n    return PlanarSurface(A, B, C, x + i * w, y + j * w);\n  }\n\n  // Theorem: Horn operators recover exact slopes on planar surfaces\n  lemma PlanarExactness(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures DzDx(GridPoint(A, B, C, 0.0, 0.0, w, -1, 0),\n                GridPoint(A, B, C, 0.0, 0.0, w, 0, 0),\n                GridPoint(A, B, C, 0.0, 0.0, w, 1, 0),\n                w) == A\n    ensures DzDy(GridPoint(A, B, C, 0.0, 0.0, w, 0, -1),\n                GridPoint(A, B, C, 0.0, 0.0, w, 0, 0),\n                GridPoint(A, B, C, 0.0, 0.0, w, 0, 1),\n                w) == B\n  {\n    // Expand the grid points\n    var a := GridPoint(A, B, C, 0.0, 0.0, w, -1, 0);\n    var b := GridPoint(A, B, C, 0.0, 0.0, w, 0, -1);\n    var c := GridPoint(A, B, C, 0.0, 0.0, w, 1, 0);\n    var e := GridPoint(A, B, C, 0.0, 0.0, w, 0, 0);\n    var h := GridPoint(A, B, C, 0.0, 0.0, w, 0, 1);\n\n    // Verify the planar surface evaluations\n    assert a == A * (-w) + B * 0.0 + C;\n    assert b == A * 0.0 + B * (-w) + C;\n    assert c == A * w + B * 0.0 + C;\n    assert e == A * 0.0 + B * 0.0 + C;\n    assert h == A * 0.0 + B * w + C;\n\n    // Compute the finite differences\n    var dx := DzDx(a, e, c, w);\n    var dy := DzDy(b, e, h, w);\n\n    // Verify exact recovery\n    assert dx == (c - a) / (2.0 * w);\n    assert dy == (h - b) / (2.0 * w);\n\n    // Substitute the planar surface evaluations\n    assert c - a == (A * w + B * 0.0 + C) - (A * (-w) + B * 0.0 + C) == 2.0 * A * w;\n    assert h - b == (A * 0.0 + B * w + C) - (A * 0.0 + B * (-w) + C) == 2.0 * B * w;\n\n    // Final verification\n    assert dx == (2.0 * A * w) / (2.0 * w) == A;\n    assert dy == (2.0 * B * w) / (2.0 * w) == B;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench GPB-019 — Horn slope exactness on planar surfaces\\n\";\n  print \"全部由编译期验证:dafny verify HornSlope.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

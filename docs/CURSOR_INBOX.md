@@ -10,10 +10,10 @@
 ## §A · 当前活跃任务(读这个)
 
 STATUS: W3/RUNNING  
-UPDATED: 2026-09-10 23:44  
-TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 GLM-4-32B starting)  
-M1 DeepSeek-V3.2 210/210: @1 dafny compile 6/27 verify 4/27.  
-M2 Qwen2.5-72B 210/210 (4 ReadTimeout): @1 dafny compile 0/27 verify 0/27; cell RAN compile_ok 1/132. Lean TOOLCHAIN_MISSING. Next M3→M4.
+UPDATED: 2026-09-11 00:35  
+TASK: **task16-W3 · L1 主实验**(M3 circuit-stop; M4 R1 retry after probe fix)  
+M3 GLM-4-32B: 80/210 stop COMPILE_ZERO_STREAK_20 (valid negative).  
+M4 R1: first probes ReadTimeout on R1-ping; probe now uses V3.2 for reachability. Batch restarting.
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。  
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:  

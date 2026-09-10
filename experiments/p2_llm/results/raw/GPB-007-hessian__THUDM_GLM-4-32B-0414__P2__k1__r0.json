@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 683,
+    "total_tokens": 950,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 11
+  },
+  "api_id": "01a08c231f9f2a14744930681743757b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll create a Dafny formalization for the Zevenbergen-Thorne discrete Hessian theorem, repairing it based on the verifier feedback. Since you haven't provided the original attempt or specific feedback, I'll create a complete formalization from scratch that should correctly capture the theorem.\n\n```dafny\nmethod ZevenbergenThorneHessian(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0;\n  requires forall x, y :: abs(x) <= 1 && abs(y) <= 1 ==> \n    A * x^2 + B * y^2 + C * x * y + D * x + E * y + F is real;\n  ensures exists a, b, c :: a == 2 * A && b == 2 * B && c == C &&\n    a == (z(1,0) - 2*z(0,0) + z(-1,0)) / (w^2) &&\n    b == (z(0,1) - 2*z(0,0) + z(0,-1)) / (w^2) &&\n    c == (z(1,1) - z(1,-1) - z(-1,1) + z(-1,-1)) / (4 * w^2);\n{\n  // Define the quadratic surface z(x,y) = A x^2 + B y^2 + C xy + Dx + Ey + F\n  function z(x: int, y: int): real\n    requires abs(x) <= 1 && abs(y) <= 1;\n  {\n    return A * x^2 + B * y^2 + C * x * y + D * x + E * y + F;\n  }\n\n  // Calculate the discrete Hessian components\n  var a := (z(1,0) - 2*z(0,0) + z(-1,0)) / (w^2);\n  var b := (z(0,1) - 2*z(0,0) + z(0,-1)) / (w^2);\n  var c := (z(1,1) - z(1,-1) - z(-1,1) + z(-1,-1)) / (4 * w^2);\n\n  // Verify the results match the analytical Hessian\n  assert a == 2 * A;\n  assert b == 2 * B;\n  assert c == C;\n}\n```\n\nThis formalization:\n1. Defines the quadratic surface z(x,y) with the given coefficients\n2. Implements the Zevenbergen-Thorne discrete Hessian calculation\n3. Verifies that the discrete Hessian exactly recovers the analytical Hessian components (2A, 2B, C)\n4. Includes proper preconditions (w > 0 and the surface is well-defined)\n5. Uses assertions to verify the main theorem claim\n\nThe theorem states that on a quadratic surface sampled on a 3x3 window with spacing w>0, the Zevenbergen-Thorne discrete Hessian recovers (2A, 2B, C) exactly, and this formalization captures that precisely.\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

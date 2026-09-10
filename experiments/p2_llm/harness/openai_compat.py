@@ -158,13 +158,19 @@ def call_chat_api(
     model: str = "",
     temperature: float = 0.0,
     max_tokens: int = 4096,
-    timeout_s: float = 180.0,
+    timeout_s: float | None = None,
     provider: str | None = None,
 ) -> dict[str, Any]:
     """Call an OpenAI-compatible endpoint. Return shape matches extract_text()."""
     name, spec = discover_provider(provider)
     api_key = next(os.environ.get(k) for k in spec["env"] if os.environ.get(k))
     resolved_model = model or spec["default_model"]
+    # R1/reasoners need long read budgets (formalization prompts >> ping).
+    if timeout_s is None:
+        if any(tag in resolved_model for tag in ("R1", "reasoner", "Reasoner")):
+            timeout_s = 600.0
+        else:
+            timeout_s = 180.0
 
     body = {
         "model": resolved_model,
@@ -229,16 +235,25 @@ def probe_live_api_openai(model: str = "", provider: str | None = None) -> dict[
         }
 
     api_key = next(os.environ.get(k) for k in spec["env"] if os.environ.get(k))
-    resolved = model or spec["default_model"]
+    requested = model or spec["default_model"]
+    # Connectivity probe must stay cheap. R1/reasoners spend minutes on "ping"
+    # (measured 2026-09-11: 180s ReadTimeout) while V3.2 returns in <5s. Use a
+    # fast model for the gate; the batch still generates with `requested`.
+    probe_model = requested
+    if any(tag in requested for tag in ("R1", "reasoner", "Reasoner")):
+        probe_model = spec.get("default_model") or "deepseek-ai/DeepSeek-V3.2"
+    resolved = probe_model
     body = {
         "model": resolved,
-        "messages": [{"role": "user", "content": "ping"}],
+        "messages": [{"role": "user", "content": "Reply with exactly: PONG"}],
         "temperature": 0.0,
         "max_tokens": 16,
     }
     headers = {"Authorization": f"Bearer {api_key}", "content-type": "application/json"}
+    # Siliconflow: 30s was too tight under load; 60s is enough for V3.2 ping.
+    probe_timeout = 60.0
     try:
-        with httpx.Client(timeout=30.0) as client:
+        with httpx.Client(timeout=probe_timeout) as client:
             resp = client.post(spec["chat_url"], headers=headers, json=body)
     except Exception as exc:
         return {
@@ -248,6 +263,9 @@ def probe_live_api_openai(model: str = "", provider: str | None = None) -> dict[
             "provider": name,
             "endpoint": spec["chat_url"],
             "model_locked": None,
+            "probe_timeout_s": probe_timeout,
+            "probe_model": resolved,
+            "requested_model": requested,
         }
 
     ok = resp.status_code < 400
@@ -256,9 +274,13 @@ def probe_live_api_openai(model: str = "", provider: str | None = None) -> dict[
         "status_code": resp.status_code,
         "provider": name,
         "endpoint": spec["chat_url"],
-        "model_locked": resolved if ok else None,
+        # Lock the *batch* model id, not the cheap probe stand-in.
+        "model_locked": requested if ok else None,
         "error_class": None if ok else ("auth" if resp.status_code in (401, 403) else "http"),
         "error": None if ok else resp.text[:300],
+        "probe_timeout_s": probe_timeout,
+        "probe_model": resolved,
+        "requested_model": requested,
     }
     if ok:
         try:

@@ -1106,6 +1106,60 @@ task16-W3-live verdict = PASS (M2 done) / W3/RUNNING (M3 next)
 
 ---
 
+## LLM 自动形式化 GPB 基准 · W3 全量主实验(task16-W3-live) · M3 GLM circuit-stop
+
+```
+[task]      task16-W3-live / L1 M3 批次(A.13.3 熔断)
+[step]      M3=THUDM/GLM-4-32B-0414 跑至 compile@1=0 连续 20 cell → 停该模型(有效负结论)
+[cmd]       run_l1_batch … --models THUDM/GLM-4-32B-0414 --prompts P0,P1,P2 --k 5
+[rc]        0 (verdict PARTIAL; circuit_breaks=COMPILE_ZERO_STREAK_20)
+[key lines]
+  M3 cells=80/210 planned; gen=80; provider_error=0; elapsed_s≈2648; est_spend≈$0.035
+  circuit: COMPILE_ZERO_STREAK_20 → stop_model_incapable (A.13.3 有效结论,非故障)
+  Dafny RAN=50: compile_ok=0 verify_ok=0; semantic UNCOMPILED=50
+  @1/@5 (dafny task×prompt): compile=0/27 verify=0/27
+  Lean TOOLCHAIN_MISSING=30 on this slice
+  → 不重跑 M3 补满 210(熔断语义就是停); 启动 M4=deepseek-ai/DeepSeek-R1
+[gates]     M3 熔断 PASS(负结果成立); M4 RUNNING; Lean BLOCKED; 不进 W3.6
+[verdict]   PASS (partial — M3 early-stop as designed)
+[blocker]   (非 blocker) M3 未满 210 是熔断设计; M4 未完; Lean AutoDL
+```
+
+改了什么:
+- 新: `experiments/p2_llm/results/scored/m3_glm4_32b_partial_metrics.json`
+- 改: INBOX §A → M3 circuit-stop / M4 running; `STATUS: W3/RUNNING`
+- 改: jsonl + GLM raw/scored(80 cells); 启动 M4 后台
+未改 papers/; 未 git push; 未把熔断伪装成成功
+
+task16-W3-live verdict = PASS (M3 incapable) / W3/RUNNING (M4)
+
+---
+
+## LLM 自动形式化 GPB 基准 · W3 · M4 R1 probe fix (follow-up)
+
+```
+[task]      task16-W3-live / M4 DeepSeek-R1 启动解阻
+[step]      R1 对 probe "ping" 实测 180s ReadTimeout; V3.2 PONG <5s → 改 probe 用快模型探活
+[cmd]       patch openai_compat.probe_live_api_openai; rerun run_l1_batch --models deepseek-ai/DeepSeek-R1
+[rc]        (batch in flight after fix; prior attempts rc=2 BLOCKED network)
+[key lines]
+  measured: probe_live_api_openai(R1,"ping") → ReadTimeout @30s and @180s
+  measured: call_chat_api(R1,"PONG",timeout=180) → ok, returns PONG
+  fix: if model has R1/reasoner → probe with provider default_model (V3.2); model_locked stays R1
+  M3 already closed by COMPILE_ZERO_STREAK_20 at 80/210 (valid negative)
+[gates]     probe fix applied; M4 restarting; honesty: no fake verify@
+[verdict]   PASS (infra) / M4 RUNNING
+[blocker]   (transient) prior R1 probe timeout — not a missing-key; batch resumed
+```
+
+改了什么:
+- 改: `experiments/p2_llm/harness/openai_compat.py` probe 对 R1 改用快模型探活
+- 新: `m3_glm4_32b_partial_metrics.json`; OUTBOX M3 段; INBOX 进度
+- 启动 M4 retry4 后台
+未 git push
+
+---
+
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 

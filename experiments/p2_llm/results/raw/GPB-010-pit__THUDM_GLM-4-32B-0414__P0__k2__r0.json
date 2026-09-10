@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1631,
+    "completion_tokens": 1161,
+    "total_tokens": 2792,
+    "prompt_tokens_details": {
+      "cached_tokens": 1600
+    },
+    "prompt_cache_hit_tokens": 1600,
+    "prompt_cache_miss_tokens": 31
+  },
+  "api_id": "01a08c25040c8977e17739a38e9ce4ca",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P005_d8.dfy: D8 pit has no flow; plane flow is constant.\n// Formalizes the property that under D8 steepest-descent routing,\n// if none of the eight neighbors is strictly lower than the center,\n// the flow direction is NoFlow (undefined / pit).\n\nmodule D8PitNoFlow {\n  // Represents a 2D grid of elevations\n  type Grid = array2d<float>\n\n  // Represents the eight possible flow directions in D8\n  datatype FlowDirection = \n    | E\n    | SE\n    | S\n    | SW\n    | W\n    | NW\n    | N\n    | NE\n    | NoFlow\n\n  // Calculates the D8 flow direction for a given cell\n  function method D8Flow(h: Grid, r: int, c: int): FlowDirection {\n    var e: float := h[r][c];\n    var best: FlowDirection := NoFlow;\n    var best_p: float := 0.0;\n\n    // Iterate through all eight neighbors\n    for i: int := 0 to 8 {\n      var name: string;\n      var dp: int;\n      var dq: int;\n      var dist2: float;\n      match i {\n        case 0 => { name := \"E\"; dp := 1; dq := 0; dist2 := 1.0; }\n        case 1 => { name := \"SE\"; dp := 1; dq := 1; dist2 := 2.0; }\n        case 2 => { name := \"S\"; dp := 0; dq := 1; dist2 := 1.0; }\n        case 3 => { name := \"SW\"; dp := -1; dq := 1; dist2 := 2.0; }\n        case 4 => { name := \"W\"; dp := -1; dq := 0; dist2 := 1.0; }\n        case 5 => { name := \"NW\"; dp := -1; dq := -1; dist2 := 2.0; }\n        case 6 => { name := \"N\"; dp := 0; dq := -1; dist2 := 1.0; }\n        case 7 => { name := \"NE\"; dp := 1; dq := -1; dist2 := 2.0; }\n      }\n\n      var rr: int := r + dq;\n      var cc: int := c + dp;\n\n      // Check if the neighbor is within the grid bounds\n      if 0 <= rr < h.Length1 && 0 <= cc < h.Length2 {\n        var drop: float := e - h[rr][cc];\n        if drop > 0 {\n          var p: float := (drop * drop) / dist2;\n          if best == NoFlow || p > best_p {\n            best := name;\n            best_p := p;\n          }\n        }\n      }\n    }\n\n    return best;\n  }\n\n  // Property to prove: If none of the eight neighbors is strictly lower than the center,\n  // then the flow direction is NoFlow.\n  lemma PitNoFlow(h: Grid, r: int, c: int)\n    requires 0 <= r < h.Length1 && 0 <= c < h.Length2\n    ensures D8Flow(h, r, c) == NoFlow\n  {\n    var e: float := h[r][c];\n\n    // Assume that none of the eight neighbors is strictly lower than the center\n    assume forall i: int :: 0 <= i < 8 ==> {\n      var name: string;\n      var dp: int;\n      var dq: int;\n      var dist2: float;\n      match i {\n        case 0 => { name := \"E\"; dp := 1; dq := 0; dist2 := 1.0; }\n        case 1 => { name := \"SE\"; dp := 1; dq := 1; dist2 := 2.0; }\n        case 2 => { name := \"S\"; dp := 0; dq := 1; dist2 := 1.0; }\n        case 3 => { name := \"SW\"; dp := -1; dq := 1; dist2 := 2.0; }\n        case 4 => { name := \"W\"; dp := -1; dq := 0; dist2 := 1.0; }\n        case 5 => { name := \"NW\"; dp := -1; dq := -1; dist2 := 2.0; }\n        case 6 => { name := \"N\"; dp := 0; dq := -1; dist2 := 1.0; }\n        case 7 => { name := \"NE\"; dp := 1; dq := -1; dist2 := 2.0; }\n      }\n\n      var rr: int := r + dq;\n      var cc: int := c + dp;\n\n      // Check if the neighbor is within the grid bounds\n      if 0 <= rr < h.Length1 && 0 <= cc < h.Length2 {\n        var drop: float := e - h[rr][cc];\n        drop <= 0\n      }\n      else {\n        true\n      }\n    };\n\n    // The D8Flow function will not find any neighbor with a positive drop,\n    // so it will return NoFlow.\n    assert D8Flow(h, r, c) == NoFlow;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

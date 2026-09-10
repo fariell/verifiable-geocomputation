@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "8b9c0663bb132c9d9ba47e78f517c93c6884a3c4d7a6bb1d6f724e317cde3e13",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 245,
+    "completion_tokens": 81,
+    "total_tokens": 326,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "prompt_cache_hit_tokens": 224,
+    "prompt_cache_miss_tokens": 21
+  },
+  "api_id": "01a08c0f641c80334420beb31aaa4d74",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I need to see the original Lean code and the toolchain feedback to provide a proper repair. Since these are missing from your message, I cannot complete the requested task.\n\nPlease provide:\n1. The original Lean code that failed\n2. The specific toolchain feedback/error messages\n\nOnce you provide these details, I can help repair the formalization while maintaining the intended theorem and geospatial meaning.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

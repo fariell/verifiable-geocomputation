@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3059,
+    "completion_tokens": 626,
+    "total_tokens": 3685,
+    "prompt_tokens_details": {
+      "cached_tokens": 3040
+    },
+    "prompt_cache_hit_tokens": 3040,
+    "prompt_cache_miss_tokens": 19
+  },
+  "api_id": "01a08c1a0e8caaa6140647b7523102dc",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.Curvature\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  中心元 e 在 Laplacian 算子中权为正,出现在算子签名里。\n-/\n\n-- ==========================================================================\n-- 算子定义\n-- ==========================================================================\n\n/-- 离散 Laplacian 的分子(尚未除以格网间距平方)。 -/\ndef numLaplacian (a b c d e f g h i : ℝ) : ℝ := \n  (a + b + c + d + f + g + h + i) - 8 * e\n\n/-- 离散 Laplacian (无量纲) -/\ndef laplacian (a b c d e f g h i w : ℝ) : ℝ := \n  numLaplacian a b c d e f g h i / (w * w)\n\n-- ==========================================================================\n-- 命题证明\n-- ==========================================================================\n\n/-- 如果中心格点 e 是离散局部极大值(高于四个正交邻居),则离散 Laplacian 在中心 <= 0 -/\ntheorem local_max_le_laplacian (a b c d e f g h i w : ℝ) \n  (h1 : e ≥ a) (h2 : e ≥ b) (h3 : e ≥ c) (h4 : e ≥ d) \n  (h5 : e ≥ f) (h6 : e ≥ g) (h7 : e ≥ h) (h8 : e ≥ i) \n  (h9 : w ≠ 0) : laplacian a b c d e f g h i w ≤ 0 := by\n  unfold laplacian numLaplacian\n  field_simp [h9]\n  nlinarith [h1, h2, h3, h4, h5, h6, h7, h8]\n\n-- ==========================================================================\n-- 冒烟测试(非命题,仅确认算子可计算)\n-- ==========================================================================\n\nexample : laplacian 0 0 0 0 1 0 0 0 0 1 = -8 := by norm_num [laplacian, numLaplacian]\nexample : laplacian 1 1 1 1 2 1 1 1 1 1 = 0 := by norm_num [laplacian, numLaplacian]\n\nend VeriGIS.Curvature\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 262,
+    "completion_tokens": 880,
+    "total_tokens": 1142,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 6
+  },
+  "api_id": "01a08c17e33e638feba8462f14af05e6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll create a Dafny formalization for the Horn finite-difference estimates theorem, repairing it based on the verifier feedback. Since you haven't provided the original attempt or specific feedback, I'll create a complete formalization from scratch that should correctly capture the theorem.\n\n```dafny\nmethod HornFiniteDifferenceEstimates(A: real, B: real, C: real, w: real, n: nat, m: nat)\n  requires w > 0;\n  requires n > 0 && m > 0;\n  ensures forall i :: 0 <= i < n ==> forall j :: 0 <= j < m ==> \n           DzDx(A, B, C, w, i, j, n, m) == A;\n  ensures forall i :: 0 <= i < n ==> forall j :: 0 <= j < m ==> \n           DzDy(A, B, C, w, i, j, n, m) == B;\n{\n  // Helper function to compute z at grid point (i,j)\n  function Model z(i: int, j: int) : real\n    requires 0 <= i < n && 0 <= j < m;\n    ensures z(i,j) == A * (i as real) * w + B * (j as real) * w + C;\n  {\n    A * (i as real) * w + B * (j as real) * w + C\n  }\n\n  // Horn's finite difference estimate for Dz/Dx\n  function Model DzDx(A: real, B: real, C: real, w: real, i: int, j: int, n: nat, m: nat) : real\n    requires w > 0;\n    requires 0 <= i < n && 0 <= j < m;\n    requires n > 0 && m > 0;\n  {\n    if i == n - 1 then\n      // At the right boundary, use backward difference\n      (z(i,j) - z(i-1,j)) / w\n    else\n      // Interior points, use central difference\n      (z(i+1,j) - z(i-1,j)) / (2 * w)\n  }\n\n  // Horn's finite difference estimate for Dz/Dy\n  function Model DzDy(A: real, B: real, C: real, w: real, i: int, j: int, n: nat, m: nat) : real\n    requires w > 0;\n    requires 0 <= i < n && 0 <= j < m;\n    requires n > 0 && m > 0;\n  {\n    if j == m - 1 then\n      // At the top boundary, use backward difference\n      (z(i,j) - z(i,j-1)) / w\n    else\n      // Interior points, use central difference\n      (z(i,j+1) - z(i,j-1)) / (2 * w)\n  }\n\n  // Verification of the theorem\n  assert forall i :: 0 <= i < n ==> forall j :: 0 <= j < m ==> \n         DzDx(A, B, C, w, i, j, n, m) == A;\n  assert forall i :: 0 <= i < n ==> forall j :: 0 <= j < m ==> \n         DzDy(A, B, C, w, i, j, n, m) == B;\n}\n```\n\nThis formalization:\n1. Defines the planar surface z = A*x + B*y + C sampled on a regular grid with spacing w\n2. Implements Horn's finite difference estimates for Dz/Dx and Dz/Dy\n3. Handles boundary conditions appropriately (using backward differences at boundaries)\n4. Includes verification assertions that the estimates recover A and B exactly\n5. Maintains all the original mathematical meaning of the theorem\n\nThe verification should pass because:\n- For interior points, the central difference estimates will exactly recover A and B\n- For boundary points, the backward difference estimates will also exactly recover A and B\n- The grid spacing w cancels out in the calculations, leaving exactly A and B\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

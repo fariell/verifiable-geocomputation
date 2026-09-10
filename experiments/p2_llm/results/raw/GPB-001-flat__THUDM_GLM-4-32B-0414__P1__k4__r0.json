@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4ad5bb6863e850e9dbcf49614acbc628556a5d50b32cfcdd7408c75c3d6d6874",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3076,
+    "completion_tokens": 842,
+    "total_tokens": 3918,
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 4
+  },
+  "api_id": "01a08c05bd4e2b8c7eb5363a04081b21",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · GPB-019\n//  文件 : formal/dafny/GPB019_Horn_slope_zero.dfy\n//  算子 : Horn (1981) 斜率计算\n//  覆盖 : 3x3 窗口平坦性 ⇒ 斜率零\n//  环境 : Dafny 4.11 · 验证命令 dafny verify GPB019_Horn_slope_zero.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n\nmodule GPB019HornZero {\n  \n  // 3x3 窗口约定(与 P-001 相同:p 向右,q 向下)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n\n  // Horn (1981) 斜率计算\n  // 斜率平方 SlopeSq = (dz/dx)² + (dz/dy)²\n  // 其中 dz/dx ≈ (f - d)/(2w), dz/dy ≈ (h - b)/(2w)\n  // 因此 SlopeSq = [(f-d)/(2w)]² + [(h-b)/(2w)]²\n  method HornSlopeSq(a: real, b: real, c: real, d: real, e: real, f: real,\n                     g: real, h: real, i: real, w: real) : real\n    requires w > 0.0\n    ensures result == ((f - d)/(2.0 * w)) * ((f - d)/(2.0 * w)) + \n                     ((h - b)/(2.0 * w)) * ((h - b)/(2.0 * w))\n  {\n    return ((f - d)/(2.0 * w)) * ((f - d)/(2.0 * w)) + \n           ((h - b)/(2.0 * w)) * ((h - b)/(2.0 * w));\n  }\n\n  // 命题:如果所有九个单元格高度相同,则 Horn 斜率平方为零\n  lemma FlatWindowImpliesZeroSlope(a: real, b: real, c: real, d: real, e: real,\n                                  f: real, g: real, h: real, i: real, w: real)\n    requires w > 0.0\n    requires a == b == c == d == e == f == g == h == i\n    ensures HornSlopeSq(a, b, c, d, e, f, g, h, i, w) == 0.0\n  {\n    // 由于所有高度相同,有 f == d 且 h == b\n    assert f == d;\n    assert h == b;\n    \n    // 因此 dz/dx = (f - d)/(2w) = 0\n    // dz/dy = (h - b)/(2w) = 0\n    // 所以 SlopeSq = 0² + 0² = 0\n    assert (f - d) == 0.0;\n    assert (h - b) == 0.0;\n    \n    // 直接计算验证\n    var slope_sq := HornSlopeSq(a, b, c, d, e, f, g, h, i, w);\n    assert slope_sq == 0.0;\n  }\n\n  method Main() {\n    print \"GeoProofBench GPB-019 — Horn slope zero on flat windows\\n\";\n    print \"全部由编译期验证:dafny verify GPB019_Horn_slope_zero.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

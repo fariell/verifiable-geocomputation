@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1629,
+    "completion_tokens": 455,
+    "total_tokens": 2084,
+    "prompt_tokens_details": {
+      "cached_tokens": 1600
+    },
+    "prompt_cache_hit_tokens": 1600,
+    "prompt_cache_miss_tokens": 29
+  },
+  "api_id": "01a08c194dec91a1ceed7a367d6d3ed1",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Matrix.Basic\n\nnamespace Curvature\n\n/-- A 3x3 window of elevation values -/\ndef Window := Matrix (Fin 3) (Fin 3) ℝ\n\n/-- The center cell of a 3x3 window -/\ndef center (w : Window) : ℝ := w 1 1\n\n/-- The four orthogonal neighbors of the center cell -/\ndef north (w : Window) : ℝ := w 0 1\ndef east (w : Window) : ℝ := w 1 2\ndef south (w : Window) : ℝ := w 2 1\ndef west (w : Window) : ℝ := w 1 0\n\n/-- A cell is a discrete local maximum if it is >= each of its orthogonal neighbors -/\ndef isDiscreteLocalMax (w : Window) : Prop := \n  w.center ≥ w.north ∧ w.center ≥ w.east ∧ w.center ≥ w.south ∧ w.center ≥ w.west\n\n/-- The discrete Laplacian at the center cell -/\ndef discreteLaplacian (w : Window) : ℝ := \n  w.north + w.east + w.south + w.west - 4 * w.center\n\n/-- If the center cell is a discrete local maximum, then the discrete Laplacian is <= 0 -/\ntheorem localMaxImpliesNonPositiveLaplacian (w : Window) (h : w.isDiscreteLocalMax) : \n  w.discreteLaplacian ≤ 0 := by\n  simp [discreteLaplacian, h.1, h.2.1, h.2.2.1, h.2.2.2]\n  nlinarith\n```\n\nThis Lean code formalizes the given natural-language specification. It defines a 3x3 window of elevation values, identifies the center cell and its four orthogonal neighbors, defines what it means for the center cell to be a discrete local maximum, defines the discrete Laplacian at the center cell, and proves that if the center cell is a discrete local maximum, then the discrete Laplacian is less than or equal to zero.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

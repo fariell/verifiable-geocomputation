@@ -3,8 +3,11 @@
   "status_code": 200,
   "provider": "siliconflow",
   "endpoint": "https://api.siliconflow.cn/v1/chat/completions",
-  "model_locked": "Qwen/Qwen2.5-72B-Instruct",
+  "model_locked": "deepseek-ai/DeepSeek-R1",
   "error_class": null,
   "error": null,
-  "echo": "Pong!"
+  "probe_timeout_s": 60.0,
+  "probe_model": "deepseek-ai/DeepSeek-V3.2",
+  "requested_model": "deepseek-ai/DeepSeek-R1",
+  "echo": "PONG"
 }

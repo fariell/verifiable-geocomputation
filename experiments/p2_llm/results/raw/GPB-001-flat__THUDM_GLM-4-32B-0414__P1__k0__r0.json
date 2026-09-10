@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4ad5bb6863e850e9dbcf49614acbc628556a5d50b32cfcdd7408c75c3d6d6874",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3076,
+    "completion_tokens": 707,
+    "total_tokens": 3783,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3076
+  },
+  "api_id": "01a08c04aeaa995401358ffdfd33a8f9",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module HornSlopeZero {\n\n  // Horn (1981) slope magnitude squared (SlopeSq) for a 3x3 window\n  // with grid spacing w. Returns zero if all elevations are equal.\n  method SlopeSq(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real) returns (sq: real)\n    requires w > 0.0\n    ensures sq >= 0.0\n    ensures (a == b && b == c && c == d && d == e && e == f && f == g && g == h && h == i) ==> sq == 0.0\n  {\n    // Horn's slope magnitude is sqrt((dz/dx)^2 + (dz/dy)^2)\n    // For equal elevations, both partial derivatives are zero\n    var dzdx := (f - d) / (2.0 * w);\n    var dzdy := (h - b) / (2.0 * w);\n    return dzdx * dzdx + dzdy * dzdy;\n  }\n\n  // Lemma proving that SlopeSq is zero when all elevations are equal\n  lemma EqualElevationsImplyZeroSlope(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real)\n    requires w > 0.0\n    requires a == b && b == c && c == d && d == e && e == f && f == g && g == h && h == i\n    ensures SlopeSq(a, b, c, d, e, f, g, h, i, w) == 0.0\n  {\n    // Since all elevations are equal, dz/dx and dz/dy are both zero\n    var dzdx := (f - d) / (2.0 * w);\n    var dzdy := (h - b) / (2.0 * w);\n    assert dzdx == 0.0;\n    assert dzdy == 0.0;\n    assert SlopeSq(a, b, c, d, e, f, g, h, i, w) == 0.0;\n  }\n\n  method Main() {\n    // Test case with all elevations equal\n    var w := 1.0;\n    var sq := SlopeSq(10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, w);\n    assert sq == 0.0;\n    \n    // Test case with unequal elevations\n    var sq2 := SlopeSq(10.0, 10.0, 10.0, 10.0, 11.0, 10.0, 10.0, 10.0, 10.0, w);\n    assert sq2 > 0.0;\n    \n    print \"GeoProofBench GPB-019 — Horn slope zero on flat surfaces\\n\";\n    print \"全部由编译期验证:dafny verify HornSlopeZero.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

@@ -197,11 +197,14 @@ def generate_one(
 
     elif backend == "openai":
         try:
+            # R1 / reasoners routinely exceed the 180s default on formalization prompts.
+            gen_timeout = 600.0 if any(t in model for t in ("R1", "reasoner", "Reasoner")) else 180.0
             api_response = call_chat_api(
                 prompt=tmpl,
                 model=model,
                 temperature=temperature,
                 max_tokens=max_tokens,
+                timeout_s=gen_timeout,
                 provider=os.environ.get("P2_LLM_PROVIDER"),
             )
             raw_text = extract_text(api_response)

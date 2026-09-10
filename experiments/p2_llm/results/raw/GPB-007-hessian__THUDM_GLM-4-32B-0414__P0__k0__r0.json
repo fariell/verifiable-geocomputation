@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1652,
+    "completion_tokens": 852,
+    "total_tokens": 2504,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1588
+  },
+  "api_id": "01a08c1b7b5823e34f18ba0ec5459769",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Zevenbergen-Thorne Hessian for quadratic surfaces\nmodule ZTHessian {\n  // Represents a 3x3 grid window with spacing w\n  datatype GridWindow = GridWindow(\n    a: real, b: real, c: real, d: real, e: real, f: real,\n    g: real, h: real, i: real,\n    w: real // spacing, must be positive\n  ) invariant w > 0.0\n\n  // Quadratic surface coefficients\n  datatype QuadraticCoeffs = QuadraticCoeffs(\n    A: real, B: real, C: real, D: real, E: real, F: real\n  )\n\n  // Compute the Zevenbergen-Thorne Hessian from a grid window\n  function Method ztHessian(window: GridWindow): (hxx: real, hyy: real, hxy: real)\n  {\n    var a, b, c, d, e, f, g, h, i, w := window.a, window.b, window.c, window.d, window.e, window.f,\n        window.g, window.h, window.i, window.w;\n    return (\n      (d - 2.0 * e + f) / (w * w),  // hxx\n      (b - 2.0 * e + h) / (w * w),  // hyy\n      (a - c - g + i) / (4.0 * w * w)  // hxy\n    )\n  }\n\n  // Evaluate quadratic surface at point (x,y)\n  function Method quadraticSurface(coeffs: QuadraticCoeffs, x: real, y: real): real\n  {\n    var A, B, C, D, E, F := coeffs.A, coeffs.B, coeffs.C, coeffs.D, coeffs.E, coeffs.F;\n    return A * x * x + B * y * y + C * x * y + D * x + E * y + F\n  }\n\n  // Sample quadratic surface on 3x3 grid with spacing w\n  function Method sampleQuadratic(coeffs: QuadraticCoeffs, w: real): GridWindow\n  {\n    var A, B, C, D, E, F := coeffs.A, coeffs.B, coeffs.C, coeffs.D, coeffs.E, coeffs.F;\n    return GridWindow(\n      quadraticSurface(coeffs, -w, -w),  // a\n      quadraticSurface(coeffs, 0.0, -w), // b\n      quadraticSurface(coeffs, w, -w),   // c\n      quadraticSurface(coeffs, -w, 0.0), // d\n      quadraticSurface(coeffs, 0.0, 0.0), // e\n      quadraticSurface(coeffs, w, 0.0),  // f\n      quadraticSurface(coeffs, -w, w),   // g\n      quadraticSurface(coeffs, 0.0, w),  // h\n      quadraticSurface(coeffs, w, w),    // i\n      w\n    )\n  }\n\n  // Theorem: ZT Hessian recovers 2A, 2B, C exactly for quadratic surfaces\n  lemma ZTRecoversQuadratic()\n  {\n    var A, B, C, D, E, F := 0.0, 0.0, 0.0, 0.0, 0.0, 0.0; // arbitrary coefficients\n    var w := 1.0; // arbitrary spacing > 0\n    var coeffs := QuadraticCoeffs(A, B, C, D, E, F);\n    var window := sampleQuadratic(coeffs, w);\n    var hxx, hyy, hxy := ztHessian(window);\n    \n    // The ZT Hessian should recover 2A, 2B, C exactly\n    assert hxx == 2.0 * A;\n    assert hyy == 2.0 * B;\n    assert hxy == C;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

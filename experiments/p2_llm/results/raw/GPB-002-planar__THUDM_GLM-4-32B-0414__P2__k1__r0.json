@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 262,
+    "completion_tokens": 979,
+    "total_tokens": 1241,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 6
+  },
+  "api_id": "01a08c1787d6ea53f67b1b06fb0bab0c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll create a Dafny formalization for the Horn finite-difference estimates theorem, repairing it based on the verifier feedback. Since you haven't provided the original attempt or specific feedback, I'll create a complete formalization from scratch that should correctly capture the theorem.\n\n```dafny\nmethod HornFiniteDifferenceEstimates(A: real, B: real, C: real, w: real, n: nat, m: nat)\n  requires w > 0;\n  requires n > 0 && m > 0;\n  ensures exists (DzDx: real, DzDy: real) {\n    forall i, j | 0 <= i < n && 0 <= j < m {\n      let z = A * (i * w) + B * (j * w) + C;\n      let DzDx = (z - (A * ((i-1) * w) + B * (j * w) + C)) / w;\n      let DzDy = (z - (A * (i * w) + B * ((j-1) * w) + C)) / w;\n      DzDx == A && DzDy == B\n    }\n  }\n{\n  // The theorem is proven by construction - the finite difference estimates\n  // exactly recover A and B for any point on the grid\n  assert forall i, j | 0 <= i < n && 0 <= j < m {\n    let z = A * (i * w) + B * (j * w) + C;\n    let DzDx = (z - (A * ((i-1) * w) + B * (j * w) + C)) / w;\n    let DzDy = (z - (A * (i * w) + B * ((j-1) * w) + C)) / w;\n    DzDx == A && DzDy == B;\n  };\n}\n\n// Helper lemma to prove the finite difference calculations\nlemma FiniteDifferenceLemma(A: real, B: real, w: real, i: nat, j: nat)\n  requires w > 0;\n  requires i > 0 && j > 0;\n  ensures let z = A * (i * w) + B * (j * w) + C;\n          let z_prev_x = A * ((i-1) * w) + B * (j * w) + C;\n          let z_prev_y = A * (i * w) + B * ((j-1) * w) + C;\n          let DzDx = (z - z_prev_x) / w;\n          let DzDy = (z - z_prev_y) / w;\n          DzDx == A && DzDy == B;\n{\n  // Direct calculation of the finite differences\n  let z = A * (i * w) + B * (j * w) + C;\n  let z_prev_x = A * ((i-1) * w) + B * (j * w) + C;\n  let z_prev_y = A * (i * w) + B * ((j-1) * w) + C;\n  \n  // Calculate DzDx\n  let DzDx = (z - z_prev_x) / w;\n  calc {\n    DzDx;\n    (z - z_prev_x) / w;\n    (A * (i * w) + B * (j * w) + C - (A * ((i-1) * w) + B * (j * w) + C)) / w;\n    (A * (i * w) - A * ((i-1) * w)) / w;\n    A * (i * w - (i-1) * w) / w;\n    A * (w) / w;\n    A;\n  }\n  \n  // Calculate DzDy\n  let DzDy = (z - z_prev_y) / w;\n  calc {\n    DzDy;\n    (z - z_prev_y) / w;\n    (A * (i * w) + B * (j * w) + C - (A * (i * w) + B * ((j-1) * w) + C)) / w;\n    (B * (j * w) - B * ((j-1) * w)) / w;\n    B * (j * w - (j-1) * w) / w;\n    B * (w) / w;\n    B;\n  }\n}\n```\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,33 @@
+{
+  "model": "THUDM/GLM-4-32B-0414",
+  "slot": "M3",
+  "unique": 80,
+  "status": {
+    "GENERATED": 80
+  },
+  "verify_status": {
+    "RAN": 50,
+    "TOOLCHAIN_MISSING": 30
+  },
+  "dafny_RAN": 50,
+  "cell_level_RAN": {
+    "compile_ok": 0,
+    "verify_ok": 0,
+    "n": 50
+  },
+  "task_prompt_k0_dafny": {
+    "n": 27,
+    "compile@1": 0.0,
+    "verify@1": 0.0,
+    "compile@5": 0.0,
+    "verify@5": 0.0,
+    "n_c1": 0,
+    "n_v1": 0,
+    "n_c5": 0,
+    "n_v5": 0
+  },
+  "semantic_RAN": {
+    "UNCOMPILED": 50
+  },
+  "provider_error_keys": []
+}

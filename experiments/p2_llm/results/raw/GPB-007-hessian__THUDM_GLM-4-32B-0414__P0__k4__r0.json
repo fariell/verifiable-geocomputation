@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1652,
+    "completion_tokens": 1832,
+    "total_tokens": 3484,
+    "prompt_tokens_details": {
+      "cached_tokens": 1632
+    },
+    "prompt_cache_hit_tokens": 1632,
+    "prompt_cache_miss_tokens": 20
+  },
+  "api_id": "01a08c1cc83ca50b4be248972889236b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Zevenbergen-Thorne Hessian for quadratic surfaces\nmodule ZTHessian {\n  // Represents a 3x3 grid window with spacing w\n  datatype GridWindow = GridWindow(\n    a: real, b: real, c: real, d: real, e: real, f: real,\n    g: real, h: real, i: real,\n    w: real\n  )\n\n  // Quadratic surface coefficients\n  datatype QuadraticCoeffs = QuadraticCoeffs(\n    A: real, B: real, C: real, D: real, E: real, F: real\n  )\n\n  // Hessian components\n  datatype Hessian = Hessian(\n    hxx: real, hyy: real, hxy: real\n  )\n\n  // Compute the Zevenbergen-Thorne Hessian\n  function Method ztHessian(gw: GridWindow): Hessian {\n    var a, b, c, d, e, f, g, h, i, w := gw.a, gw.b, gw.c, gw.d, gw.e, gw.f, gw.g, gw.h, gw.i, gw.w;\n    var hxx := (d - 2.0 * e + f) / (w * w);\n    var hyy := (b - 2.0 * e + h) / (w * w);\n    var hxy := (a - c - g + i) / (4.0 * w * w);\n    return Hessian(hxx, hyy, hxy);\n  }\n\n  // Sample a quadratic surface on a 3x3 grid\n  function Method sampleQuadratic(qc: QuadraticCoeffs, w: real): GridWindow {\n    var A, B, C, D, E, F := qc.A, qc.B, qc.C, qc.D, qc.E, qc.F;\n    var a := A * (-w)^2 + B * (-w)^2 + C * (-w) * (-w) + D * (-w) + E * (-w) + F;\n    var b := A * (-w)^2 + B * 0^2 + C * (-w) * 0 + D * (-w) + E * 0 + F;\n    var c := A * (-w)^2 + B * w^2 + C * (-w) * w + D * (-w) + E * w + F;\n    var d := A * 0^2 + B * (-w)^2 + C * 0 * (-w) + D * 0 + E * (-w) + F;\n    var e := A * 0^2 + B * 0^2 + C * 0 * 0 + D * 0 + E * 0 + F;\n    var f := A * 0^2 + B * w^2 + C * 0 * w + D * 0 + E * w + F;\n    var g := A * w^2 + B * (-w)^2 + C * w * (-w) + D * w + E * (-w) + F;\n    var h := A * w^2 + B * 0^2 + C * w * 0 + D * w + E * 0 + F;\n    var i := A * w^2 + B * w^2 + C * w * w + D * w + E * w + F;\n    return GridWindow(a, b, c, d, e, f, g, h, i, w);\n  }\n\n  // Theorem: ZT Hessian recovers (2A, 2B, C) exactly for quadratic surfaces\n  lemma ZTRecoversQuadratic()\n    ensures forall qc, w {\n      w > 0 ==> let gw = sampleQuadratic(qc, w);\n                let h = ztHessian(gw);\n                h.hxx == 2.0 * qc.A &&\n                h.hyy == 2.0 * qc.B &&\n                h.hxy == qc.C\n    }\n  {\n    // Proof by direct computation\n    forall qc, w | w > 0\n    {\n      var gw := sampleQuadratic(qc, w);\n      var h := ztHessian(gw);\n      \n      // Verify hxx = 2A\n      assert h.hxx == (gw.d - 2.0 * gw.e + gw.f) / (gw.w * gw.w);\n      assert gw.d == qc.D - qc.E * w + qc.F + qc.A * w^2 + qc.B * w^2 + qc.C * w * w;\n      assert gw.e == qc.F;\n      assert gw.f == qc.D + qc.E * w + qc.F + qc.A * w^2 + qc.B * w^2 + qc.C * w * w;\n      assert h.hxx == (qc.A * w^2 + qc.B * w^2 + qc.C * w * w + qc.D - qc.E * w + qc.F - 2.0 * qc.F + qc.A * w^2 + qc.B * w^2 + qc.C * w * w + qc.D + qc.E * w + qc.F) / (w * w);\n      assert h.hxx == (2.0 * qc.A * w^2 + 2.0 * qc.B * w^2 + 2.0 * qc.C * w * w + 2.0 * qc.D) / (w * w);\n      assert h.hxx == 2.0 * qc.A + 2.0 * qc.B + 2.0 * qc.C * w^2 / w^2 + 2.0 * qc.D / w^2;\n      assert h.hxx == 2.0 * qc.A;\n      \n      // Verify hyy = 2B\n      assert h.hyy == (gw.b - 2.0 * gw.e + gw.h) / (gw.w * gw.w);\n      assert gw.b == qc.D - qc.E * w + qc.F + qc.A * w^2;\n      assert gw.h == qc.D + qc.E * w + qc.F + qc.A * w^2;\n      assert h.hyy == (qc.A * w^2 + qc.D - qc.E * w + qc.F - 2.0 * qc.F + qc.A * w^2 + qc.D + qc.E * w + qc.F) / (w * w);\n      assert h.hyy == (2.0 * qc.A * w^2 + 2.0 * qc.D) / (w * w);\n      assert h.hyy == 2.0 * qc.A + 2.0 * qc.D / w^2;\n      assert h.hyy == 2.0 * qc.B;\n      \n      // Verify hxy = C\n      assert h.hxy == (gw.a - gw.c - gw.g + gw.i) / (4.0 * gw.w * gw.w);\n      assert gw.a == qc.A * w^2 + qc.B * w^2 + qc.C * w * w + qc.D - qc.E * w + qc.F;\n      assert gw.c == qc.A * w^2 + qc.B * w^2 - qc.C * w * w + qc.D - qc.E * w + qc.F;\n      assert gw.g == qc.A * w^2 + qc.B * w^2 - qc.C * w * w + qc.D + qc.E * w + qc.F;\n      assert gw.i == qc.A * w^2 + qc.B * w^2 + qc.C * w * w + qc.D + qc.E * w + qc.F;\n      assert h.hxy == (qc.A * w^2 + qc.B * w^2 + qc.C * w * w + qc.D - qc.E * w + qc.F - qc.A * w^2 - qc.B * w^2 + qc.C * w * w - qc.D + qc.E * w - qc.F - qc.A * w^2 - qc.B * w^2 + qc.C * w * w - qc.D - qc.E * w - qc.F + qc.A * w^2 + qc.B * w^2 + qc.C * w * w + qc.D + qc.E * w + qc.F) / (4.0 * w * w);\n      assert h.hxy == (4.0 * qc.C * w * w) / (4.0 * w * w);\n      assert h.hxy == qc.C;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}
