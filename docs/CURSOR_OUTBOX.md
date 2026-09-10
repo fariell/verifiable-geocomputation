@@ -1199,3 +1199,25 @@ task16-W3-live verdict = PASS (M4 live partial) / W3/RUNNING (M4 alive)
 > 不要写"一切正常""跑通了"这类摘要 —— 洛书看不到你的终端,摘要等于没说。
 > 改完回传时,额外说明:改动了哪个文件哪几行、为什么这么改。
 
+
+---
+
+## LLM 自动形式化 GPB 基准 · W3 · M4 R1 checkpoint 5/210
+
+```
+[task]      task16-W3-live / M4 DeepSeek-R1 progress
+[step]      checkpoint after GPB-001-flat P0 k0–k4
+[cmd]       (batch pid=8244 still running)
+[rc]        running
+[key lines]
+  unique_raw=5/210; GENERATED=4 PROVIDER_ERROR=1
+  RAN=4: compile_ok=2 verify_ok=1
+  P0 k1: verify_rc=0 PASS; P0 k3: PROVIDER_ERROR (retryable later)
+  semantic: UNCOMPILED=2 LIKELY_ALIGNED=1 COMPILE_ONLY=1
+[gates]     M4 RUNNING; not W3.6
+[verdict]   PASS (partial)
+[blocker]   M4 long ETA; 1 timeout stub
+```
+
+STATUS remains W3/RUNNING. Batch left alive. No push.
+
