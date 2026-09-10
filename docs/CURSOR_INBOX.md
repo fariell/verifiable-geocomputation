@@ -1208,6 +1208,27 @@ grep -rn "concurrency|parallel|ThreadPool|max_workers|--jobs" harness/*.py
 若 GLM 普遍打满说明输出被 `max_tokens` 截断,会导致人为的低通过率,
 那就要调 `max_tokens` 或改 prompt,否则结论不成立。
 
+### A.17.8 重跑会覆盖旧记录,正在吃掉稀有事件(秘书 00:1x 统计时发现)
+
+统计口径:jsonl 有 717 行,但按 `(model, task_id, prompt_id, sample_index)` 去重后
+**只有 484 个唯一 cell** —— 多出来的 233 行是重跑/补跑,且**后来者覆盖了前者**。
+
+代价是实打实的:按行统计时 `VERIFIED_BUT_DRIFT_SUSPECT` 有 **4 条**,去重取最后一条后
+**只剩 1 条**。3 个 drift 样本被重跑抹掉了。而 drift 是本论文的头条指标
+(semantic fidelity 的全部证据),丢一个就少一个。
+
+要做的(不改语义,只改持久化):
+1. 记录加 `attempt` 字段(同一 cell 的第几次尝试),唯一键变成
+   `(model, task_id, prompt_id, sample_index, attempt)`。
+2. **append-only**:重跑追加新行,不覆盖旧行。
+3. 统计脚本一律**按唯一 cell 取最后一条**算最终指标,同时**单独报一份
+   「全部尝试」口径**,两者的差异要在 OUTBOX 里写明 —— 这个差异本身就是诚实性的证据。
+4. 已有 717 行不要动,不要试图回填 attempt(从 0 开始即可)。
+
+另外,去重后的当前基数报给 PI 了:`compile_rc=0` 25 条、`verify_rc=0` 18 条、
+RAN 300 条、`VERIFIED_BUT_DRIFT_SUSPECT` 1 条。**论文里任何数字都必须注明是
+「按唯一 cell 去重」还是「按全部尝试」。**
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
