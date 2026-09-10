@@ -1104,7 +1104,27 @@ jsonl 里出现过 1 条 `metric_eligible: true`,但它是 **`"status": "SKIP_EX
    - 有记录但 `.dfy` 缺失或 0 字节 → 只重跑这一个 cell。
    **严禁清空 results/ 重开**。已生成的 `.dfy` 是花钱买来的资产。
 
-### A.16.4 诚实红线
+### A.16.4 verify 通道已探明(秘书 2026-09-10 15:5x 实测,可直接照抄,不必再摸索)
+**根因确认**:宿主机 Windows **根本没有 dafny**(`dafny --version` → `command not found`),
+这就是 `TOOLCHAIN_MISSING` 的来源。
+
+**可用通道**:WSL2 `Ubuntu-22.04` 里有 **Dafny 4.11.0**,路径 `/usr/local/bin/dafny`。
+
+**已实测通过的调用模板**(路径含空格与中文,`cd` 目标必须用双引号包裹):
+```
+wsl -- bash -lc 'cd "/mnt/e/AI for Math与DEM空间网格交叉研究/verifiable-geocomputation/experiments/p2_llm/results/raw" && dafny verify <file>.dfy 2>&1 | tail -12'
+```
+**实测输出**(昨夜生成的真实产物,非玩具样例):
+```
+GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy
+Dafny program verifier finished with 1 verified, 0 errors
+```
+建议:在 harness 里封装 `run_dafny_wsl(dfy_path)`,把 Windows 路径
+(`E:\...`) 转成 WSL 路径(`/mnt/e/...`),内部走上面的 `wsl -- bash -lc`,
+解析输出里的 `N verified, M errors` 并回填 `compile_rc / verify_rc /
+verify_status / semantic`。
+
+### A.16.5 诚实红线
 - 不许把 `TOOLCHAIN_MISSING` 计入通过;不许在论文里写任何未经真实 verify 的
   verify@ / semantic fidelity 数字。
 - 若最终确有子集无法验证,必须在 OUTBOX 明确列出"哪些子集有真实 verify、哪些没有",
