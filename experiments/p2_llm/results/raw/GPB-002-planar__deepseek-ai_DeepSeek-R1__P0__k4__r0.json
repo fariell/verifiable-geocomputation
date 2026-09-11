@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1612,
+    "completion_tokens": 7227,
+    "total_tokens": 8839,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6586
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1612
+  },
+  "api_id": "01a08e0c390719f1e158be61bfa675a4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "lemma HornExactOnPlane(A: real, B: real, w: real)\n  requires w > 0.0\n  ensures forall i: int, j: int, C: real :: \n    // Horn x-derivative estimate\n    ( (A * ((i+1) * w) + B * (j * w) + C) - \n      (A * ((i-1) * w) + B * (j * w) + C) ) / (2.0 * w) == A\n    &&\n    // Horn y-derivative estimate\n    ( (A * (i * w) + B * ((j+1) * w) + C) - \n      (A * (i * w) + B * ((j-1) * w) + C) ) / (2.0 * w) == B\n{\n  forall i: int, j: int, C: real\n    ensures ( (A * ((i+1) * w) + B * (j * w) + C) - \n              (A * ((i-1) * w) + B * (j * w) + C) ) / (2.0 * w) == A\n    ensures ( (A * (i * w) + B * ((j+1) * w) + C) - \n              (A * (i * w) + B * ((j-1) * w) + C) ) / (2.0 * w) == B\n  {\n    // Proof for x-derivative\n    calc {\n      ( (A * ((i+1) * w) + B * (j * w) + C) - \n        (A * ((i-1) * w) + B * (j * w) + C) ) / (2.0 * w);\n      ==\n      (A * (i+1)*w - A*(i-1)*w) / (2.0 * w);\n      ==\n      A * w * ((i+1) - (i-1)) / (2.0 * w);\n      ==\n      A * w * 2 / (2.0 * w);\n      ==\n      A;\n    }\n    // Proof for y-derivative\n    calc {\n      ( (A * (i * w) + B * ((j+1) * w) + C) - \n        (A * (i * w) + B * ((j-1) * w) + C) ) / (2.0 * w);\n      ==\n      (B * (j+1)*w - B*(j-1)*w) / (2.0 * w);\n      ==\n      B * w * ((j+1) - (j-1)) / (2.0 * w);\n      ==\n      B * w * 2 / (2.0 * w);\n      ==\n      B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

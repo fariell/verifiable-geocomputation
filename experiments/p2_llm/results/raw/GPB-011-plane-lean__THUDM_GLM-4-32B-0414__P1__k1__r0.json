@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e0dc09f76b4ae856d309edb9a76ab31bc3fecd0ccd7bdfb8594f58272323b981",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3074,
+    "completion_tokens": 978,
+    "total_tokens": 4052,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3074
+  },
+  "api_id": "01a08def23bdbb60d3dae2490f9d9196",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.D8\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## D8 流向约定\n\n  D8 流向算法将每个格点视为中心,计算其与8个相邻格点的落差平方比。\n  流向定义为具有最大正落差平方比的相邻格点方向。若所有相邻格点\n  高程均不小于中心格点,则标记为\"NoFlow\"。\n\n  方向编码:\n  ```\n  E(1,0), SE(1,1), S(0,1), SW(-1,1),\n  W(-1,0), NW(-1,-1), N(0,-1), NE(1,-1)\n  ```\n  距离平方: E/W/S/N = 1.0, SE/SW/NW/NE = 2.0\n-/\n\n-- 平面 DEM z = A x + B y + C 的参数\n-- 假设格网间距为 1 单位\ndef planeDEM (A B C : ℝ) (x y : ℝ) : ℝ := A * x + B * y + C\n\n-- D8 流向计算的核心比较量\ndef d8Drop (A B C : ℝ) (x y : ℝ) (dx dy : ℝ) : ℝ :=\n  let center := planeDEM A B C x y\n  let neighbor := planeDEM A B C (x + dx) (y + dy)\n  (center - neighbor) * (center - neighbor) / (dx * dx + dy * dy)\n\n-- D8 流向决策函数\ndef d8Flow (A B C : ℝ) (x y : ℝ) : String :=\n  let best_dir := \"NoFlow\"\n  let best_p := 0.0\n  let dirs := [\n    (\"E\", 1, 0),\n    (\"SE\", 1, 1),\n    (\"S\", 0, 1),\n    (\"SW\", -1, 1),\n    (\"W\", -1, 0),\n    (\"NW\", -1, -1),\n    (\"N\", 0, -1),\n    (\"NE\", 1, -1)\n  ]\n  for (name, dp, dq) in dirs do\n    let p := d8Drop A B C x y dp dq\n    if p > best_p then\n      best_dir := name\n      best_p := p\n  best_dir\n\n-- 平面 DEM 上 D8 流向的恒定性定理\n-- 命题: 在平面 z = A x + B y + C 上,若 A > 0 且 B = 0,\n-- 则所有内部格点的 D8 流向均为 \"W\" (西向)\ntheorem planeFlowWest (A B C : ℝ) (h x y : ℝ)\n    (hA : A > 0) (hB : B = 0) :\n    d8Flow A B C x y = \"W\" := by\n  simp [hB, d8Flow, d8Drop]\n  unfold planeDEM\n  ring_nf\n  nlinarith [hA, hB]\n\n-- 平面 DEM 上 D8 流向的恒定性定理\n-- 命题: 在平面 z = A x + B y + C 上,若 A > 0 且 B > 0,\n-- 则所有内部格点的 D8 流向均为 \"NW\" (西北向)\ntheorem planeFlowNW (A B C : ℝ) (h x y : ℝ)\n    (hA : A > 0) (hB : B > 0) :\n    d8Flow A B C x y = \"NW\" := by\n  simp [d8Flow, d8Drop]\n  unfold planeDEM\n  ring_nf\n  nlinarith [hA, hB]\n\n-- 高程基准面平移不影响流向定理\n-- 命题: 在平面 z = A x + B y + C 上,将高程基准面平移 ΔC\n-- (即使用 z = A x + B y + (C + ΔC)) 不改变 D8 流向\ntheorem datumTranslation (A B C ΔC : ℝ) (h x y : ℝ) :\n    d8Flow A B C x y = d8Flow A B (C + ΔC) x y := by\n  simp [d8Flow, d8Drop]\n  unfold planeDEM\n  ring_nf\n  nlinarith\n\nend VeriGIS.D8\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

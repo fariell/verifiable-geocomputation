@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 6510,
+    "total_tokens": 6771,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6193
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08e51cf2a6d6d5c5c592022bba950",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "type Cell\nfunction f(c: Cell): Cell\n\npredicate outlet(c: Cell) {\n  f(c) == c\n}\n\nfunction stepN(s: Cell, n: nat): Cell\n  decreases n\n{\n  if n == 0 then s else f(stepN(s, n-1))\n}\n\nlemma outletFixed(c: Cell, k: nat)\n  requires outlet(c)\n  ensures stepN(c, k) == c\n  decreases k\n{\n  if k != 0 {\n    outletFixed(c, k-1);\n  }\n}\n\nlemma stepNAdd(s: Cell, n: nat, m: nat)\n  ensures stepN(s, n+m) == stepN(stepN(s, n), m)\n  decreases m\n{\n  if m != 0 {\n    stepNAdd(s, n, m-1);\n  }\n}\n\ntheorem watershedUniqueness(s: Cell, n: nat, m: nat)\n  requires outlet(stepN(s, n)) && outlet(stepN(s, m))\n  ensures stepN(s, n) == stepN(s, m)\n{\n  if n <= m {\n    var k: nat := m - n;\n    stepNAdd(s, n, k);\n    outletFixed(stepN(s, n), k);\n  } else {\n    var k: nat := n - m;\n    stepNAdd(s, m, k);\n    outletFixed(stepN(s, m), k);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

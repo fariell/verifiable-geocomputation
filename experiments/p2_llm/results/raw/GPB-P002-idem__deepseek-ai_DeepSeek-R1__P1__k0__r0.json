@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3188,
+    "completion_tokens": 5942,
+    "total_tokens": 9130,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4918
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3188
+  },
+  "api_id": "01a08e63c9de253483acf3a5a4eb8a88",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-5\n//  文件 : formal/dafny/PCOMP_5_idempotent.dfy\n//  算子 : 1D 左出口洼地填充\n//  覆盖 : GPB-026(幂等性)、GPB-027(不动点)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_5_idempotent.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  洼地填充是水文分析的基础算子。幂等性(fill∘fill = fill)是算子鲁棒性的核心指标:\n//      1) 保证多次填充不会改变结果 → 算法稳定性\n//      2) 与不动点性质(fill(a)[i]=a[i]当a[i]≥max(a[0..i]))共同构成\n//         填充算子的代数规范\n//\n//  本文件证明一维左出口填充的幂等性。一维情形是二维填充的代数基础:\n//      (i)   一维幂等性 → 二维填充的扫描线不变性\n//      (ii)  不动点性质 → 二维\"山脊线\"的保持性\n//  见 P-002 (GPB-021–023) 的二维形式化。\n//\n// ===========================================================================\n\nmodule PitFill1D {\n\n  // -------------------------------------------------------------------------\n  // 1D 左出口填充算子定义\n  // 约定: 序列索引0为最左端(出口), 水流只能向左流\n  // -------------------------------------------------------------------------\n  function Fill(a: seq<real>): (r: seq<real>)\n    requires |a| > 0\n    ensures |r| == |a|\n    ensures r[0] == a[0]  // 左端点不变\n    ensures forall i :: 1 <= i < |a| ==> r[i] == max(a[i], r[i-1])\n  {\n    if |a| == 1 then\n      [a[0]]\n    else\n      var prefix := Fill(a[..|a|-1]);  // 递归填充前缀\n      prefix + [max(a[|a|-1], prefix[|a|-2])]\n  }\n\n  // ========================================================================\n  // 性质1: 幂等性 (Fill ∘ Fill = Fill)\n  // ========================================================================\n  lemma Idempotent(a: seq<real>)\n    requires |a| > 0\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    // 关键引理: 填充结果单调非减\n    assert IsMonotonic(Fill(a));\n\n    // 通过单调性证明幂等\n    if |a| > 1 {\n      Idempotent(a[..|a|-1]);  // 递归证明前缀幂等\n    }\n  }\n\n  // 辅助引理: 填充结果单调非减\n  lemma IsMonotonic(s: seq<real>)\n    requires |s| > 0\n    ensures forall i :: 1 <= i < |s| ==> s[i] >= s[i-1]\n  {\n    // 由Fill定义直接得出\n  }\n\n  // ========================================================================\n  // 性质2: 不动点 (满足条件的单元在填充中保持不变)\n  // 条件: 单元a[i]不小于其左侧所有单元 → 不会向左溢流\n  // ========================================================================\n  lemma FixedPoint(a: seq<real>, i: int)\n    requires |a| > 0\n    requires 0 <= i < |a|\n    requires forall j :: 0 <= j < i ==> a[i] >= a[j]  // 不向左溢流\n    ensures Fill(a)[i] == a[i]                        // 不动点\n  {\n    // 基础情形: 最左单元总是不动点\n    if i == 0 {\n      return;\n    }\n\n    // 归纳步骤: 证明左侧前缀满足不动点条件\n    FixedPoint(a, i-1);\n\n    // 由定义和归纳假设得证\n    assert Fill(a)[i] == max(a[i], Fill(a)[i-1]);\n    assert Fill(a)[i-1] <= a[i];  // 由全局条件和归纳假设\n  }\n\n  // ========================================================================\n  // 验证入口\n  // ========================================================================\n  method Main() {\n    print \"GeoProofBench P-COMP-5 — 1D洼地填充幂等性证明\\n\";\n    print \"验证命令: dafny verify PCOMP_5_idempotent.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

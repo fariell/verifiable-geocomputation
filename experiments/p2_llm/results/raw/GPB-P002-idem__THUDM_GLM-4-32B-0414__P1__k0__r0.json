@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3162,
+    "completion_tokens": 764,
+    "total_tokens": 3926,
+    "prompt_tokens_details": {
+      "cached_tokens": 2688
+    },
+    "prompt_cache_hit_tokens": 2688,
+    "prompt_cache_miss_tokens": 474
+  },
+  "api_id": "01a08df4a8e3803317c5209eca2d65c5",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PitFillingIdempotent {\n  // 1D Fill operator: prefix max\n  function Fill(a: array<int>): array<int>\n  {\n    var out := new int[a.Length];\n    out[0] := a[0];\n    for i := 1 to a.Length - 1\n      out[i] := max(a[i], out[i - 1]);\n    return out;\n  }\n\n  // Idempotence lemma\n  lemma Idempotent(a: array<int>)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    // Base case: first element remains unchanged\n    assert Fill(Fill(a))[0] == a[0] == Fill(a)[0];\n    \n    // Inductive step: each subsequent element is the max of itself and all previous\n    for i := 1 to a.Length - 1\n    {\n      // Fill(a)[i] = max(a[i], Fill(a)[i-1])\n      // Fill(Fill(a))[i] = max(Fill(a)[i], Fill(Fill(a))[i-1])\n      // By induction hypothesis, Fill(Fill(a))[i-1] = Fill(a)[i-1]\n      // So Fill(Fill(a))[i] = max(Fill(a)[i], Fill(a)[i-1]) = Fill(a)[i]\n      assert Fill(Fill(a))[i] == Fill(a)[i];\n    }\n  }\n\n  // Fixed point lemma for cells that don't spill left\n  lemma FixedPoint(a: array<int>, i: int)\n    requires i > 0\n    requires a[i] >= a[i - 1]\n    ensures Fill(a)[i] == a[i]\n  {\n    // By definition of Fill, Fill(a)[i] = max(a[i], Fill(a)[i-1])\n    // Since a[i] >= a[i-1], and Fill(a)[i-1] >= a[i-1] by monotonicity,\n    // we have Fill(a)[i-1] <= a[i] (because a[i] >= a[i-1] and Fill preserves order)\n    // Thus max(a[i], Fill(a)[i-1]) = a[i]\n    assert Fill(a)[i] == a[i];\n  }\n\n  method Main()\n  {\n    // Test cases from reference implementation\n    var plane := new int[4]; plane[0] = 5; plane[1] = 5; plane[2] = 5; plane[3] = 5;\n    var pit := new int[3]; pit[0] = 3; pit[1] = 1; pit[2] = 4;\n    var slope := new int[4]; slope[0] = 0; slope[1] = 1; slope[2] = 2; slope[3] = 3;\n    var cascade := new int[3]; cascade[0] = 3; cascade[1] = 1; cascade[2] = 0;\n    \n    // Verify idempotence for each case\n    Idempotent(plane);\n    Idempotent(pit);\n    Idempotent(slope);\n    Idempotent(cascade);\n    \n    // Verify fixed points\n    FixedPoint(pit, 0);  // First element is always a fixed point\n    FixedPoint(slope, 0);\n    FixedPoint(cascade, 0);\n    FixedPoint(plane, 0);\n    \n    print \"P-COMP-5 / GPB-026: 1D pit filling idempotence verified\\n\";\n    print \"All test cases passed\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

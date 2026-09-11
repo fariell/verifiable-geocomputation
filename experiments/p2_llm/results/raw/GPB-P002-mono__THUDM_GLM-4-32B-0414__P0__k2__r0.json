@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "eab8c2a3213e460c9bd707579906280dd615923ea4a9033bad5daa0dc361f804",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1539,
+    "completion_tokens": 655,
+    "total_tokens": 2194,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 3
+  },
+  "api_id": "01a08df4f8c4ae90bf662c8b310716ff",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formal specification of the 1D Wang-Liu pit-filling algorithm with left outlet\nmodule PitFill1D {\n  // Represents a 1D elevation profile\n  type Profile = array<int>\n\n  // Fill operation: Fill[0] = orig[0], Fill[i] = max(orig[i], Fill[i-1])\n  function Fill(orig: Profile): Profile {\n    var n := orig.Length;\n    var fill := new int[n];\n    fill[0] := orig[0];\n    var i := 1;\n    while i < n\n      invariant 1 <= i <= n\n      invariant forall j :: 0 <= j < i ==> fill[j] == (if j == 0 then orig[0] else max(orig[j], fill[j-1]))\n    {\n      fill[i] := max(orig[i], fill[i-1]);\n      i := i + 1;\n    }\n    return fill;\n  }\n\n  // Property: Each raise is monotone (no cell elevation decreases)\n  lemma Monotonicity(orig: Profile, fill: Profile)\n    requires fill == Fill(orig)\n    ensures forall i, j :: 0 <= i <= j < orig.Length ==> fill[i] <= fill[j]\n  {\n    var n := orig.Length;\n    var i := 0;\n    while i < n\n      invariant 0 <= i <= n\n      invariant forall j :: 0 <= j < i ==> fill[j] <= fill[i]\n    {\n      var j := i + 1;\n      while j < n\n        invariant i < j <= n\n        invariant forall k :: i < k < j ==> fill[i] <= fill[k]\n      {\n        assert fill[i] <= fill[j];\n        j := j + 1;\n      }\n      i := i + 1;\n    }\n  }\n\n  // Property: After a full scan the profile is nondecreasing\n  lemma NonDecreasingProfile(orig: Profile, fill: Profile)\n    requires fill == Fill(orig)\n    ensures forall i :: 0 <= i < fill.Length - 1 ==> fill[i] <= fill[i+1]\n  {\n    var n := orig.Length;\n    var i := 0;\n    while i < n - 1\n      invariant 0 <= i <= n - 1\n      invariant forall j :: 0 <= j < i ==> fill[j] <= fill[j+1]\n    {\n      assert fill[i] <= fill[i+1];\n      i := i + 1;\n    }\n  }\n\n  // Property: No cell elevation decreases during filling\n  lemma NoDecrease(orig: Profile, fill: Profile)\n    requires fill == Fill(orig)\n    ensures forall i :: 0 <= i < orig.Length ==> orig[i] <= fill[i]\n  {\n    var n := orig.Length;\n    var i := 0;\n    while i < n\n      invariant 0 <= i <= n\n      invariant forall j :: 0 <= j < i ==> orig[j] <= fill[j]\n    {\n      assert orig[i] <= fill[i];\n      i := i + 1;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

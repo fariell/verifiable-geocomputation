@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 3821,
+    "total_tokens": 4082,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3240
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08dfcb9bdc83843013a1d62a78484",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function SlopeSq(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n{\n  var dx_numerator := c + 2.0*f + i - a - 2.0*d - g;\n  var dy_numerator := g + 2.0*h + i - a - 2.0*b - c;\n  var dx := dx_numerator / (8.0 * w);\n  var dy := dy_numerator / (8.0 * w);\n  dx*dx + dy*dy\n}\n\nlemma ZeroSlopeWhenUniform(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real)\n  requires w > 0.0\n  requires a == b && b == c && c == d && d == e && e == f && f == g && g == h && h == i\n  ensures SlopeSq(a,b,c,d,e,f,g,h,i,w) == 0.0\n{\n  // Uniform elevation makes all numerator terms cancel\n  assert dx_numerator := c + 2.0*f + i - a - 2.0*d - g == 0.0 by {\n    assert a == b == c == d == e == f == g == h == i;\n    calc {\n      c + 2.0*f + i - a - 2.0*d - g;\n      == { assert c == a; assert f == a; assert i == a; assert d == a; assert g == a; }\n      a + 2.0*a + a - a - 2.0*a - a;\n      == \n      0.0;\n    }\n  }\n  assert dy_numerator := g + 2.0*h + i - a - 2.0*b - c == 0.0 by {\n    assert a == b == c == d == e == f == g == h == i;\n    calc {\n      g + 2.0*h + i - a - 2.0*b - c;\n      == { assert g == a; assert h == a; assert i == a; assert b == a; assert c == a; }\n      a + 2.0*a + a - a - 2.0*a - a;\n      == \n      0.0;\n    }\n  }\n  // With zero numerators, slope components are zero\n  assert dx == 0.0 && dy == 0.0;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

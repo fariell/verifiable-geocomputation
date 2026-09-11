@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 3238,
+    "total_tokens": 3499,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2838
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08e51cf3cae68126d25c9d07620dc",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "type Cell\nfunction succ(c: Cell): Cell\n\npredicate outlet(c: Cell) {\n  c == succ(c)\n}\n\nfunction stepN(s: Cell, n: nat): Cell {\n  if n == 0 then s else succ(stepN(s, n-1))\n}\n\nlemma LemmaOutletStable(c: Cell, k: nat)\n  requires outlet(c)\n  ensures stepN(c, k) == c\n  decreases k\n{\n  if k != 0 {\n    LemmaOutletStable(c, k-1);\n  }\n}\n\nlemma LemmaStepAdditive(s: Cell, n: nat, k: nat)\n  ensures stepN(s, n + k) == stepN(stepN(s, n), k)\n  decreases k\n{\n  if k != 0 {\n    LemmaStepAdditive(s, n, k-1);\n  }\n}\n\ntheorem WatershedUniqueness(s: Cell, n: nat, m: nat)\n  requires outlet(stepN(s, n))\n  requires outlet(stepN(s, m))\n  ensures stepN(s, n) == stepN(s, m)\n{\n  if n <= m {\n    var d: nat := m - n;\n    calc {\n      stepN(s, m);\n      == { LemmaStepAdditive(s, n, d); }\n      stepN(stepN(s, n), d);\n      == { LemmaOutletStable(stepN(s, n), d); }\n      stepN(s, n);\n    }\n  } else {\n    var d: nat := n - m;\n    calc {\n      stepN(s, n);\n      == { LemmaStepAdditive(s, m, d); }\n      stepN(stepN(s, m), d);\n      == { LemmaOutletStable(stepN(s, m), d); }\n      stepN(s, m);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

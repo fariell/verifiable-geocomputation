@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 45,
+    "total_tokens": 289,
+    "prompt_tokens_details": {
+      "cached_tokens": 32
+    },
+    "prompt_cache_hit_tokens": 32,
+    "prompt_cache_miss_tokens": 212
+  },
+  "api_id": "01a08df5b98fd4238cda5d33a8c946df",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "It seems that the original attempt and the toolchain feedback are missing from your message. Could you please provide the original Lean code and the feedback you received? This will help me assist you in repairing the formalization correctly.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

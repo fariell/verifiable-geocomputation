@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "eab8c2a3213e460c9bd707579906280dd615923ea4a9033bad5daa0dc361f804",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 7251,
+    "total_tokens": 8856,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6855
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a08e73eedacca6df938a45d1c3e913",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function max(a: real, b: real): real {\n  if a >= b then a else b\n}\n\nfunction Fill(orig: seq<real>): seq<real>\n  ensures |Fill(orig)| == |orig|\n  ensures |orig| > 0 ==> Fill(orig)[0] == orig[0]\n  ensures forall i :: 1 <= i < |orig| ==> Fill(orig)[i] == max(orig[i], Fill(orig)[i-1])\n  ensures forall i, j :: 0 <= i <= j < |orig| ==> Fill(orig)[i] <= Fill(orig)[j]\n{\n  if orig == [] then []\n  else\n    var f0 := orig[0];\n    var frest := FillRest(orig[1..], f0);\n    [f0] + frest\n}\n\nfunction FillRest(rest: seq<real>, prev: real): seq<real>\n  ensures |FillRest(rest, prev)| == |rest|\n  ensures |rest| > 0 ==> FillRest(rest, prev)[0] == max(rest[0], prev)\n  ensures forall i :: 1 <= i < |rest| ==> FillRest(rest, prev)[i] == max(rest[i], FillRest(rest, prev)[i-1])\n  ensures forall i, j :: 0 <= i <= j < |rest| ==> FillRest(rest, prev)[i] <= FillRest(rest, prev)[j]\n  ensures |rest| > 0 ==> FillRest(rest, prev)[0] >= prev\n{\n  if rest == [] then []\n  else\n    var cur := max(rest[0], prev);\n    var frest1 := FillRest(rest[1..], cur);\n    [cur] + frest1\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

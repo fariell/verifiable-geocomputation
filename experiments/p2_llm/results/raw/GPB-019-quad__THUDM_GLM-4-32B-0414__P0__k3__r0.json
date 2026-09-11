@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1698,
+    "completion_tokens": 1176,
+    "total_tokens": 2874,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 2
+  },
+  "api_id": "01a08df339210efa03ef9f48cc5814db",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P-004 / GPB-019: Horn slope is exact on quadratic surfaces and has O(w^2) remainder on cubic surfaces.\n\nmethod HornSlopeExactOnQuadraticSurfaces()\n  // Horn slope is exact on quadratic surfaces: DzDx and DzDy recover the true planar gradient coefficients (A,B) identically.\n  // We model a general quadratic surface z = Ax + By + C + Dx^2 + Exy + Fy^2.\n  // The Horn slope algorithm computes DzDx and DzDy using a 3x3 grid of points.\n  // We will show that for any quadratic surface, the Horn slope algorithm computes the exact gradient (A,B).\n\n  // Define the coefficients of the quadratic surface\n  var A, B, C, D, E, F: real;\n  A := 0.3;  // Example value\n  B := -0.2; // Example value\n  C := 5.0;\n  D := 0.05;\n  E := -0.04;\n  F := 0.02;\n\n  // Define the grid spacing\n  var w: real;\n  w := 1.0;\n\n  // Define the 3x3 grid of points on the quadratic surface\n  var a, b, c, d, f, g, h, i: real;\n  a := A * (-w) + B * (-w) + C + D * (-w)^2 + E * (-w) * (-w) + F * (-w)^2;\n  b := A * (0) + B * (-w) + C + D * (0)^2 + E * (0) * (-w) + F * (-w)^2;\n  c := A * (w) + B * (-w) + C + D * (w)^2 + E * (w) * (-w) + F * (-w)^2;\n  d := A * (-w) + B * (0) + C + D * (-w)^2 + E * (-w) * (0) + F * (0)^2;\n  f := A * (w) + B * (0) + C + D * (w)^2 + E * (w) * (0) + F * (0)^2;\n  g := A * (-w) + B * (w) + C + D * (-w)^2 + E * (-w) * (w) + F * (w)^2;\n  h := A * (0) + B * (w) + C + D * (0)^2 + E * (0) * (w) + F * (w)^2;\n  i := A * (w) + B * (w) + C + D * (w)^2 + E * (w) * (w) + F * (w)^2;\n\n  // Compute the Horn slope DzDx and DzDy\n  var DzDx: real;\n  var DzDy: real;\n  DzDx := ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w);\n  DzDy := ((g + 2.0 * h + i) - (a + 2.0 * b + c)) / (8.0 * w);\n\n  // Verify that the Horn slope is exact\n  assert DzDx == A;\n  assert DzDy == B;\n\nmethod HornSlopeCubicRemainder()\n  // On z = G x^3 the DzDx remainder at the origin equals G w^2 (order O(w^2)).\n  // We model the cubic surface z = G x^3.\n  // The Horn slope algorithm computes DzDx using a 3x3 grid of points.\n  // We will show that the remainder of the Horn slope algorithm at the origin is G w^2.\n\n  // Define the coefficient of the cubic surface\n  var G: real;\n  G := 0.07; // Example value\n\n  // Define the grid spacing\n  var w: real;\n  w := 1.0;\n\n  // Define the 3x3 grid of points on the cubic surface\n  var a, b, c, d, f, g, h, i: real;\n  a := G * (-w)^3;\n  b := G * (0)^3;\n  c := G * (w)^3;\n  d := G * (-w)^3;\n  f := G * (w)^3;\n  g := G * (-w)^3;\n  h := G * (0)^3;\n  i := G * (w)^3;\n\n  // Compute the Horn slope DzDx\n  var DzDx: real;\n  DzDx := ((c + 2.0 * f + i) - (a + 2.0 * d + g)) / (8.0 * w);\n\n  // Compute the true gradient at the origin\n  var trueGradient: real;\n  trueGradient := 0.0; // The true gradient of z = G x^3 at the origin is 0.\n\n  // Compute the remainder\n  var remainder: real;\n  remainder := DzDx - trueGradient;\n\n  // Verify that the remainder is G w^2\n  assert remainder == G * w^2;\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

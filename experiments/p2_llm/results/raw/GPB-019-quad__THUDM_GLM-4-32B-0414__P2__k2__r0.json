@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 270,
+    "completion_tokens": 82,
+    "total_tokens": 352,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 14
+  },
+  "api_id": "01a08df3bce734f5ceed11c2037ab3b7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I need to see the original Dafny code and the verifier feedback to provide a proper repair. Since these were not provided in your message, I cannot proceed with repairing the code.\n\nPlease provide:\n1. The original Dafny code that failed\n2. The verifier/compiler feedback that was received\n\nOnce you provide these, I can help repair the code while following the repair rules you've outlined.\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

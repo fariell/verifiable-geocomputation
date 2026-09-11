@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1712,
+    "completion_tokens": 1228,
+    "total_tokens": 2940,
+    "completion_tokens_details": {
+      "reasoning_tokens": 818
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1712
+  },
+  "api_id": "01a08e10ac1acb4a1ed589063c0fda84",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\n\n/-!\nWe formalize the property about a 3x3 grid window in digital elevation models (DEM):\nIf the center cell is a discrete local maximum (≥ all four orthogonal neighbors),\nthen the discrete Laplacian at the center is ≤ 0.\n\nNotation:\n  c : elevation at center\n  n, s, w, e : elevations at north/south/west/east neighbors\n\nThe discrete Laplacian is defined as: (n + s + w + e) - 4*c\n-/\n\ntheorem local_max_implies_nonpositive_laplacian\n  (c n s w e : ℝ)  -- Elevations: center, north, south, west, east\n  (h_n : c ≥ n)    -- Center ≥ north neighbor\n  (h_s : c ≥ s)    -- Center ≥ south neighbor\n  (h_w : c ≥ w)    -- Center ≥ west neighbor\n  (h_e : c ≥ e)    -- Center ≥ east neighbor\n  :\n  (n + s + w + e) - 4 * c ≤ 0 := by\n  -- Rewrite goal as sum of non-positive differences\n  have h1 : n - c ≤ 0 := by linarith\n  have h2 : s - c ≤ 0 := by linarith\n  have h3 : w - c ≤ 0 := by linarith\n  have h4 : e - c ≤ 0 := by linarith\n  -- Combine differences algebraically\n  calc\n    (n + s + w + e) - 4 * c\n      = (n - c) + (s - c) + (w - c) + (e - c) := by ring\n    _ ≤ 0 + 0 + 0 + 0 := by gcongr\n    _ = 0 := by simp\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

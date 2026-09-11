@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3120,
+    "completion_tokens": 2295,
+    "total_tokens": 5415,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1205
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3120
+  },
+  "api_id": "01a08e0c3975d9306e28dba51f2f9475",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-001\n//  算子 : Horn (1981) 有限差分坡度\n//  定理 : 在平面 z = A*x + B*y + C 上，Horn 差分算子精确恢复 A 和 B\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P001_horn_slope.dfy\n// ===========================================================================\n\nmodule HornSlope {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定 (p 向右, q 向下)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // Horn 坡度算子:\n  //   DzDx = (f - d) / (2 * w)\n  //   DzDy = (h - b) / (2 * w)\n  // ------------------------------------------------------------------\n\n  // Horn 有限差分算子\n  function HornDzDx(d: real, f: real, w: real): real\n    requires w > 0.0\n  {\n    (f - d) / (2.0 * w)\n  }\n\n  function HornDzDy(b: real, h: real, w: real): real\n    requires w > 0.0\n  {\n    (h - b) / (2.0 * w)\n  }\n\n  // 平面高程函数\n  function PlaneZ(A: real, B: real, C: real, x: real, y: real): real\n  {\n    A * x + B * y + C\n  }\n\n  // ==================================================================\n  // 主定理: 在平面上 Horn 差分精确恢复梯度分量\n  // ==================================================================\n  lemma TheoremExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0  // 网格间距必须为正\n    ensures HornDzDx(\n      PlaneZ(A, B, C, -w, 0.0),  // d = z(-w, 0)\n      PlaneZ(A, B, C, w, 0.0),   // f = z(w, 0)\n      w\n    ) == A\n    ensures HornDzDy(\n      PlaneZ(A, B, C, 0.0, -w),  // b = z(0, -w)\n      PlaneZ(A, B, C, 0.0, w),   // h = z(0, w)\n      w\n    ) == B\n  {\n    // 展开 d, f 的高程表达式\n    assert PlaneZ(A, B, C, -w, 0.0) == A*(-w) + B*0.0 + C;\n    assert PlaneZ(A, B, C, w, 0.0)  == A*w + B*0.0 + C;\n\n    // 计算 DzDx: (f - d)/(2w) = [ (Aw+C) - (-Aw+C) ] / (2w) = (2Aw)/(2w) = A\n    assert HornDzDx(A*(-w)+C, A*w+C, w) == \n      ( (A*w + C) - (A*(-w) + C) ) / (2.0 * w);\n    assert ( (A*w + C) - (A*(-w) + C) ) == 2.0 * A * w;\n    assert (2.0 * A * w) / (2.0 * w) == A;\n\n    // 展开 b, h 的高程表达式\n    assert PlaneZ(A, B, C, 0.0, -w) == A*0.0 + B*(-w) + C;\n    assert PlaneZ(A, B, C, 0.0, w)  == A*0.0 + B*w + C;\n\n    // 计算 DzDy: (h - b)/(2w) = [ (Bw+C) - (-Bw+C) ] / (2w) = (2Bw)/(2w) = B\n    assert HornDzDy(B*(-w)+C, B*w+C, w) == \n      ( (B*w + C) - (B*(-w) + C) ) / (2.0 * w);\n    assert ( (B*w + C) - (B*(-w) + C) ) == 2.0 * B * w;\n    assert (2.0 * B * w) / (2.0 * w) == B;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-001 — Horn Slope: exact on planes\\n\";\n  print \"验证通过: dafny verify P001_horn_slope.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

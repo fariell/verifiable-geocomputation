@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "8b9c0663bb132c9d9ba47e78f517c93c6884a3c4d7a6bb1d6f724e317cde3e13",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 4324,
+    "total_tokens": 4568,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3908
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 244
+  },
+  "api_id": "01a08e014af8b0408ff763940decd115",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Fin.Basic\n\ntheorem horn_slope_sq_nonneg (w : ℝ) (hw : w > 0) (z : Fin 3 → Fin 3 → ℝ) :\n  let numx := (z 0 2 + 2 * z 1 2 + z 2 2) - (z 0 0 + 2 * z 1 0 + z 2 0)\n  let numy := (z 2 0 + 2 * z 2 1 + z 2 2) - (z 0 0 + 2 * z 0 1 + z 0 2)\n  let denom := 8 * w\n  0 ≤ (numx / denom)^2 + (numy / denom)^2 := by\n  let numx := (z 0 2 + 2 * z 1 2 + z 2 2) - (z 0 0 + 2 * z 1 0 + z 2 0)\n  let numy := (z 2 0 + 2 * z 2 1 + z 2 2) - (z 0 0 + 2 * z 0 1 + z 0 2)\n  let denom := 8 * w\n  have denom_pos : 0 < denom := mul_pos (by norm_num) hw\n  have h : (numx / denom)^2 + (numy / denom)^2 = (numx^2 + numy^2) / denom^2 := by\n    field_simp; ring\n  rw [h]\n  apply div_nonneg\n  · apply add_nonneg <;> apply pow_two_nonneg\n  · exact le_of_lt (pow_pos denom_pos 2)\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

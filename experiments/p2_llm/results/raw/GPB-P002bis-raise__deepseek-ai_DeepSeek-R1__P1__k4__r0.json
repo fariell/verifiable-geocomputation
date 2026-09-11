@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3078,
+    "completion_tokens": 5352,
+    "total_tokens": 8430,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3994
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 6
+  },
+  "api_id": "01a08e9ae3471bccb3b448d2c456280e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  算子 : Wang & Liu 4-connected flood fill (RaiseNbr step)\n//  覆盖 : GPB-021 (填洼后无4邻域洼地)\n//  环境 : Dafny 4.11\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  本证明验证填洼算法核心步骤 RaiseNbr 的关键性质:从已处理单元 p 抬高其4邻域单元 n 时,\n//  1) 高程永不降低 (fill[n] ≥ orig[n])\n//  2) 至少抬高至 max(orig[n], fill[p])\n//\n//  这是保证填洼算法终止性和正确性的基础引理。结合后续的流域划分证明(P-006)可建立\n//  \"填洼→流域划分\"复合算法的完全正确性(见 GPB-021 完整验证链)。\n//\n// ===========================================================================\n\nmodule PitFillRaiseNbr {\n\n  // 网格系统参数\n  const rows: int, cols: int\n  ghost const origElev: array2<real>  // 原始高程矩阵\n\n  // 状态变量\n  var filled: array2<real>    // 填充后高程\n  var processed: array2<bool> // 处理标记\n\n  // 网格有效性谓词\n  predicate GridValid()\n    reads this, origElev, filled, processed\n  {\n    rows > 0 && cols > 0 &&\n    origElev != null && origElev.Length0 == rows && origElev.Length1 == cols &&\n    filled != null && filled.Length0 == rows && filled.Length1 == cols &&\n    processed != null && processed.Length0 == rows && processed.Length1 == cols\n  }\n\n  // 核心不变式:已处理单元满足高程非降\n  predicate Invariant()\n    requires GridValid()\n    reads this, origElev, filled, processed\n  {\n    forall i, j :: \n      0 <= i < rows && 0 <= j < cols && processed[i,j] == true ==>\n      filled[i,j] >= origElev[i,j]\n  }\n\n  // 4邻域关系定义\n  predicate Is4Neighbor(i: int, j: int, ni: int, nj: int)\n    requires 0 <= i < rows && 0 <= j < cols\n    requires 0 <= ni < rows && 0 <= nj < cols\n  {\n    (ni == i-1 && nj == j) ||  // 上\n    (ni == i+1 && nj == j) ||  // 下\n    (ni == i && nj == j-1) ||  // 左\n    (ni == i && nj == j+1)     // 右\n  }\n\n  // 最大值辅助函数\n  function max(a: real, b: real): real {\n    if a >= b then a else b\n  }\n\n  // ==================================================================\n  // 核心引理:RaiseNbr 步骤性质\n  // ------------------------------------------------------------------\n  // 当从已处理单元 (r, c) 抬高其4邻域单元 (nr, nc) 时:\n  //   1. 高程永不降低 (fill[nr,nc] ≥ orig[nr,nc])\n  //   2. 至少抬高至 max(orig[nr,nc], fill[r,c])\n  // ==================================================================\n  lemma RaiseNbrProperties(r: int, c: int, nr: int, nc: int)\n    requires GridValid()\n    requires Invariant()\n    requires 0 <= r < rows && 0 <= c < cols\n    requires 0 <= nr < rows && 0 <= nc < cols\n    requires processed[r,c] == true\n    requires processed[nr,nc] == false\n    requires Is4Neighbor(r, c, nr, nc)\n    ensures filled[nr,nc] >= origElev[nr,nc]  // 性质1:高程非降\n    ensures filled[nr,nc] >= max(origElev[nr,nc], filled[r,c])  // 性质2:最小抬高\n  {\n    // 由不变式得当前单元填充值 ≥ 原始值\n    assert filled[r,c] >= origElev[r,c]; \n\n    // 根据算法定义:新高程 = max(原始邻域高程, 当前单元填充值)\n    // 此赋值同时满足两个性质\n    assert filled[nr,nc] == max(origElev[nr,nc], filled[r,c]);\n\n    // 性质1: max(a,b) ≥ a\n    assert filled[nr,nc] >= origElev[nr,nc];\n\n    // 性质2: max(a,b) ≥ b\n    assert filled[nr,nc] >= filled[r,c];\n    // 结合 max 定义得证\n  }\n\n  // ==================================================================\n  // 不变式保持性\n  // ------------------------------------------------------------------\n  // 执行 RaiseNbr 后不变式仍保持,因为:\n  //   1. 新处理单元满足 filled[n] ≥ orig[n]\n  //   2. 已有单元状态未改变\n  // ==================================================================\n  lemma InvariantPreserved(r: int, c: int, nr: int, nc: int)\n    requires GridValid()\n    requires Invariant()\n    requires 0 <= r < rows && 0 <= c < cols\n    requires 0 <= nr < rows && 0 <= nc < cols\n    requires processed[r,c] == true\n    requires processed[nr,nc] == false\n    requires Is4Neighbor(r, c, nr, nc)\n    ensures old(Invariant()) && \n            filled[nr,nc] == max(origElev[nr,nc], old(filled[r,c])) &&\n            processed[nr,nc] == true\n            ==> Invariant()\n  {\n    // 新单元满足: filled[n] = max(orig[n], filled[p]) ≥ orig[n]\n    // 已有单元不变,故全局不变式保持\n  }\n\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — RaiseNbr 步骤性质验证\\n\";\n    print \"编译验证: dafny verify PitFillRaiseNbr.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1606,
+    "completion_tokens": 5063,
+    "total_tokens": 6669,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4526
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1606
+  },
+  "api_id": "01a08e48a69d4503f65215b93d80dd76",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0 · Zero-shot auto-formalization: Watershed uniqueness\n// Grid dimensions\nconst H: int, W: int\nassume H > 0 && W > 0  // Non-empty grid\n\n// Cell type\ntype Cell = (int, int)\n\n// Valid grid cell predicate\npredicate validCell(c: Cell) {\n  0 <= c.0 < H && 0 <= c.1 < W\n}\n\n// Abstract deterministic successor function\nfunction succ(c: Cell): Cell\n  requires validCell(c)\n  ensures validCell(succ(c))  // Successor remains in grid\n\n// Outlet predicate (fixed point)\npredicate isOutlet(c: Cell) {\n  validCell(c) && succ(c) == c\n}\n\n// Bounded iteration of successor function\nfunction stepN(c: Cell, n: nat): Cell\n  requires validCell(c)\n  decreases n\n  ensures validCell(stepN(c, n))\n{\n  if n == 0 then c else stepN(succ(c), n-1)\n}\n\n// Fixed points remain fixed under iteration\nlemma FixedPointStays(c: Cell, k: nat)\n  requires validCell(c) && isOutlet(c)\n  ensures stepN(c, k) == c\n  decreases k\n{\n  if k != 0 {\n    FixedPointStays(c, k-1);\n  }\n}\n\n// Path composition lemma\nlemma StepNAdd(c: Cell, n: nat, m: nat)\n  requires validCell(c)\n  ensures stepN(c, n+m) == stepN(stepN(c, n), m)\n  decreases n\n{\n  if n != 0 {\n    StepNAdd(succ(c), n-1, m);\n  }\n}\n\n// Watershed uniqueness: common start ⇒ common outlet\nlemma WatershedUniqueness(c0: Cell, n: nat, m: nat)\n  requires validCell(c0)\n  requires isOutlet(stepN(c0, n))\n  requires isOutlet(stepN(c0, m))\n  ensures stepN(c0, n) == stepN(c0, m)\n{\n  if n <= m {\n    var diff: nat := m - n;\n    StepNAdd(c0, n, diff);\n    FixedPointStays(stepN(c0, n), diff);\n  } else {\n    var diff: nat := n - m;\n    StepNAdd(c0, m, diff);\n    FixedPointStays(stepN(c0, m), diff);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

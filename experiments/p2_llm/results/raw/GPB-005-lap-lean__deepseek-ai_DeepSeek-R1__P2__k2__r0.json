@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 1583,
+    "total_tokens": 1827,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1369
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 244
+  },
+  "api_id": "01a08e14cc7813d52dd06d4d42f98f35",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\n\ntheorem discrete_laplacian_nonpositive (f : ℤ × ℤ → ℝ) (i j : ℤ) :\n  let c := f (i, j)\n  let n := f (i-1, j)\n  let s := f (i+1, j)\n  let e := f (i, j+1)\n  let w := f (i, j-1)\n  (c ≥ n ∧ c ≥ s ∧ c ≥ e ∧ c ≥ w) → \n  (n + s + e + w - 4 * c ≤ 0) := by\n  intro h\n  rcases h with ⟨hcn, hcs, hce, hcw⟩\n  have h_sum : n + s + e + w ≤ c + c + c + c := by\n    gcongr\n    exact hcn; exact hcs; exact hce; exact hcw\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

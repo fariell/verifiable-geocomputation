@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "fd2794d37f8c2b4e57722e1f3a7cbaeabc65731dfceb63eda8f1cddbdf98644e",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3223,
+    "completion_tokens": 7825,
+    "total_tokens": 11048,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5520
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3223
+  },
+  "api_id": "01a08e1fa11e7202de86fd57418643e4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-003\n//  算子 : Zevenbergen-Thorne 离散 Hessian 在二次曲面上的精确性\n//  覆盖 : GPB-003 (二次曲面上的精确恢复)\n//  环境 : Dafny 4.11\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  Phase 1 实验显示二阶曲率算子存在显著差异(corr ≈ 0.157)。本证明揭示:\n//  在精确算术下，Zevenbergen-Thorne Hessian 对二次曲面具有精确恢复能力。\n//  这为后续曲率算子误差分析(泰勒展开 O(w²) 项)提供代数基础，并解释:\n//      1) 为何一阶差分在 DEM 上表现一致\n//      2) 为何二阶差分对高程噪声敏感\n//\n//  核心结论: ZT Hessian 在二次曲面上的精确性是曲率误差分析的基准点。\n//  病态性源于二次以上项和噪声放大(见文末注记)。\n//\n// ===========================================================================\n\nmodule ZevenbergenThorne {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // 注意: Hessian 显式依赖中心元 e (与 Horn 一阶差分的关键区别)\n  // ------------------------------------------------------------------\n\n  // 二次曲面函数: z = A x² + B y² + C xy + D x + E y + F\n  function method quadratic(\n    A: real, B: real, C: real, D: real, E: real, F: real,\n    x: real, y: real\n  ): real\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n\n  // Zevenbergen-Thorne 离散 Hessian 分量\n  function method ZT_Hxx(\n    a: real, b: real, c: real, d: real, e: real, f: real,\n    g: real, h: real, i: real, w: real\n  ): real\n    requires w > 0.0\n  {\n    (d - 2.0*e + f) / (w*w)\n  }\n\n  function method ZT_Hyy(\n    a: real, b: real, c: real, d: real, e: real, f: real,\n    g: real, h: real, i: real, w: real\n  ): real\n    requires w > 0.0\n  {\n    (b - 2.0*e + h) / (w*w)\n  }\n\n  function method ZT_Hxy(\n    a: real, b: real, c: real, d: real, e: real, f: real,\n    g: real, h: real, i: real, w: real\n  ): real\n    requires w > 0.0\n  {\n    (a - c - g + i) / (4.0 * w * w)\n  }\n\n  // ==================================================================\n  // 核心定理: 在任意二次曲面上，ZT Hessian 精确恢复 (2A, 2B, C)\n  // ==================================================================\n  lemma HessianExactOnQuadratic(\n    A: real, B: real, C: real, D: real, E: real, F: real, w: real\n  )\n    requires w > 0.0\n    ensures \n      // 采样二次曲面到 3x3 窗口\n      let a := quadratic(A,B,C,D,E,F, -w, -w) in\n      let b := quadratic(A,B,C,D,E,F,  0, -w) in\n      let c := quadratic(A,B,C,D,E,F,  w, -w) in\n      let d := quadratic(A,B,C,D,E,F, -w,  0) in\n      let e := quadratic(A,B,C,D,E,F,  0,  0) in\n      let f := quadratic(A,B,C,D,E,F,  w,  0) in\n      let g := quadratic(A,B,C,D,E,F, -w,  w) in\n      let h := quadratic(A,B,C,D,E,F,  0,  w) in\n      let i := quadratic(A,B,C,D,E,F,  w,  w) in\n      // 精确恢复连续 Hessian 分量\n      ZT_Hxx(a,b,c,d,e,f,g,h,i,w) == 2.0*A &&\n      ZT_Hyy(a,b,c,d,e,f,g,h,i,w) == 2.0*B &&\n      ZT_Hxy(a,b,c,d,e,f,g,h,i,w) == C\n  {\n    // 展开二次函数在格网点上的值\n    // 命名: q[dx][dy] = quadratic(A,B,C,D,E,F, dx*w, dy*w)\n    // 注意: 以下展开式由二次函数定义直接推出\n    assert quadratic(A,B,C,D,E,F, -w, -w) == A*w*w + B*w*w + C*w*w - D*w - E*w + F; // a\n    assert quadratic(A,B,C,D,E,F,  0, -w) == B*w*w - E*w + F;                      // b\n    assert quadratic(A,B,C,D,E,F,  w, -w) == A*w*w + B*w*w - C*w*w + D*w - E*w + F; // c\n    assert quadratic(A,B,C,D,E,F, -w,  0) == A*w*w - D*w + F;                      // d\n    assert quadratic(A,B,C,D,E,F,  0,  0) == F;                                    // e\n    assert quadratic(A,B,C,D,E,F,  w,  0) == A*w*w + D*w + F;                      // f\n    assert quadratic(A,B,C,D,E,F, -w,  w) == A*w*w + B*w*w - C*w*w - D*w + E*w + F; // g\n    assert quadratic(A,B,C,D,E,F,  0,  w) == B*w*w + E*w + F;                      // h\n    assert quadratic(A,B,C,D,E,F,  w,  w) == A*w*w + B*w*w + C*w*w + D*w + E*w + F; // i\n\n    // 证明 Hxx = (d - 2e + f)/w² = 2A\n    calc {\n      ZT_Hxx(a,b,c,d,e,f,g,h,i,w);\n      (d - 2.0*e + f) / (w*w);\n      ( (A*w*w - D*w + F) - 2.0*F + (A*w*w + D*w + F) ) / (w*w);\n      (2.0*A*w*w) / (w*w);\n      2.0*A;\n    }\n\n    // 证明 Hyy = (b - 2e + h)/w² = 2B\n    calc {\n      ZT_Hyy(a,b,c,d,e,f,g,h,i,w);\n      (b - 2.0*e + h) / (w*w);\n      ( (B*w*w - E*w + F) - 2.0*F + (B*w*w + E*w + F) ) / (w*w);\n      (2.0*B*w*w) / (w*w);\n      2.0*B;\n    }\n\n    // 证明 Hxy = (a - c - g + i)/(4w²) = C\n    calc {\n      ZT_Hxy(a,b,c,d,e,f,g,h,i,w);\n      (a - c - g + i) / (4.0 * w * w);\n      ( (A*w*w + B*w*w + C*w*w - D*w - E*w + F) \n        - (A*w*w + B*w*w - C*w*w + D*w - E*w + F)\n        - (A*w*w + B*w*w - C*w*w - D*w + E*w + F)\n        + (A*w*w + B*w*w + C*w*w + D*w + E*w + F) \n      ) / (4.0 * w * w);\n      // 合并同类项:\n      //   A: w² - w² - w² + w² = 0\n      //   B: w² - w² - w² + w² = 0\n      //   C: w² - (-w²) - (-w²) + w² = 4w²\n      //   D: -w - w - (-w) + w = 0\n      //   E: -w - (-w) - w + w = 0\n      //   F: F - F - F + F = 0\n      (4.0 * C * w * w) / (4.0 * w * w);\n      C;\n    }\n  }\n\n  // ==================================================================\n  // 病态性注记(非形式化)\n  // ------------------------------------------------------------------\n  // 本定理解释了 Phase 1 中曲率算子低相关性的深层原因:\n  //\n  //   1) 泰勒展开: 对非二次曲面，ZT Hessian 有 O(w²) 截断误差\n  //        → 实际地形含更高阶项\n  //   2) 噪声放大: 二阶差分将高程噪声放大 O(1/w²)\n  //        → SRTM 30m 数据上，2-5m 噪声可导致曲率信噪比崩塌\n  //\n  // 推论: \n  //   - 坡度算子的一致性可证(见 P-001)\n  //   - 曲率算子需显式误差模型(定义域/正则化/误差界)\n  //\n  // 后续工作:\n  //   - P-003: 泰勒展开余项的形式误差界\n  //   - GPB-020: 噪声传播模型\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-003 — Zevenbergen-Thorne Hessian 在二次曲面上的精确性\\n\";\n  print \"由编译期验证: dafny verify 本文件\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

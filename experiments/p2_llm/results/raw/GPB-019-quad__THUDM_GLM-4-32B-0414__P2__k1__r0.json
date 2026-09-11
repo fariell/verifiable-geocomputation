@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 270,
+    "completion_tokens": 531,
+    "total_tokens": 801,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 14
+  },
+  "api_id": "01a08df3bbddf2429070730b7cbee52f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll help you repair the Dafny formalization based on the verifier feedback. Since you haven't provided the original code or the specific feedback, I'll create a proper Dafny formalization for the Horn slope theorem from scratch, following the specification you provided.\n\n```dafny\nmethod HornSlopeTheorem()\n{\n  // Define the quadratic surface z = Ax + By + C\n  // The Horn slope operators DzDx and DzDy should recover A and B exactly\n  \n  // Define the cubic surface z = Gx^3\n  // The DzDx remainder at the origin should be G*w^2 (order O(w^2))\n  \n  // We'll formalize these properties using mathematical theorems\n  \n  // Theorem 1: Horn slope is exact on quadratic surfaces\n  lemma HornSlopeExactOnQuadratic()\n  requires true\n  ensures forall x, y, A, B, C :: {\n    var z := A * x + B * y + C;\n    // DzDx and DzDy are Horn slope operators\n    var DzDx := /* implementation of DzDx operator */;\n    var DzDy := /* implementation of DzDy operator */;\n    DzDx == A && DzDy == B\n  }\n  {\n    // Proof would go here\n  }\n  \n  // Theorem 2: Remainder property for cubic surfaces\n  lemma HornSlopeRemainderOnCubic()\n  requires true\n  ensures forall G, x, w :: {\n    var z := G * x * x * x;\n    // DzDx is the Horn slope operator\n    var DzDx := /* implementation of DzDx operator */;\n    var remainder := DzDx - G * x * x;\n    // The remainder is of order O(w^2)\n    abs(remainder) <= some_constant * w * w\n  }\n  {\n    // Proof would go here\n  }\n}\n\n// Helper functions\nfunction abs(x: real): real\n{\n  if x >= 0 then x else -x\n}\n```\n\nNote: This is a template that needs to be completed with the actual implementation of the Horn slope operators (DzDx and DzDy) and the specific mathematical properties you want to verify. The verifier feedback would help me refine this further by identifying specific issues with the implementation.\n\nIf you can provide the original code and the specific verifier feedback, I can give you a more precise repair.\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

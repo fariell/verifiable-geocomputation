@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3173,
+    "completion_tokens": 5316,
+    "total_tokens": 8489,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3893
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3173
+  },
+  "api_id": "01a08e317c17b302176e7837a01c717d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  算子 : D8 最陡坡度流向\n//  覆盖 : GPB-010 (洼地无流向)、GPB-011 (平面流向一致性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  D8 流向算法是水文分析的基础算子。本文件证明其核心性质：\n//      当中心点不高于任何邻点时（洼地条件），流向应为 NoFlow。\n//\n//  该性质是填洼算法（P-002）和流量累积（P-006）的前置条件，\n//  确保水文网络在洼地处终止。\n//\n//  注：本证明仅关注洼地条件，平面流向一致性见 GPB-011 的独立证明。\n// ===========================================================================\n\nmodule D8Flow {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定（行偏移向下为正，符合栅格惯例）\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  // ------------------------------------------------------------------\n\n  // 流向枚举（含 NoFlow 状态）\n  datatype Direction = \n    | E   // 东\n    | SE  // 东南\n    | S   // 南\n    | SW  // 西南\n    | W   // 西\n    | NW  // 西北\n    | N   // 北\n    | NE  // 东北\n    | NoFlow\n\n  // D8 流向计算核心函数\n  function method FlowDirection(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  ): Direction\n  {\n    // 初始化最佳优先级和方向\n    var bestDir := NoFlow;\n    var bestPriority := 0.0;\n\n    // 东向 (E) - 邻点 f\n    var drop := e - f;\n    if drop > 0.0 {\n      var priority := drop * drop / 1.0;  // 距离因子=1.0\n      if priority > bestPriority {\n        bestDir, bestPriority := E, priority;\n      }\n    }\n\n    // 东南 (SE) - 邻点 i\n    drop := e - i;\n    if drop > 0.0 {\n      var priority := drop * drop / 2.0;  // 距离因子=2.0\n      if priority > bestPriority {\n        bestDir, bestPriority := SE, priority;\n      }\n    }\n\n    // 南 (S) - 邻点 h\n    drop := e - h;\n    if drop > 0.0 {\n      var priority := drop * drop / 1.0;\n      if priority > bestPriority {\n        bestDir, bestPriority := S, priority;\n      }\n    }\n\n    // 西南 (SW) - 邻点 g\n    drop := e - g;\n    if drop > 0.0 {\n      var priority := drop * drop / 2.0;\n      if priority > bestPriority {\n        bestDir, bestPriority := SW, priority;\n      }\n    }\n\n    // 西 (W) - 邻点 d\n    drop := e - d;\n    if drop > 0.0 {\n      var priority := drop * drop / 1.0;\n      if priority > bestPriority {\n        bestDir, bestPriority := W, priority;\n      }\n    }\n\n    // 西北 (NW) - 邻点 a\n    drop := e - a;\n    if drop > 0.0 {\n      var priority := drop * drop / 2.0;\n      if priority > bestPriority {\n        bestDir, bestPriority := NW, priority;\n      }\n    }\n\n    // 北 (N) - 邻点 b\n    drop := e - b;\n    if drop > 0.0 {\n      var priority := drop * drop / 1.0;\n      if priority > bestPriority {\n        bestDir, bestPriority := N, priority;\n      }\n    }\n\n    // 东北 (NE) - 邻点 c\n    drop := e - c;\n    if drop > 0.0 {\n      var priority := drop * drop / 2.0;\n      if priority > bestPriority {\n        bestDir, bestPriority := NE, priority;\n      }\n    }\n\n    bestDir  // 返回最终流向\n  }\n\n  // ==================================================================\n  // 洼地引理：若中心点不高于任何邻点，则流向为 NoFlow\n  // ==================================================================\n  lemma PitCondition(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  )\n    // 前置条件：所有邻点高程 ≥ 中心点\n    requires a >= e && b >= e && c >= e\n    requires d >= e && f >= e\n    requires g >= e && h >= e && i >= e\n    // 后置条件：流向必为 NoFlow\n    ensures FlowDirection(a,b,c,d,e,f,g,h,i) == NoFlow\n  {\n    // 证明策略：所有邻点下降值 ≤ 0 → 无正优先级更新\n    assert e - a <= 0.0;  // 西北\n    assert e - b <= 0.0;  // 北\n    assert e - c <= 0.0;  // 东北\n    assert e - d <= 0.0;  // 西\n    assert e - f <= 0.0;  // 东\n    assert e - g <= 0.0;  // 西南\n    assert e - h <= 0.0;  // 南\n    assert e - i <= 0.0;  // 东南\n    // 由函数逻辑：所有 if(drop>0) 分支均跳过 → bestDir 保持 NoFlow\n  }\n\n  method Main() {\n    print \"GeoProofBench P-005 — D8 洼地无流向定理\\n\";\n    print \"编译期验证: dafny verify P005_d8.dfy\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

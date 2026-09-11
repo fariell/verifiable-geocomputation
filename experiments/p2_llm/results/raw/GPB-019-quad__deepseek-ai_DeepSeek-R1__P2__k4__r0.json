@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 4182,
+    "total_tokens": 4449,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3621
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 267
+  },
+  "api_id": "01a08e60171c3eb3d9e3db69dade9f8e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function method QuadraticSurface(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n  A*x + B*y + C*x*x + D*x*y + E*y*y + F\n}\n\nfunction method CubicSurface(x: real, G: real): real\n{\n  G * x * x * x\n}\n\nfunction method HornDzDx(grid: (int,int) -> real, i: int, j: int, w: real): real\n  requires w > 0.0\n{\n  (grid(i+1, j) - grid(i-1, j)) / (2.0 * w)\n}\n\nfunction method HornDzDy(grid: (int,int) -> real, i: int, j: int, w: real): real\n  requires w > 0.0\n{\n  (grid(i, j+1) - grid(i, j-1)) / (2.0 * w)\n}\n\nfunction method QuadraticGrid(i: int, j: int, A: real, B: real, C: real, D: real, E: real, F: real, w: real): real\n{\n  QuadraticSurface(i*w, j*w, A, B, C, D, E, F)\n}\n\nfunction method CubicGrid(i: int, j: int, G: real, w: real): real\n{\n  CubicSurface(i*w, G)\n}\n\nmethod QuadraticExactness(i: int, j: int, A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures HornDzDx((i',j') => QuadraticGrid(i',j',A,B,C,D,E,F,w), i, j, w) == A + 2.0*C*(i*w) + D*(j*w)\n  ensures HornDzDy((i',j') => QuadraticGrid(i',j',A,B,C,D,E,F,w), i, j, w) == B + D*(i*w) + 2.0*E*(j*w)\n{\n  // Proof by Dafny's automatic polynomial arithmetic\n}\n\nmethod CubicRemainder(G: real, w: real)\n  requires w > 0.0\n  ensures HornDzDx((i',j') => CubicGrid(i',j',G,w), 0, 0, w) == G * w * w\n{\n  // Proof by Dafny's automatic polynomial arithmetic\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

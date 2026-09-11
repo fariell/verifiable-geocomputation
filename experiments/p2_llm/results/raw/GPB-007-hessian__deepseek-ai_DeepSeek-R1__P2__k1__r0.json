@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 6104,
+    "total_tokens": 6373,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5830
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a08e1fa0b25b3de37b68b17a891b7f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Zevenbergen-Thorne discrete Hessian for quadratic surfaces\nlemma HessianRecovery(A: real, B: real, C: real, D: real, E: real, F: real, w: real, x0: real, y0: real)\n  requires w > 0.0\n  ensures (z(x0 + w, y0) - 2.0*z(x0, y0) + z(x0 - w, y0)) / (w*w) == 2.0 * A\n  ensures (z(x0, y0 + w) - 2.0*z(x0, y0) + z(x0, y0 - w)) / (w*w) == 2.0 * B\n  ensures (z(x0 + w, y0 + w) - z(x0 + w, y0 - w) - z(x0 - w, y0 + w) + z(x0 - w, y0 - w)) / (4.0*w*w) == C\n{\n  // Quadratic surface definition\n  function z(x: real, y: real): real\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

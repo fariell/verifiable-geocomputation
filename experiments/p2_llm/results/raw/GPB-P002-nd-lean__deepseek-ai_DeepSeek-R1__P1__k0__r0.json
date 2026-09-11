@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2986,
+    "completion_tokens": 7277,
+    "total_tokens": 10263,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6559
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 2986
+  },
+  "api_id": "01a08e836554e5f11bdbf741b5524b41",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.OneDFill\n\nnoncomputable section\n\n/-!\n## 1D Left-Outlet Fill Operator Specification\n\nWe formalize the 1D pit-filling algorithm where:\n- The outlet is at the leftmost position (index 0)\n- Fill values propagate rightward: \n  `fill(a)[i] = max(a[i], fill(a)[i-1])`\n- The result must be nondecreasing: \n  `∀ i, fill(a)[i] ≤ fill(a)[i+1]`\n-/\n\n/-- Predicate: List is nondecreasing (adjacent elements satisfy `x ≤ y`) -/\ndef nondec : List ℝ → Prop\n| [] => True\n| [_] => True\n| x::y::xs => x ≤ y ∧ nondec (y::xs)\n\n/-- Auxiliary function for left-outlet fill (carries current fill value) -/\ndef fill_aux (acc : ℝ) : List ℝ → List ℝ\n| [] => []\n| x::xs => \n    let m := max acc x\n    m :: fill_aux m xs\n\n/-- Left-outlet fill operator: \n    - Start with first element\n    - Propagate max(current, previous) rightward -/\ndef fill : List ℝ → List ℝ\n| [] => []\n| x::xs => x :: fill_aux x xs\n\n/-!\n### Key Property: Fill Result is Nondecreasing\n-/\n\nlemma fill_aux_prop (acc : ℝ) (xs : List ℝ) : \n    nondec (fill_aux acc xs) ∧ (∀ y ∈ fill_aux acc xs, acc ≤ y) := by\n  induction xs with\n  | nil => simp [fill_aux, nondec]\n  | cons x xs' ih =>\n      simp [fill_aux]\n      rcases ih with ⟨ih_nondec, ih_all⟩\n      constructor\n      · cases hrest : fill_aux (max acc x) xs' with\n        | nil => simp [nondec]\n        | cons h t =>\n            have h_first : max acc x ≤ h := by\n              apply ih_all; simp [hrest, List.mem_cons]\n            have h_tail : nondec (h::t) := by\n              rw [← hrest] at ih_nondec; exact ih_nondec\n            exact ⟨h_first, h_tail⟩\n      · intro y hy\n        simp at hy\n        rcases hy with (rfl | hy)\n        · apply le_max_left\n        · exact le_trans (le_max_left _ _) (ih_all y hy)\n\ntheorem fill_nondec (a : List ℝ) : nondec (fill a) := by\n  cases a with\n  | nil => simp [fill, nondec]\n  | cons x xs =>\n      cases xs with\n      | nil => simp [fill, fill_aux, nondec]\n      | cons y ys =>\n          have ⟨nondec_tail, all_ge_x⟩ := fill_aux_prop x (y::ys)\n          simp [fill, nondec]\n          constructor\n          · apply all_ge_x\n            simp [fill_aux, List.mem_cons, true_or]\n          · exact nondec_tail\n\nend -- noncomputable section\n\nend VeriGIS.OneDFill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

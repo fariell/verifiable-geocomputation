@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2948,
+    "completion_tokens": 337,
+    "total_tokens": 3285,
+    "prompt_tokens_details": {
+      "cached_tokens": 2528
+    },
+    "prompt_cache_hit_tokens": 2528,
+    "prompt_cache_miss_tokens": 420
+  },
+  "api_id": "01a08df5ba121955496d937fbf42aa07",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.PitFill\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## 1D 左出口填充算子\n\n  给定序列 a,填充算子 Fill(a) 产生一个非递减序列,满足:\n  1. Fill(a)[0] = a[0]\n  2. 对于所有 i, Fill(a)[i+1] = max(a[i+1], Fill(a)[i])\n  3. 当 Fill(a)[i] 未定义时,Fill(a)[i+1] 也未定义\n\n  本文件证明 Fill(a) 是一个非递减序列:对于所有 i, Fill(a)[i] <= Fill(a)[i+1] 当定义时。\n-/\n\n-- 定义 1D 序列类型\ndef Seq (n : ℕ) := Fin n → ℝ\n\n-- 定义左出口填充算子\ndef Fill (a : Seq (n + 1)) : Seq (n + 1) :=\n  fun i ↦ if i = 0 then a 0 else max (a i) (Fill a (i.pred))\n\n-- 证明 Fill(a) 是非递减的\ntheorem fill_non_decreasing (a : Seq (n + 1)) (i : Fin (n + 1)) :\n    Fill a i ≤ Fill a i.succ := by\n  cases i <;> simp [Fill, max_le_iff, le_refl, le_max_right]\n\nend VeriGIS.PitFill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

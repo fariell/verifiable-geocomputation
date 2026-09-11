@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1612,
+    "completion_tokens": 7912,
+    "total_tokens": 9524,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6789
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1612
+  },
+  "api_id": "01a08e0c391ae2b195e1fbae0a028c68",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PlaneExactness {\n  function z(A: real, B: real, w: real, i: int, j: int): real\n  {\n    A * (i * w) + B * (j * w)  // Constant C omitted (cancels in differences)\n  }\n\n  function HornDzDx(A: real, B: real, w: real, i: int, j: int): real\n    requires w > 0.0\n  {\n    (z(A, B, w, i+1, j-1) + 2.0 * z(A, B, w, i+1, j) + z(A, B, w, i+1, j+1) \n     - z(A, B, w, i-1, j-1) - 2.0 * z(A, B, w, i-1, j) - z(A, B, w, i-1, j+1)) \n    / (8.0 * w)\n  }\n\n  function HornDzDy(A: real, B: real, w: real, i: int, j: int): real\n    requires w > 0.0\n  {\n    (z(A, B, w, i-1, j+1) + 2.0 * z(A, B, w, i, j+1) + z(A, B, w, i+1, j+1) \n     - z(A, B, w, i-1, j-1) - 2.0 * z(A, B, w, i, j-1) - z(A, B, w, i+1, j-1)) \n    / (8.0 * w)\n  }\n\n  lemma ExactRecovery(A: real, B: real, w: real, i: int, j: int)\n    requires w > 0.0\n    ensures HornDzDx(A, B, w, i, j) == A\n    ensures HornDzDy(A, B, w, i, j) == B\n  {\n    // Proof for DzDx\n    calc {\n      HornDzDx(A, B, w, i, j);\n      ==\n      (z(A, B, w, i+1, j-1) + 2.0 * z(A, B, w, i+1, j) + z(A, B, w, i+1, j+1) \n       - z(A, B, w, i-1, j-1) - 2.0 * z(A, B, w, i-1, j) - z(A, B, w, i-1, j+1)) \n       / (8.0 * w);\n      ==\n      (A*w*( (i+1) + 2*(i+1) + (i+1) - (i-1) - 2*(i-1) - (i-1) ) \n       + B*w*( (j-1) + 2*j + (j+1) - (j-1) - 2*j - (j+1) )) \n       / (8.0 * w);\n      ==\n      (A*w*(4*(i+1) - 4*(i-1)) + B*w*0) / (8.0 * w);\n      ==\n      (A*w*(4*i + 4 - 4*i + 4)) / (8.0 * w);\n      ==\n      (A*w*8) / (8.0 * w);\n      ==\n      A;\n    }\n    // Proof for DzDy\n    calc {\n      HornDzDy(A, B, w, i, j);\n      ==\n      (z(A, B, w, i-1, j+1) + 2.0 * z(A, B, w, i, j+1) + z(A, B, w, i+1, j+1) \n       - z(A, B, w, i-1, j-1) - 2.0 * z(A, B, w, i, j-1) - z(A, B, w, i+1, j-1)) \n       / (8.0 * w);\n      ==\n      (A*w*( (i-1) + 2*i + (i+1) - (i-1) - 2*i - (i+1) ) \n       + B*w*( (j+1) + 2*(j+1) + (j+1) - (j-1) - 2*(j-1) - (j-1) )) \n       / (8.0 * w);\n      ==\n      (A*w*0 + B*w*(4*(j+1) - 4*(j-1))) / (8.0 * w);\n      ==\n      (B*w*(4*j + 4 - 4*j + 4)) / (8.0 * w);\n      ==\n      (B*w*8) / (8.0 * w);\n      ==\n      B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

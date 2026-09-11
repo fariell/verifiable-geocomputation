@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3118,
+    "completion_tokens": 3965,
+    "total_tokens": 7083,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3328
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3118
+  },
+  "api_id": "01a08e13224edb2e563cdb7525d3b332",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-003 (local maximum and Laplacian)\n   文件 : formal/lean4/VeriGIS/LocalMaxLaplacian.lean\n   命题 : 局部极大值蕴含离散拉普拉斯非正\n   环境 : Lean 4 + mathlib\n   日期 : 2024\n  ==========================================================================\n\n  本文件证明: 在3x3窗口中,若中心元为四邻域局部极大值,则其离散拉普拉斯算子(5点格式)非正.\n\n  离散拉普拉斯算子定义为: (b + d + f + h) - 4*e, 其中e为中心, b,d,f,h为四邻域(上,左,右,下).\n\n  注意: 此定义对应于正方形网格,但结论的符号不依赖于网格间距(因分母为正).\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.LocalMaxLaplacian\n\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  中心元 e 的离散拉普拉斯算子使用四正交邻域(b,d,f,h)\n-/\n\nvariable {a b c d e f g h i : ℝ}\n\n/-- 离散拉普拉斯算子(5点格式)的分子部分 -/\ndef laplacian_num : ℝ := (b + d + f + h) - 4 * e\n\n/--\n  若中心元 e 是其四正交邻域(b,d,f,h)的局部极大值,\n  则离散拉普拉斯算子分子部分 ≤ 0\n-/\ntheorem local_max_imp_laplacian_nonpos\n    (h_b : e ≥ b) (h_d : e ≥ d) (h_f : e ≥ f) (h_h : e ≥ h) :\n    laplacian_num ≤ 0 := by\n  -- 展开拉普拉斯算子定义\n  unfold laplacian_num\n  -- 将结论转化为 4*e ≥ b+d+f+h\n  rw [sub_nonpos]\n  -- 组合四个不等式: e≥b, e≥d, e≥f, e≥h\n  have h_sum : b + d + f + h ≤ e + e + e + e := by\n    repeat apply add_le_add <;> assumption\n  -- 化简右侧为 4*e\n  rw [show e + e + e + e = 4 * e by ring] at h_sum\n  exact h_sum\n\nend -- noncomputable section\n\nend VeriGIS.LocalMaxLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

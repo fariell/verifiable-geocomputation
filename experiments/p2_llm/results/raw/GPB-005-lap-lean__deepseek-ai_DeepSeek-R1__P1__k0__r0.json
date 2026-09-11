@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3118,
+    "completion_tokens": 4985,
+    "total_tokens": 8103,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4054
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3118
+  },
+  "api_id": "01a08e132240b5980dcb51ad7218aaa7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · Discrete Local Maximum and Laplacian Sign\n   算子 : 5-point discrete Laplacian (orthogonal neighbors only)\n   环境 : Lean 4.18.0 + mathlib\n  ==========================================================================\n\n  本文件证明: 若 3x3 窗口中心为离散局部极大值(中心高程≥四个正交邻域),\n  则中心点的离散拉普拉斯算子 ≤0.\n\n  离散拉普拉斯算子定义(5点模板):\n      ∇²h = (west + east + north + south) - 4 * center\n\n  注: 此定义对应网格间距 dx=dy=1 的情形. 对于任意网格间距, 拉普拉斯算子需除以 dx²,\n      但符号不变(因 dx²>0), 故结论仍成立.\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.LocalMaxLaplacian\n\nnoncomputable section\n\n/-!\n  ## 3×3 窗口约定(行偏移向下为正)\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)   e( 0, 0)   f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  正交邻域: b(north), d(west), f(east), h(south)\n  中心元: e\n-/\n\n/-- 离散拉普拉斯算子(5点模板) -/\ndef discreteLaplacian (a b c d e f g h i : ℝ) : ℝ := \n  (b + d + f + h) - 4 * e\n\n/--\n  定理: 若中心为局部极大值(≥所有正交邻域), 则离散拉普拉斯算子非正\n-/\ntheorem local_max_imp_nonpos_laplacian (a b c d e f g h i : ℝ)\n    (h_north : e ≥ b)  -- 中心 ≥ 北邻\n    (h_south : e ≥ h)  -- 中心 ≥ 南邻\n    (h_west : e ≥ d)   -- 中心 ≥ 西邻\n    (h_east : e ≥ f) : -- 中心 ≥ 东邻\n    discreteLaplacian a b c d e f g h i ≤ 0 := by\n  -- 展开拉普拉斯算子定义\n  unfold discreteLaplacian\n  -- 将目标重写为邻域与中心的差值之和\n  have target_eq : (b + d + f + h) - 4 * e = (b - e) + (d - e) + (f - e) + (h - e) := by ring\n  rw [target_eq]\n  -- 每个差值项 ≤0 (由局部极大值假设)\n  have h1 : b - e ≤ 0 := sub_nonpos.mpr h_north\n  have h2 : d - e ≤ 0 := sub_nonpos.mpr h_west\n  have h3 : f - e ≤ 0 := sub_nonpos.mpr h_east\n  have h4 : h - e ≤ 0 := sub_nonpos.mpr h_south\n  -- 四个非正数之和仍非正\n  linarith\n\n-- ==========================================================================\n-- 冒烟测试\n-- ==========================================================================\n\n/-- 平坦地形: 拉普拉斯=0 -/\nexample : discreteLaplacian 1 1 1 1 1 1 1 1 1 = 0 := by norm_num [discreteLaplacian]\n\n/-- 局部极大值: 拉普拉斯=-4 -/\nexample : discreteLaplacian 0 1 0 1 5 1 0 1 0 = -4 := by norm_num [discreteLaplacian]\n\n/-- 非极大值: 拉普拉斯=1 (不满足定理条件) -/\nexample : discreteLaplacian 0 2 0 2 1 2 0 2 0 = 1 := by norm_num [discreteLaplacian]\n\nend -- noncomputable section\n\nend VeriGIS.LocalMaxLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

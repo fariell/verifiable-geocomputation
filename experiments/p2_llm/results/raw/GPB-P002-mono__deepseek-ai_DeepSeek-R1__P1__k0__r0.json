@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 5822,
+    "total_tokens": 8913,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5090
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3091
+  },
+  "api_id": "01a08e7b927dfed7763f08a1291100df",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1 (1D Wang-Liu pit-filling)\n//  算子 : 1D Wang-Liu 填洼算法 (左侧出口)\n//  覆盖 : GPB-021 (填洼后地形非递减)、单调性(无高程降低)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify PCOMP_1.dfy\n// ===========================================================================\n\nmodule WangLiu1D {\n\n  // -------------------------------------------------------------------------\n  // 1D 填洼算子定义\n  // -------------------------------------------------------------------------\n  function method Fill(orig: array<real>, i: int): real\n    requires orig != null\n    requires 0 <= i < orig.Length\n    decreases i  // 递归终止于 i=0\n  {\n    if i == 0 then orig[0] \n    else max(orig[i], Fill(orig, i-1))\n  }\n\n  // -------------------------------------------------------------------------\n  // 性质 1: 单调性 (无高程降低)\n  // 每个单元的填洼高程 ≥ 原始高程\n  // -------------------------------------------------------------------------\n  lemma FillMonotone(orig: array<real>, i: int)\n    requires orig != null\n    requires 0 <= i < orig.Length\n    ensures Fill(orig, i) >= orig[i]\n  {\n    // 递归基础: i=0 时直接相等\n    if i > 0 {\n      // 归纳步骤: 由 max 性质保证\n      assert Fill(orig, i) == max(orig[i], Fill(orig, i-1)) >= orig[i];\n    }\n  }\n\n  // -------------------------------------------------------------------------\n  // 性质 2: 非递减性 (填洼后地形单调)\n  // 任意相邻单元满足 fill[i] ≤ fill[i+1]\n  // -------------------------------------------------------------------------\n  lemma FillNonDecreasing(orig: array<real>, i: int)\n    requires orig != null\n    requires 0 <= i < orig.Length - 1\n    ensures Fill(orig, i) <= Fill(orig, i+1)\n  {\n    // 由定义直接推导: \n    //   fill[i+1] = max(orig[i+1], fill[i]) ≥ fill[i]\n    assert Fill(orig, i+1) == max(orig[i+1], Fill(orig, i)) >= Fill(orig, i);\n  }\n\n  // -------------------------------------------------------------------------\n  // 全局非递减性 (强结论)\n  // 对任意 i ≤ j, 有 fill[i] ≤ fill[j]\n  // -------------------------------------------------------------------------\n  lemma GlobalNonDecreasing(orig: array<real>, i: int, j: int)\n    requires orig != null\n    requires 0 <= i <= j < orig.Length\n    ensures Fill(orig, i) <= Fill(orig, j)\n    decreases j - i\n  {\n    if i < j {\n      // 传递性: i->i+1 和 (i+1)->j\n      FillNonDecreasing(orig, i, i+1);\n      GlobalNonDecreasing(orig, i+1, j);\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-COMP-1 — 1D Wang-Liu 填洼算子的形式化验证\\n\";\n  print \"验证命令: dafny verify PCOMP_1.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

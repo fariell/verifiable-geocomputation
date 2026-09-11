@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2948,
+    "completion_tokens": 616,
+    "total_tokens": 3564,
+    "prompt_tokens_details": {
+      "cached_tokens": 2528
+    },
+    "prompt_cache_hit_tokens": 2528,
+    "prompt_cache_miss_tokens": 420
+  },
+  "api_id": "01a08df5ba2870567147b31a0145e577",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.PitFill\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## 1D 左出口填充算子\n\n  给定序列 a,填充算子 Fill(a) 产生一个非递减序列,满足:\n  1. Fill(a)[0] = a[0]\n  2. 对于所有 i, Fill(a)[i+1] = max(a[i+1], Fill(a)[i])\n  3. Fill(a) 是 a 的最小非递减上界序列\n\n  本文件证明 Fill(a) 的单调性:对于所有 i, Fill(a)[i] <= Fill(a)[i+1] 当定义时。\n-/\n\n-- 1D 序列类型\ndef Seq (n : ℕ) := Fin n → ℝ\n\n-- 左出口填充算子\ndef Fill (a : Seq (n + 1)) : Seq (n + 1) :=\n  fun i ↦ if i = 0 then a 0 else max (a i) (Fill a (i.pred))\n\n-- 基础情况:第一个元素不变\n@[simp]\ntheorem fill_zero (a : Seq (n + 1)) : Fill a 0 = a 0 := by simp [Fill]\n\n-- 递归情况:后续元素是当前元素和前一个填充值的最大值\n@[simp]\ntheorem fill_succ (a : Seq (n + 1)) (i : Fin n) :\n    Fill a i.succ = max (a i.succ) (Fill a i) := by simp [Fill]\n\n-- 填充序列的单调性\ntheorem fill_nondecreasing (a : Seq (n + 1)) (i : Fin n) :\n    Fill a i ≤ Fill a i.succ := by\n  cases i <;> simp [fill_zero, fill_succ, max_le]\n\n-- 填充序列是原始序列的上界\ntheorem fill_upper_bound (a : Seq (n + 1)) (i : Fin (n + 1)) :\n    a i ≤ Fill a i := by\n  induction i <;> simp [*, fill_zero, fill_succ, max_le_left, le_refl]\n\n-- 填充序列是最小的非递减上界序列\ntheorem fill_minimal (a : Seq (n + 1)) (b : Seq (n + 1)) (h₁ : ∀ i, a i ≤ b i) (h₂ : ∀ i j, i ≤ j → b i ≤ b j) (i : Fin (n + 1)) :\n    Fill a i ≤ b i := by\n  induction i <;> simp [*, fill_zero, fill_succ, h₁, h₂, max_le, le_trans]\n  aesop\n\nend VeriGIS.PitFill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

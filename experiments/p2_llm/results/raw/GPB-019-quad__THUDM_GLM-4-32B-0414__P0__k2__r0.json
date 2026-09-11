@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1698,
+    "completion_tokens": 1420,
+    "total_tokens": 3118,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 2
+  },
+  "api_id": "01a08df33910685d3a029f257e01066f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P-004 / GPB-019 algebraic entry: Horn exact on quadratics, cubic O(w²).\n// Formal verification of Horn slope algorithm properties.\n\nmodule HornSlopeProperties {\n  // Grid spacing must be positive\n  ghost function method PositiveGridSpacing(w: real): bool\n    ensures PositiveGridSpacing(w) <==> w > 0.0\n  {\n    w > 0.0\n  }\n\n  // Quadratic surface coefficients\n  ghost function method QuadraticSurface(a: real, b: real, c: real, d: real, e: real, f: real): (z: real)\n    decreases *\n    requires PositiveGridSpacing(w)\n    ensures z == a*x + b*y + c + d*x*x + e*x*y + f*y*y\n  {\n    // Implementation would sample the quadratic surface at grid points\n    // This is a placeholder for the actual implementation\n    0.0\n  }\n\n  // Horn slope algorithm for DzDx\n  ghost function method HornDzDx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): (dzdx: real)\n    decreases *\n    requires PositiveGridSpacing(w)\n    ensures dzdx == ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w)\n  {\n    ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w)\n  }\n\n  // Horn slope algorithm for DzDy\n  ghost function method HornDzDy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): (dzdy: real)\n    decreases *\n    requires PositiveGridSpacing(w)\n    ensures dzdy == ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w)\n  {\n    ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w)\n  }\n\n  // True planar gradient coefficients (A, B) for quadratic surface\n  ghost function method TrueGradient(a: real, b: real, d: real, e: real, f: real): (A: real, B: real)\n    decreases *\n    ensures A == a + e*y + 2.0*d*x\n    ensures B == b + e*x + 2.0*f*y\n  {\n    (a, b)\n  }\n\n  // Property 1: Horn slope is exact on quadratic surfaces\n  lemma HornExactOnQuadratic(a: real, b: real, c: real, d: real, e: real, f: real, w: real)\n    decreases *\n    requires PositiveGridSpacing(w)\n    ensures HornDzDx(a, b, c, d, f, g, h, i, w) == a + e*y + 2.0*d*x\n    ensures HornDzDy(a, b, c, d, f, g, h, i, w) == b + e*x + 2.0*f*y\n  {\n    // Sample the quadratic surface at grid points\n    var a := QuadraticSurface(-1, -1, a, b, c, d, e, f, w);\n    var b := QuadraticSurface(0, -1, a, b, c, d, e, f, w);\n    var c := QuadraticSurface(1, -1, a, b, c, d, e, f, w);\n    var d := QuadraticSurface(-1, 0, a, b, c, d, e, f, w);\n    var f := QuadraticSurface(1, 0, a, b, c, d, e, f, w);\n    var g := QuadraticSurface(-1, 1, a, b, c, d, e, f, w);\n    var h := QuadraticSurface(0, 1, a, b, c, d, e, f, w);\n    var i := QuadraticSurface(1, 1, a, b, c, d, e, f, w);\n\n    // Compute Horn slope\n    var dzdx := HornDzDx(a, b, c, d, f, g, h, i, w);\n    var dzdy := HornDzDy(a, b, c, d, f, g, h, i, w);\n\n    // Compute true gradient\n    var (A, B) := TrueGradient(a, b, d, e, f);\n\n    // Verify exactness\n    assert dzdx == A;\n    assert dzdy == B;\n  }\n\n  // Cubic surface z = G x³\n  ghost function method CubicSurface(G: real, p: real, w: real): (z: real)\n    decreases *\n    requires PositiveGridSpacing(w)\n    ensures z == G * (p * w) * (p * w) * (p * w)\n  {\n    G * (p * w) * (p * w) * (p * w)\n  }\n\n  // Property 2: On z = G x³, the DzDx remainder at the origin equals G w²\n  lemma CubicRemainder(G: real, w: real)\n    decreases *\n    requires PositiveGridSpacing(w)\n    ensures HornDzDx(a, b, c, d, f, g, h, i, w) - G == G * w * w\n  {\n    // Sample the cubic surface at grid points\n    var a := CubicSurface(G, -1, w);\n    var b := CubicSurface(G, 0, w);\n    var c := CubicSurface(G, 1, w);\n    var d := CubicSurface(G, -1, w);\n    var f := CubicSurface(G, 1, w);\n    var g := CubicSurface(G, -1, w);\n    var h := CubicSurface(G, 0, w);\n    var i := CubicSurface(G, 1, w);\n\n    // Compute Horn slope\n    var dzdx := HornDzDx(a, b, c, d, f, g, h, i, w);\n\n    // Verify remainder\n    assert dzdx - G == G * w * w;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

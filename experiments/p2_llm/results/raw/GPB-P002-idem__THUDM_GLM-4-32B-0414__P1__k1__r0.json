@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3162,
+    "completion_tokens": 603,
+    "total_tokens": 3765,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 1466
+  },
+  "api_id": "01a08df4a8c4d597aa431c7c8a08a6bb",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PitFillingIdempotent {\n  // 1D left-outlet pit filling: Fill(Fill(a)) = Fill(a)\n  // Cells that already do not spill to the left are fixed points of Raise\n\n  // 1D array type for DEM elevation\n  type Elevation = array<real>\n\n  // Fill operation: 1D left-outlet pit filling\n  function Fill(a: Elevation): Elevation\n  {\n    var n := a.Length;\n    var out := new real[n];\n    out[0] := a[0];\n    for i := 1 to n - 1\n      out[i] := max(a[i], out[i - 1]);\n    return out;\n  }\n\n  // Lemma: Fill is idempotent\n  lemma Idempotent(a: Elevation)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    var n := a.Length;\n    var filled := Fill(a);\n    var filled_filled := Fill(filled);\n    \n    // Base case\n    assert filled_filled[0] == filled[0] == a[0];\n    \n    // Inductive step\n    for i := 1 to n - 1\n      invariant filled_filled[i - 1] == filled[i - 1]\n      assert filled_filled[i] == max(filled[i], filled_filled[i - 1])\n        == max(max(a[i], filled[i - 1]), filled[i - 1])\n        == max(a[i], filled[i - 1])\n        == filled[i];\n  }\n\n  // Lemma: Cells that do not spill to the left are fixed points\n  lemma FixedPoint(a: Elevation, i: int)\n    requires 0 <= i < a.Length\n    requires a[i] >= a[i - 1]  // Cell does not spill to the left\n    ensures Fill(a)[i] == a[i]\n  {\n    var n := a.Length;\n    var filled := Fill(a);\n    \n    // Base case\n    if i == 0 {\n      assert filled[0] == a[0];\n    }\n    else {\n      // Inductive step\n      assert filled[i] == max(a[i], filled[i - 1]);\n      assert filled[i - 1] == a[i - 1] by {\n        // By induction hypothesis\n        this.FixedPoint(a, i - 1);\n      }\n      assert a[i] >= a[i - 1];\n      assert filled[i] == max(a[i], a[i - 1]) == a[i];\n    }\n  }\n\n  method Main()\n  {\n    print \"GPB-026: Pit filling is idempotent on 1D left-outlet specialization\\n\";\n    print \"Fill(Fill(a)) == Fill(a) and cells not spilling left are fixed points\\n\";\n    print \"All properties verified by Dafny compiler\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1687,
+    "completion_tokens": 4904,
+    "total_tokens": 6591,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4486
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1687
+  },
+  "api_id": "01a08e2546b0935334159427d5eb3788",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "datatype Direction = E | SE | S | SW | W | NW | N | NE | NoFlow\n\nfunction indexToDir(i: int): Direction\n  requires 0 <= i < 8\n{\n  if i == 0 then E else\n  if i == 1 then SE else\n  if i == 2 then S else\n  if i == 3 then SW else\n  if i == 4 then W else\n  if i == 5 then NW else\n  if i == 6 then N else\n  NE\n}\n\nfunction method D8(center: real, neighbors: seq<real>): Direction\n  requires |neighbors| == 8\n{\n  var bestDir: Direction := NoFlow;\n  var bestPriority: real := 0.0;\n  var dists := [1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0];\n  var i: int := 0;\n  while i < 8\n    invariant 0 <= i <= 8\n    invariant bestDir == NoFlow\n    invariant bestPriority == 0.0\n    decreases 8 - i\n  {\n    var drop: real := center - neighbors[i];\n    if drop > 0.0 {\n      var priority := (drop * drop) / dists[i];\n      if bestDir == NoFlow || priority > bestPriority {\n        bestDir := indexToDir(i);\n        bestPriority := priority;\n      }\n    }\n    i := i + 1;\n  }\n  bestDir\n}\n\nlemma Lemma_D8_Pit(center: real, neighbors: seq<real>)\n  requires |neighbors| == 8\n  requires forall i :: 0 <= i < 8 ==> neighbors[i] >= center\n  ensures D8(center, neighbors) == NoFlow\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

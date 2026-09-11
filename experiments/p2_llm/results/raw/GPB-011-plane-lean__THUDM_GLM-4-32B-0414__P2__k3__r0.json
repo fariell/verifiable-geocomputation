@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 252,
+    "completion_tokens": 78,
+    "total_tokens": 330,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "prompt_cache_hit_tokens": 224,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08df068e2a9d49e53a8031a932346",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I need to see the original Lean code and the toolchain feedback to provide a proper repair. Since these are missing from your message, I cannot complete the requested task.\n\nPlease provide:\n1. The original Lean code that failed\n2. The specific toolchain feedback/error messages\n\nOnce you provide these details, I can help repair the code while following the repair rules you've outlined.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

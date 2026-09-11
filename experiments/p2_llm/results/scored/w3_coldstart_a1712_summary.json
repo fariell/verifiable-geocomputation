@@ -1,0 +1,365 @@
+{
+  "ts_utc": "2026-09-11T04:29:52.506305+00:00",
+  "jsonl_rows": 1075,
+  "unique_cells_all": 828,
+  "attempt_rows_minus_unique": 247,
+  "models": {
+    "deepseek-ai/DeepSeek-V3.2": {
+      "unique_cells": 210,
+      "n_generated_or_skip": 208,
+      "n_provider_error": 2,
+      "n_with_compile_rc": 134,
+      "compile_rc_eq_0": 24,
+      "compile_at_1_over_with_compile": 0.1791,
+      "n_with_real_verify": 134,
+      "verify_rc_eq_0": 18,
+      "verify_at_1_over_with_verify": 0.1343,
+      "n_tasks": 14,
+      "tasks": [
+        "GPB-001-flat",
+        "GPB-001-nonneg-lean",
+        "GPB-002-planar",
+        "GPB-005-lap-lean",
+        "GPB-007-hessian",
+        "GPB-010-pit",
+        "GPB-011-plane-lean",
+        "GPB-015-basin",
+        "GPB-019-quad",
+        "GPB-P002-idem",
+        "GPB-P002-mono",
+        "GPB-P002-nd-lean",
+        "GPB-P002bis-raise",
+        "GPB-T6-terminate-lean"
+      ],
+      "semantic_lastwins": {
+        "null": 185,
+        "UNCOMPILED": 18,
+        "LIKELY_ALIGNED": 2,
+        "VERIFIED_BUT_DRIFT_SUSPECT": 1,
+        "VERIFY_SKIPPED": 4
+      },
+      "note": "NO semantic_fidelity_pct until PI judges VERIFIED_NEEDS_HUMAN; rates use last-wins unique cells"
+    },
+    "Qwen/Qwen2.5-72B-Instruct": {
+      "unique_cells": 210,
+      "n_generated_or_skip": 206,
+      "n_provider_error": 4,
+      "n_with_compile_rc": 132,
+      "compile_rc_eq_0": 1,
+      "compile_at_1_over_with_compile": 0.0076,
+      "n_with_real_verify": 132,
+      "verify_rc_eq_0": 0,
+      "verify_at_1_over_with_verify": 0.0,
+      "n_tasks": 14,
+      "tasks": [
+        "GPB-001-flat",
+        "GPB-001-nonneg-lean",
+        "GPB-002-planar",
+        "GPB-005-lap-lean",
+        "GPB-007-hessian",
+        "GPB-010-pit",
+        "GPB-011-plane-lean",
+        "GPB-015-basin",
+        "GPB-019-quad",
+        "GPB-P002-idem",
+        "GPB-P002-mono",
+        "GPB-P002-nd-lean",
+        "GPB-P002bis-raise",
+        "GPB-T6-terminate-lean"
+      ],
+      "semantic_lastwins": {
+        "UNCOMPILED": 131,
+        "VERIFY_SKIPPED": 74,
+        "COMPILE_ONLY": 1,
+        "null": 4
+      },
+      "note": "NO semantic_fidelity_pct until PI judges VERIFIED_NEEDS_HUMAN; rates use last-wins unique cells"
+    },
+    "THUDM/GLM-4-32B-0414": {
+      "unique_cells": 200,
+      "n_generated_or_skip": 200,
+      "n_provider_error": 0,
+      "n_with_compile_rc": 125,
+      "compile_rc_eq_0": 0,
+      "compile_at_1_over_with_compile": 0.0,
+      "n_with_real_verify": 125,
+      "verify_rc_eq_0": 0,
+      "verify_at_1_over_with_verify": 0.0,
+      "n_tasks": 14,
+      "tasks": [
+        "GPB-001-flat",
+        "GPB-001-nonneg-lean",
+        "GPB-002-planar",
+        "GPB-005-lap-lean",
+        "GPB-007-hessian",
+        "GPB-010-pit",
+        "GPB-011-plane-lean",
+        "GPB-015-basin",
+        "GPB-019-quad",
+        "GPB-P002-idem",
+        "GPB-P002-mono",
+        "GPB-P002-nd-lean",
+        "GPB-P002bis-raise",
+        "GPB-T6-terminate-lean"
+      ],
+      "semantic_lastwins": {
+        "UNCOMPILED": 125,
+        "VERIFY_SKIPPED": 75
+      },
+      "note": "NO semantic_fidelity_pct until PI judges VERIFIED_NEEDS_HUMAN; rates use last-wins unique cells"
+    },
+    "deepseek-ai/DeepSeek-R1": {
+      "unique_cells": 208,
+      "n_generated_or_skip": 133,
+      "n_provider_error": 75,
+      "n_with_compile_rc": 92,
+      "compile_rc_eq_0": 28,
+      "compile_at_1_over_with_compile": 0.3043,
+      "n_with_real_verify": 92,
+      "verify_rc_eq_0": 24,
+      "verify_at_1_over_with_verify": 0.2609,
+      "n_tasks": 14,
+      "tasks": [
+        "GPB-001-flat",
+        "GPB-001-nonneg-lean",
+        "GPB-002-planar",
+        "GPB-005-lap-lean",
+        "GPB-007-hessian",
+        "GPB-010-pit",
+        "GPB-011-plane-lean",
+        "GPB-015-basin",
+        "GPB-019-quad",
+        "GPB-P002-idem",
+        "GPB-P002-mono",
+        "GPB-P002-nd-lean",
+        "GPB-P002bis-raise",
+        "GPB-T6-terminate-lean"
+      ],
+      "semantic_lastwins": {
+        "null": 86,
+        "VERIFIED_NEEDS_HUMAN": 17,
+        "VERIFY_SKIPPED": 41,
+        "UNCOMPILED": 59,
+        "COMPILE_ONLY": 3,
+        "LIKELY_ALIGNED": 2
+      },
+      "note": "NO semantic_fidelity_pct until PI judges VERIFIED_NEEDS_HUMAN; rates use last-wins unique cells"
+    }
+  },
+  "m3_catchup": {
+    "tasks_filled_15": [
+      "GPB-011-plane-lean",
+      "GPB-015-basin",
+      "GPB-019-quad",
+      "GPB-P002-idem",
+      "GPB-P002-mono",
+      "GPB-P002-nd-lean",
+      "GPB-P002bis-raise",
+      "GPB-T6-terminate-lean"
+    ],
+    "compile0_all_unique": 0,
+    "note": "valid negative: GLM-4-32B 0 compile across covered L1 cells"
+  },
+  "m4_partial": {
+    "planned": 210,
+    "unique": 208,
+    "generated_or_skip": 133,
+    "provider_error": 75,
+    "circuit": "HTTP_STREAK_10",
+    "retry_blocked": "siliconflow account balance insufficient (code 30001)"
+  },
+  "needs_human_a1711_original4": [
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P1",
+      "sample_index": 1,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P1",
+      "sample_index": 2,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P2",
+      "sample_index": 0,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P2",
+      "sample_index": 1,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy"
+    }
+  ],
+  "needs_human_lastwins": [
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P0",
+      "sample_index": 3,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P0__k3__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P2",
+      "sample_index": 3,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P2",
+      "sample_index": 4,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-002-planar",
+      "prompt_id": "P1",
+      "sample_index": 0,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-002-planar",
+      "prompt_id": "P1",
+      "sample_index": 1,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-002-planar",
+      "prompt_id": "P1",
+      "sample_index": 2,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-002-planar",
+      "prompt_id": "P1",
+      "sample_index": 4,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-019-quad",
+      "prompt_id": "P1",
+      "sample_index": 1,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-019-quad__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-idem",
+      "prompt_id": "P0",
+      "sample_index": 2,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-idem__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-mono",
+      "prompt_id": "P0",
+      "sample_index": 0,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-mono__deepseek-ai_DeepSeek-R1__P0__k0__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-mono",
+      "prompt_id": "P0",
+      "sample_index": 2,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-mono__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-mono",
+      "prompt_id": "P2",
+      "sample_index": 0,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-mono",
+      "prompt_id": "P2",
+      "sample_index": 2,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-mono",
+      "prompt_id": "P2",
+      "sample_index": 3,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002-mono",
+      "prompt_id": "P2",
+      "sample_index": 4,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002bis-raise",
+      "prompt_id": "P2",
+      "sample_index": 0,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy"
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1",
+      "task_id": "GPB-P002bis-raise",
+      "prompt_id": "P2",
+      "sample_index": 4,
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "dfy": "GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy"
+    }
+  ],
+  "drift_lastwins": [
+    {
+      "model": "deepseek-ai/DeepSeek-V3.2",
+      "task_id": "GPB-001-flat",
+      "prompt_id": "P2",
+      "sample_index": 0,
+      "dfy": null
+    }
+  ]
+}

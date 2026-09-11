@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 252,
+    "completion_tokens": 664,
+    "total_tokens": 916,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "prompt_cache_hit_tokens": 224,
+    "prompt_cache_miss_tokens": 28
+  },
+  "api_id": "01a08df639e5b82b388c02fa470fe883",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll help repair the Dafny formalization based on the iterative repair process. Since you haven't provided the original attempt or the specific feedback, I'll create a proper Dafny formalization for the 2D local raise step (RaiseNbr) that satisfies the given specification.\n\nHere's the repaired Dafny source text:\n\n```dafny\nmethod RaiseNbr(grid: array2<int>, x: int, y: int, processed: set<int>)\n  requires grid != null;\n  requires 0 <= x < grid.Length1 && 0 <= y < grid.Length2;\n  requires |processed| > 0;\n  requires forall i,j :: (i,j) !in processed ==> grid[i,j] >= 0;\n  requires forall i,j :: (i,j) in processed ==> grid[i,j] >= 0;\n  requires forall i,j :: (i,j) in processed ==> (i,j) != (x,y);\n  modifies grid;\n  ensures forall i,j :: (i,j) !in processed ==> grid[i,j] >= 0;\n  ensures grid[x,y] >= old(grid[x,y]);\n  ensures (x,y) in processed;\n  ensures forall dx,dy :: (dx,dy) in {(0,1), (1,0), (0,-1), (-1,0)}; \n           exists i,j :: (i,j) == (x+dx, y+dy) && i >= 0 && j >= 0 && i < grid.Length1 && j < grid.Length2\n           ==> grid[x+dx,y+dy] >= max(old(grid[x+dx,y+dy]), old(grid[x,y]));\n{\n  // Add the current cell to the processed set\n  processed := processed + {(x,y)};\n  \n  // For each 4-neighbor\n  foreach dx,dy in {(0,1), (1,0), (0,-1), (-1,0)}\n  {\n    var nx := x + dx;\n    var ny := y + dy;\n    \n    // Check if neighbor is within grid bounds\n    if nx >= 0 && ny >= 0 && nx < grid.Length1 && ny < grid.Length2\n    {\n      // Raise the neighbor to at least the maximum of its original value and the processed cell's value\n      grid[nx, ny] := max(grid[nx, ny], grid[x, y]);\n    }\n  }\n}\n```\n\nThis formalization:\n1. Takes a 2D grid, coordinates (x,y), and a set of processed cells\n2. Ensures the grid is modified such that:\n   - The elevation of the processed cell (x,y) is not decreased\n   - The cell (x,y) is added to the processed set\n   - For each 4-neighbor, its elevation is raised to at least the maximum of its original value and the processed cell's value\n3. Maintains non-negative elevations throughout\n4. Properly handles grid boundaries\n\nThe method signature and specifications match the original intent while ensuring the verifier can check the properties. The implementation follows the specification by raising each neighbor to at least the maximum of its original value and the processed cell's value.\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

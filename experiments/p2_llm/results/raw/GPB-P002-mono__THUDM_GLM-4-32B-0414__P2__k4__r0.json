@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "ec578a84868b8b3f6cf5c26bc9fa5c9d78e46b6456451698e11daa292093e204",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 265,
+    "completion_tokens": 309,
+    "total_tokens": 574,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 9
+  },
+  "api_id": "01a08df57b70ab95343ad86a922d3b20",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll create a proper Dafny formalization for the 1D Wang-Liu pit-filling algorithm with left outlet, based on the specification and following the repair rules.\n\n```dafny\nmethod FillLeftOutlet(array<int> orig) returns (array<int>)\n  requires |orig| > 0;\n  ensures |result| == |orig|;\n  ensures result[0] == orig[0];\n  ensures forall i :: 0 <= i < |orig| ==> result[i] >= orig[i];\n  ensures forall i :: 0 <= i < |orig| - 1 ==> result[i] <= result[i+1];\n{\n  var fill := new int[|orig|];\n  fill[0] := orig[0];\n  var i := 1;\n  while i < |orig|\n    invariant 1 <= i <= |orig|;\n    invariant forall j :: 1 <= j < i ==> fill[j] == max(orig[j], fill[j-1]);\n    invariant forall j :: 0 <= j < i ==> fill[j] >= orig[j];\n    invariant forall j :: 0 <= j < i - 1 ==> fill[j] <= fill[j+1];\n    decreases |orig| - i;\n  {\n    fill[i] := max(orig[i], fill[i-1]);\n    i := i + 1;\n  }\n  return fill;\n}\n\nfunction max(a: int, b: int): int\n{\n  if a >= b then a else b\n}\n```\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

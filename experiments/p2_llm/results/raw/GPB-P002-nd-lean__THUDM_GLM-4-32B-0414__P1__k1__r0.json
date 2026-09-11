@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2948,
+    "completion_tokens": 489,
+    "total_tokens": 3437,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 1380
+  },
+  "api_id": "01a08df5b9f36b7b75586387c175a0b6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.PitFill\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## 1D 左出口填充算子\n\n  给定序列 a,填充算子 Fill(a) 产生一个非递减序列,满足:\n  1. Fill(a)[0] = a[0]\n  2. 对于所有 i, Fill(a)[i+1] = max(a[i+1], Fill(a)[i])\n  3. 当 Fill(a)[i] 未定义时,不等式不适用\n\n  本文件证明 Fill(a) 是一个非递减算子。\n-/\n\n-- 1D 序列类型\ndef Seq (n : ℕ) := Fin n → ℝ\n\n-- 左出口填充算子\ndef Fill (a : Seq (n + 1)) : Seq (n + 1) :=\n  fun i ↦\n    if i = 0 then a 0\n    else max (a i) (Fill a (i.pred))\n\n-- 基础情况:第一个元素\n@[simp]\ntheorem Fill_zero (a : Seq (n + 1)) : Fill a 0 = a 0 := by simp [Fill]\n\n-- 递归情况:后续元素\n@[simp]\ntheorem Fill_succ (a : Seq (n + 1)) (i : Fin n) :\n    Fill a (i.succ) = max (a i.succ) (Fill a i) := by simp [Fill]\n\n-- 主定理:填充序列是非递减的\ntheorem Fill_nondecreasing (a : Seq (n + 1)) (i : Fin n) :\n    Fill a i ≤ Fill a (i.succ) := by\n  cases i <;> simp [Fill_succ, max_le (le_refl _) (le_refl _)]\n\n-- 冒烟测试(非命题,仅确认算子可计算)\nexample (a : Seq 2) : Fill a 0 ≤ Fill a 1 := by simp [Fill_nondecreasing]\nexample (a : Seq 3) : Fill a 1 ≤ Fill a 2 := by simp [Fill_nondecreasing]\n\nend -- noncomputable section\n\nend VeriGIS.PitFill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

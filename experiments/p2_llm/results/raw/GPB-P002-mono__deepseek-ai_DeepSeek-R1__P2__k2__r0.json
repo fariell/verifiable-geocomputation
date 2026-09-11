@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "ec578a84868b8b3f6cf5c26bc9fa5c9d78e46b6456451698e11daa292093e204",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 5097,
+    "total_tokens": 5366,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4769
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a08e7f9cebf48227eb63c38c693423",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method Fill(orig: array<int>) returns (fill: array<int>)\n  requires orig.Length > 0\n  ensures fill.Length == orig.Length\n  ensures fill[0] == orig[0]\n  ensures forall i :: 1 <= i < orig.Length ==> fill[i] == (if orig[i] > fill[i-1] then orig[i] else fill[i-1])\n  ensures forall i :: 0 <= i < orig.Length ==> orig[i] <= fill[i]\n  ensures forall i :: 0 <= i < orig.Length - 1 ==> fill[i] <= fill[i+1]\n{\n  fill := new int[orig.Length];\n  fill[0] := orig[0];\n  var i := 1;\n\n  while i < orig.Length\n    invariant 1 <= i <= orig.Length\n    invariant fill[0] == orig[0]\n    invariant forall j :: 1 <= j < i ==> fill[j] == (if orig[j] > fill[j-1] then orig[j] else fill[j-1])\n    invariant forall j :: 0 <= j < i ==> orig[j] <= fill[j]\n    invariant forall j,k :: 0 <= j <= k < i ==> fill[j] <= fill[k]\n    decreases orig.Length - i\n  {\n    if orig[i] > fill[i-1] {\n      fill[i] := orig[i];\n    } else {\n      fill[i] := fill[i-1];\n    }\n    i := i + 1;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

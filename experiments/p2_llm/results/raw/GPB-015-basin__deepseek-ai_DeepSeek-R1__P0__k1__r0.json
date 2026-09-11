@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1606,
+    "completion_tokens": 6095,
+    "total_tokens": 7701,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5845
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1606
+  },
+  "api_id": "01a08e48a6259e8a815494c507fe8ada",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "type Cell\n\nfunction next(cell: Cell): Cell\n\npredicate isOutlet(cell: Cell) {\n  next(cell) == cell\n}\n\nfunction stepN(cell: Cell, n: nat): Cell\n  decreases n\n{\n  if n == 0 then cell\n  else if isOutlet(cell) then cell\n  else stepN(next(cell), n-1)\n}\n\nlemma WatershedUniqueness(s: Cell, n: nat, m: nat)\n  requires isOutlet(stepN(s, n))\n  requires isOutlet(stepN(s, m))\n  ensures stepN(s, n) == stepN(s, m)\n  decreases n + m\n{\n  if n == 0 {\n    // Base case: n=0 implies outlet is start cell\n  } else if m == 0 {\n    // Base case: m=0 implies outlet is start cell\n  } else {\n    if isOutlet(s) {\n      // Start cell is already outlet\n    } else {\n      // Both paths reduce by one step\n      WatershedUniqueness(next(s), n-1, m-1);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

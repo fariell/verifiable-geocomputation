@@ -1,0 +1,62 @@
+{
+  "task_id": "GPB-019-quad",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "DzDx",
+    "DzDy"
+  ],
+  "n_gen_names": 2,
+  "n_gold_names": 19,
+  "keyword_hits": {
+    "keywords": [
+      "coefficients",
+      "dzdx",
+      "dzdy",
+      "equals",
+      "exact",
+      "gradient",
+      "horn",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "quadratic",
+      "recover",
+      "remainder",
+      "separately",
+      "slope",
+      "surfaces",
+      "true"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "exact",
+      "gradient",
+      "horn",
+      "origin",
+      "quadratic",
+      "recover",
+      "remainder",
+      "slope"
+    ],
+    "miss": [
+      "coefficients",
+      "equals",
+      "identically",
+      "order",
+      "planar",
+      "separately",
+      "surfaces",
+      "true"
+    ],
+    "hit_ratio": 0.5556
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

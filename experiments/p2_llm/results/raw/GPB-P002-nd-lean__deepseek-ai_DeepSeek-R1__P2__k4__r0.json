@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 8018,
+    "total_tokens": 8262,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7776
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 244
+  },
+  "api_id": "01a08e91d12ee6eeef4f5366a2ea7ca8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "def fill_left {α : Type} [LinearOrder α] : List α → List α\n  | [] => []\n  | x::xs => List.scanl (fun acc y => max y acc) x xs\n\ntheorem fill_left_non_decreasing {α : Type} [LinearOrder α] (a : List α) :\n    match fill_left a with\n    | [] => True\n    | x::xs => List.Chain (· ≤ ·) x xs := by\n  cases a with\n  | nil => simp [fill_left]\n  | cons x xs =>\n      simp [fill_left]\n      let rec helper (init : α) (ys : List α) : List.Chain (· ≤ ·) init (List.scanl (fun acc y => max y acc) init ys) := by\n        cases ys with\n        | nil => exact List.Chain.nil\n        | cons y ys' =>\n            simp [List.scanl]\n            apply List.Chain.cons\n            · apply le_max_right\n            · exact helper (max y init) ys'\n      exact helper x xs\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

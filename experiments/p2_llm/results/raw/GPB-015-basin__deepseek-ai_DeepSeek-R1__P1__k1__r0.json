@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3092,
+    "completion_tokens": 4351,
+    "total_tokens": 7443,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3578
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3092
+  },
+  "api_id": "01a08e48a6c0cba8b5e9d5c99ff8240c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  算子 : Watershed uniqueness under deterministic D8 flow\n//  覆盖 : GPB-015 (Layer A: deterministic D8 ⇒ unique outlet if orbit terminates)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n// ===========================================================================\n\nmodule WatershedUniqueness {\n\n  // -------------------------------------------------------------------------\n  // Abstract cell type and deterministic successor function\n  // -------------------------------------------------------------------------\n  type Cell\n  function succ(c: Cell): Cell  // Deterministic flow successor\n\n  // Fixed point definition (outlet cell)\n  predicate IsOutlet(c: Cell) {\n    succ(c) == c\n  }\n\n  // -------------------------------------------------------------------------\n  // Bounded iteration (stepN) without recursion\n  // -------------------------------------------------------------------------\n  function stepN(s: Cell, n: nat): (c: Cell)\n    decreases n\n  {\n    if n == 0 then s\n    else if IsOutlet(s) then s\n    else stepN(succ(s), n-1)\n  }\n\n  // -------------------------------------------------------------------------\n  // Composition lemma: stepN(s, m+n) = stepN(stepN(s, m), n)\n  // -------------------------------------------------------------------------\n  lemma StepNAdd(s: Cell, m: nat, n: nat)\n    ensures stepN(s, m+n) == stepN(stepN(s, m), n)\n    decreases m\n  {\n    if m == 0 {\n      // Base case: stepN(s, 0+n) = stepN(s, n) = stepN(stepN(s, 0), n)\n    } else if IsOutlet(s) {\n      // Early termination: s is already outlet\n    } else {\n      // Inductive step: reduce m and advance successor\n      StepNAdd(succ(s), m-1, n);\n    }\n  }\n\n  // -------------------------------------------------------------------------\n  // Stability lemma: Outlets remain fixed under further iteration\n  // -------------------------------------------------------------------------\n  lemma StepNOutlet(c: Cell, n: nat)\n    requires IsOutlet(c)\n    ensures stepN(c, n) == c\n  {\n    // Trivial by stepN definition (outlet condition stops iteration)\n  }\n\n  // =========================================================================\n  // MAIN THEOREM: Watershed outlet uniqueness\n  // -------------------------------------------------------------------------\n  // If bounded iteration reaches an outlet from the same start cell in\n  // two different step counts, those outlets must be equal.\n  // =========================================================================\n  theorem WatershedUniqueness(s: Cell, n1: nat, n2: nat)\n    requires IsOutlet(stepN(s, n1))  // First run terminates at outlet\n    requires IsOutlet(stepN(s, n2))  // Second run terminates at outlet\n    ensures stepN(s, n1) == stepN(s, n2)\n  {\n    // Case 1: n1 ≤ n2\n    if n1 <= n2 {\n      var diff: nat := n2 - n1;\n      StepNAdd(s, n1, diff);\n      StepNOutlet(stepN(s, n1), diff);\n    }\n    // Case 2: n2 < n1\n    else {\n      var diff: nat := n1 - n2;\n      StepNAdd(s, n2, diff);\n      StepNOutlet(stepN(s, n2), diff);\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-006 — Watershed outlet uniqueness\\n\";\n  print \"Verified: dafny verify P006_watershed.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

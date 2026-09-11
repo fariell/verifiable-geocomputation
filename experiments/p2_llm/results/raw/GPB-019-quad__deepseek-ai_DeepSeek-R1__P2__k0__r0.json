@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 4448,
+    "total_tokens": 4715,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4099
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 267
+  },
+  "api_id": "01a08e60171941a0cb05dd0365a2797d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P2 · Iterative repair (verifier feedback)\n\nfunction method HornDzDx(x: real, y: real, w: real, z: (real,real) -> real): real\n  requires w != 0.0\n{\n  (z(x+w, y) - z(x-w, y)) / (2.0 * w)\n}\n\nfunction method HornDzDy(x: real, y: real, w: real, z: (real,real) -> real): real\n  requires w != 0.0\n{\n  (z(x, y+w) - z(x, y-w)) / (2.0 * w)\n}\n\nlemma LemmaQuadraticExactness(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w != 0.0\n  ensures HornDzDx(0.0, 0.0, w, (x,y) => A*x + B*y + C*x*x + D*x*y + E*y*y + F) == A\n  ensures HornDzDy(0.0, 0.0, w, (x,y) => A*x + B*y + C*x*x + D*x*y + E*y*y + F) == B\n{\n}\n\nlemma LemmaCubicRemainder(G: real, w: real)\n  requires w != 0.0\n  ensures HornDzDx(0.0, 0.0, w, (x,y) => G*x*x*x) == G * w * w\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

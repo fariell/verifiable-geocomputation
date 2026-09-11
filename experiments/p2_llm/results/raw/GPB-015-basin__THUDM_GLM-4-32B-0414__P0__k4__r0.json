@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1543,
+    "completion_tokens": 566,
+    "total_tokens": 2109,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 7
+  },
+  "api_id": "01a08df1cade3d96ff75245337f04177",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P006_watershed.dfy\n// Formalization of watershed uniqueness under deterministic D8.\n\nmodule Watershed {\n  // Define the grid and cell types\n  type Grid = array2d<int>\n  type Cell = (int, int)\n\n  // Define the successor function (d8_at in Python)\n  function method d8_at(h: Grid, r: int, c: int): string {\n    // Implementation of d8_at logic (simplified for this example)\n    // Returns \"NoFlow\" or a direction string\n    \"NoFlow\" // Placeholder\n  }\n\n  // Define the delta for each direction\n  function method _delta(name: string): (int, int) {\n    // Implementation of _delta logic (simplified for this example)\n    (0, 0) // Placeholder\n  }\n\n  // Define the follow_d8 function (bounded iterate stepN)\n  function method follow_d8(h: Grid, r: int, c: int, max_steps: int): (bool, Cell, seq<Cell>) {\n    // Implementation of follow_d8 logic (simplified for this example)\n    (true, (r, c), [(r, c)]) // Placeholder\n  }\n\n  // Define the follow_ring function (for testing)\n  function method follow_ring(start: Cell, max_steps: int): (bool, Cell, seq<Cell>) {\n    // Implementation of follow_ring logic (simplified for this example)\n    (true, start, [start]) // Placeholder\n  }\n\n  // The main theorem: watershed uniqueness\n  lemma WatershedUniqueness(h: Grid, r: int, c: int, max_steps: int)\n    requires 0 <= r < h.Length1 && 0 <= c < h.Length2\n    requires max_steps >= 0\n    decreases max_steps\n  {\n    // Get the first outlet and path\n    var reached1, outlet1, path1 := follow_d8(h, r, c, max_steps);\n    // Get the second outlet and path\n    var reached2, outlet2, path2 := follow_d8(h, r, c, max_steps);\n\n    // Assert that if both reached an outlet, they are the same\n    if reached1 && reached2 {\n      assert outlet1 == outlet2;\n    }\n  }\n\n  // Test cases\n  method TestWatershedUniqueness()\n  {\n    // Create a test grid\n    var h := new Grid[2, 2];\n    // Initialize the grid with some values\n    // ...\n\n    // Test the WatershedUniqueness lemma\n    WatershedUniqueness(h, 0, 0, 10);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

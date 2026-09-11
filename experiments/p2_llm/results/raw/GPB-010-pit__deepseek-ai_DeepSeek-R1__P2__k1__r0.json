@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5b1d80c9f558cecc7abebaec3f40a41e3aa5f66762cf489a62d60b5d8363feaf",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 240,
+    "completion_tokens": 6400,
+    "total_tokens": 6640,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5805
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 240
+  },
+  "api_id": "01a08e317bb537a678a636cd0a181d42",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "datatype Direction = NW | N | NE | W | E | SW | S | SE | NoFlow\n\nfunction method OffsetToDirection(dx: int, dy: int): Direction {\n  if dx == -1 && dy == -1 then NW\n  else if dx == -1 && dy == 0 then N\n  else if dx == -1 && dy == 1 then NE\n  else if dx == 0 && dy == -1 then W\n  else if dx == 0 && dy == 1 then E\n  else if dx == 1 && dy == -1 then SW\n  else if dx == 1 && dy == 0 then S\n  else if dx == 1 && dy == 1 then SE\n  else NoFlow\n}\n\nfunction method FlowDirection(grid: array2<int>, i: int, j: int): Direction\n  requires grid != null\n  requires 0 <= i < grid.Length0 && 0 <= j < grid.Length1\n{\n  var center := grid[i, j];\n  var dirs := [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)];\n  var bestDrop := 0;\n  var bestDir: Direction := NoFlow;\n\n  for k := 0 to 7\n    invariant bestDir == NoFlow || bestDrop > 0\n  {\n    var dx := dirs[k].0;\n    var dy := dirs[k].1;\n    var ni := i + dx;\n    var nj := j + dy;\n    if 0 <= ni < grid.Length0 && 0 <= nj < grid.Length1 {\n      var neighbor := grid[ni, nj];\n      if neighbor < center {\n        var drop := center - neighbor;\n        if bestDir == NoFlow || drop > bestDrop {\n          bestDrop := drop;\n          bestDir := OffsetToDirection(dx, dy);\n        }\n      }\n    }\n  }\n  bestDir\n}\n\nlemma Theorem(grid: array2<int>, i: int, j: int)\n  requires grid != null\n  requires 0 <= i < grid.Length0 && 0 <= j < grid.Length1\n  requires forall dx: int, dy: int ::\n      dx in {-1,0,1} && dy in {-1,0,1} && (dx != 0 || dy != 0) ==>\n        (i+dx < 0 || i+dx >= grid.Length0 || j+dy < 0 || j+dy >= grid.Length1) ||\n        grid[i+dx, j+dy] >= grid[i, j]\n  ensures FlowDirection(grid, i, j) == NoFlow\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

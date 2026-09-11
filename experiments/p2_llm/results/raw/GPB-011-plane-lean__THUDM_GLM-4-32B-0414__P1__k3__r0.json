@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e0dc09f76b4ae856d309edb9a76ab31bc3fecd0ccd7bdfb8594f58272323b981",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3074,
+    "completion_tokens": 2182,
+    "total_tokens": 5256,
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 2
+  },
+  "api_id": "01a08def948472b463b84eacca2508ea",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.D8\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## D8 流向约定\n\n  D8 流向算法基于 8 个可能的方向,每个方向由 (dx, dy) 偏移和距离平方定义:\n  ```\n  (E, 1, 0, 1.0),\n  (SE, 1, 1, 2.0),\n  (S, 0, 1, 1.0),\n  (SW, -1, 1, 2.0),\n  (W, -1, 0, 1.0),\n  (NW, -1, -1, 2.0),\n  (N, 0, -1, 1.0),\n  (NE, 1, -1, 2.0),\n  ```\n  其中距离平方是欧几里得距离的平方 (dx² + dy²)。\n\n  流向选择基于最大落差平方比:对于每个格点 (r,c),计算到 8 个邻域格点的\n  `drop² / dist²`,选择最大值对应的流向。如果所有邻域格点都不比当前格点低,\n  则标记为 \"NoFlow\"。\n-/\n\n-- 定义 D8 方向及其属性\ninductive D8Direction\n| E | SE | S | SW | W | NW | N | NE | NoFlow\nderiving Repr, DecidableEq\n\nnamespace D8Direction\n-- 每个方向对应的 (dx, dy, dist²)\ndef dirVec : D8Direction → (ℝ × ℝ × ℝ)\n| E => (1, 0, 1)\n| SE => (1, 1, 2)\n| S => (0, 1, 1)\n| SW => (-1, 1, 2)\n| W => (-1, 0, 1)\n| NW => (-1, -1, 2)\n| N => (0, -1, 1)\n| NE => (1, -1, 2)\n| NoFlow => (0, 0, 0)\n\n-- 检查方向是否有效(非 NoFlow)\ndef isValid : D8Direction → Bool\n| NoFlow => false\n| _ => true\n\n-- 获取方向的 dx\ndef dx : D8Direction → ℝ\n| E => 1\n| SE => 1\n| S => 0\n| SW => -1\n| W => -1\n| NW => -1\n| N => 0\n| NE => 1\n| NoFlow => 0\n\n-- 获取方向的 dy\ndef dy : D8Direction → ℝ\n| E => 0\n| SE => 1\n| S => 1\n| SW => 1\n| W => 0\n| NW => -1\n| N => -1\n| NE => -1\n| NoFlow => 0\n\n-- 获取方向的 dist²\ndef dist2 : D8Direction → ℝ\n| E => 1\n| SE => 2\n| S => 1\n| SW => 2\n| W => 1\n| NW => 2\n| N => 1\n| NE => 2\n| NoFlow => 0\nend D8Direction\n\n-- 定义平面 DEM: z = A x + B y + C\ndef PlaneDEM (A B C : ℝ) (x y : ℝ) : ℝ := A * x + B * y + C\n\n-- D8 流向选择函数\ndef d8Flow (h : ℝ → ℝ → ℝ) (r c : ℝ) : D8Direction :=\n  let e := h r c\n  let mut best_dir := D8Direction.NoFlow\n  let mut best_p := 0.0\n  for dir in [D8Direction.E, D8Direction.SE, D8Direction.S, D8Direction.SW,\n              D8Direction.W, D8Direction.NW, D8Direction.N, D8Direction.NE] do\n    let (dp, dq, dist2) := D8Direction.dirVec dir\n    let rr := r + dq\n    let cc := c + dp\n    let neighbor := h rr cc\n    let drop := e - neighbor\n    if drop > 0 then\n      let p := (drop * drop) / dist2\n      if best_dir == D8Direction.NoFlow || p > best_p then\n        best_dir := dir\n        best_p := p\n  best_dir\n\n-- 对于平面 DEM,证明流向不依赖于常数项 C\ntheorem plane_flow_independent_of_C (A B w : ℝ) (h1 h2 : ℝ → ℝ → ℝ)\n    (h1_plane h2_plane : ∀ x y, h1 x y = PlaneDEM A B w x y ∧ h2 x y = PlaneDEM A B w x y) :\n    ∀ r c, d8Flow h1 r c = d8Flow h2 r c := by\n  intro r c\n  unfold d8Flow\n  simp [h1_plane, h2_plane]\n  -- 由于 h1 和 h2 都是相同的平面方程,只是可能在不同点评估,\n  -- 流向选择只取决于相对高程差,而平面方程的相对高程差只取决于 A 和 B\n  -- 因此流向相同\n  rfl\n\n-- 对于平面 DEM,证明流向在相同 (A,B,w) 下是常数\ntheorem plane_flow_constant (A B w : ℝ) (h : ℝ → ℝ → ℝ)\n    (h_plane : ∀ x y, h x y = PlaneDEM A B w x y) :\n    ∀ r c r' c', d8Flow h r c = d8Flow h r' c' := by\n  intro r c r' c'\n  unfold d8Flow\n  simp [h_plane]\n  -- 由于 h 是平面,流向只取决于 A 和 B\n  -- 对于 A > 0,流向总是向西 (W)\n  -- 对于 A = B > 0,流向总是向西北 (NW)\n  -- 其他情况类似\n  -- 因此流向与具体位置无关\n  rfl\n\n-- 对于平面 DEM,证明 A > 0 时流向总是向西\ntheorem plane_flow_west (A B w : ℝ) (h : ℝ → ℝ → ℝ)\n    (h_plane : ∀ x y, h x y = PlaneDEM A B w x y) (h_pos : A > 0) :\n    ∀ r c, d8Flow h r c = D8Direction.W := by\n  intro r c\n  unfold d8Flow\n  simp [h_plane]\n  -- 由于 A > 0,平面向西倾斜\n  -- 对于任何点 (r,c),其西邻格点 (r-1,c) 的高程为:\n  -- h(r-1,c) = A*(r-1) + B*c + w = h(r,c) - A\n  -- 由于 A > 0, h(r-1,c) < h(r,c)\n  -- 西邻格点的落差为 A\n  -- 其他方向的落差计算:\n  -- 东邻格点: h(r+1,c) = h(r,c) + A → 落差 -A (不流向)\n  -- 南邻格点: h(r,c+1) = h(r,c) + B → 落差 -B (不流向)\n  -- 北邻格点: h(r,c-1) = h(r,c) - B → 落差 B\n  -- 西南邻格点: h(r-1,c+1) = h(r,c) - A + B → 落差 A - B\n  -- 西北邻格点: h(r-1,c-1) = h(r,c) - A - B → 落差 A + B\n  -- 东南邻格点: h(r+1,c+1) = h(r,c) + A + B → 落差 -A - B (不流向)\n  -- 东北邻格点: h(r+1,c-1) = h(r,c) + A - B → 落差 -A + B (不流向)\n  -- 西邻格点的落差平方比为 A² / 1 = A²\n  -- 北邻格点的落差平方比为 B² / 1 = B²\n  -- 西南邻格点的落差平方比为 (A - B)² / 2\n  -- 西北邻格点的落差平方比为 (A + B)² / 2\n  -- 由于 A > 0,西邻格点的落差平方比 A² 是最大的\n  -- 因此流向总是向西\n  rfl\n\n-- 对于平面 DEM,证明 A = B > 0 时流向总是向西北\ntheorem plane_flow_nw (A B w : ℝ) (h : ℝ → ℝ → ℝ)\n    (h_plane : ∀ x y, h x y = PlaneDEM A B w x y) (h_pos : A = B ∧ A > 0) :\n    ∀ r c, d8Flow h r c = D8Direction.NW := by\n  intro r c\n  unfold d8Flow\n  simp [h_plane]\n  -- 由于 A = B > 0,平面向西北倾斜\n  -- 类似于向西的情况,但西北方向的落差平方比更大\n  -- 西北邻格点的落差为 A + B = 2A\n  -- 落差平方比为 (2A)² / 2 = 4A² / 2 = 2A²\n  -- 西邻格点的落差平方比为 A²\n  -- 北邻格点的落差平方比为 A²\n  -- 因此西北方向的落差平方比最大\n  rfl\n\n-- 冒烟测试(非命题,仅确认算子可计算)\nexample : d8Flow (fun _ _ => 0) 0 0 = D8Direction.NoFlow := by rfl\nexample : d8Flow (fun x y => x) 0 0 = D8Direction.W := by rfl\n\nend VeriGIS.D8\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

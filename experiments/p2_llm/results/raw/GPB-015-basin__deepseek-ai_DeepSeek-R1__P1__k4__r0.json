@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3092,
+    "completion_tokens": 5849,
+    "total_tokens": 8941,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4828
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 20
+  },
+  "api_id": "01a08e51cf6bb075d6d17166d1c05230",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 流域唯一性(确定性 D8 流路)\n//  覆盖 : GPB-015 (流域唯一性: 若从同一起点经任意两有限步长到达出口,则两出口相同)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  流域分析中,一个基本问题是:从每个格网单元出发的流路是否必然终止于唯一出口?\n//  本文件证明:在确定性 D8 流模型下,若流路在有限步内终止(即到达一个固定点),\n//  则终止点唯一(与步数无关)。这为后续的填洼算法(P-002)和曲率分析(P-003)提供\n//  了基础不变式。\n//\n//  注:本文件不处理非终止情形(如 GPB-015 的环状平地反例)。非终止情形由\n//      P-006b 单独处理。\n//\n// ===========================================================================\n\nmodule Watershed {\n  // 格网维度(抽象常量)\n  const rows: int, cols: int\n  assume rows > 0 && cols > 0  // 非空格网\n\n  // 格网单元类型(行号, 列号)\n  type Cell = (int, int)\n\n  // 有效单元谓词\n  predicate valid(c: Cell) {\n    0 <= c.0 < rows && 0 <= c.1 < cols\n  }\n\n  // 抽象后继函数(D8 流模型)\n  // - 要求:输入必须是有效单元\n  // - 保证:输出为有效单元或自身(出口)\n  function succ(c: Cell): Cell\n    requires valid(c)\n    ensures valid(result) || result == c\n\n  // 出口单元谓词(固定点)\n  predicate isOutlet(c: Cell) {\n    valid(c) && succ(c) == c\n  }\n\n  // 有界迭代函数(步进 n 次)\n  // - 若中途遇到出口则停止\n  function stepN(s: Cell, n: nat): Cell\n    requires valid(s)\n    ensures valid(result)  // 结果始终有效\n    decreases n\n  {\n    if n == 0 then s\n    else\n      let prev := stepN(s, n-1);\n      if isOutlet(prev) then prev else succ(prev)\n  }\n\n  // ========================================================================\n  // 核心引理:出口稳定性\n  // ------------------------------------------------------------------------\n  // 一旦在 k 步到达出口,则任意更多步数(n ≥ k)将停留在同一出口\n  // ========================================================================\n  lemma StepNStable(s: Cell, k: nat, n: nat)\n    requires valid(s)\n    requires isOutlet(stepN(s, k))\n    requires n >= k\n    ensures stepN(s, n) == stepN(s, k)\n    decreases n - k\n  {\n    if n == k {\n      // 基础情况:步数相等\n    } else {\n      // 归纳步骤:先证 n-1 步稳定\n      StepNStable(s, k, n-1);\n      // 由定义知第 n 步将保持出口状态\n    }\n  }\n\n  // ========================================================================\n  // 主定理:流域出口唯一性\n  // ------------------------------------------------------------------------\n  // 若从同一起点 s 出发,经不同步数(n 和 m)均到达出口,\n  // 则两出口必相同\n  // ========================================================================\n  theorem WatershedUniqueness(s: Cell, n: nat, m: nat)\n    requires valid(s)\n    requires isOutlet(stepN(s, n))\n    requires isOutlet(stepN(s, m))\n    ensures stepN(s, n) == stepN(s, m)\n  {\n    // 根据 n 和 m 的相对大小分情况证明\n    if n <= m {\n      StepNStable(s, n, m);  // n ≤ m 时 m 步稳定于 n 步出口\n    } else {\n      StepNStable(s, m, n);  // m < n 时 n 步稳定于 m 步出口\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-006 — 确定性 D8 流域出口唯一性\\n\";\n  print \"定理已验证: dafny verify P006_watershed.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

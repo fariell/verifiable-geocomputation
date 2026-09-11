@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3030,
+    "completion_tokens": 3058,
+    "total_tokens": 6088,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2478
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3030
+  },
+  "api_id": "01a08dffe76a70b44d7a330227375e1e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-001\n   文件 : formal/lean4/VeriGIS/HornSlope.lean\n   算子 : Horn (1981) 有限差分坡度平方\n   对偶 : experiments/phase1/gpb019_consistency.py\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  证明 Horn (1981) 坡度平方算子对任意 3×3 高程窗口和正网格间距 w 非负。\n  该性质对任意高程表面成立，不限于平面。\n\n  算子定义:\n    SlopeSq = [(f - d)/(2w)]² + [(b - h)/(2w)]²\n\n  覆盖:\n    GPB-019 代数核: 坡度平方非负性\n    Phase 1 核心算子基础性质\n  ==========================================================================\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.HornSlope\n\nnoncomputable section\n\n/-!\n  3×3 窗口(p 向右,q 向下),与 `Curvature` / Dafny P-003 相同。\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  Horn 坡度平方仅需 b,d,f,h 四点\n-/\n\n/-- Horn (1981) 坡度平方算子 -/\ndef slopeSq (b d f h w : ℝ) : ℝ := \n  ((f - d) / (2 * w)) ^ 2 + ((b - h) / (2 * w)) ^ 2\n\n/-!\n  核心定理: 对任意高程值和正网格间距，坡度平方非负。\n  证明仅需:\n  1. 实数平方的非负性\n  2. 正网格间距保证分母非零\n-/\ntheorem slopeSq_nonneg (b d f h w : ℝ) (hw : w > 0) :\n    0 ≤ slopeSq b d f h w := by\n  -- 展开算子定义\n  unfold slopeSq\n  -- 证明两项均非负\n  apply add_nonneg\n  · -- 第一项: [(f - d)/(2w)]² ≥ 0\n    apply pow_two_nonneg\n  · -- 第二项: [(b - h)/(2w)]² ≥ 0\n    apply pow_two_nonneg\n\nend\nend VeriGIS.HornSlope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

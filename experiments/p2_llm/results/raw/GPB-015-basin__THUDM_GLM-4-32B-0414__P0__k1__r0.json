@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1543,
+    "completion_tokens": 692,
+    "total_tokens": 2235,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 7
+  },
+  "api_id": "01a08df1cacbdeda5ea4670965680a44",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P006_watershed.dfy\n// Formalization of watershed uniqueness under deterministic D8.\n\nmodule Watershed {\n  // Define the grid and cell types\n  type Grid = array<array<int>> // 2D grid representing elevation\n  type Cell = (int, int)        // (row, column) pair\n\n  // Define the successor function (d8_at in Python)\n  function method d8_at(h: Grid, r: int, c: int): string\n    requires 0 <= r < |h| && 0 <= c < |h[0]|\n    // Returns the direction of flow or \"NoFlow\"\n\n  // Define the successor relation\n  function method succ(h: Grid, cell: Cell): Cell\n    requires 0 <= cell.0 < |h| && 0 <= cell.1 < |h[0]|\n    // Returns the next cell in the flow path or the current cell if NoFlow\n\n  // Define the bounded iterate function (stepN in Python)\n  function method stepN(h: Grid, start: Cell, n: int): Cell\n    requires n >= 0\n    decreases n\n    // Returns the cell reached after n steps from start\n\n  // Define the fixed point (outlet) predicate\n  predicate isOutlet(h: Grid, cell: Cell)\n    // True if the cell is an outlet (NoFlow or fixed point)\n\n  // The main theorem: watershed uniqueness\n  lemma WatershedUniqueness(h: Grid, start: Cell, n1: int, n2: int)\n    requires n1 >= 0 && n2 >= 0\n    requires isOutlet(h, stepN(h, start, n1))\n    requires isOutlet(h, stepN(h, start, n2))\n    ensures stepN(h, start, n1) == stepN(h, start, n2)\n  {\n    // Proof by induction on the maximum of n1 and n2\n    if n1 == 0 || n2 == 0 {\n      // Base case: one of the steps is 0, so both must be the same outlet\n      assert stepN(h, start, 0) == start;\n      assert isOutlet(h, start);\n    } else {\n      // Inductive case: reduce to smaller steps\n      var m := max(n1, n2);\n      var m1 := if n1 == m then n1 - 1 else n1;\n      var m2 := if n2 == m then n2 - 1 else n2;\n      WatershedUniqueness(h, start, m1, m2);\n      // The outlets must be the same by the inductive hypothesis\n    }\n  }\n\n  // Helper lemma for fixed points\n  lemma FixedPointReached(h: Grid, start: Cell, n: int)\n    requires isOutlet(h, stepN(h, start, n))\n    ensures isOutlet(h, start) ==> stepN(h, start, n) == start\n  {\n    // Proof by contradiction\n    assume !isOutlet(h, start);\n    // The path must eventually reach an outlet, and by determinism it must be unique\n    // This is a sketch - actual proof would depend on the properties of d8_at\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

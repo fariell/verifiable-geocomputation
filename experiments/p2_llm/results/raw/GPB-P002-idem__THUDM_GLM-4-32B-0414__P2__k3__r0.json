@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "344ceb916dac07e97c3b52f3a8371609af11c3828fdf4e865cad24e497832500",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 245,
+    "completion_tokens": 600,
+    "total_tokens": 845,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "prompt_cache_hit_tokens": 224,
+    "prompt_cache_miss_tokens": 21
+  },
+  "api_id": "01a08df4e9a8c418c550dc6b79a94833",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I need to see the original specification and previous attempt to provide a proper repair. Since these are missing, I'll create a complete formalization for the pit filling idempotence property in 1D with left outlets.\n\n```dafny\nmethod Fill(a: array<int>, i: int) returns (b: array<int>)\n  requires 0 <= i < a.Length\n  requires forall j :: 0 <= j < a.Length ==> 0 <= a[j]\n  requires forall j :: 0 <= j < i ==> a[j] <= a[i]  // left outlets: nothing spills left of i\n  ensures b.Length == a.Length\n  ensures forall j :: 0 <= j < a.Length ==> 0 <= b[j]\n  ensures forall j :: 0 <= j < a.Length ==> b[j] >= a[j]\n  ensures forall j :: 0 <= j < i ==> b[j] == a[j]  // left outlets remain unchanged\n{\n  b := new int[a.Length];\n  // Initialize b with a copy of a\n  forall j | 0 <= j < a.Length { b[j] := a[j]; }\n  \n  // Fill pits to the right of i\n  var k := i;\n  while k < a.Length\n    invariant i <= k <= a.Length\n    invariant forall j :: i <= j < k ==> b[j] >= a[j]\n    invariant forall j :: 0 <= j < i ==> b[j] == a[j]\n    invariant forall j :: 0 <= j < a.Length ==> 0 <= b[j]\n  {\n    if k > i && b[k] < b[k-1] {\n      b[k] := b[k-1];\n    }\n    k := k + 1;\n  }\n}\n\nmethod FillIdempotent(a: array<int>, i: int) returns (b: array<int>, c: array<int>)\n  requires 0 <= i < a.Length\n  requires forall j :: 0 <= j < a.Length ==> 0 <= a[j]\n  requires forall j :: 0 <= j < i ==> a[j] <= a[i]  // left outlets: nothing spills left of i\n  ensures b.Length == a.Length\n  ensures c.Length == a.Length\n  ensures forall j :: 0 <= j < a.Length ==> b[j] == c[j]\n{\n  var a1 := Fill(a, i);\n  var a2 := Fill(a1, i);\n  return (a1, a2);\n}\n\nmethod Main()\n{\n  var a := new int[5];\n  a[0] := 1; a[1] := 0; a[2] := 2; a[3] := 1; a[4] := 3;\n  var (b, c) := FillIdempotent(a, 2);\n  assert b == c;\n}\n```\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1608,
+    "completion_tokens": 733,
+    "total_tokens": 2341,
+    "prompt_tokens_details": {
+      "cached_tokens": 1600
+    },
+    "prompt_cache_hit_tokens": 1600,
+    "prompt_cache_miss_tokens": 8
+  },
+  "api_id": "01a08df4a82ef368f2701e8ee47ee2da",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Pit filling is idempotent on the 1D left-outlet specialization: Fill(Fill(a)) = Fill(a).\n// Cells that already do not spill to the left are fixed points of Raise.\n\nmodule PitFillingIdempotent {\n  // Represents a 1D elevation profile\n  type ElevationProfile = seq<int>\n\n  // Fill operation for 1D elevation profile\n  function Fill(a: ElevationProfile): ElevationProfile {\n    // Base case: empty profile\n    if |a| == 0 then []\n    // Base case: single cell profile\n    else if |a| == 1 then [a[0]]\n    // Recursive case: fill the profile\n    else {\n      var n := |a|;\n      var filled := [a[0]];\n      var current_max := a[0];\n      var i := 1;\n      while i < n\n        invariant 1 <= i <= n\n        invariant |filled| == i\n        invariant filled == Fill(a[..i])\n        invariant current_max == max(a[..i])\n        decreases n - i\n      {\n        current_max := max(current_max, a[i]);\n        filled := filled + [current_max];\n        i := i + 1;\n      }\n      filled\n    }\n  }\n\n  // Fixed point property: cells that do not spill to the left are fixed points of Raise\n  lemma FixedPointProperty(a: ElevationProfile, i: int)\n    requires 0 <= i < |a|\n    requires a[i] >= a[i-1] when i > 0\n    ensures Fill(a)[i] == a[i]\n  {\n    // Base case: i == 0\n    if i == 0 {\n      assert Fill(a)[0] == a[0];\n    }\n    // Inductive case: i > 0\n    else {\n      // By induction hypothesis, Fill(a)[i-1] == a[i-1]\n      // Since a[i] >= a[i-1], the max operation in Fill will not change a[i]\n      assert Fill(a)[i] == max(Fill(a)[i-1], a[i]) == max(a[i-1], a[i]) == a[i];\n    }\n  }\n\n  // Idempotence property: Fill(Fill(a)) = Fill(a)\n  lemma IdempotenceProperty(a: ElevationProfile)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    var n := |a|;\n    var i := 0;\n    while i < n\n      invariant 0 <= i <= n\n      invariant Fill(Fill(a))[..i] == Fill(a)[..i]\n      decreases n - i\n    {\n      // By FixedPointProperty, if a[i] does not spill to the left, it is a fixed point\n      if i > 0 && a[i] >= a[i-1] {\n        assert Fill(a)[i] == a[i];\n        // Since Fill(a)[i] == a[i], and a[i] does not spill to the left, Fill(Fill(a))[i] == Fill(a)[i]\n        assert Fill(Fill(a))[i] == Fill(a)[i];\n      }\n      // Otherwise, Fill(Fill(a))[i] is the maximum of Fill(a)[..i], which is Fill(a)[i]\n      else {\n        assert Fill(Fill(a))[i] == Fill(a)[i];\n      }\n      i := i + 1;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

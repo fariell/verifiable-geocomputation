@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 4625,
+    "total_tokens": 7716,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3743
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3091
+  },
+  "api_id": "01a08e7b9273c1b8bb91d122122c8c30",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1 (1D specialization)\n//  算子 : Wang-Liu pit-filling (left outlet)\n//  覆盖 : GPB-021 的一维特例(填洼后非递减)\n//  环境 : Dafny 4.11\n// ===========================================================================\n\nmodule WangLiu1D {\n\n  // -------------------------------------------------------------------------\n  // 1D Wang-Liu pit-filling with left outlet\n  // \n  // 定义:\n  //   Fill[0] = orig[0]\n  //   Fill[i] = max(orig[i], Fill[i-1])   for i > 0\n  //\n  // 性质:\n  //   (1) 单调性: 所有高程点只升不降 (Fill[i] ≥ orig[i])\n  //   (2) 非递减性: 填充后序列单调不减 (Fill[i] ≤ Fill[i+1])\n  // -------------------------------------------------------------------------\n\n  // 递归定义填充函数\n  function fillAt(orig: array<real>, i: int): real\n    requires orig != null\n    requires 0 <= i < orig.Length\n    decreases i  // 递归终止于i=0\n  {\n    if i == 0 then orig[0]\n    else max(orig[i], fillAt(orig, i-1))\n  }\n\n  // 主填充方法\n  method Fill(orig: array<real>) returns (fill: array<real>)\n    requires orig != null\n    ensures fill != null && fill.Length == orig.Length\n    ensures forall i :: 0 <= i < orig.Length ==> fill[i] == fillAt(orig, i)\n    // 单调性: 所有点高程不降低\n    ensures forall i :: 0 <= i < orig.Length ==> fill[i] >= orig[i]\n    // 非递减性: 填充后序列单调不减\n    ensures forall i :: 0 <= i < orig.Length - 1 ==> fill[i] <= fill[i+1]\n  {\n    fill := new real[orig.Length];\n    var idx := 0;\n    \n    while idx < orig.Length\n      invariant 0 <= idx <= orig.Length\n      invariant forall j :: 0 <= j < idx ==> fill[j] == fillAt(orig, j)\n    {\n      fill[idx] := fillAt(orig, idx);\n      idx := idx + 1;\n    }\n  }\n\n  // ========================================================================\n  // 核心性质证明\n  // ========================================================================\n\n  // 性质1: 单调性引理 (所有点只升不降)\n  lemma Monotonicity(orig: array<real>, i: int)\n    requires orig != null\n    requires 0 <= i < orig.Length\n    ensures fillAt(orig, i) >= orig[i]\n  {\n    // 递归基础: i=0时 fillAt(orig,0)=orig[0]\n    // 递归步骤: fillAt(orig,i)=max(orig[i],fillAt(orig,i-1)) ≥ orig[i]\n  }\n\n  // 性质2: 非递减性引理 (序列单调不减)\n  lemma NonDecreasing(orig: array<real>, i: int)\n    requires orig != null\n    requires 0 <= i < orig.Length - 1\n    ensures fillAt(orig, i) <= fillAt(orig, i+1)\n  {\n    // 由定义: \n    //   fillAt(orig, i+1) = max(orig[i+1], fillAt(orig, i))\n    // 因此必然有 fillAt(orig, i) ≤ fillAt(orig, i+1)\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-COMP-1 — 1D Wang-Liu填洼算子验证\\n\";\n  print \"性质1: 所有点高程不降低 (单调性)\\n\";\n  print \"性质2: 填充后序列单调不减 (非递减性)\\n\";\n  print \"验证命令: dafny verify WangLiu1D.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3092,
+    "completion_tokens": 6929,
+    "total_tokens": 10021,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5894
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3092
+  },
+  "api_id": "01a08e48a6b1276456a998223e7cca09",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 流域出口的唯一性 (在确定性流函数下)\n//  覆盖 : GPB-015 (流域出口的唯一性)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P006_watershed.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  在数字地形分析中,流域划分是水文建模的基础。流域的出口是水流路径的终点。\n//  本文件证明:在确定性流函数(如D8)下,从同一单元格出发的任意两条有限步长\n//  的流路径,若均到达出口(不动点),则这两个出口必相同。\n//\n//  这保证了流域划分的良定义性:每个单元格属于且仅属于一个流域(以出口为标识)。\n//\n//  注:本证明不要求流路径是最短路径,也不要求流函数无环(但若存在环,则可能\n//      无法在有限步内到达出口,此时本定理的条件不满足)。\n//\n//  相关反例见 P-006b (人工构建的4元环,无法终止)。\n//\n// ===========================================================================\n\nmodule WatershedUniqueness {\n  // 单元格类型 (行号, 列号)\n  datatype Cell = Cell(row: int, col: int)\n\n  // 确定性流函数 (如D8算法)\n  // 约定: 若为出口则返回自身 (succ(c) == c)\n  const succ: Cell -> Cell\n\n  // 判断是否为出口 (不动点)\n  predicate isOutlet(c: Cell) {\n    succ(c) == c\n  }\n\n  // 有界迭代函数: 应用succ函数n次\n  function stepN(s: Cell, n: nat): Cell\n    decreases n;\n  {\n    if n == 0 then s\n    else succ(stepN(s, n-1))\n  }\n\n  // ========================================================================\n  // 核心引理: 一旦到达出口,后续迭代保持不变\n  // ========================================================================\n  lemma FixedPointStable(c: Cell, k: nat)\n    requires isOutlet(c)\n    ensures stepN(c, k) == c\n    decreases k;\n  {\n    if k != 0 {\n      // 出口单元格应用succ仍为自身\n      // 递归证明后续步骤保持稳定\n      FixedPointStable(c, k-1);\n    }\n  }\n\n  // ========================================================================\n  // 步数可加性: stepN(s, m+n) = stepN(stepN(s, m), n)\n  // ========================================================================\n  lemma StepAdditive(s: Cell, m: nat, n: nat)\n    ensures stepN(s, m+n) == stepN(stepN(s, m), n)\n    decreases n;\n  {\n    if n == 0 {}\n    else {\n      StepAdditive(s, m, n-1);\n    }\n  }\n\n  // ========================================================================\n  // 主定理: 流域出口的唯一性\n  // ------------------------------------------------------------------------\n  // 若从同一起点s出发:\n  //   经n1步到达出口o1 (isOutlet(o1))\n  //   经n2步到达出口o2 (isOutlet(o2))\n  // 则o1 == o2\n  // ========================================================================\n  theorem WatershedUniqueOutlet(s: Cell, n1: nat, n2: nat)\n    requires isOutlet(stepN(s, n1))\n    requires isOutlet(stepN(s, n2))\n    ensures stepN(s, n1) == stepN(s, n2)\n  {\n    // 情况1: n1 ≤ n2\n    if n1 <= n2 {\n      // 计算步数差\n      var diff: nat := n2 - n1;\n      // 分解迭代: stepN(s, n2) = stepN(stepN(s, n1), diff)\n      StepAdditive(s, n1, diff);\n      // 出口稳定性: stepN(o1, diff) = o1\n      FixedPointStable(stepN(s, n1), diff);\n    }\n    // 情况2: n2 < n1 (对称情况)\n    else {\n      var diff: nat := n1 - n2;\n      StepAdditive(s, n2, diff);\n      FixedPointStable(stepN(s, n2), diff);\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-006 — 流域出口的唯一性\\n\";\n  print \"编译期验证: dafny verify P006_watershed.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

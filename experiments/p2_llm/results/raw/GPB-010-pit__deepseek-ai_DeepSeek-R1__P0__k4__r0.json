@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1687,
+    "completion_tokens": 7307,
+    "total_tokens": 8994,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6584
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1687
+  },
+  "api_id": "01a08e28c95ea7c84ea928a7e220eda8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "datatype Direction = E | SE | S | SW | W | NW | N | NE | NoFlow\n\nconst Directions: set<Direction> = {E, SE, S, SW, W, NW, N, NE};\n\nfunction method GetOffset(dir: Direction): (int, int, real) {\n  match dir\n    case E  => ( 1,  0, 1.0)\n    case SE => ( 1,  1, 2.0)\n    case S  => ( 0,  1, 1.0)\n    case SW => (-1,  1, 2.0)\n    case W  => (-1,  0, 1.0)\n    case NW => (-1, -1, 2.0)\n    case N  => ( 0, -1, 1.0)\n    case NE => ( 1, -1, 2.0)\n    case NoFlow => (0, 0, 0.0)\n}\n\nfunction method D8(grid: array<array<real>>, i: int, j: int): Direction\n  requires grid.Length > 0\n  requires forall r :: 0 <= r < grid.Length ==> grid[r] != null && grid[r].Length == grid[0].Length\n  requires 0 <= i < grid.Length && 0 <= j < grid[0].Length\n{\n  var bestDir: Direction := NoFlow;\n  var bestPower: real := 0.0;\n  var dirList := [E, SE, S, SW, W, NW, N, NE];\n  var idx := 0;\n  \n  while idx < |dirList|\n    invariant 0 <= idx <= |dirList|\n    invariant bestDir == NoFlow\n    invariant bestPower == 0.0\n  {\n    var dir := dirList[idx];\n    var (dp, dq, dist2) := GetOffset(dir);\n    var ni := i + dq;\n    var nj := j + dp;\n    \n    if ni >= 0 && ni < grid.Length && nj >= 0 && nj < grid[0].Length {\n      var drop := grid[i][j] - grid[ni][nj];\n      if drop > 0.0 {\n        var power := (drop * drop) / dist2;\n        if bestDir == NoFlow || power > bestPower {\n          bestDir := dir;\n          bestPower := power;\n        }\n      }\n    }\n    idx := idx + 1;\n  }\n  bestDir\n}\n\nlemma PitConditionImpliesNoFlow(grid: array<array<real>>, i: int, j: int)\n  requires grid.Length > 0\n  requires forall r :: 0 <= r < grid.Length ==> grid[r] != null && grid[r].Length == grid[0].Length\n  requires 0 <= i < grid.Length && 0 <= j < grid[0].Length\n  requires forall dir :: dir in Directions ==> \n      var (dp, dq, _) := GetOffset(dir);\n      var ni := i + dq;\n      var nj := j + dp;\n      (0 <= ni < grid.Length && 0 <= nj < grid[0].Length) ==> grid[ni][nj] >= grid[i][j]\n  ensures D8(grid, i, j) == NoFlow\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

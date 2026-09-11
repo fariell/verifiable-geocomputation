@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 256,
+    "completion_tokens": 8006,
+    "total_tokens": 8262,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7339
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 256
+  },
+  "api_id": "01a08ea422ff22822aa9f11e1ec6d13b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function max(a: int, b: int): int {\n  if a >= b then a else b\n}\n\npredicate ValidStep(\n  old_elev: array2<int>,\n  i: int, j: int,\n  fill: int,\n  ni: int, nj: int,\n  new_elev: array2<int>\n)\n  requires 0 <= i < old_elev.Length0\n  requires 0 <= j < old_elev.Length1\n  requires 0 <= ni < old_elev.Length0\n  requires 0 <= nj < old_elev.Length1\n  requires old_elev[i, j] == fill\n{\n  // (ni, nj) must be a 4-neighbor of (i, j)\n  (ni == i - 1 && nj == j) ||\n  (ni == i + 1 && nj == j) ||\n  (ni == i && nj == j - 1) ||\n  (ni == i && nj == j + 1)\n  &&\n  // Grid dimensions unchanged\n  new_elev.Length0 == old_elev.Length0 &&\n  new_elev.Length1 == old_elev.Length1\n  &&\n  // Neighbor raised sufficiently\n  new_elev[ni, nj] >= max(old_elev[ni, nj], fill)\n  &&\n  // All other cells unchanged\n  (forall r, c ::\n    0 <= r < new_elev.Length0 &&\n    0 <= c < new_elev.Length1 &&\n    (r != ni || c != nj) ==>\n      new_elev[r, c] == old_elev[r, c]\n  )\n}\n\nlemma Theorem(\n  old_elev: array2<int>,\n  i: int, j: int,\n  fill: int,\n  ni: int, nj: int,\n  new_elev: array2<int>\n)\n  requires ValidStep(old_elev, i, j, fill, ni, nj, new_elev)\n  ensures forall r, c ::\n    0 <= r < old_elev.Length0 &&\n    0 <= c < old_elev.Length1 ==>\n      new_elev[r, c] >= old_elev[r, c]\n  ensures new_elev[ni, nj] >= max(old_elev[ni, nj], fill)\n{\n  // Second ensures follows directly from ValidStep\n  // First ensures: show non-decreasing for every cell\n  forall r, c | 0 <= r < old_elev.Length0 && 0 <= c < old_elev.Length1\n    ensures new_elev[r, c] >= old_elev[r, c]\n  {\n    if r == ni && c == nj {\n      // Raised neighbor: new value >= max(old, fill) >= old value\n      assert new_elev[ni, nj] >= max(old_elev[ni, nj], fill);\n      assert max(old_elev[ni, nj], fill) >= old_elev[ni, nj];\n    } else {\n      // Unchanged cell: equality holds\n      assert new_elev[r, c] == old_elev[r, c];\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

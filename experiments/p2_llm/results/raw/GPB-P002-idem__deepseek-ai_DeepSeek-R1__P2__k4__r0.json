@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "344ceb916dac07e97c3b52f3a8371609af11c3828fdf4e865cad24e497832500",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 248,
+    "completion_tokens": 7258,
+    "total_tokens": 7506,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6516
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 248
+  },
+  "api_id": "01a08e726931c876a450b3ca37316bb5",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function max(a: int, b: int): int {\n  if a >= b then a else b\n}\n\npredicate IsFilled(a: array<int>, b: array<int>)\n  requires a != null && b != null\n{\n  a.Length == b.Length &&\n  b[0] == a[0] &&\n  (forall i | 1 <= i < a.Length :: b[i] == max(a[i], b[i-1]))\n}\n\npredicate IsSameArray(a: array<int>, b: array<int>)\n  requires a != null && b != null\n{\n  a.Length == b.Length &&\n  (forall i | 0 <= i < a.Length :: a[i] == b[i])\n}\n\nfunction method Fill(a: array<int>): array<int>\n  requires a != null\n  ensures IsFilled(a, Fill(a))\n  ensures Fill(a).Length == a.Length\n{\n  var b := new int[a.Length];\n  if a.Length == 0 {\n    return b;\n  }\n  b[0] := a[0];\n  var i := 1;\n  while i < a.Length\n    invariant 1 <= i <= a.Length\n    invariant b[0] == a[0]\n    invariant forall j | 1 <= j < i :: b[j] == max(a[j], b[j-1])\n  {\n    b[i] := max(a[i], b[i-1]);\n    i := i + 1;\n  }\n  b\n}\n\nlemma FillOfFilledIsIdentity(b: array<int>)\n  requires b != null\n  requires IsFilled(b, b)\n  ensures IsSameArray(Fill(b), b)\n{\n  if b.Length == 0 { return; }\n  var fb := Fill(b);\n  var idx: int := 0;\n  while idx < b.Length\n    invariant 0 <= idx <= b.Length\n    invariant forall j | 0 <= j < idx :: fb[j] == b[j]\n  {\n    if idx > 0 {\n      assert fb[idx] == max(b[idx], fb[idx-1]);\n      assert fb[idx-1] == b[idx-1] by { assume idx-1 >= 0; }\n      assert fb[idx] == max(b[idx], b[idx-1]);\n      assert b[idx] == max(b[idx], b[idx-1]) by {\n        assert IsFilled(b, b) && idx >= 1 ==> b[idx] == max(b[idx], b[idx-1]);\n      }\n    }\n    idx := idx + 1;\n  }\n}\n\nlemma Idempotent(a: array<int>)\n  requires a != null\n  ensures IsSameArray(Fill(Fill(a)), Fill(a))\n{\n  var fa := Fill(a);\n  var i: int := 1;\n  while i < fa.Length\n    invariant 1 <= i <= fa.Length\n    invariant forall j | 1 <= j < i :: fa[j] >= fa[j-1]\n  {\n    i := i + 1;\n  }\n  FillOfFilledIsIdentity(fa);\n}\n\nlemma FixedPoint(a: array<int>, i: int)\n  requires a != null && 0 <= i < a.Length\n  requires i == 0 || a[i] >= Fill(a)[i-1]\n  ensures Fill(a)[i] == a[i]\n{\n  if i > 0 {\n    assert Fill(a)[i] == max(a[i], Fill(a)[i-1]);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

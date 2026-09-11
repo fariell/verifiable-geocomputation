@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1526,
+    "completion_tokens": 672,
+    "total_tokens": 2198,
+    "prompt_tokens_details": {
+      "cached_tokens": 1504
+    },
+    "prompt_cache_hit_tokens": 1504,
+    "prompt_cache_miss_tokens": 22
+  },
+  "api_id": "01a08df5ede2e22224af92cfc246c523",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formal specification of the 2D local raise step RaiseNbr\nmodule RaiseNbrSpec {\n  // Represents a 2D grid of elevations\n  type Grid = array<array<float>>\n\n  // Represents a cell's coordinates in the grid\n  type Cell = (int, int)\n\n  // Represents the 4-neighbors of a cell\n  type Neighbors = set<Cell>\n\n  // Function to get the 4-neighbors of a cell\n  function method GetNeighbors(p: Cell, rows: int, cols: int): Neighbors {\n    var (r, c) := p;\n    var neighbors := {};\n    if r > 0 { neighbors := neighbors + {(r - 1, c)}; }\n    if r < rows - 1 { neighbors := neighbors + {(r + 1, c)}; }\n    if c > 0 { neighbors := neighbors + {(r, c - 1)}; }\n    if c < cols - 1 { neighbors := neighbors + {(r, c + 1)}; }\n    return neighbors;\n  }\n\n  // Function to raise a cell's elevation based on its 4-neighbors\n  function method RaiseNbr(h: Grid, p: Cell, rows: int, cols: int): float {\n    var (r, c) := p;\n    var neighbors := GetNeighbors(p, rows, cols);\n    var maxNeighbor := 0.0;\n    for n in neighbors {\n      var (nr, nc) := n;\n      if h[nr][nc] > maxNeighbor {\n        maxNeighbor := h[nr][nc];\n      }\n    }\n    return max(h[r][c], maxNeighbor);\n  }\n\n  // Property to be proven: raising a 4-neighbor from an already-processed cell\n  // never decreases any cell elevation, and the neighbor is lifted at least to\n  // max(original neighbor, processed cell fill)\n  lemma RaiseNbrProperty(h: Grid, p: Cell, rows: int, cols: int)\n    requires 0 <= p.0 < rows && 0 <= p.1 < cols\n    requires rows > 0 && cols > 0\n    ensures RaiseNbr(h, p, rows, cols) >= h[p.0][p.1]\n    ensures forall n :: n in GetNeighbors(p, rows, cols) ==> RaiseNbr(h, n, rows, cols) >= max(h[n.0][n.1], h[p.0][p.1])\n  {\n    var (r, c) := p;\n    var neighbors := GetNeighbors(p, rows, cols);\n    var maxNeighbor := 0.0;\n    for n in neighbors {\n      var (nr, nc) := n;\n      if h[nr][nc] > maxNeighbor {\n        maxNeighbor := h[nr][nc];\n      }\n    }\n    assert RaiseNbr(h, p, rows, cols) >= h[r][c];\n    for n in neighbors {\n      var (nr, nc) := n;\n      assert RaiseNbr(h, n, rows, cols) >= max(h[nr][nc], h[r][c]);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3091,
+    "completion_tokens": 4403,
+    "total_tokens": 7494,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3748
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3091
+  },
+  "api_id": "01a08e7b926f614c230a06428bcef06d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PitFill1D {\n\n  // ===========================================================================\n  //  GeoProofBench · P-COMP-1\n  //  算子 : 1D Wang-Liu 填洼 (左出口)\n  //  覆盖 : GPB-021 (填洼后单调非降)\n  //  环境 : Dafny 4.11\n  // ===========================================================================\n  //\n  //  科学动机\n  //  ---------\n  //  填洼是水文分析的基础算子。Wang-Liu 算法通过单次扫描实现 O(n) 复杂度，\n  //  其核心性质是：\n  //    (1) 高程提升单调性：任意单元高程在填洼后不会降低\n  //    (2) 地形非降性：填洼后地形从左至右单调非降\n  //\n  //  本文件证明 1D 特化版本的基本代数性质，为 2D 填洼的终止性证明 (P-006)\n  //  提供代数引理。\n  //\n  // ===========================================================================\n\n  // 填洼算子定义\n  function Fill(orig: seq<real>): (fill: seq<real>)\n    requires |orig| >= 1  // 至少一个单元（左出口必需）\n    ensures |fill| == |orig|\n    ensures fill[0] == orig[0]  // 左边界条件\n    ensures forall i :: 1 <= i < |orig| ==> \n      fill[i] == max(orig[i], fill[i-1])  // 核心递推式\n    ensures forall i :: 0 <= i < |orig| ==> \n      orig[i] <= fill[i]  // 高程提升单调性 (GPB-021a)\n    ensures forall i :: 1 <= i < |orig| ==> \n      fill[i-1] <= fill[i]  // 地形非降性 (GPB-021b)\n  {\n    if |orig| == 1 then\n      [orig[0]]  // 单单元情形\n    else\n      var prefix := Fill(orig[0..|orig|-1]);  // 递归处理前缀\n      var last := max(orig[|orig|-1], prefix[|prefix|-1]);  // 末位单元\n      prefix + [last]  // 拼接结果\n  }\n\n  // ==================================================================\n  // 辅助引理：最大值函数基本性质\n  // ==================================================================\n  lemma MaxProperty(a: real, b: real)\n    ensures max(a, b) >= a\n    ensures max(a, b) >= b\n  {\n    // Dafny 自动证明实数最大值性质\n  }\n\n  // ==================================================================\n  // 主验证方法\n  // ==================================================================\n  method Main() {\n    print \"GeoProofBench P-COMP-1 — 1D Wang-Liu 填洼算子验证\\n\";\n    print \"已验证性质: 高程提升单调性 + 地形非降性 (GPB-021)\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

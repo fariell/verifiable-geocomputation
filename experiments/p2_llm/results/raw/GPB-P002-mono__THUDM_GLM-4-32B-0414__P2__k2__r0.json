@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "ec578a84868b8b3f6cf5c26bc9fa5c9d78e46b6456451698e11daa292093e204",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 265,
+    "completion_tokens": 644,
+    "total_tokens": 909,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "prompt_cache_hit_tokens": 256,
+    "prompt_cache_miss_tokens": 9
+  },
+  "api_id": "01a08df56420c2d210028c59a9016848",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I'll help you repair the Dafny formalization for the 1D Wang-Liu pit-filling algorithm. Since you haven't provided the original attempt or the toolchain feedback, I'll create a proper Dafny implementation from scratch based on the specification.\n\n```dafny\nmethod FillLeftOutlet(int n, int[] orig) returns (int[] fill)\n  requires n >= 0;\n  requires orig != null;\n  requires orig.Length == n;\n  ensures fill != null;\n  ensures fill.Length == n;\n  ensures fill[0] == orig[0];\n  ensures forall i :: 0 <= i < n ==> fill[i] >= orig[i];\n  ensures forall i :: 0 <= i < n-1 ==> fill[i] <= fill[i+1];\n{\n  // Initialize the fill array\n  var fill := new int[n];\n  fill[0] := orig[0];\n  \n  // Fill the array from left to right\n  var prev := orig[0];\n  var i := 1;\n  while i < n\n    invariant 1 <= i <= n;\n    invariant forall j :: 0 <= j < i ==> fill[j] == max(orig[j], prev);\n    invariant forall j :: 0 <= j < i-1 ==> fill[j] <= fill[j+1];\n    invariant fill[0] == orig[0];\n    invariant forall j :: 0 <= j < i-1 ==> fill[j+1] >= orig[j+1];\n    decreases n - i;\n  {\n    fill[i] := max(orig[i], prev);\n    prev := fill[i];\n    i := i + 1;\n  }\n}\n\nfunction max(a: int, b: int): int\n{\n  if a >= b then a else b\n}\n\nlemma FillLeftOutletTermination(orig: int[], n: int)\n  requires n >= 0;\n  requires orig != null;\n  requires orig.Length == n;\n{\n  var fill := FillLeftOutlet(n, orig);\n  // The lemma just verifies the method works correctly\n}\n```\n\nThis implementation:\n1. Creates a `FillLeftOutlet` method that implements the pit-filling algorithm\n2. Includes proper preconditions and postconditions\n3. Uses a while loop with appropriate invariants\n4. Defines a `max` function for clarity\n5. Includes a lemma to verify termination\n\nThe key properties are:\n- `fill[0] == orig[0]` (first cell remains unchanged)\n- `fill[i] == max(orig[i], fill[i-1])` (each cell is filled to the maximum of its original value or the previous cell's fill value)\n- The resulting array is non-decreasing (monotonic)\n\nThe invariants in the while loop ensure that:\n1. We're processing cells in order\n2. Each cell is filled correctly according to the algorithm\n3. The array remains non-decreasing as we build it\n4. The fill values are never less than the original values\n\nIf you have specific feedback from the verifier that needs addressing, please share it and I can further refine this implementation.\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

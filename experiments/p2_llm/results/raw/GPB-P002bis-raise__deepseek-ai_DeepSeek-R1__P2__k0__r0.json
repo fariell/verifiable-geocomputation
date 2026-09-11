@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 256,
+    "completion_tokens": 3864,
+    "total_tokens": 4120,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3497
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 256
+  },
+  "api_id": "01a08e9af9f9aa2b4f397d9134f998f4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function max(a: int, b: int): int {\n  if a < b then b else a\n}\n\npredicate Is4Neighbor(processed: (int, int), neighbor: (int, int)) {\n  (processed.0 == neighbor.0 && (processed.1 == neighbor.1 - 1 || processed.1 == neighbor.1 + 1)) ||\n  (processed.1 == neighbor.1 && (processed.0 == neighbor.0 - 1 || processed.0 == neighbor.0 + 1))\n}\n\nmethod RaiseNbr(grid: array2<int>, processed: (int, int), neighbor: (int, int))\n  requires grid != null\n  requires 0 <= processed.0 < grid.Length0 && 0 <= processed.1 < grid.Length1\n  requires 0 <= neighbor.0 < grid.Length0 && 0 <= neighbor.1 < grid.Length1\n  requires Is4Neighbor(processed, neighbor)\n  modifies grid\n  ensures grid[neighbor.0, neighbor.1] >= max(old(grid[neighbor.0, neighbor.1]), old(grid[processed.0, processed.1]))\n  ensures forall i, j :: 0 <= i < grid.Length0 && 0 <= j < grid.Length1 && (i, j) != (neighbor.0, neighbor.1) ==> grid[i, j] == old(grid[i, j])\n{\n  var nbrVal := grid[neighbor.0, neighbor.1];\n  var procVal := grid[processed.0, processed.1];\n  if nbrVal < procVal {\n    grid[neighbor.0, neighbor.1] := procVal;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

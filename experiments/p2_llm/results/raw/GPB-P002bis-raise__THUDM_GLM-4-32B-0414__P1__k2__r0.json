@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3080,
+    "completion_tokens": 811,
+    "total_tokens": 3891,
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 8
+  },
+  "api_id": "01a08df63a105e774421560394ed35da",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module RaiseNbr {\n  // Define the 4-neighbors of a cell (up, down, left, right)\n  function Nbr4(p: (int, int)): set<(int, int)>\n  {\n    set var (r, c); (r - 1, c); (r + 1, c); (r, c - 1); (r, c + 1)\n  }\n\n  // Define the RaiseNbr operation\n  function RaiseNbr(h: array2d<real>, p: (int, int), processed: set<(int, int)>): real\n  {\n    // The neighbor must be a 4-neighbor of p and not yet processed\n    var nbrs := Nbr4(p) - processed;\n    if |nbrs| == 0 then h[p] else\n    {\n      // Raise the neighbor to the maximum of its original elevation and the processed cell's fill\n      var max_elev := h[p];\n      var raised_nbrs := set var (r, c); (r, c) in nbrs; h[(r, c)] := max(h[(r, c)], max_elev);\n      // The raised elevation is the maximum of the original and the processed cell's fill\n      max(raised_nbrs)\n    }\n  }\n\n  // Lemma: Raising a 4-neighbor from an already-processed cell never decreases any cell elevation\n  lemma NoDecrease(h: array2d<real>, p: (int, int), processed: set<(int, int)>)\n    requires forall (r, c) :: (r, c) in processed ==> h[(r, c)] == RaiseNbr(h, (r, c), {})\n    ensures forall (r, c) :: (r, c) in Nbr4(p) - processed ==> h[(r, c)] <= RaiseNbr(h, p, processed)\n  {\n    var nbrs := Nbr4(p) - processed;\n    if |nbrs| == 0 then return;\n    var max_elev := h[p];\n    var raised_nbrs := set var (r, c); (r, c) in nbrs; h[(r, c)] := max(h[(r, c)], max_elev);\n    forall (r, c) :: (r, c) in nbrs\n      ensures h[(r, c)] <= RaiseNbr(h, p, processed)\n    {\n      assert h[(r, c)] <= max(h[(r, c)], max_elev);\n    }\n  }\n\n  // Lemma: The neighbor is lifted at least to max(original neighbor, processed cell fill)\n  lemma MinRaise(h: array2d<real>, p: (int, int), processed: set<(int, int)>)\n    requires forall (r, c) :: (r, c) in processed ==> h[(r, c)] == RaiseNbr(h, (r, c), {})\n    ensures forall (r, c) :: (r, c) in Nbr4(p) - processed ==>\n      RaiseNbr(h, p, processed) >= max(h[(r, c)], h[p])\n  {\n    var nbrs := Nbr4(p) - processed;\n    if |nbrs| == 0 then return;\n    var max_elev := h[p];\n    var raised_nbrs := set var (r, c); (r, c) in nbrs; h[(r, c)] := max(h[(r, c)], max_elev);\n    forall (r, c) :: (r, c) in nbrs\n      ensures RaiseNbr(h, p, processed) >= max(h[(r, c)], h[p])\n    {\n      assert max(h[(r, c)], max_elev) >= max(h[(r, c)], h[p]);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

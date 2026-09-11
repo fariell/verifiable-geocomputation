@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1592,
+    "completion_tokens": 7783,
+    "total_tokens": 9375,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6901
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1592
+  },
+  "api_id": "01a08e91d146d70d1921ab6fa0fca7eb",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ElevationGrid.dfy\n// Proof of the RaiseNbr step property in 2D pit filling algorithm\n\nfunction method Max(a: real, b: real): real\n{\n  if a >= b then a else b\n}\n\npredicate ValidGrid<T>(g: array2d<T>)\n{\n  g != null\n}\n\npredicate Nbr4(p0: int, p1: int, n0: int, n1: int)\n{\n  (p0 == n0 && (p1 == n1 - 1 || p1 == n1 + 1)) ||\n  (p1 == n1 && (p0 == n0 - 1 || p0 == n0 + 1))\n}\n\npredicate Invariant(orig: array2d<real>, fill: array2d<real>, visited: array2d<bool>)\n  requires ValidGrid(orig) && ValidGrid(fill) && ValidGrid(visited)\n  requires orig.Length0 == fill.Length0 && orig.Length1 == fill.Length1\n  requires orig.Length0 == visited.Length0 && orig.Length1 == visited.Length1\n  reads orig, fill, visited\n{\n  forall i, j :: \n    0 <= i < orig.Length0 && 0 <= j < orig.Length1 && visited[i,j] == true ==>\n    fill[i,j] >= orig[i,j]\n}\n\nlemma RaiseNbrStepPreserves(\n  p0: int, p1: int, \n  n0: int, n1: int,\n  orig: array2d<real>,\n  fill: array2d<real>,\n  visited: array2d<bool>\n)\n  requires ValidGrid(orig) && ValidGrid(fill) && ValidGrid(visited)\n  requires orig.Length0 == fill.Length0 && orig.Length1 == fill.Length1\n  requires orig.Length0 == visited.Length0 && orig.Length1 == visited.Length1\n  requires 0 <= p0 < orig.Length0 && 0 <= p1 < orig.Length1\n  requires 0 <= n0 < orig.Length0 && 0 <= n1 < orig.Length1\n  requires Nbr4(p0, p1, n0, n1)\n  requires visited[p0, p1] && !visited[n0, n1]\n  requires Invariant(orig, fill, visited)\n  ensures \n    var fill_new := fill[ n0, n1 := Max(orig[n0, n1], fill[p0, p1]) ];\n    var visited_new := visited[ n0, n1 := true ];\n    fill_new[n0, n1] == Max(orig[n0, n1], fill[p0, p1]) &&\n    fill_new[n0, n1] >= orig[n0, n1] &&\n    fill_new[n0, n1] >= fill[p0, p1] &&\n    Invariant(orig, fill_new, visited_new)\n{\n  // Updated cell properties\n  assert fill_new[n0, n1] == Max(orig[n0, n1], fill[p0, p1]);\n  assert Max(orig[n0, n1], fill[p0, p1]) >= orig[n0, n1];\n  assert Max(orig[n0, n1], fill[p0, p1]) >= fill[p0, p1];\n\n  // Invariant preservation\n  forall i, j | 0 <= i < orig.Length0 && 0 <= j < orig.Length1 && visited_new[i,j]\n    ensures fill_new[i,j] >= orig[i,j]\n  {\n    if i == n0 && j == n1 {\n      assert fill_new[i,j] == Max(orig[i,j], fill[p0,p1]) >= orig[i,j];\n    } else {\n      assert visited_new[i,j] ==> (i == n0 && j == n1) || visited[i,j];\n      if i != n0 || j != n1 {\n        assert visited[i,j];\n        assert fill_new[i,j] == fill[i,j];\n        assert fill[i,j] >= orig[i,j] by Invariant(orig, fill, visited);\n      }\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

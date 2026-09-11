@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3162,
+    "completion_tokens": 585,
+    "total_tokens": 3747,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 1466
+  },
+  "api_id": "01a08df4a8c1e19a7566ee6909076790",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PitFillingIdempotent {\n  // 1D Fill operator: prefix max\n  function Fill(a: array<int>): array<int>\n  {\n    var out := new int[a.Length];\n    out[0] := a[0];\n    var i := 1;\n    while i < a.Length\n      invariant i <= a.Length;\n      invariant forall j :: 0 <= j < i ==> out[j] == (a[..j+1] |=> max).Last;\n    {\n      out[i] := max(a[i], out[i - 1]);\n      i := i + 1;\n    }\n    return out;\n  }\n\n  // Cells that already do not spill to the left are fixed points of Raise\n  lemma FixedPoint(a: array<int>, i: int)\n    requires 0 <= i < a.Length\n    requires forall j :: 0 <= j < i ==> a[j] <= a[i]\n    ensures Fill(a)[i] == a[i]\n  {\n    // By construction of Fill, out[i] = max(a[i], out[i-1])\n    // For all j < i, a[j] <= a[i] by precondition\n    // Thus out[i-1] = max(a[..i]) <= a[i]\n    // Therefore out[i] = max(a[i], out[i-1]) = a[i]\n  }\n\n  // Idempotence: Fill(Fill(a)) = Fill(a)\n  lemma Idempotent(a: array<int>)\n    ensures Fill(Fill(a)) == Fill(a)\n  {\n    var filled := Fill(a);\n    var i := 0;\n    while i < a.Length\n      invariant i <= a.Length;\n      invariant forall j :: 0 <= j < i ==> Fill(filled)[j] == filled[j];\n    {\n      // Base case: i=0\n      if i == 0 {\n        // filled[0] = a[0] by Fill definition\n        // Fill(filled)[0] = filled[0] by Fill definition\n      }\n      else {\n        // Inductive step: filled[i] = max(a[i], filled[i-1])\n        // By induction hypothesis, Fill(filled)[i-1] = filled[i-1]\n        // So Fill(filled)[i] = max(filled[i], Fill(filled)[i-1])\n        //                    = max(filled[i], filled[i-1])\n        //                    = filled[i] by definition of filled[i]\n      }\n      i := i + 1;\n    }\n  }\n\n  method Main()\n  {\n    print \"GPB-026: Pit filling is idempotent on 1D left-outlet specialization\\n\";\n    print \"Fill(Fill(a)) == Fill(a) proven by Dafny verification\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

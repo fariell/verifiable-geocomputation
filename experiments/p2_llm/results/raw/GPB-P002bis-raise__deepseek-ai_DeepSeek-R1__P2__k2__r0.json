@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 256,
+    "completion_tokens": 4636,
+    "total_tokens": 4892,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4375
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 256
+  },
+  "api_id": "01a08ea422eb4573585bfa2db7ed5d52",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method RaiseNbr(grid: array2<int>, processed: array2<bool>, i: int, j: int, dx: int, dy: int)\n  requires 0 <= i < grid.Length0 && 0 <= j < grid.Length1\n  requires 0 <= i+dx < grid.Length0 && 0 <= j+dy < grid.Length1\n  requires (dx == 0 && (dy == 1 || dy == -1)) || (dy == 0 && (dx == 1 || dx == -1))\n  requires processed[i,j]\n  modifies grid\n  ensures forall x, y :: 0 <= x < grid.Length0 && 0 <= y < grid.Length1 ==> grid[x,y] >= old(grid)[x,y]\n  ensures let ni := i+dx, nj := j+dy in\n          grid[ni, nj] >= old(grid)[ni, nj] && grid[ni, nj] >= old(grid)[i, j]\n{\n  let ni := i + dx;\n  let nj := j + dy;\n  if grid[ni, nj] < grid[i, j] {\n    grid[ni, nj] := grid[i, j];\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

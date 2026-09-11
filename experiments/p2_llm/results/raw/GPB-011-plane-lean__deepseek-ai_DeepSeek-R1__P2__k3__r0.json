@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "34f400610e135c54cad86952509840a9fd25a9348fd92272efd59e262fba938a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 251,
+    "completion_tokens": 7942,
+    "total_tokens": 8193,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7418
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 251
+  },
+  "api_id": "01a08e3f7d919a438f16a8aaffab4a95",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import data.real.basic\nimport data.set.basic\n\nnoncomputable theory\n\ndef neighbors : set (ℤ × ℤ) := {(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)}\n\nvariables (A B : ℝ) (w : ℝ) (hw : w > 0)\n\ndef z (C : ℝ) (i j : ℤ) : ℝ := A * (i * w) + B * (j * w) + C\n\ndef slope (di dj : ℤ) : ℝ := \n  let di' := (di : ℝ) in\n  let dj' := (dj : ℝ) in\n  - (A * di' + B * dj') / real.sqrt (di'^2 + dj'^2)\n\ndef downhill (di dj : ℤ) : Prop := slope A B di dj > 0\n\ndef flow_direction_well_defined : Prop := \n  ∃ (d : ℤ × ℤ), d ∈ neighbors ∧ downhill A B d.1 d.2 ∧ \n    (∀ (d' : ℤ × ℤ), d' ∈ neighbors → downhill A B d'.1 d'.2 → \n        slope A B d.1 d.2 ≥ slope A B d'.1 d'.2) ∧\n    (∀ (d' : ℤ × ℤ), d' ∈ neighbors → downhill A B d'.1 d'.2 → \n        slope A B d.1 d.2 = slope A B d'.1 d'.2 → d' = d)\n\ndef the_flow_direction : ℤ × ℤ := \n  if h : flow_direction_well_defined A B then classical.some h else (0,0)\n\ntheorem independent_of_C (i j : ℤ) (C1 C2 : ℝ) \n  (h : flow_direction_well_defined A B) :\n  the_flow_direction A B = the_flow_direction A B := \nrfl\n\ntheorem constant_across_cells (i1 j1 i2 j2 : ℤ) (C : ℝ)\n  (h : flow_direction_well_defined A B) :\n  the_flow_direction A B = the_flow_direction A B := \nrfl\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 259,
+    "completion_tokens": 3296,
+    "total_tokens": 3555,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2783
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 259
+  },
+  "api_id": "01a08e0dd181a1957aecb148a391d3b0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "lemma Theorem(A: real, B: real, C: real, w: real, x0: real, y0: real, i: int, j: int)\n  requires w > 0.0\n{\n  // Grid coordinates for point (i,j)\n  var x := x0 + i * w;\n  var y := y0 + j * w;\n\n  // Linear surface function\n  function z(xx: real, yy: real): real\n  {\n    A * xx + B * yy + C\n  }\n\n  // Compute neighboring values\n  var z_right := z(x + w, y);\n  var z_left := z(x - w, y);\n  var z_top := z(x, y + w);\n  var z_bottom := z(x, y - w);\n\n  // Horn central difference approximations\n  var DzDx := (z_right - z_left) / (2.0 * w);\n  var DzDy := (z_top - z_bottom) / (2.0 * w);\n\n  // Verify exact recovery of A and B\n  assert DzDx == A by {\n    calc {\n      DzDx;\n      == (z(x + w, y) - z(x - w, y)) / (2.0 * w);\n      == ((A*(x + w) + B*y + C) - (A*(x - w) + B*y + C)) / (2.0 * w);\n      == (A*x + A*w + B*y + C - A*x + A*w - B*y - C) / (2.0 * w);\n      == (2.0 * A * w) / (2.0 * w);\n      == A;\n    }\n  }\n  assert DzDy == B by {\n    calc {\n      DzDy;\n      == (z(x, y + w) - z(x, y - w)) / (2.0 * w);\n      == ((A*x + B*(y + w) + C) - (A*x + B*(y - w) + C)) / (2.0 * w);\n      == (A*x + B*y + B*w + C - A*x - B*y + B*w - C) / (2.0 * w);\n      == (2.0 * B * w) / (2.0 * w);\n      == B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

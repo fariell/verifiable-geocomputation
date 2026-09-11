@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 259,
+    "completion_tokens": 7614,
+    "total_tokens": 7873,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7077
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 259
+  },
+  "api_id": "01a08e0da5675a5d86c0fbca428ae165",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "const A: real\nconst B: real\nconst C: real\nconst w: real\nconst x0: real\nconst y0: real\n\npredicate Valid()\n{\n  w > 0.0\n}\n\nfunction z(i: int, j: int): real\n{\n  A * (x0 + i * w) + B * (y0 + j * w) + C\n}\n\nfunction DzDx(i: int, j: int): real\n  requires Valid()\n{\n  (z(i+1, j) - z(i-1, j)) / (2.0 * w)\n}\n\nfunction DzDy(i: int, j: int): real\n  requires Valid()\n{\n  (z(i, j+1) - z(i, j-1)) / (2.0 * w)\n}\n\nlemma Theorem()\n  requires Valid()\n  ensures forall i: int, j: int :: \n    DzDx(i, j) == A && DzDy(i, j) == B\n{\n  forall i: int, j: int {\n    calc {\n      DzDx(i, j);\n      == (z(i+1, j) - z(i-1, j)) / (2.0 * w);\n      == ( (A*(x0 + (i+1)*w) + B*(y0 + j*w) + C) - \n           (A*(x0 + (i-1)*w) + B*(y0 + j*w) + C) ) / (2.0 * w);\n      == (A*((i+1)*w - (i-1)*w)) / (2.0 * w);\n      == (A*(2*w)) / (2.0 * w);\n      == A;\n    }\n    calc {\n      DzDy(i, j);\n      == (z(i, j+1) - z(i, j-1)) / (2.0 * w);\n      == ( (A*(x0 + i*w) + B*(y0 + (j+1)*w) + C) - \n           (A*(x0 + i*w) + B*(y0 + (j-1)*w) + C) ) / (2.0 * w);\n      == (B*((j+1)*w - (j-1)*w)) / (2.0 * w);\n      == (B*(2*w)) / (2.0 * w);\n      == B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

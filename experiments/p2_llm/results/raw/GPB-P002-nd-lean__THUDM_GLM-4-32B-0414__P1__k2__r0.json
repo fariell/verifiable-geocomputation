@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2948,
+    "completion_tokens": 773,
+    "total_tokens": 3721,
+    "prompt_tokens_details": {
+      "cached_tokens": 1568
+    },
+    "prompt_cache_hit_tokens": 1568,
+    "prompt_cache_miss_tokens": 1380
+  },
+  "api_id": "01a08df5b9f2d24f8a1d4c5c922ba190",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.PitFill\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## 1D Fill 算子定义\n\n  给定序列 a, Fill(a) 是通过以下过程构造的:\n  1. 初始化 fill[0] = a[0]\n  2. 对于每个 i > 0, fill[i] = max(a[i], fill[i-1])\n  这个过程确保 fill 是非递减的,且 fill[i] ≥ a[i] 对所有 i 成立。\n-/\n\n-- 1D Fill 算子定义\ndef fillSeq (a : ℕ → ℝ) : ℕ → ℝ\n| 0 => a 0\n| n + 1 => max (a (n + 1)) (fillSeq a n)\n\n/-!\n  ## 非递减性质证明\n\n  我们需要证明:对于所有 i, Fill(a)[i] ≤ Fill(a)[i+1] 当定义时。\n  这等价于证明 fillSeq a 是一个非递减序列。\n-/\n\n-- 辅助引理:fillSeq 在 n=0 时成立\nlemma fillSeq_nondecreasing_zero (a : ℕ → ℝ) : fillSeq a 0 ≤ fillSeq a 1 := by\n  simp [fillSeq]\n  apply le_max_left\n\n-- 辅助引理:fillSeq 在 n+1 时成立\nlemma fillSeq_nondecreasing_succ (a : ℕ → ℝ) (n : ℕ) :\n    fillSeq a n ≤ fillSeq a (n + 1) := by\n  simp [fillSeq]\n  apply le_max_left\n\n-- 主定理:fillSeq 是非递减的\ntheorem fillSeq_nondecreasing (a : ℕ → ℝ) (i : ℕ) : fillSeq a i ≤ fillSeq a (i + 1) := by\n  induction i <;> simp [fillSeq, *]\n  apply le_max_left\n\n-- 冒烟测试(非命题,仅确认算子可计算)\nexample : fillSeq (fun _ => 0) 0 = 0 := by norm_num [fillSeq]\nexample : fillSeq (fun _ => 0) 1 = 0 := by norm_num [fillSeq]\nexample : fillSeq (fun _ => 0) 2 = 0 := by norm_num [fillSeq]\n\nexample : fillSeq (fun _ => 1) 0 = 1 := by norm_num [fillSeq]\nexample : fillSeq (fun _ => 1) 1 = 1 := by norm_num [fillSeq]\nexample : fillSeq (fun _ => 1) 2 = 1 := by norm_num [fillSeq]\n\nexample : fillSeq (fun i => i) 0 = 0 := by norm_num [fillSeq]\nexample : fillSeq (fun i => i) 1 = 1 := by norm_num [fillSeq]\nexample : fillSeq (fun i => i) 2 = 2 := by norm_num [fillSeq]\n\nexample : fillSeq (fun i => if i = 0 then 0 else 1) 0 = 0 := by norm_num [fillSeq]\nexample : fillSeq (fun i => if i = 0 then 0 else 1) 1 = 1 := by norm_num [fillSeq]\nexample : fillSeq (fun i => if i = 0 then 0 else 1) 2 = 1 := by norm_num [fillSeq]\n\nend VeriGIS.PitFill\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

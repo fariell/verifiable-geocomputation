@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 234,
+    "completion_tokens": 543,
+    "total_tokens": 777,
+    "prompt_tokens_details": {
+      "cached_tokens": 32
+    },
+    "prompt_cache_hit_tokens": 32,
+    "prompt_cache_miss_tokens": 202
+  },
+  "api_id": "01a08df7e4f7a03de493fa70b281cb1c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I need to see the original attempt and the toolchain feedback to provide a proper repair. Since these are missing, I'll create a basic template for an iterative repair proof that follows the specification about strict descent and termination at fixed points.\n\nHere's a repaired version that would typically work for such a specification:\n\n```lean\nimport Mathlib.Data.Nat.Basic\n\nsection OrbitTermination\n\nvariable {Cell : Type} [DecidableEq Cell]\nvariable (s : Finset Cell) (succ : Cell → Cell) (strict_desc : ∀ c, c ∈ s → succ c ∈ s ∧ succ c < c)\n\n-- Define the orbit function\ndef orbit (c : Cell) : ℕ → Cell\n| 0       => c\n| (n + 1) => succ (orbit n)\n\n-- Define the fixed point predicate\ndef isFixedPoint (c : Cell) : Prop := succ c = c\n\n-- The main theorem: every orbit terminates at a fixed point\ntheorem orbit_terminates (c : Cell) (hc : c ∈ s) : \n  ∃ n, orbit c n ∈ s ∧ isFixedPoint (orbit c n) := by\n  -- Use well-founded induction on the natural numbers with the measure c\n  refine' Nat.recOn c (fun _ => _) (fun _ => _)\n  -- Base case: if c is already a fixed point\n  simp only [orbit, isFixedPoint, Finset.mem_insert, Finset.mem_singleton] at *\n  aesop\n  -- Inductive step\n  simp only [orbit, isFixedPoint, Finset.mem_insert, Finset.mem_singleton] at *\n  rcases strict_desc c hc with ⟨hc', hc'lt⟩\n  obtain ⟨n, hn⟩ := orbit_terminates (succ c) hc'\n  refine' ⟨n + 1, _, _⟩\n  -- Show orbit c (n+1) is in s\n  simp [orbit, hn.1]\n  -- Show orbit c (n+1) is a fixed point\n  simp [orbit, hn.2, succ_inj]\n  linarith [hc'lt]\n\nend OrbitTermination\n```\n\nThis proof uses:\n1. A well-founded induction on natural numbers\n2. The strict descent property to ensure termination\n3. The fact that the successor stays within the finite set\n4. A measure (the cell value) that strictly decreases with each step\n\nNote: Without seeing the original attempt and feedback, this is a general template. The actual repair would need to address specific syntax/type errors or verification failures from the original code.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

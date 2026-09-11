@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1712,
+    "completion_tokens": 7406,
+    "total_tokens": 9118,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7075
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1712
+  },
+  "api_id": "01a08e1321ca87f090fe129d60d83fd7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Tactic.Linarith\n\ntheorem local_max_imp_laplacian_nonpos (b d e f h dx dy : ℝ)\n    (hdx : dx > 0) (hdy : dy > 0)\n    (h_max : e ≥ b ∧ e ≥ d ∧ e ≥ f ∧ e ≥ h) :\n    (d - 2 * e + f) / dx ^ 2 + (b - 2 * e + h) / dy ^ 2 ≤ 0 := by\n  obtain ⟨hb, hd, hf, hh⟩ := h_max\n  have h1 : d + f ≤ 2 * e := by linarith\n  have h2 : b + h ≤ 2 * e := by linarith\n  have h1' : d - 2 * e + f ≤ 0 := by linarith\n  have h2' : b - 2 * e + h ≤ 0 := by linarith\n  have h1'' : (d - 2 * e + f) / dx ^ 2 ≤ 0 :=\n    div_nonpos_of_nonpos_of_pos h1' (pow_pos hdx 2)\n  have h2'' : (b - 2 * e + h) / dy ^ 2 ≤ 0 :=\n    div_nonpos_of_nonpos_of_pos h2' (pow_pos hdy 2)\n  exact add_nonpos h1'' h2''\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

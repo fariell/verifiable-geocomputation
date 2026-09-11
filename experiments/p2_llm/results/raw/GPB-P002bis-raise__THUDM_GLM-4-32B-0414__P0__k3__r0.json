@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1526,
+    "completion_tokens": 695,
+    "total_tokens": 2221,
+    "prompt_tokens_details": {
+      "cached_tokens": 1504
+    },
+    "prompt_cache_hit_tokens": 1504,
+    "prompt_cache_miss_tokens": 22
+  },
+  "api_id": "01a08df5ef570d4507483e7868b1190d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formal specification of the 2D local raise step RaiseNbr\nmodule RaiseNbr {\n  // Represents a 2D grid of elevations\n  type Grid = array<array<float>>\n\n  // 4-neighbors: up, down, left, right\n  const NBR4: (int, int)[] = [(-1, 0), (1, 0), (0, -1), (0, 1)]\n\n  // Original elevation grid\n  var original: Grid\n  // Processed (filled) elevation grid\n  var processed: Grid\n  // Neighbor to be raised\n  var nbr: (int, int)\n  // Current cell (already processed)\n  var cell: (int, int)\n\n  // Property to prove:\n  // Raising a 4-neighbor from an already-processed cell never decreases any cell elevation,\n  // and the neighbor is lifted at least to max(original neighbor, processed cell fill).\n  lemma RaiseNbrProperty()\n    requires original != null && processed != null\n    requires original.Length == processed.Length && original[0].Length == processed[0].Length\n    requires 0 <= cell.Item1 < original.Length && 0 <= cell.Item2 < original[0].Length\n    requires 0 <= nbr.Item1 < original.Length && 0 <= nbr.Item2 < original[0].Length\n    requires (nbr.Item1 == cell.Item1 + 1 || nbr.Item1 == cell.Item1 - 1 || nbr.Item1 == cell.Item1) &&\n             (nbr.Item2 == cell.Item2 + 1 || nbr.Item2 == cell.Item2 - 1 || nbr.Item2 == cell.Item2) &&\n             !(nbr.Item1 == cell.Item1 && nbr.Item2 == cell.Item2) // nbr is a 4-neighbor\n    ensures processed[nbr.Item1][nbr.Item2] >= original[nbr.Item1][nbr.Item2]\n    ensures processed[nbr.Item1][nbr.Item2] >= processed[cell.Item1][cell.Item2]\n    ensures processed[nbr.Item1][nbr.Item2] == max(original[nbr.Item1][nbr.Item2], processed[cell.Item1][cell.Item2])\n  {\n    // The neighbor is raised to the maximum of its original elevation and the processed cell's elevation\n    // This ensures it never decreases and meets the specified condition\n    processed[nbr.Item1][nbr.Item2] := max(original[nbr.Item1][nbr.Item2], processed[cell.Item1][cell.Item2]);\n    \n    // Verify the properties\n    assert processed[nbr.Item1][nbr.Item2] >= original[nbr.Item1][nbr.Item2];\n    assert processed[nbr.Item1][nbr.Item2] >= processed[cell.Item1][cell.Item2];\n    assert processed[nbr.Item1][nbr.Item2] == max(original[nbr.Item1][nbr.Item2], processed[cell.Item1][cell.Item2]);\n  }\n\n  // Helper function to compute maximum of two values\n  function method max(a: float, b: float): float\n    ensures max(a, b) == a || max(a, b) == b\n    ensures max(a, b) >= a && max(a, b) >= b\n  {\n    if a >= b then a else b\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

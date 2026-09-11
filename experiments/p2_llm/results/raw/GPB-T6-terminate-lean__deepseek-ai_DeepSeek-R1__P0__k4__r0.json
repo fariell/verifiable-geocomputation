@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1579,
+    "completion_tokens": 7587,
+    "total_tokens": 9166,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7094
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1579
+  },
+  "api_id": "01a08ea42304ab8d87277cee0645b7e8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Fintype.Basic\nimport Mathlib.Data.Finset.Basic\n\nvariable {S : Type*} [Fintype S]\nvariable {α : Type*} [LinearOrder α]\nvariable (h : S → α)\nvariable (succ : S → Option S)\nvariable (h_succ : ∀ c d, succ c = some d → h d < h c)\n\ndef r (a b : S) : Prop := succ b = some a\n\ndef step_measure (c : S) : ℕ :=\n  (Finset.univ.filter (fun d => h d < h c)).card\n\ntheorem measure_decreases {c : S} {d : S} (hstep : r succ d c) :\n    step_measure h d < step_measure h c := by\n  unfold r at hstep\n  unfold step_measure\n  have h_lt : h d < h c := h_succ c d hstep\n  let set_below_d := Finset.filter (fun x => h x < h d) Finset.univ\n  let set_below_c := Finset.filter (fun x => h x < h c) Finset.univ\n  have h_sub : set_below_d ⊆ set_below_c := by\n    intro x hx\n    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx ⊢\n    exact lt_trans hx h_lt\n  have h_mem : d ∈ set_below_c := by\n    simp [h_lt]\n  have h_not_mem : d ∉ set_below_d := by\n    simp [lt_irrefl (h d)]\n  have : set_below_d ⊂ set_below_c :=\n    Finset.ssubset_iff_subset_ne.2 ⟨h_sub, fun h_eq => h_not_mem (h_eq ▸ h_mem)⟩\n  exact Finset.card_lt_card this\n\ntheorem wf_r : WellFounded (r succ) :=\n  InvImage.wf (step_measure h) (Nat.lt_wfRel.wf) (fun _ _ hstep => measure_decreases h succ h_succ hstep)\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

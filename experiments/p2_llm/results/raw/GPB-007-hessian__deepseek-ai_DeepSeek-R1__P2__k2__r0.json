@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 4939,
+    "total_tokens": 5208,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4553
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a08e223334071c2987b07f30b1acb8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function f(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n  A * x * x + B * y * y + C * x * y + D * x + E * y + F\n}\n\nlemma ZT_Hessian(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures (f(w, 0.0, A, B, C, D, E, F) - 2.0 * f(0.0, 0.0, A, B, C, D, E, F) + f(-w, 0.0, A, B, C, D, E, F)) / (w * w) == 2.0 * A\n  ensures (f(0.0, w, A, B, C, D, E, F) - 2.0 * f(0.0, 0.0, A, B, C, D, E, F) + f(0.0, -w, A, B, C, D, E, F)) / (w * w) == 2.0 * B\n  ensures (f(w, w, A, B, C, D, E, F) + f(-w, -w, A, B, C, D, E, F) - f(w, -w, A, B, C, D, E, F) - f(-w, w, A, B, C, D, E, F)) / (4.0 * w * w) == C\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
+}

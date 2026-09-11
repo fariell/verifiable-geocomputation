@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 4985,
+    "total_tokens": 5252,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4402
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 267
+  },
+  "api_id": "01a08e60172548a3a4153568e66f550e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope exactness on quadratic surfaces and cubic remainder\nfunction QuadraticSurface(x: real, y: real, P: real, Q: real, R: real, A: real, B: real, C: real): real\n{\n  P*x*x + Q*x*y + R*y*y + A*x + B*y + C\n}\n\nfunction CubicSurface(x: real, y: real, G: real): real\n{\n  G * x * x * x\n}\n\nfunction HornDzDx(x: real, y: real, w: real, f: (real, real) -> real): real\n  requires w > 0.0\n{\n  (f(x + w, y) - f(x - w, y)) / (2.0 * w)\n}\n\nfunction HornDzDy(x: real, y: real, w: real, f: (real, real) -> real): real\n  requires w > 0.0\n{\n  (f(x, y + w) - f(x, y - w)) / (2.0 * w)\n}\n\nfunction TrueDzDx_Quad(x: real, y: real, P: real, Q: real, R: real, A: real, B: real, C: real): real\n{\n  2.0*P*x + Q*y + A\n}\n\nfunction TrueDzDy_Quad(x: real, y: real, P: real, Q: real, R: real, A: real, B: real, C: real): real\n{\n  Q*x + 2.0*R*y + B\n}\n\nlemma LemmaQuadraticExact(x: real, y: real, w: real, P: real, Q: real, R: real, A: real, B: real, C: real)\n  requires w > 0.0\n  ensures HornDzDx(x, y, w, (a,b) => QuadraticSurface(a,b,P,Q,R,A,B,C)) \n          == TrueDzDx_Quad(x,y,P,Q,R,A,B,C)\n  ensures HornDzDy(x, y, w, (a,b) => QuadraticSurface(a,b,P,Q,R,A,B,C)) \n          == TrueDzDy_Quad(x,y,P,Q,R,A,B,C)\n{\n  // Quadratic exactness follows by algebraic expansion\n}\n\nlemma LemmaCubicOrigin(w: real, G: real)\n  requires w > 0.0\n  ensures HornDzDx(0.0, 0.0, w, (a,b) => CubicSurface(a,b,G)) == G * w * w\n{\n  // Cubic remainder at origin is G*w² by computation\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

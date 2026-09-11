@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3765fe33242088c01081d2ed57ee1d86a205e77af61ff88df8e7a2899860b72b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3173,
+    "completion_tokens": 5277,
+    "total_tokens": 8450,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3849
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3173
+  },
+  "api_id": "01a08e317bfd10405d6d3fb1f04b0f44",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-005\n//  文件 : formal/dafny/P005_d8.dfy\n//  算子 : D8 最陡下降法流向\n//  覆盖 : GPB-010 (洼地无流向)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P005_d8.dfy\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  水文分析中洼地(pit)是流向未定义的区域。本文件证明:在 D8 最陡下降法中，\n//  当中心单元不存在严格下坡邻居时，流向必为 NoFlow。这是流向算法正确性的\n//  基本引理，也是填洼算法(P-002)的前置条件。\n//\n//  注:本文件仅覆盖洼地条件(GPB-010)。平面流场的一致性(GPB-011)需额外\n//  证明(见 separate P005_plane.dfy)。\n//\n// ===========================================================================\n\nmodule D8Flow {\n\n  // -------------------------------------------------------------------------\n  // 流向类型定义 (8方向 + NoFlow)\n  // -------------------------------------------------------------------------\n  datatype Direction = \n    | E    // 东\n    | SE   // 东南\n    | S    // 南\n    | SW   // 西南\n    | W    // 西\n    | NW   // 西北\n    | N    // 北\n    | NE   // 东北\n    | NoFlow  // 无流向(洼地)\n\n  // -------------------------------------------------------------------------\n  // 3x3 窗口约定(行偏移 q 向下为正，符合栅格惯例)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // 注意:中心元 e 参与流向决策(与 Horn 坡度不同)\n  // -------------------------------------------------------------------------\n\n  // -------------------------------------------------------------------------\n  // D8 最陡下降法核心逻辑\n  // -------------------------------------------------------------------------\n  function D8Flow(\n    a: real, b: real, c: real,  // 上排\n    d: real, e: real, f: real,  // 中排\n    g: real, h: real, i: real   // 下排\n  ): Direction\n  {\n    // 初始化:无流向，优先级为0\n    var candidate := NoFlow;\n    var max_priority := 0.0;\n\n    // 检查东(E)方向: f(1,0)\n    if e > f {\n      var priority := (e - f) * (e - f) / 1.0;  // 距离平方=1\n      if priority > max_priority {\n        candidate := E;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查东南(SE)方向: i(1,1)\n    if e > i {\n      var priority := (e - i) * (e - i) / 2.0;  // 距离平方=2\n      if priority > max_priority {\n        candidate := SE;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查南(S)方向: h(0,1)\n    if e > h {\n      var priority := (e - h) * (e - h) / 1.0;\n      if priority > max_priority {\n        candidate := S;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查西南(SW)方向: g(-1,1)\n    if e > g {\n      var priority := (e - g) * (e - g) / 2.0;\n      if priority > max_priority {\n        candidate := SW;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查西(W)方向: d(-1,0)\n    if e > d {\n      var priority := (e - d) * (e - d) / 1.0;\n      if priority > max_priority {\n        candidate := W;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查西北(NW)方向: a(-1,-1)\n    if e > a {\n      var priority := (e - a) * (e - a) / 2.0;\n      if priority > max_priority {\n        candidate := NW;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查北(N)方向: b(0,-1)\n    if e > b {\n      var priority := (e - b) * (e - b) / 1.0;\n      if priority > max_priority {\n        candidate := N;\n        max_priority := priority;\n      }\n    }\n    \n    // 检查东北(NE)方向: c(1,-1)\n    if e > c {\n      var priority := (e - c) * (e - c) / 2.0;\n      if priority > max_priority {\n        candidate := NE;\n        max_priority := priority;\n      }\n    }\n    \n    candidate  // 返回最终流向\n  }\n\n  // ========================================================================\n  // 洼地条件定理:若无严格下坡邻居，则流向必为 NoFlow\n  // ========================================================================\n  lemma PitCondition(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real\n  )\n    // 前置条件:所有邻居高程 ≥ 中心高程 (无严格下坡)\n    requires a >= e && b >= e && c >= e\n    requires d >= e && f >= e\n    requires g >= e && h >= e && i >= e\n    \n    // 结论:流向必为 NoFlow\n    ensures D8Flow(a, b, c, d, e, f, g, h, i) == NoFlow\n  {\n    // 由前置条件直接推导:所有方向 e > neighbor 均不成立\n    // Dafny 自动验证所有分支条件失败，candidate 保持 NoFlow\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-005 — D8 洼地条件 (GPB-010)\\n\";\n  print \"编译期验证: dafny verify P005_d8.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

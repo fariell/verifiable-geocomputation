@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4e243b2cfa64fbdd94202c40dcc62e40a558c74c328328764f542cd2db43004e",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3239,
+    "completion_tokens": 7942,
+    "total_tokens": 11181,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5584
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 39
+  },
+  "api_id": "01a08e5af8a25b62f352c911c9e21be8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-004\n//  算子 : Horn (1981) 3x3 有限差分坡度在二次/三次曲面上的精度\n//  覆盖 : GPB-019 (代数部分:二次曲面精确性,三次曲面余项)\n//  环境 : Dafny 4.11\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  GPB-019 的核心代数结论: Horn 坡度算子\n//    (1) 在任意二次曲面上精确恢复梯度系数 (A,B)\n//    (2) 在三次曲面 z = Gx³ 上,中心点 x 方向坡度余项为 Gw²\n//\n//  本文件形式化这两条代数性质,解释:\n//    (1) 为何二次曲面精确性成立 (线性差分 + 二次项对称抵消)\n//    (2) 为何三次曲面余项为 O(w²) (泰勒展开的三阶项主导)\n//\n//  结合 P-001 的线性性质,构成 Horn 坡度算子的完整代数画像。\n// ===========================================================================\n\nmodule HornExactness {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定 (行偏移 q 向下为正)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // 注意:中心元 e 在 Horn 一阶差分中的权为 0, 不出现在算子签名\n  // ------------------------------------------------------------------\n\n  // ---- Horn 核函数 (与 P-001 一致) ----\n  function NumDx(a: real, b: real, c: real, d: real, f: real,\n                 g: real, h: real, i: real): real\n  { (c + 2.0*f + i) - (a + 2.0*d + g) }\n\n  function NumDy(a: real, b: real, c: real, d: real, f: real,\n                 g: real, h: real, i: real): real\n  { (g + 2.0*h + i) - (a + 2.0*b + c) }\n\n  function DzDx(a: real, b: real, c: real, d: real, f: real,\n                g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n  { NumDx(a, b, c, d, f, g, h, i) / (8.0 * w) }\n\n  function DzDy(a: real, b: real, c: real, d: real, f: real,\n                g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n  { NumDy(a, b, c, d, f, g, h, i) / (8.0 * w) }\n\n  // ==================================================================\n  // 二次曲面: z = A·x + B·y + C + D·x² + E·x·y + F·y²\n  // 性质: Horn 坡度精确恢复系数 (A,B)\n  // ==================================================================\n\n  // ---- 二次曲面采样函数 ----\n  function quadratic_z(A: real, B: real, C: real, D: real, E: real, F: real, \n                       x: real, y: real): real \n  { \n    A*x + B*y + C + D*x*x + E*x*y + F*y*y \n  }\n\n  function quad_a(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, -w, -w) }\n  function quad_b(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, 0.0, -w) }\n  function quad_c(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, w, -w) }\n  function quad_d(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, -w, 0.0) }\n  function quad_f(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, w, 0.0) }\n  function quad_g(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, -w, w) }\n  function quad_h(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, 0.0, w) }\n  function quad_i(A: real, B: real, C: real, D: real, E: real, F: real, w: real): real \n  { quadratic_z(A, B, C, D, E, F, w, w) }\n\n  // ---- 精确性引理 ----\n  lemma QuadraticExactness(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n    requires w > 0.0\n    ensures DzDx(quad_a(A,B,C,D,E,F,w), quad_b(A,B,C,D,E,F,w), quad_c(A,B,C,D,E,F,w),\n                quad_d(A,B,C,D,E,F,w), quad_f(A,B,C,D,E,F,w),\n                quad_g(A,B,C,D,E,F,w), quad_h(A,B,C,D,E,F,w), quad_i(A,B,C,D,E,F,w), w) \n            == A\n    ensures DzDy(quad_a(A,B,C,D,E,F,w), quad_b(A,B,C,D,E,F,w), quad_c(A,B,C,D,E,F,w),\n                quad_d(A,B,C,D,E,F,w), quad_f(A,B,C,D,E,F,w),\n                quad_g(A,B,C,D,E,F,w), quad_h(A,B,C,D,E,F,w), quad_i(A,B,C,D,E,F,w), w) \n            == B\n  {\n    // 代数展开后,二次项对称抵消,线性项精确恢复 (A,B)\n    // Dafny 自动验证代数恒等式\n  }\n\n  // ==================================================================\n  // 三次曲面: z = G·x³\n  // 性质: 中心点 x 方向坡度余项 = G·w²\n  // ==================================================================\n\n  // ---- 三次曲面采样函数 ----\n  function cubic_z(G: real, x: real, y: real): real \n  { \n    G * x * x * x  // 无 y 依赖\n  }\n\n  function cubic_a(G: real, w: real): real { cubic_z(G, -w, -w) }\n  function cubic_b(G: real, w: real): real { cubic_z(G, 0.0, -w) }\n  function cubic_c(G: real, w: real): real { cubic_z(G, w, -w) }\n  function cubic_d(G: real, w: real): real { cubic_z(G, -w, 0.0) }\n  function cubic_f(G: real, w: real): real { cubic_z(G, w, 0.0) }\n  function cubic_g(G: real, w: real): real { cubic_z(G, -w, w) }\n  function cubic_h(G: real, w: real): real { cubic_z(G, 0.0, w) }\n  function cubic_i(G: real, w: real): real { cubic_z(G, w, w) }\n\n  // ---- 余项引理 ----\n  lemma CubicRemainder(G: real, w: real)\n    requires w > 0.0\n    ensures DzDx(cubic_a(G,w), cubic_b(G,w), cubic_c(G,w),\n                cubic_d(G,w), cubic_f(G,w),\n                cubic_g(G,w), cubic_h(G,w), cubic_i(G,w), w) \n            == G * w * w\n  {\n    // 直接计算分子:\n    //   NumDx = [c + 2f + i] - [a + 2d + g]\n    //         = [G·w³ + 2·(G·w³) + G·w³] - [(-G·w³) + 2·(-G·w³) + (-G·w³)]\n    //         = (4G·w³) - (-4G·w³) = 8G·w³\n    // 因此 DzDx = (8G·w³) / (8w) = G·w²\n    // Dafny 自动验证代数恒等式\n  }\n\n  // ==================================================================\n  // 结构注记\n  // ------------------------------------------------------------------\n  // 二次精确性成立的关键:\n  //   1) 线性差分: 坡度算子是高程的线性泛函\n  //   2) 二次对称性: 二次项在 3x3 窗口的差分计算中完全抵消\n  //\n  // 三次余项 O(w²) 的机制:\n  //   泰勒展开: f(x) = f(0) + f'(0)x + f''(0)x²/2 + f'''(ξ)x³/6\n  //   Horn 差分格式的截断误差来自三阶导数项,其贡献为 O(w²)\n  //   本文件对 z=Gx³ 的特例给出了精确余项 Gw²\n  //\n  // 结合 P-001 的线性/平移不变性,完整刻画了 Horn 算子的代数行为。\n  // ==================================================================\n}\n\nmethod Main() {\n  print \"GeoProofBench P-004 — Horn 坡度在二次/三次曲面上的精确性与余项\\n\";\n  print \"全部由编译期验证\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

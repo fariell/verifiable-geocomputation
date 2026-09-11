@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-007-hessian",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "fd2794d37f8c2b4e57722e1f3a7cbaeabc65731dfceb63eda8f1cddbdf98644e",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P003_curvature.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3223,
+    "completion_tokens": 3717,
+    "total_tokens": 6940,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1574
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3223
+  },
+  "api_id": "01a08e1fa119d96a6b3553a1f0afea3f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-003\n//  算子 : Zevenbergen-Thorne 离散 Hessian\n//  覆盖 : GPB-003(二次曲面上的精确性)\n//  环境 : Dafny 4.11\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  曲率算子对噪声敏感(Phase 1 实测 corr ≈ 0.157),但代数结构上,\n//  Zevenbergen-Thorne Hessian 在二次曲面上应精确恢复系数 (2A, 2B, C)。\n//  本证明验证该代数性质,为后续误差分析建立基准。\n//\n// ===========================================================================\n\nmodule ZTHessian {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //\n  //     a(-w,-w)   b( 0,-w)   c( w,-w)\n  //     d(-w, 0)     e(0,0)   f( w, 0)\n  //     g(-w, w)   h( 0, w)   i( w, w)\n  // ------------------------------------------------------------------\n\n  // ---- 二次曲面函数 ----\n  function Quadratic(x: real, y: real, \n                     A: real, B: real, C: real, \n                     D: real, E: real, F: real): real\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n\n  // ---- ZT Hessian 分量 ----\n  function ZT_Hxx(a: real, b: real, c: real, \n                  d: real, e: real, f: real,\n                  g: real, h: real, i: real, \n                  w: real): real\n    requires w > 0.0\n  {\n    (d - 2.0*e + f) / (w*w)\n  }\n\n  function ZT_Hyy(a: real, b: real, c: real, \n                  d: real, e: real, f: real,\n                  g: real, h: real, i: real, \n                  w: real): real\n    requires w > 0.0\n  {\n    (b - 2.0*e + h) / (w*w)\n  }\n\n  function ZT_Hxy(a: real, b: real, c: real, \n                  d: real, e: real, f: real,\n                  g: real, h: real, i: real, \n                  w: real): real\n    requires w > 0.0\n  {\n    (a - c - g + i) / (4.0 * w * w)\n  }\n\n  // ==================================================================\n  // 核心定理:在二次曲面上 ZT Hessian 精确恢复 (2A, 2B, C)\n  // ==================================================================\n  lemma ExactOnQuadratic(A: real, B: real, C: real,\n                         D: real, E: real, F: real,\n                         w: real)\n    requires w > 0.0\n    ensures \n      // 采样点定义\n      let a := Quadratic(-w, -w, A, B, C, D, E, F) in\n      let b := Quadratic( 0, -w, A, B, C, D, E, F) in\n      let c := Quadratic( w, -w, A, B, C, D, E, F) in\n      let d := Quadratic(-w,  0, A, B, C, D, E, F) in\n      let e := Quadratic( 0,  0, A, B, C, D, E, F) in\n      let f := Quadratic( w,  0, A, B, C, D, E, F) in\n      let g := Quadratic(-w,  w, A, B, C, D, E, F) in\n      let h := Quadratic( 0,  w, A, B, C, D, E, F) in\n      let i := Quadratic( w,  w, A, B, C, D, E, F) in\n      // 验证 Hessian 分量\n      ZT_Hxx(a, b, c, d, e, f, g, h, i, w) == 2.0 * A &&\n      ZT_Hyy(a, b, c, d, e, f, g, h, i, w) == 2.0 * B &&\n      ZT_Hxy(a, b, c, d, e, f, g, h, i, w) == C\n  {\n    // 展开二次曲面采样点\n    calc {\n      Quadratic(-w, -w, A, B, C, D, E, F);\n      == { \n        Quadratic(-w, -w, A, B, C, D, E, F) \n          = A*(-w)*(-w) + B*(-w)*(-w) + C*(-w)*(-w) + D*(-w) + E*(-w) + F;\n      }\n      A*w*w + B*w*w + C*w*w - D*w - E*w + F;\n    }\n    calc {\n      Quadratic(0, -w, A, B, C, D, E, F);\n      == \n      A*0 + B*(-w)*(-w) + C*0*(-w) + D*0 + E*(-w) + F;\n      == \n      B*w*w - E*w + F;\n    }\n    calc {\n      Quadratic(w, -w, A, B, C, D, E, F);\n      == \n      A*w*w + B*w*w + C*w*(-w) + D*w + E*(-w) + F;\n      == \n      A*w*w + B*w*w - C*w*w + D*w - E*w + F;\n    }\n    calc {\n      Quadratic(-w, 0, A, B, C, D, E, F);\n      == \n      A*(-w)*(-w) + B*0 + C*(-w)*0 + D*(-w) + E*0 + F;\n      == \n      A*w*w - D*w + F;\n    }\n    calc {\n      Quadratic(0, 0, A, B, C, D, E, F);\n      == \n      F;\n    }\n    calc {\n      Quadratic(w, 0, A, B, C, D, E, F);\n      == \n      A*w*w + D*w + F;\n    }\n    calc {\n      Quadratic(-w, w, A, B, C, D, E, F);\n      == \n      A*(-w)*(-w) + B*w*w + C*(-w)*w + D*(-w) + E*w + F;\n      == \n      A*w*w + B*w*w - C*w*w - D*w + E*w + F;\n    }\n    calc {\n      Quadratic(0, w, A, B, C, D, E, F);\n      == \n      B*w*w + E*w + F;\n    }\n    calc {\n      Quadratic(w, w, A, B, C, D, E, F);\n      == \n      A*w*w + B*w*w + C*w*w + D*w + E*w + F;\n    }\n\n    // 验证 Hxx = (d - 2e + f)/w² = 2A\n    calc {\n      ZT_Hxx(a, b, c, d, e, f, g, h, i, w);\n      == \n      (d - 2.0*e + f) / (w*w);\n      == \n      ((A*w*w - D*w + F) - 2.0*F + (A*w*w + D*w + F)) / (w*w);\n      == \n      (2.0*A*w*w) / (w*w);\n      == \n      2.0 * A;\n    }\n\n    // 验证 Hyy = (b - 2e + h)/w² = 2B\n    calc {\n      ZT_Hyy(a, b, c, d, e, f, g, h, i, w);\n      == \n      (b - 2.0*e + h) / (w*w);\n      == \n      ((B*w*w - E*w + F) - 2.0*F + (B*w*w + E*w + F)) / (w*w);\n      == \n      (2.0*B*w*w) / (w*w);\n      == \n      2.0 * B;\n    }\n\n    // 验证 Hxy = (a - c - g + i)/(4w²) = C\n    calc {\n      ZT_Hxy(a, b, c, d, e, f, g, h, i, w);\n      == \n      (a - c - g + i) / (4.0 * w * w);\n      == \n      ( (A*w*w + B*w*w + C*w*w - D*w - E*w + F) \n        - (A*w*w + B*w*w - C*w*w + D*w - E*w + F)\n        - (A*w*w + B*w*w - C*w*w - D*w + E*w + F)\n        + (A*w*w + B*w*w + C*w*w + D*w + E*w + F)\n      ) / (4.0 * w * w);\n      == \n      (4.0 * C * w * w) / (4.0 * w * w);\n      == \n      C;\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-003 — Zevenbergen-Thorne Hessian 在二次曲面上的精确性\\n\";\n  print \"由编译期验证: dafny verify P003_curvature.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

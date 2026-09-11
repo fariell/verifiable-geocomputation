@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1526,
+    "completion_tokens": 809,
+    "total_tokens": 2335,
+    "prompt_tokens_details": {
+      "cached_tokens": 1504
+    },
+    "prompt_cache_hit_tokens": 1504,
+    "prompt_cache_miss_tokens": 22
+  },
+  "api_id": "01a08df5ef89900311f7528511b8c6eb",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formal specification of the 2D local raise step RaiseNbr\nmodule RaiseNbr {\n  // Represents a 2D grid of elevations\n  type Grid = array<array<float>>\n\n  // 4-neighbors of a cell (up, down, left, right)\n  const NBR4: (int, int)[] = [(-1, 0), (1, 0), (0, -1), (0, 1)]\n\n  // Raises a 4-neighbor from an already-processed cell\n  method RaiseNbr(h: Grid, p: (int, int), n: (int, int)) returns (h': Grid)\n    requires 0 <= p.0 < h.Length && 0 <= p.1 < h[p.0].Length\n    requires 0 <= n.0 < h.Length && 0 <= n.1 < h[n.0].Length\n    requires (n.0 == p.0 + 1 || n.0 == p.0 - 1 || n.0 == p.0) && (n.1 == p.1 + 1 || n.1 == p.1 - 1 || n.1 == p.1)\n    requires h[p.0][p.1] == float.PositiveInfinity // Already processed cell\n    ensures h'.Length == h.Length\n    ensures forall i :: 0 <= i < h.Length ==> h'[i].Length == h[i].Length\n    ensures forall i, j :: 0 <= i < h.Length && 0 <= j < h[i].Length && (i, j) != n ==> h'[i][j] == h[i][j]\n    ensures h'[n.0][n.1] >= h[n.0][n.1] // Never decreases any cell elevation\n    ensures h'[n.0][n.1] >= max(h[n.0][n.1], h[p.0][p.1]) // Lifted at least to max(original neighbor, processed cell fill)\n  {\n    var h' := h;\n    h'[n.0][n.1] := max(h[n.0][n.1], h[p.0][p.1]);\n    return h';\n  }\n\n  // Helper function to compute the maximum of two values\n  function method max(a: float, b: float): float\n    ensures max(a, b) >= a\n    ensures max(a, b) >= b\n  {\n    if a >= b then a else b\n  }\n\n  // Verification of the property\n  lemma RaiseNbrProperty()\n  {\n    var h: Grid := new array<array<float>>(3, 3);\n    h[0][0] := 1.0;\n    h[0][1] := 2.0;\n    h[0][2] := 3.0;\n    h[1][0] := 4.0;\n    h[1][1] := float.PositiveInfinity; // Already processed cell\n    h[1][2] := 6.0;\n    h[2][0] := 7.0;\n    h[2][1] := 8.0;\n    h[2][2] := 9.0;\n\n    var p := (1, 1);\n    var n := (1, 0);\n\n    var h' := RaiseNbr(h, p, n);\n\n    assert h'[n.0][n.1] >= h[n.0][n.1]; // Never decreases any cell elevation\n    assert h'[n.0][n.1] >= max(h[n.0][n.1], h[p.0][p.1]); // Lifted at least to max(original neighbor, processed cell fill)\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

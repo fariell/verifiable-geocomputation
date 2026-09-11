@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4ad5bb6863e850e9dbcf49614acbc628556a5d50b32cfcdd7408c75c3d6d6874",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3122,
+    "completion_tokens": 3506,
+    "total_tokens": 6628,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2441
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 50
+  },
+  "api_id": "01a08c4ac05fb5b211e07c84faed6fef",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · Horn Slope Consistency\n//  算子 : Horn (1981) 3x3 坡度算子\n//  定理 : 平坦地形上坡度平方恒为零\n//  环境 : Dafny 4.11\n// ===========================================================================\n\nmodule HornSlope {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(与 P-003 相同)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // Horn (1981) 坡度算子定义:\n  //   ∂z/∂x = ( (c + 2f + i) - (a + 2d + g) ) / (8w)\n  //   ∂z/∂y = ( (g + 2h + i) - (a + 2b + c) ) / (8w)\n  //   SlopeSq = (∂z/∂x)² + (∂z/∂y)²\n  // ------------------------------------------------------------------\n\n  // Horn 坡度平方算子\n  function HornSlopeSq(\n    a: real, b: real, c: real,\n    d: real,         f: real,\n    g: real, h: real, i: real,\n    w: real\n  ): real\n    requires w > 0.0  // 网格间距必须为正\n  {\n    // 计算 x 方向偏导\n    var dzdx := ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w);\n    // 计算 y 方向偏导\n    var dzdy := ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w);\n    // 返回坡度平方\n    dzdx*dzdx + dzdy*dzdy\n  }\n\n  // ==================================================================\n  // 核心定理: 平坦地形上坡度平方为零\n  // ==================================================================\n  theorem FlatTerrainZeroSlope(\n    a: real, b: real, c: real,\n    d: real, e: real, f: real,\n    g: real, h: real, i: real,\n    w: real\n  )\n    requires w > 0.0                     // 网格间距为正\n    requires a == b && b == c && c == d  // 所有高程相等\n      && d == e && e == f\n      && f == g && g == h && h == i\n    ensures HornSlopeSq(a, b, c, d, f, g, h, i, w) == 0.0\n  {\n    // 展开坡度平方计算\n    var dzdx := ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w);\n    var dzdy := ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w);\n\n    // 平坦地形下分子恒为零\n    assert (c + 2.0*f + i) - (a + 2.0*d + g) == 0.0 by {\n      calc {\n        (c + 2.0*f + i) - (a + 2.0*d + g);\n        ==  // 所有高程相等\n        (a + 2.0*a + a) - (a + 2.0*a + a);\n        ==  // 算术简化\n        4.0*a - 4.0*a;\n        ==\n        0.0;\n      }\n    }\n\n    assert ((g + 2.0*h + i) - (a + 2.0*b + c)) == 0.0 by {\n      calc {\n        (g + 2.0*h + i) - (a + 2.0*b + c);\n        ==  // 所有高程相等\n        (a + 2.0*a + a) - (a + 2.0*a + a);\n        ==  // 算术简化\n        4.0*a - 4.0*a;\n        ==\n        0.0;\n      }\n    }\n\n    // 偏导为零 ⇒ 坡度平方为零\n    assert dzdx == 0.0 && dzdy == 0.0 ==> dzdx*dzdx + dzdy*dzdy == 0.0;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench: Horn slope consistency on flat terrain\\n\";\n  print \"Verified by Dafny\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

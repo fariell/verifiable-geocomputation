@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "619a038db5a298c60275645f88d0e1ee5c1af471e82c1c16508a890e8c999c74",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2985,
+    "completion_tokens": 6139,
+    "total_tokens": 9124,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5522
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 41
+  },
+  "api_id": "01a08ea71763834d4ad350b1984aaddf",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-006\n   文件 : formal/lean4/VeriGIS/Watershed.lean\n   算子 : 流域唯一性(确定性 D8 流)\n   对偶 : formal/dafny/P006_watershed.dfy  (Dafny 4.11, 19 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明:在有限元胞集上,若存在严格下降后继函数,则每个轨道终止于不动点.\n  这是 P-006 流域唯一性的代数基础.\n\n  注意:本文件不涉及具体 DEM 数据结构,而是抽象为任意有限类型上的函数迭代.\n-/\n\nimport Mathlib.Logic.Function.Iteration\nimport Mathlib.WellFounded\n\nnamespace VeriGIS.Watershed\n\nopen Function\n\n/--\n  严格下降条件:若非不动点,则后继的测度严格下降.\n  其中 `f` 是后继函数, `m` 是取值为自然数的测度函数.\n-/\ntheorem terminates {α : Type _} (f : α → α) (m : α → ℕ)\n    (h : ∀ x, f x ≠ x → m (f x) < m x) (x : α) :\n    ∃ n, f^[n] x = f^[n+1] x := by\n  letI : WellFoundedRelation α := measure m\n  induction' x using WellFounded.induction with x ih\n  by_cases hfx : f x = x\n  · -- 若 x 已是不动点,则取 n=0 即可.\n    use 0\n    simp [hfx]\n  · -- 否则,对 f x 应用归纳假设 (因为 m (f x) < m x)\n    have step : m (f x) < m x := h x hfx\n    rcases ih (f x) step with ⟨n, hn⟩\n    -- 则从 x 出发, n+1 步后到达不动点.\n    use n+1\n    -- 展开迭代定义: f^[n+1] x = f^[n] (f x) 且 f^[n+2] x = f^[n+1] (f x)\n    rw [iterate_succ_apply, iterate_succ_apply, hn]\n    rfl\n\n-- ==========================================================================\n-- 注:有限性条件未显式使用,因为测度下降条件已蕴含终止性.\n-- 在具体 DEM 应用中,测度 m 可取为高程的整数编码,或为元胞到汇点的步数上界(有限性保证其存在).\n-- ==========================================================================\n\nend VeriGIS.Watershed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

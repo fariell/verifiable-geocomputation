@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1606,
+    "completion_tokens": 7648,
+    "total_tokens": 9254,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7213
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1606
+  },
+  "api_id": "01a08e48a696d4bfc23a97c2ff82ebea",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0 · Zero-shot auto-formalization: Watershed uniqueness\ntype Cell\n\nfunction succ(c: Cell): Cell\n\npredicate IsOutlet(c: Cell) {\n  succ(c) == c\n}\n\nfunction stepN(s: Cell, n: nat): Cell\n  decreases n\n{\n  if n == 0 then s else stepN(succ(s), n-1)\n}\n\nlemma StepNAdd(s: Cell, n: nat, m: nat)\n  ensures stepN(s, n+m) == stepN(stepN(s, n), m)\n  decreases n\n{\n  if n == 0 {\n  } else {\n    StepNAdd(succ(s), n-1, m);\n  }\n}\n\nlemma OutletStable(o: Cell, k: nat)\n  requires IsOutlet(o)\n  ensures stepN(o, k) == o\n  decreases k\n{\n  if k != 0 {\n    OutletStable(o, k-1);\n  }\n}\n\nlemma AfterOutlet(s: Cell, n: nat, k: nat)\n  requires IsOutlet(stepN(s, n))\n  requires k >= n\n  ensures stepN(s, k) == stepN(s, n)\n  decreases k - n\n{\n  if k == n {\n  } else {\n    AfterOutlet(s, n, k-1);\n    StepNAdd(s, k-1, 1);\n    assert stepN(s, k) == stepN(stepN(s, k-1), 1);\n    var o := stepN(s, n);\n    OutletStable(o, 1);\n  }\n}\n\nlemma WatershedUniqueness(s: Cell, n: nat, m: nat)\n  requires IsOutlet(stepN(s, n))\n  requires IsOutlet(stepN(s, m))\n  ensures stepN(s, n) == stepN(s, m)\n{\n  if n <= m {\n    AfterOutlet(s, n, m);\n  } else {\n    AfterOutlet(s, m, n);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

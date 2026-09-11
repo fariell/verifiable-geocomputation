@@ -9,11 +9,12 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/RUNNING  
-UPDATED: 2026-09-11 01:03  
-TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 circuit-stop; M4 DeepSeek-R1 RUNNING)  
-M4 R1 live: probe gate fixed (V3.2 stand-in); gen timeout 600s; pid=8244.  
-Partial 5/210: P0 k0-k4 done (k1 verify PASS; k3 PROVIDER_ERROR). Batch pid=8244 alive.
+STATUS: W3/BLOCKED  
+UPDATED: 2026-09-11 12:30  
+TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 catchup PASS compile@1=0; M4 R1 PARTIAL)  
+A.17.12 done: pool.py + M3 120/120 + M4 133/210 then HTTP_STREAK_10.  
+BLOCKER: siliconflow balance insufficient (code 30001) — 75 R1 PROVIDER_ERROR need retry after PI recharge.  
+Then set STATUS → W3/PENDING. NEEDS_HUMAN 17 listed in OUTBOX (no semantic fidelity % yet).
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。  
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:  

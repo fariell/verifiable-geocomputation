@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 5414,
+    "total_tokens": 5681,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4591
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 267
+  },
+  "api_id": "01a08e60171dce2bb0c4169bd140776f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "type Surface = (real, real) -> real\n\nfunction DzDx(z: Surface, i: int, j: int, w: real): real\n  requires w > 0.0\n{\n  (z((i+1)*w, j*w) - z((i-1)*w, j*w)) / (2.0 * w)\n}\n\nfunction DzDy(z: Surface, i: int, j: int, w: real): real\n  requires w > 0.0\n{\n  (z(i*w, (j+1)*w) - z(i*w, (j-1)*w)) / (2.0 * w)\n}\n\nfunction quadratic(A: real, B: real, C: real): Surface\n{\n  (x,y) => A*x + B*y + C\n}\n\nfunction cubic(G: real): Surface\n{\n  (x,y) => G * x * x * x\n}\n\nlemma Theorem1_ExactQuadraticGradient(A: real, B: real, C: real, w: real, i: int, j: int)\n  requires w > 0.0\n  ensures DzDx(quadratic(A,B,C), i, j, w) == A\n  ensures DzDy(quadratic(A,B,C), i, j, w) == B\n{\n  calc {\n    DzDx(quadratic(A,B,C), i, j, w);\n    ==\n    (quadratic(A,B,C)((i+1)*w, j*w) - quadratic(A,B,C)((i-1)*w, j*w)) / (2.0 * w);\n    ==\n    (A*(i+1)*w + B*j*w + C - (A*(i-1)*w + B*j*w + C)) / (2.0 * w);\n    ==\n    (A*w*(i+1 - (i-1))) / (2.0 * w);\n    ==\n    (A*w*2) / (2.0 * w);\n    ==\n    A;\n  }\n  calc {\n    DzDy(quadratic(A,B,C), i, j, w);\n    ==\n    (quadratic(A,B,C)(i*w, (j+1)*w) - quadratic(A,B,C)(i*w, (j-1)*w)) / (2.0 * w);\n    ==\n    (A*i*w + B*(j+1)*w + C - (A*i*w + B*(j-1)*w + C)) / (2.0 * w);\n    ==\n    (B*w*(j+1 - (j-1))) / (2.0 * w);\n    ==\n    (B*w*2) / (2.0 * w);\n    ==\n    B;\n  }\n}\n\nlemma Theorem2_CubicOriginRemainder(G: real, w: real)\n  requires w > 0.0\n  ensures DzDx(cubic(G), 0, 0, w) == G * w * w\n{\n  calc {\n    DzDx(cubic(G), 0, 0, w);\n    ==\n    (cubic(G)(w, 0.0) - cubic(G)(-w, 0.0)) / (2.0 * w);\n    ==\n    (G*w*w*w - G*(-w)*(-w)*(-w)) / (2.0 * w);\n    ==\n    (G*w*w*w - G*(-w*w*w)) / (2.0 * w);\n    ==\n    (G*w*w*w + G*w*w*w) / (2.0 * w);\n    ==\n    (2.0 * G * w * w * w) / (2.0 * w);\n    ==\n    G * w * w;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3118,
+    "completion_tokens": 1565,
+    "total_tokens": 4683,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1038
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3118
+  },
+  "api_id": "01a08e132242844e8cc442ac8002953a",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.LocalMaxLaplacian\n\nnoncomputable section\n\n/-!\n## 3×3 Window Convention (row offset q positive downward)\n\n    a(-1,-1)   b( 0,-1)   c( 1,-1)\n    d(-1, 0)     e        f( 1, 0)\n    g(-1, 1)   h( 0, 1)   i( 1, 1)\n\nDiscrete Laplacian (Δh) at center cell e is defined as:\n  Δh = (b + d + f + h - 4*e) / w²\nSince w² > 0, sign(Δh) = sign(b + d + f + h - 4*e)\n-/\n\n/-- Discrete Laplacian numerator (sign determines concavity) -/\ndef laplacian_num (b d e f h : ℝ) : ℝ := b + d + f + h - 4 * e\n\n/-- Orthogonal neighborhood: North(b), West(d), East(f), South(h) -/\nstructure OrthoMax (b d e f h : ℝ) : Prop where\n  north : e ≥ b\n  west  : e ≥ d\n  east  : e ≥ f\n  south : e ≥ h\n\n/-!\n### Main Theorem\nIf center cell e is local maximum in its orthogonal neighborhood,\nthen discrete Laplacian numerator ≤ 0.\n-/\ntheorem local_max_implies_nonpositive_laplacian\n    (b d e f h : ℝ) (h_max : OrthoMax b d e f h) :\n    laplacian_num b d e f h ≤ 0 := by\n  -- Expand Laplacian definition\n  unfold laplacian_num\n  -- Extract neighborhood maximum conditions\n  have hb := h_max.north\n  have hd := h_max.west\n  have hf := h_max.east\n  have hh := h_max.south\n  -- Algebraic rearrangement: b + d + f + h ≤ 4*e\n  calc\n    b + d + f + h ≤ e + e + e + e := by rel [hb, hd, hf, hh]\n    _ = 4 * e := by ring\n  -- Conclude inequality\n  linarith\n\nend -- noncomputable section\n\nend VeriGIS.LocalMaxLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

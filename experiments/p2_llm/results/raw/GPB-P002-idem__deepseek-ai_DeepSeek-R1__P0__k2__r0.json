@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1702,
+    "completion_tokens": 7201,
+    "total_tokens": 8903,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6689
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1702
+  },
+  "api_id": "01a08e62e18f087632bf20ee11b40d63",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0: Pit filling idempotent and fixed point properties in 1D\nfunction prefixMax(a: seq<int>, i: int): int\n  requires 0 <= i < |a|\n  decreases i\n{\n  if i == 0 then a[0]\n  else\n    var prev := prefixMax(a, i-1);\n    if a[i] > prev then a[i] else prev\n}\n\nfunction Fill(a: seq<int>): seq<int>\n  requires |a| > 0\n{\n  seq(|a|, i requires 0<=i<|a| => prefixMax(a, i))\n}\n\nlemma NonDecreasing(a: seq<int>)\n  requires |a| > 0\n  ensures forall j :: 0 <= j < |a|-1 ==> Fill(a)[j] <= Fill(a)[j+1]\n{\n  forall j | 0 <= j < |a|-1\n    ensures Fill(a)[j] <= Fill(a)[j+1]\n  {\n    assert prefixMax(a, j+1) == (if a[j+1] > prefixMax(a, j) then a[j+1] else prefixMax(a, j));\n  }\n}\n\nlemma LemmaPrefixMaxForNonDecreasing(b: seq<int>, i: int)\n  requires |b| > 0\n  requires 0 <= i < |b|\n  requires forall j :: 0 <= j < |b|-1 ==> b[j] <= b[j+1]\n  ensures prefixMax(b, i) == b[i]\n  decreases i\n{\n  if i > 0 {\n    LemmaPrefixMaxForNonDecreasing(b, i-1);\n  }\n}\n\nlemma Idempotent(a: seq<int>)\n  requires |a| > 0\n  ensures Fill(Fill(a)) == Fill(a)\n{\n  var b := Fill(a);\n  NonDecreasing(a);\n  var c := Fill(b);\n  forall i | 0 <= i < |a|\n    ensures c[i] == b[i]\n  {\n    LemmaPrefixMaxForNonDecreasing(b, i);\n  }\n}\n\nlemma FixedPoint(a: seq<int>, i: int)\n  requires |a| > 0\n  requires 0 <= i < |a|\n  requires prefixMax(a, i) == a[i]\n  ensures Fill(a)[i] == a[i]\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

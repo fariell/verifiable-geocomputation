@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 259,
+    "completion_tokens": 5821,
+    "total_tokens": 6080,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5051
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 259
+  },
+  "api_id": "01a08e0d5fa3a9f43011d66e6c50c4d2",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function z(A: real, B: real, C: real, w: real, i: int, j: int): real\n{\n  A * (i * w) + B * (j * w) + C\n}\n\nfunction DzDx(A: real, B: real, C: real, w: real, i: int, j: int): real\n  requires w > 0.0\n{\n  (z(A, B, C, w, i+1, j) - z(A, B, C, w, i-1, j)) / (2.0 * w)\n}\n\nfunction DzDy(A: real, B: real, C: real, w: real, i: int, j: int): real\n  requires w > 0.0\n{\n  (z(A, B, C, w, i, j+1) - z(A, B, C, w, i, j-1)) / (2.0 * w)\n}\n\nlemma Theorem(A: real, B: real, C: real, w: real)\n  requires w > 0.0\n  ensures forall i: int, j: int :: \n      DzDx(A, B, C, w, i, j) == A && DzDy(A, B, C, w, i, j) == B\n{\n  forall i: int, j: int)\n    ensures DzDx(A, B, C, w, i, j) == A && DzDy(A, B, C, w, i, j) == B\n  {\n    calc {\n      DzDx(A, B, C, w, i, j);\n    ==\n      (z(A, B, C, w, i+1, j) - z(A, B, C, w, i-1, j)) / (2.0 * w);\n    ==\n      ( (A * ( (i+1) * w ) + B * (j * w) + C) - (A * ( (i-1) * w ) + B * (j * w) + C) ) / (2.0 * w);\n    ==\n      (A * (i+1) * w - A * (i-1) * w) / (2.0 * w);\n    ==\n      A * w * ( (i+1) - (i-1) ) / (2.0 * w);\n    ==\n      A * w * 2 / (2.0 * w);\n    ==\n      A;\n    }\n    calc {\n      DzDy(A, B, C, w, i, j);\n    ==\n      (z(A, B, C, w, i, j+1) - z(A, B, C, w, i, j-1)) / (2.0 * w);\n    ==\n      ( (A * (i * w) + B * ((j+1) * w) + C) - (A * (i * w) + B * ((j-1) * w) + C) ) / (2.0 * w);\n    ==\n      (B * (j+1) * w - B * (j-1) * w) / (2.0 * w);\n    ==\n      B * w * ( (j+1) - (j-1) ) / (2.0 * w);\n    ==\n      B * w * 2 / (2.0 * w);\n    ==\n      B;\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3120,
+    "completion_tokens": 5909,
+    "total_tokens": 9029,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4048
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3120
+  },
+  "api_id": "01a08e0c396cc4ce840e71132ab7ef13",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-001 (algebraic core of GPB-019)\n//  算子 : Horn (1981) 3x3 一阶差分(坡度)\n//  覆盖 : 平面上的精确恢复\n//  环境 : Dafny 4.11\n// ===========================================================================\n\nmodule HornSlopeExact {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(与 P-003 相同:p 向右,q 向下)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // Horn 一阶差分给出:\n  //   ∂z/∂x = [ (c - a) + 2*(f - d) + (i - g) ] / (8w)\n  //   ∂z/∂y = [ (g - a) + 2*(h - b) + (i - c) ] / (8w)\n  // -------------------------------------------\n\n  // Horn 坡度算子 (x方向)\n  function HornDzDx(a: real, d: real, g: real, c: real, f: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    ( (c - a) + 2.0*(f - d) + (i - g) ) / (8.0 * w)\n  }\n\n  // Horn 坡度算子 (y方向)\n  function HornDzDy(a: real, b: real, c: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    ( (g - a) + 2.0*(h - b) + (i - c) ) / (8.0 * w)\n  }\n\n  // 平面高程函数: z = A*x + B*y + C\n  function PlaneAt(x: real, y: real, A: real, B: real, C: real): real\n  {\n    A * x + B * y + C\n  }\n\n  // 网格点高程 (中心 e 在 (0,0))\n  function a(A: real, B: real, C: real, w: real): real { PlaneAt(-w, -w, A, B, C) }\n  function b(A: real, B: real, C: real, w: real): real { PlaneAt( 0.0, -w, A, B, C) }\n  function c(A: real, B: real, C: real, w: real): real { PlaneAt( w, -w, A, B, C) }\n  function d(A: real, B: real, C: real, w: real): real { PlaneAt(-w,  0.0, A, B, C) }\n  function e(A: real, B: real, C: real, w: real): real { PlaneAt( 0.0, 0.0, A, B, C) }\n  function f(A: real, B: real, C: real, w: real): real { PlaneAt( w,  0.0, A, B, C) }\n  function g(A: real, B: real, C: real, w: real): real { PlaneAt(-w,  w, A, B, C) }\n  function h(A: real, B: real, C: real, w: real): real { PlaneAt( 0.0, w, A, B, C) }\n  function i(A: real, B: real, C: real, w: real): real { PlaneAt( w,  w, A, B, C) }\n\n  // ==================================================================\n  // 核心定理: 平面上 Horn 算子精确恢复梯度分量\n  // ==================================================================\n  lemma HornExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures HornDzDx(\n        a(A,B,C,w), d(A,B,C,w), g(A,B,C,w),\n        c(A,B,C,w), f(A,B,C,w), i(A,B,C,w), w) == A\n    ensures HornDzDy(\n        a(A,B,C,w), b(A,B,C,w), c(A,B,C,w),\n        g(A,B,C,w), h(A,B,C,w), i(A,B,C,w), w) == B\n  {\n    // 展开所有网格点高程\n    // a: (-w,-w) -> A*(-w) + B*(-w) + C\n    // c: (w,-w)  -> A*w + B*(-w) + C\n    // d: (-w,0)  -> A*(-w) + B*0 + C\n    // f: (w,0)   -> A*w + B*0 + C\n    // g: (-w,w)  -> A*(-w) + B*w + C\n    // i: (w,w)   -> A*w + B*w + C\n\n    // 计算 DzDx 分子分量\n    assert c(A,B,C,w) - a(A,B,C,w) == (A*w - B*w + C) - (-A*w - B*w + C) == 2.0 * A * w;\n    assert f(A,B,C,w) - d(A,B,C,w) == (A*w + C) - (-A*w + C) == 2.0 * A * w;\n    assert i(A,B,C,w) - g(A,B,C,w) == (A*w + B*w + C) - (-A*w + B*w + C) == 2.0 * A * w;\n\n    // 合并 DzDx 分子\n    var num_x := (c(A,B,C,w) - a(A,B,C,w)) + \n                2.0*(f(A,B,C,w) - d(A,B,C,w)) + \n                (i(A,B,C,w) - g(A,B,C,w));\n    assert num_x == 2.0*A*w + 2.0*(2.0*A*w) + 2.0*A*w == 8.0 * A * w;\n\n    // 最终 DzDx = (8Aw)/(8w) = A\n    assert HornDzDx(a(A,B,C,w), d(A,B,C,w), g(A,B,C,w), \n                    c(A,B,C,w), f(A,B,C,w), i(A,B,C,w), w) \n            == num_x / (8.0 * w) == A;\n\n    // 计算 DzDy 分子分量\n    assert g(A,B,C,w) - a(A,B,C,w) == (-A*w + B*w + C) - (-A*w - B*w + C) == 2.0 * B * w;\n    assert h(A,B,C,w) - b(A,B,C,w) == (B*w + C) - (-B*w + C) == 2.0 * B * w;\n    assert i(A,B,C,w) - c(A,B,C,w) == (A*w + B*w + C) - (A*w - B*w + C) == 2.0 * B * w;\n\n    // 合并 DzDy 分子\n    var num_y := (g(A,B,C,w) - a(A,B,C,w)) + \n                2.0*(h(A,B,C,w) - b(A,B,C,w)) + \n                (i(A,B,C,w) - c(A,B,C,w));\n    assert num_y == 2.0*B*w + 2.0*(2.0*B*w) + 2.0*B*w == 8.0 * B * w;\n\n    // 最终 DzDy = (8Bw)/(8w) = B\n    assert HornDzDy(a(A,B,C,w), b(A,B,C,w), c(A,B,C,w), \n                    g(A,B,C,w), h(A,B,C,w), i(A,B,C,w), w) \n            == num_y / (8.0 * w) == B;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-001 — Horn slope exact on planes (algebraic core of GPB-019)\\n\";\n  print \"Verified by Dafny\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

@@ -1,0 +1,53 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 4,
+  "n_gold_names": 3,
+  "keyword_hits": {
+    "keywords": [
+      "argument",
+      "cell",
+      "decreases-style",
+      "descent",
+      "every",
+      "finite",
+      "fixed",
+      "give",
+      "measure",
+      "orbit",
+      "point",
+      "strict",
+      "successor",
+      "terminates",
+      "well-founded"
+    ],
+    "hit": [
+      "cell",
+      "descent",
+      "every",
+      "finite",
+      "fixed",
+      "give",
+      "measure",
+      "orbit",
+      "point",
+      "strict",
+      "successor",
+      "terminates",
+      "well-founded"
+    ],
+    "miss": [
+      "argument",
+      "decreases-style"
+    ],
+    "hit_ratio": 0.8667
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

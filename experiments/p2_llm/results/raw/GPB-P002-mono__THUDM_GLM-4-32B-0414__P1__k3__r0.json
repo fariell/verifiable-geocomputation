@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "60cee8056697984b57f8c5c405f24c6498faf43070ba22db9d41e87d6c0a2d7a",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3093,
+    "completion_tokens": 654,
+    "total_tokens": 3747,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 1397
+  },
+  "api_id": "01a08df535f187d9c022817ddb336009",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PitFillWangLiu {\n  // 1D Wang-Liu pit-filling specialization with left outlet\n  function FillLeft(orig: array<real>): array<real>\n  {\n    var n := orig.Length;\n    var fill := new real[n];\n    fill[0] := orig[0];\n    var i := 1;\n    while i < n\n      invariant i >= 1 && i <= n\n      invariant forall j :: 0 <= j < i ==> fill[j] == orig[j] || fill[j] == fill[j-1]\n      invariant forall j :: 0 <= j < i ==> fill[j] >= orig[j]\n      invariant forall j :: 0 <= j < i ==> fill[j] >= fill[j-1]\n    {\n      fill[i] := max(orig[i], fill[i-1]);\n      i := i + 1;\n    }\n    return fill;\n  }\n\n  // Theorem: Each raise is monotone (no cell elevation decreases)\n  lemma MonotoneRise(orig: array<real>)\n    requires orig != null\n    ensures forall i :: 0 <= i < orig.Length ==> FillLeft(orig)[i] >= orig[i]\n  {\n    var fill := FillLeft(orig);\n    var n := orig.Length;\n    var i := 0;\n    while i < n\n      invariant i >= 0 && i <= n\n      invariant forall j :: 0 <= j < i ==> fill[j] >= orig[j]\n    {\n      assert fill[i] >= orig[i];\n      i := i + 1;\n    }\n  }\n\n  // Theorem: After a full scan the profile is nondecreasing\n  lemma NonDecreasingProfile(orig: array<real>)\n    requires orig != null\n    ensures forall i :: 0 <= i < orig.Length - 1 ==> FillLeft(orig)[i] <= FillLeft(orig)[i+1]\n  {\n    var fill := FillLeft(orig);\n    var n := orig.Length;\n    var i := 0;\n    while i < n - 1\n      invariant i >= 0 && i <= n - 1\n      invariant forall j :: 0 <= j < i ==> fill[j] <= fill[j+1]\n    {\n      assert fill[i] <= fill[i+1];\n      i := i + 1;\n    }\n  }\n\n  method Main()\n  {\n    // Example usage\n    var orig := new real[5];\n    orig[0] := 1.0;\n    orig[1] := 0.5;\n    orig[2] := 0.8;\n    orig[3] := 0.3;\n    orig[4] := 0.7;\n    \n    var fill := FillLeft(orig);\n    print \"Original: \";\n    forall i | 0 <= i < orig.Length { print orig[i], \" \"; }\n    print \"\\nFilled: \";\n    forall i | 0 <= i < fill.Length { print fill[i], \" \"; }\n    print \"\\n\";\n    \n    // Verify properties\n    MonotoneRise(orig);\n    NonDecreasingProfile(orig);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

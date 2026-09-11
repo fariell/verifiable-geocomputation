@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "05e00f3a391b22d6f382644237480d78921654f434c67db4301207c33fc0e53b",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1592,
+    "completion_tokens": 6617,
+    "total_tokens": 8209,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6266
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1592
+  },
+  "api_id": "01a08e91d141c2bc5911d0bb275098e3",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formalization of RaiseNbr step properties\npredicate N4(p_i: int, p_j: int, q_i: int, q_j: int)\n{\n  (q_i == p_i && q_j == p_j - 1) ||\n  (q_i == p_i && q_j == p_j + 1) ||\n  (q_i == p_i - 1 && q_j == p_j) ||\n  (q_i == p_i + 1 && q_j == p_j)\n}\n\nlemma RaiseNbrStep(h: array2<real>, fill: array2<real>, p_i: int, p_j: int, n_i: int, n_j: int)\n  requires h != null && fill != null\n  requires h.Length0 == fill.Length0 && h.Length1 == fill.Length1\n  requires 0 <= p_i < h.Length0 && 0 <= p_j < h.Length1\n  requires 0 <= n_i < h.Length0 && 0 <= n_j < h.Length1\n  requires N4(p_i, p_j, n_i, n_j)\n  ensures \n    var new_fill := fill[n_i, n_j := max(h[n_i, n_j], fill[p_i, p_j])];\n    // Elevation never decreases\n    new_fill[n_i, n_j] >= h[n_i, n_j] &&\n    // Neighbor lifted to at least max(original, processed cell)\n    new_fill[n_i, n_j] >= max(h[n_i, n_j], fill[p_i, p_j])\n{\n  // Verification follows directly from assignment semantics\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

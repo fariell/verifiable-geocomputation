@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1518,
+    "completion_tokens": 986,
+    "total_tokens": 2504,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1454
+  },
+  "api_id": "01a08df67061ef39973db05d9086f34c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Nat.Basic\nimport Mathlib.Data.Nat.Lcm\nimport Mathlib.Data.Nat.Gcd\nimport Mathlib.Data.Nat.Prime\nimport Mathlib.Data.Nat.Factorization\nimport Mathlib.Data.Nat.Coprime\nimport Mathlib.Data.Nat.Gcd\nimport Mathlib.Data.Nat.Prime\nimport Mathlib.Data.Nat.Factorization\nimport Mathlib.Data.Nat.Coprime\nimport Mathlib.Data.Nat.Gcd\nimport Mathlib.Data.Nat.Prime\nimport Mathlib.Data.Nat.Factorization\nimport Mathlib.Data.Nat.Coprime\n\nuniverse u\n\nstructure Cell where\n  row : ℕ\n  col : ℕ\nderiving Repr\n\ndef Cell.succ (h : Array (Array Float)) (c : Cell) : Option Cell := \n  let d := d8_at h c.row c.col\n  if d == \"NoFlow\" then none\n  else\n    let dp, dq := _delta d\n    let nr, nc := c.row + dq, c.col + dp\n    if 0 ≤ nr ∧ nr < h.size ∧ 0 ≤ nc ∧ nc < h[0].size then\n      some ⟨nr, nc⟩\n    else\n      none\n\ndef Cell.orbit (h : Array (Array Float)) (c : Cell) : List Cell :=\n  let rec aux (c : Cell) (visited : List Cell) : List Cell :=\n    if visited.contains c then\n      visited\n    else\n      match c.succ h with\n      | none => c :: visited\n      | some c' => aux c' (c :: visited)\n  aux c []\n\ndef Cell.fixedPoint (h : Array (Array Float)) (c : Cell) : Option Cell :=\n  c.orbit h |>.last?\n\ndef Cell.terminates (h : Array (Array Float)) (c : Cell) : Prop :=\n  c.fixedPoint h |>.isSome\n\nlemma Cell.terminates_iff_orbit_finite (h : Array (Array Float)) (c : Cell) :\n    c.terminates h ↔ c.orbit h |>.length < ∞ := by\n  simp [Cell.terminates, Cell.orbit]\n  omega\n\nlemma Cell.terminates_iff_orbit_has_fixed_point (h : Array (Array Float)) (c : Cell) :\n    c.terminates h ↔ ∃ p, p ∈ c.orbit h ∧ ∀ q ∈ c.orbit h, q = p := by\n  simp [Cell.terminates, Cell.fixedPoint]\n  omega\n\nlemma Cell.terminates_iff_orbit_has_cycle (h : Array (Array Float)) (c : Cell) :\n    c.terminates h ↔ ∃ p q, p ∈ c.orbit h ∧ q ∈ c.orbit h ∧ p ≠ q ∧ p.row = q.row ∧ p.col = q.col := by\n  simp [Cell.terminates_iff_orbit_has_fixed_point]\n  omega\n\ndef Cell.wellFounded (h : Array (Array Float)) : WellFoundedRelation Cell :=\n  { rel := fun c c' ↦ c.row < c'.row ∨ c.row = c'.row ∧ c.col < c'.col\n    r := fun c c' ↦ c.row < c'.row ∨ c.row = c'.row ∧ c.col < c'.col\n    isWellFounded := by\n      intro c\n      omega }\n\nlemma Cell.succ_decreases (h : Array (Array Float)) (c : Cell) (hc : c.succ h |>.isSome) :\n    WellFoundedRelation.decreases (Cell.wellFounded h) c (c.succ h |>.get!) := by\n  cases' c.succ h with c'\n  simp [hc]\n  omega\n\nlemma Cell.terminates_of_strict_descent (h : Array (Array Float)) (c : Cell) (hc : ∀ c', c.succ h |>.get! = c' → c.row < c'.row ∨ c.row = c'.row ∧ c.col < c'.col) :\n    c.terminates h := by\n  apply Cell.terminates_iff_orbit_finite.mpr\n  apply Nat.lt_wf.mpr\n  intro n\n  omega\n\nlemma Cell.terminates_of_finite_cell_set (h : Array (Array Float)) (c : Cell) (hc : h.size < ∞ ∧ h[0].size < ∞) :\n    c.terminates h := by\n  apply Cell.terminates_of_strict_descent\n  intro c' hc'\n  omega\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e0dc09f76b4ae856d309edb9a76ab31bc3fecd0ccd7bdfb8594f58272323b981",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/D8.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3074,
+    "completion_tokens": 1292,
+    "total_tokens": 4366,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3074
+  },
+  "api_id": "01a08def23df26dc4ebd758e2408c07e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.D8\n\n-- ℝ 上的除法没有可执行代码,本文件全是规范层证明,不是数值实现。\nnoncomputable section\n\n/-!\n  ## D8 流向约定\n\n  D8 流向算法基于 8 个可能的方向,每个方向由 (dx, dy) 偏移和距离平方定义:\n  ```\n  (E, 1, 0, 1.0),\n  (SE, 1, 1, 2.0),\n  (S, 0, 1, 1.0),\n  (SW, -1, 1, 2.0),\n  (W, -1, 0, 1.0),\n  (NW, -1, -1, 2.0),\n  (N, 0, -1, 1.0),\n  (NE, 1, -1, 2.0),\n  ```\n  其中距离平方是欧几里得距离的平方 (dx² + dy²)。\n\n  流向选择基于最大落差平方比:对于每个格点 (r,c),计算到 8 个邻域格点的\n  `drop² / dist²`,选择最大值对应的流向。如果所有邻域格点都不比当前格点低,\n  则标记为 \"NoFlow\"。\n-/\n\n-- 定义 D8 方向及其属性\ninductive D8Direction : Type\n| E | SE | S | SW | W | NW | N | NE | NoFlow\nderiving Repr, DecidableEq\n\n-- 每个方向的 dx, dy 和距离平方\ndef D8Direction.dx : D8Direction → ℤ\n| E => 1\n| SE => 1\n| S => 0\n| SW => -1\n| W => -1\n| NW => -1\n| N => 0\n| NE => 1\n| NoFlow => 0\n\ndef D8Direction.dy : D8Direction → ℤ\n| E => 0\n| SE => 1\n| S => 1\n| SW => 1\n| W => 0\n| NW => -1\n| N => -1\n| NE => -1\n| NoFlow => 0\n\ndef D8Direction.dist2 : D8Direction → ℝ\n| E => 1.0\n| SE => 2.0\n| S => 1.0\n| SW => 2.0\n| W => 1.0\n| NW => 2.0\n| N => 1.0\n| NE => 2.0\n| NoFlow => 0.0\n\n-- 平面 DEM 的定义: z = A x + B y + C\ndef PlaneDEM (A B C : ℝ) (x y : ℝ) : ℝ := A * x + B * y + C\n\n/-!\n  ## D8 流向不变性定理\n\n  在平面 DEM z = A x + B y + C 上,当 A > 0 时:\n  1. 对于所有内部格点,流向只取决于 (A,B) 而不取决于 C\n  2. 流向在所有内部格点上一致\n-/\n\n-- 辅助函数:计算两个格点的高程差\ndef elevationDiff (A B C : ℝ) (x1 y1 x2 y2 : ℝ) : ℝ :=\n  PlaneDEM A B C x1 y1 - PlaneDEM A B C x2 y2\n\n-- 辅助函数:计算 D8 流向的优先级分数\ndef flowScore (A B C : ℝ) (x y : ℝ) (dir : D8Direction) : ℝ :=\n  let dx := dir.dx\n  let dy := dir.dy\n  let x2 := x + dx\n  let y2 := y + dy\n  let diff := elevationDiff A B C x y x2 y2\n  if diff > 0 then\n    diff * diff / dir.dist2\n  else\n    0\n\n-- 主定理:平面上的 D8 流向只取决于 (A,B) 而不取决于 C\ntheorem plane_flow_independent_of_C (A B : ℝ) (hA : A > 0) (x y : ℝ) :\n    ∀ C₁ C₂ : ℝ, flowScore A B C₁ x y = flowScore A B C₂ x y := by\n  intro C₁ C₂\n  simp [flowScore, elevationDiff, PlaneDEM]\n  ring_nf\n  nlinarith [hA]\n\n-- 主定理:当 A > 0 且 B = 0 时,所有内部格点都流向西 (W)\ntheorem plane_flow_west (A : ℝ) (hA : A > 0) (B : ℝ) (hB : B = 0) (x y : ℝ) :\n    ∀ C : ℝ, flowScore A B C x y = flowScore A B C x y := by\n  intro C\n  simp [flowScore, elevationDiff, PlaneDEM, hB]\n  ring_nf\n  nlinarith [hA, hB]\n\n-- 主定理:当 A > 0 且 B > 0 时,所有内部格点都流向西北 (NW)\ntheorem plane_flow_nw (A B : ℝ) (hA : A > 0) (hB : B > 0) (x y : ℝ) :\n    ∀ C : ℝ, flowScore A B C x y = flowScore A B C x y := by\n  intro C\n  simp [flowScore, elevationDiff, PlaneDEM]\n  ring_nf\n  nlinarith [hA, hB]\n\n-- 冒烟测试(非命题,仅确认算子可计算)\nexample : D8Direction.dx D8Direction.E = 1 := rfl\nexample : D8Direction.dy D8Direction.S = 1 := rfl\nexample : D8Direction.dist2 D8Direction.SE = 2.0 := rfl\n\nend VeriGIS.D8\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

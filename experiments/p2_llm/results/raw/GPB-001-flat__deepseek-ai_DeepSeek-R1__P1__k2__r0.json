@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "4ad5bb6863e850e9dbcf49614acbc628556a5d50b32cfcdd7408c75c3d6d6874",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3122,
+    "completion_tokens": 2631,
+    "total_tokens": 5753,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1796
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 50
+  },
+  "api_id": "01a08c48e69d28f5b0b2bf11608ad6b4",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · Horn Slope on Flat Window\n//  算子 : Horn (1981) slope magnitude\n//  命题 : 在任意 3x3 窗口内，若所有高程值相等，则 Horn 坡度幅值为零。\n//  环境 : Dafny 4.11\n// ===========================================================================\n\nmodule HornSlope {\n\n  // Horn (1981) 有限差分坡度算子\n  function HornDx(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    ( (c + 2.0*f + i) - (a + 2.0*d + g) ) / (8.0 * w)\n  }\n\n  function HornDy(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    ( (g + 2.0*h + i) - (a + 2.0*b + c) ) / (8.0 * w)\n  }\n\n  function SlopeSq(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n    requires w > 0.0\n  {\n    var dx := HornDx(a, b, c, d, e, f, g, h, i, w);\n    var dy := HornDy(a, b, c, d, e, f, g, h, i, w);\n    dx*dx + dy*dy\n  }\n\n  // 核心定理: 当所有高程相等时，坡度平方恒为零\n  lemma ZeroSlopeOnFlatTerrain(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real)\n    requires w > 0.0\n    requires a == b && b == c && c == d && d == e && e == f && f == g && g == h && h == i\n    ensures SlopeSq(a, b, c, d, e, f, g, h, i, w) == 0.0\n  {\n    // 计算梯度分量\n    var dx := HornDx(a, b, c, d, e, f, g, h, i, w);\n    var dy := HornDy(a, b, c, d, e, f, g, h, i, w);\n    \n    // 展开分子项证明为零\n    assert (c + 2.0*f + i) == a + 2.0*a + a;  // 4a\n    assert (a + 2.0*d + g) == a + 2.0*a + a;  // 4a\n    assert dx == 0.0 / (8.0 * w);\n    \n    assert (g + 2.0*h + i) == a + 2.0*a + a;  // 4a\n    assert (a + 2.0*b + c) == a + 2.0*a + a;  // 4a\n    assert dy == 0.0 / (8.0 * w);\n    \n    // 零的平方和为零\n    assert dx*dx == 0.0;\n    assert dy*dy == 0.0;\n  }\n\n  method Main() {\n    print \"GeoProofBench: Horn slope is zero on flat terrain (verified)\\n\";\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

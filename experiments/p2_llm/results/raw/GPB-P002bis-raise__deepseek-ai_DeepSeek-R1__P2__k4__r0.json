@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "aa011513bf2dcbdb84190fb21c66037984bd110cedf6e06d673902a3dd7fd519",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 256,
+    "completion_tokens": 4636,
+    "total_tokens": 4892,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4228
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 256
+  },
+  "api_id": "01a08ea422f83348cc116aaa4216603d",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function abs(x: int): int {\n  if x >= 0 then x else -x\n}\n\nfunction max(a: int, b: int): int {\n  if a >= b then a else b\n}\n\nmethod RaiseNbr(grid: array2<int>, processed: array2<bool>, c_row: int, c_col: int, dx: int, dy: int)\n  requires grid != null && processed != null\n  requires grid.Length0 == processed.Length0 && grid.Length1 == processed.Length1\n  requires 0 <= c_row < grid.Length0 && 0 <= c_col < grid.Length1\n  requires processed[c_row, c_col] == true\n  requires abs(dx) + abs(dy) == 1\n  requires 0 <= c_row+dx < grid.Length0 && 0 <= c_col+dy < grid.Length1\n  modifies grid\n  ensures grid[c_row, c_col] == old(grid[c_row, c_col])\n  ensures forall i,j :: 0<=i<grid.Length0 && 0<=j<grid.Length1 && (i != c_row+dx || j != c_col+dy) ==> grid[i,j] == old(grid[i,j])\n  ensures grid[c_row+dx, c_col+dy] >= old(grid[c_row+dx, c_col+dy])\n  ensures grid[c_row+dx, c_col+dy] >= old(grid[c_row, c_col])\n  ensures grid[c_row+dx, c_col+dy] == max(old(grid[c_row+dx, c_col+dy]), old(grid[c_row, c_col]))\n{\n  var n_row := c_row + dx;\n  var n_col := c_col + dy;\n  var neighbor_old := grid[n_row, n_col];\n  var fill := grid[c_row, c_col];\n  grid[n_row, n_col] := max(neighbor_old, fill);\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

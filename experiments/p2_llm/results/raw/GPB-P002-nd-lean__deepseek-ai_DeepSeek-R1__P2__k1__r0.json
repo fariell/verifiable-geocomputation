@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "6a7f0670cfe4817af21b0c66707946c8e963495cf1458206e3d78516d40ee335",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 5162,
+    "total_tokens": 5406,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4817
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 244
+  },
+  "api_id": "01a08e91d14655e201b0beecad7e3caa",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "variable {α : Type} [LinearOrder α]\n\ndef fill_aux (curr : α) : List α → List α\n  | [] => []\n  | (x::xs) => \n      let m := max curr x\n      m :: fill_aux m xs\n\ndef fill : List α → List α\n  | [] => []\n  | (x::xs) => x :: fill_aux x xs\n\ndef NonDecreasing : List α → Prop\n  | [] => True\n  | [_] => True\n  | (x::y::xs) => x ≤ y ∧ NonDecreasing (y::xs)\n\nlemma non_decreasing_fill_aux (curr : α) (l : List α) : NonDecreasing (fill_aux curr l) := by\n  induction l with\n  | nil => simp [fill_aux, NonDecreasing]\n  | cons x xs ih =>\n      simp [fill_aux]\n      cases xs with\n      | nil => \n          simp [NonDecreasing]\n      | cons y ys =>\n          apply And.intro\n          · apply le_max_left\n          · exact ih\n\ntheorem fill_non_decreasing (a : List α) : NonDecreasing (fill a) := by\n  cases a with\n  | nil => simp [fill, NonDecreasing]\n  | cons x xs =>\n      cases xs with\n      | nil => \n          simp [fill, NonDecreasing]\n      | cons y ys =>\n          simp [fill]\n          apply And.intro\n          · apply le_max_left\n          · apply non_decreasing_fill_aux\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

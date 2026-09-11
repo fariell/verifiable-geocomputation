@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1698,
+    "completion_tokens": 1106,
+    "total_tokens": 2804,
+    "prompt_tokens_details": {
+      "cached_tokens": 64
+    },
+    "prompt_cache_hit_tokens": 64,
+    "prompt_cache_miss_tokens": 1634
+  },
+  "api_id": "01a08df25acfde372002c59006dee365",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P-004 / GPB-019: Horn slope is exact on quadratic surfaces and has O(w^2) remainder on cubic surfaces\nmodule HornSlopeConsistency {\n  // Grid spacing must be positive\n  method HornSlopeExactOnQuadratic(w: real) requires w > 0.0\n  {\n    // Quadratic surface coefficients\n    var A, B, C, D, E, F: real;\n    A := 0.3; B := -0.2; C := 5.0; // Linear terms\n    D := 0.05; E := -0.04; F := 0.02; // Quadratic terms\n    \n    // Sample points around origin (0,0)\n    var a, b, c, d, f, g, h, i: real;\n    // Points at (-w,-w), (0,-w), (w,-w), (-w,0), (w,0), (-w,w), (0,w), (w,w)\n    a := A*(-w) + B*(-w) + C + D*(-w)*(-w) + E*(-w)*(-w) + F*(-w)*(-w);\n    b := A*(0) + B*(-w) + C + D*(0)*(-w) + E*(0)*(-w) + F*(-w)*(-w);\n    c := A*(w) + B*(-w) + C + D*(w)*(-w) + E*(w)*(-w) + F*(-w)*(-w);\n    d := A*(-w) + B*(0) + C + D*(-w)*(0) + E*(-w)*(0) + F*(0)*(0);\n    f := A*(w) + B*(0) + C + D*(w)*(0) + E*(w)*(0) + F*(0)*(0);\n    g := A*(-w) + B*(w) + C + D*(-w)*(w) + E*(-w)*(w) + F*(w)*(w);\n    h := A*(0) + B*(w) + C + D*(0)*(w) + E*(0)*(w) + F*(w)*(w);\n    i := A*(w) + B*(w) + C + D*(w)*(w) + E*(w)*(w) + F*(w)*(w);\n    \n    // Horn's DzDx and DzDy formulas\n    var hornDzDx: real;\n    hornDzDx := ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w);\n    var hornDzDy: real;\n    hornDzDy := ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w);\n    \n    // True analytical derivatives at origin\n    var trueDzDx: real;\n    trueDzDx := A; // dz/dx = A + 2Dx + Ey evaluated at (0,0)\n    var trueDzDy: real;\n    trueDzDy := B; // dz/dy = B + Dx + 2Fy evaluated at (0,0)\n    \n    // Prove Horn's method is exact for quadratic surfaces\n    assert hornDzDx == trueDzDx;\n    assert hornDzDy == trueDzDy;\n  }\n  \n  method HornSlopeCubicRemainder(G: real, w: real) requires w > 0.0\n  {\n    // Cubic surface z = G*x^3\n    // Sample points around origin (0,0)\n    var a, b, c, d, f, g, h, i: real;\n    // Points at (-w,-w), (0,-w), (w,-w), (-w,0), (w,0), (-w,w), (0,w), (w,w)\n    a := G*(-w)^3;\n    b := G*(0)^3;\n    c := G*(w)^3;\n    d := G*(-w)^3;\n    f := G*(w)^3;\n    g := G*(-w)^3;\n    h := G*(0)^3;\n    i := G*(w)^3;\n    \n    // Horn's DzDx formula\n    var hornDzDx: real;\n    hornDzDx := ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w);\n    \n    // True analytical derivative at origin\n    var trueDzDx: real;\n    trueDzDx := 0.0; // dz/dx = 3Gx^2 evaluated at (0,0)\n    \n    // Remainder term\n    var remainder: real;\n    remainder := hornDzDx - trueDzDx;\n    \n    // Prove remainder is O(w^2)\n    assert abs(remainder) <= abs(G) * w * w;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

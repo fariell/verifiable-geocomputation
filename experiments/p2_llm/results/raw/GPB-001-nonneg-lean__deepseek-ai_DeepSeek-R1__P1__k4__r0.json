@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3030,
+    "completion_tokens": 3517,
+    "total_tokens": 6547,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2934
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 86
+  },
+  "api_id": "01a08e006d1f34e70a0c24065108e25f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.Slope\n\nnoncomputable section\n\n/-!\n  Horn (1981) finite-difference slope operator for 3×3 window:\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  Slope components defined as:\n    dz/dx ≈ ( (c + 2*f + i) - (a + 2*d + g) ) / (8 * w)\n    dz/dy ≈ ( (g + 2*h + i) - (a + 2*b + c) ) / (8 * w)\n-/\n\ndef horn_dzdx (a b c d e f g h i w : ℝ) : ℝ := \n  (c + 2*f + i - (a + 2*d + g)) / (8 * w)\n\ndef horn_dzdy (a b c d e f g h i w : ℝ) : ℝ := \n  (g + 2*h + i - (a + 2*b + c)) / (8 * w)\n\ndef horn_slope_sq (a b c d e f g h i w : ℝ) : ℝ := \n  (horn_dzdx a b c d e f g h i w)^2 + (horn_dzdy a b c d e f g h i w)^2\n\n/-!\n  ==========================================================================\n   GeoProofBench · P-019\n   Horn slope-square nonnegativity for arbitrary elevations\n  ==========================================================================\n\n  Theorem: For any real-valued 3×3 elevation window (a,...,i) and positive \n  grid spacing w > 0, the Horn slope-square is nonnegative.\n\n  Proof: The slope-square is sum of two real squares. Squares are always ≥0, \n  and sum of nonnegative terms is nonnegative. The w>0 precondition ensures \n  division is well-defined but doesn't affect nonnegativity.\n  ==========================================================================\n-/\n\ntheorem horn_slope_sq_nonneg (a b c d e f g h i w : ℝ) (hw : w > 0) : \n    0 ≤ horn_slope_sq a b c d e f g h i w := by\n  unfold horn_slope_sq\n  apply add_nonneg\n  · apply pow_two_nonneg  -- (dzdx)^2 ≥ 0\n  · apply pow_two_nonneg  -- (dzdy)^2 ≥ 0\n\nend\nend VeriGIS.Slope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

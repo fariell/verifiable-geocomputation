@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "eab8c2a3213e460c9bd707579906280dd615923ea4a9033bad5daa0dc361f804",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1539,
+    "completion_tokens": 491,
+    "total_tokens": 2030,
+    "prompt_tokens_details": {
+      "cached_tokens": 1536
+    },
+    "prompt_cache_hit_tokens": 1536,
+    "prompt_cache_miss_tokens": 3
+  },
+  "api_id": "01a08df4f46d8dcc363aa5cf5c8d3ca6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Formal specification of the 1D Wang-Liu pit-filling algorithm with left outlet\nmodule PitFill1D {\n  // Represents a 1D elevation profile\n  type ElevationProfile = array<int>\n\n  // Fill operation with left outlet\n  function Fill(orig: ElevationProfile): ElevationProfile\n  {\n    var n := orig.Length;\n    var fill := new int[n];\n    fill[0] := orig[0];\n    var i := 1;\n    while i < n\n      invariant 1 <= i <= n\n      invariant forall j :: 0 <= j < i ==> fill[j] == orig[j] || fill[j] == fill[j-1]\n      invariant forall j :: 0 <= j < i ==> fill[j] >= orig[j]\n      invariant forall j :: 0 <= j < i ==> fill[j] >= fill[j-1]\n    {\n      fill[i] := max(orig[i], fill[i-1]);\n      i := i + 1;\n    }\n    return fill;\n  }\n\n  // Property: Each raise is monotone (no cell elevation decreases)\n  lemma Monotonicity(orig: ElevationProfile)\n  {\n    var n := orig.Length;\n    var fill := Fill(orig);\n    var i := 0;\n    while i < n - 1\n      invariant 0 <= i < n - 1\n      invariant forall j :: 0 <= j < i ==> fill[j] <= fill[j+1]\n    {\n      assert fill[i] <= fill[i+1];\n      i := i + 1;\n    }\n  }\n\n  // Property: After a full scan the profile is nondecreasing\n  lemma NonDecreasingProfile(orig: ElevationProfile)\n  {\n    var n := orig.Length;\n    var fill := Fill(orig);\n    var i := 0;\n    while i < n - 1\n      invariant 0 <= i < n - 1\n      invariant forall j :: 0 <= j < i ==> fill[j] <= fill[j+1]\n    {\n      assert fill[i] <= fill[i+1];\n      i := i + 1;\n    }\n  }\n\n  // Helper function to compute maximum\n  function max(a: int, b: int): int\n  {\n    if a >= b then a else b\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

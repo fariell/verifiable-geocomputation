@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 2245,
+    "total_tokens": 2506,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1692
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08dfcb958e7d8a0fd6ddca8b52cd7",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function HornSlopeSq(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n{\n  var dx := ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w);\n  var dy := ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w);\n  dx*dx + dy*dy\n}\n\nlemma Theorem(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real)\n  requires w > 0.0\n  requires a == b && b == c && c == d && d == e && e == f && f == g && g == h && h == i\n  ensures HornSlopeSq(a, b, c, d, e, f, g, h, i, w) == 0.0\n{\n  // All values are equal to a\n  assert (c + 2.0*f + i) == a + 2.0*a + a by {}\n  assert (a + 2.0*d + g) == a + 2.0*a + a by {}\n  assert ((c + 2.0*f + i) - (a + 2.0*d + g)) == 0.0 by {}\n\n  assert (g + 2.0*h + i) == a + 2.0*a + a by {}\n  assert (a + 2.0*b + c) == a + 2.0*a + a by {}\n  assert ((g + 2.0*h + i) - (a + 2.0*b + c)) == 0.0 by {}\n\n  // Both dx and dy numerators are zero\n  assert HornSlopeSq(a, b, c, d, e, f, g, h, i, w) == (0.0/(8.0*w))*(0.0/(8.0*w)) + (0.0/(8.0*w))*(0.0/(8.0*w)) by {}\n  assert HornSlopeSq(a, b, c, d, e, f, g, h, i, w) == 0.0 by {}\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

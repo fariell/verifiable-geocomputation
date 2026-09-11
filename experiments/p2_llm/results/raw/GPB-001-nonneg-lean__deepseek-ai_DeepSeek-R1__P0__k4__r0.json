@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5d92a2abc99c8b7c236c9312a40370eb6ef99fe8a1bc241c27a8a01891431b19",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1597,
+    "completion_tokens": 1855,
+    "total_tokens": 3452,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1490
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1597
+  },
+  "api_id": "01a08dffe71771f511e29475c768fcee",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\n\n/-!\n### Horn Slope-Square Nonnegativity Proof\n\nFor any 3×3 elevation window and positive grid spacing `w`, \nthe Horn slope-square (SlopeSq) is nonnegative. This holds \nfor arbitrary elevation values, not just planar surfaces.\n\nThe Horn (1981) finite-difference method defines:\n- `dz/dx ≈ (c + 2f + i - a - 2d - g) / (8w)`\n- `dz/dy ≈ (g + 2h + i - a - 2b - c) / (8w)`\n- SlopeSq = (dz/dx)^2 + (dz/dy)^2\n\nSince SlopeSq is a sum of squares, it must be ≥0.\n-/\n\ntheorem horn_slope_sq_nonneg \n  (a b c d e f g h i w : ℝ)  -- Elevations a..i, spacing w\n  (hw : w > 0) :              -- Grid spacing positive\n  let dzdx := (c + 2*f + i - a - 2*d - g) / (8 * w);\n  let dzdy := (g + 2*h + i - a - 2*b - c) / (8 * w);\n  dzdx^2 + dzdy^2 ≥ 0 := by\n  -- Define intermediate derivatives\n  intro dzdx dzdy\n  -- Sum of squares is nonnegative\n  apply add_nonneg\n  · apply pow_two_nonneg  -- (dzdx)^2 ≥ 0\n  · apply pow_two_nonneg  -- (dzdy)^2 ≥ 0\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

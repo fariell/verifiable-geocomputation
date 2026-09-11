@@ -1,0 +1,57 @@
+{
+  "task_id": "GPB-P002-mono",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 5,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "cell",
+      "consider",
+      "decreases",
+      "elevation",
+      "fill",
+      "full",
+      "left",
+      "monotone",
+      "nondecreasing",
+      "orig",
+      "outlet",
+      "pit-filling",
+      "profile",
+      "raise",
+      "scan",
+      "specialization",
+      "wang-liu"
+    ],
+    "hit": [
+      "decreases",
+      "fill",
+      "nondecreasing",
+      "orig",
+      "profile",
+      "specialization",
+      "wang-liu"
+    ],
+    "miss": [
+      "cell",
+      "consider",
+      "elevation",
+      "full",
+      "left",
+      "monotone",
+      "outlet",
+      "pit-filling",
+      "raise",
+      "scan"
+    ],
+    "hit_ratio": 0.4118
+  },
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only. F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity."
+}

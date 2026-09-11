@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2986,
+    "completion_tokens": 3528,
+    "total_tokens": 6514,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2955
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 42
+  },
+  "api_id": "01a08e88a86b5e1a1bb4bca627610dd0",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.Fill1D\n\nnoncomputable section\n\n/-!\n## 1D Left-Outlet Fill Operator Specification\n\nWe formalize the property that the 1D left-outlet fill operator produces a nondecreasing sequence.\nThe fill starts at the left outlet (index 0) and propagates rightwards using the rule:\n  fill[i] = max(original[i], fill[i-1])\n\nThis matches the 2D Wang & Liu algorithm's core behavior in the 1D case.\n-/\n\n/-- Auxiliary function for left-outlet fill (carries accumulator) -/\ndef fillAux (acc : ℝ) : List ℝ → List ℝ\n  | [] => []\n  | (x::xs) => \n      let new := max x acc\n      new :: fillAux new xs\n\n/-- 1D left-outlet fill operator -/\ndef fill : List ℝ → List ℝ\n  | [] => []\n  | (x::xs) => x :: fillAux x xs\n\n/-!\n### Key Property: Fill produces nondecreasing sequences\n\nAfter applying the fill operator, every consecutive pair in the \nresult satisfies `fill[i] ≤ fill[i+1]`.\n-/\n\ntheorem fill_aux_chain (acc : ℝ) (xs : List ℝ) : \n    List.Chain (·≤·) (acc :: fillAux acc xs) := by\n  induction xs with\n  | nil => exact List.Chain.nil\n  | cons y ys ih =>\n      unfold fillAux\n      apply List.Chain.cons\n      · apply le_max_right\n      · exact ih\n\ntheorem fill_nondec (l : List ℝ) : List.Chain (·≤·) (fill l) := by\n  cases l with\n  | nil => exact List.Chain.nil\n  | cons x xs => \n      unfold fill\n      exact fill_aux_chain x xs\n\n/-!\n### Corollary: Element-wise nondecreasing property\n\nFor any consecutive indices `i` and `i+1` in the filled result,\nwe have `get i ≤ get (i+1)`.\n-/\n\ntheorem fill_step_nondec (l : List ℝ) (i : ℕ) (h : i < (fill l).length - 1) :\n    (fill l).get ⟨i, by omega⟩ ≤ (fill l).get ⟨i+1, by omega⟩ := by\n  have chain := fill_nondec l\n  rw [List.chain_iff_get] at chain\n  exact chain i (by omega)\n\nend -- noncomputable section\n\nend VeriGIS.Fill1D\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

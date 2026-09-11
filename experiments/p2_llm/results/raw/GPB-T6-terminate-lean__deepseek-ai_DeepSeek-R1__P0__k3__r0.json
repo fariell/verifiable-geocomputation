@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "1cc7d3fcbae5240a7ffc725c1061ba992e47392ad3a7e9e734753b45021155bf",
+  "sample_index": 3,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1579,
+    "completion_tokens": 5219,
+    "total_tokens": 6798,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4971
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1579
+  },
+  "api_id": "01a08ea422f7d572d74ed03bb515984e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Nat.Basic\nimport Mathlib.Logic.Function.Iterate\n\nvariable {Cell : Type} (succ : Cell → Cell) (h : Cell → ℕ)\n  (strict_descent : ∀ c, succ c ≠ c → h (succ c) < h c)\n\ntheorem terminates_at_fixed_point (c : Cell) :\n    ∃ (n : ℕ) (c' : Cell), (succ^[n] c) = c' ∧ succ c' = c' := by\n  apply Nat.strongInductionOn (h c)\n  intro k ih\n  by_cases hc : succ c = c\n  · use 0, c\n    simp [hc]\n  · have step : h (succ c) < h c := strict_descent c hc\n    obtain ⟨n, c', h_iter, h_fixed⟩ := ih (h (succ c)) step (succ c)\n    use n + 1, c'\n    constructor\n    · rw [Function.iterate_succ_apply, h_iter]\n    · exact h_fixed\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-mono",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "ec578a84868b8b3f6cf5c26bc9fa5c9d78e46b6456451698e11daa292093e204",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 6933,
+    "total_tokens": 7202,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6616
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a08e7f9d16714dd05ec2f223274ed5",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function max(a: int, b: int): int {\n  if a > b then a else b\n}\n\nmethod ComputeFill(orig: array<int>) returns (fill: array<int>)\n  requires orig != null\n  ensures fill != null && fill.Length == orig.Length\n  ensures fill[0] == orig[0]\n  ensures forall i :: 1 <= i < orig.Length ==> fill[i] == max(orig[i], fill[i-1])\n  ensures forall i :: 0 <= i < orig.Length ==> fill[i] >= orig[i]\n  ensures forall i, j :: 0 <= i <= j < fill.Length ==> fill[i] <= fill[j]\n{\n  fill := new int[orig.Length];\n  if orig.Length == 0 {\n    return;\n  }\n  fill[0] := orig[0];\n  var i := 1;\n  while i < orig.Length\n    invariant 1 <= i <= orig.Length\n    invariant fill[0] == orig[0]\n    invariant forall k :: 1 <= k < i ==> fill[k] == max(orig[k], fill[k-1])\n    invariant forall k :: 0 <= k < i ==> fill[k] >= orig[k]\n    invariant forall k, j :: 0 <= k <= j < i ==> fill[k] <= fill[j]\n  {\n    fill[i] := max(orig[i], fill[i-1]);\n    i := i + 1;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
+}

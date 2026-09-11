@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "74bd9fb19405eaece92effb6271411666e04858fd98690a09557bf9f69abf522",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 2986,
+    "completion_tokens": 1380,
+    "total_tokens": 4366,
+    "completion_tokens_details": {
+      "reasoning_tokens": 926
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    },
+    "prompt_cache_hit_tokens": 2944,
+    "prompt_cache_miss_tokens": 42
+  },
+  "api_id": "01a08e84cafe84549537a866e36999d1",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.Fill1D\n\nnoncomputable section\n\n/-!\n## 1D Left-Outlet Fill Operator Specification\n\nWe formalize the 1D pit-filling algorithm where:\n- The outlet is fixed at the leftmost position (index 0)\n- Filled elevation at each cell is the maximum of:\n  1. Original elevation\n  2. Filled elevation of the left neighbor\n\nThis yields a non-decreasing sequence from left to right.\n-/\n\n/-- Fill operator for 1D elevation sequences -/\ndef fill : List ℝ → List ℝ\n| [] => []\n| x::xs => \n    let rest := fill xs\n    x :: List.map (max x) rest\n\n/-!\n### Core Property: Non-decreasing Sequence\nFor any input elevation list `a`, the filled sequence satisfies:\n∀ i < (length (fill a) - 1), (fill a)[i] ≤ (fill a)[i+1]\n-/\n\ntheorem fill_non_decreasing (a : List ℝ) :\n    ∀ (i : Fin (List.length (fill a) - 1)), \n      List.get (fill a) i.castSucc ≤ List.get (fill a) i.succ := by\n  induction a with\n  | nil => \n      intro i\n      have h_len : List.length (fill []) = 0 := rfl\n      simp [h_len] at i\n  | cons x xs ih =>\n      unfold fill\n      let filled_rest := fill xs\n      intro i\n      cases i using Fin.cases with\n      | zero =>\n          simp [List.get]\n          apply le_max_left\n      | succ i =>\n          simp [List.get]\n          have : i < List.length filled_rest - 1 := by\n            rw [List.length_map] at i\n            exact Nat.sub_lt_sub_right i.is_lt (by decide)\n          specialize ih ⟨i, this⟩\n          apply le_trans ?_ (le_max_right _ _)\n          exact ih\n\nend -- noncomputable section\n\nend VeriGIS.Fill1D\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

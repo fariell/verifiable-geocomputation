@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "56d958189467dd8c8b268ae890f52e7421f480563ddf8e44f86ebb90746c2628",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/PitFilling.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1518,
+    "completion_tokens": 202,
+    "total_tokens": 1720,
+    "prompt_tokens_details": {
+      "cached_tokens": 1056
+    },
+    "prompt_cache_hit_tokens": 1056,
+    "prompt_cache_miss_tokens": 462
+  },
+  "api_id": "01a08df581861488b38a4d7b8b7ebbe6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Nat.Basic\n\nnamespace FillOperator\n\n-- Define the 1D left-outlet Fill operator\ndef fill (a : List ℝ) : List ℝ := List.map (fun i => List.foldl (fun acc j => max acc a[j]) a[i] a) (List.range a.length)\n\n-- Property: The fill operator yields a nondecreasing sequence\nlemma fill_nondecreasing (a : List ℝ) (h : ∀ i, i < a.length → a[i] ≤ a[i + 1]) : ∀ i, i < fill a.length → fill a[i] ≤ fill a[i + 1] := by\n  intro i hi\n  simp [fill] at *\n  intro i hi\n  apply List.foldl_le\n  intro j hj\n  apply max_le\n  apply h\n  linarith\n  apply h\n  linarith\n\nend FillOperator\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

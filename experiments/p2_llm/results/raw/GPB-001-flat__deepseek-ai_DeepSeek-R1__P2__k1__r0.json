@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-flat",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-10",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5977db13a9c164b8eaa4bc3edd60c2563027cb5cf64309a745003e45b5be5e9b",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 3458,
+    "total_tokens": 3719,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2998
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08c530a1e21852bfb4c726d1384df",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function HornSlopeSq(a00: real, a01: real, a02: real,\n                     a10: real, a11: real, a12: real,\n                     a20: real, a21: real, a22: real, w: real): real\n  requires w > 0.0\n{\n  var dzdx_numerator := a02 + 2.0*a12 + a22 - a00 - 2.0*a10 - a20;\n  var dzdy_numerator := a20 + 2.0*a21 + a22 - a00 - 2.0*a01 - a02;\n  var dzdx := dzdx_numerator / (8.0 * w);\n  var dzdy := dzdy_numerator / (8.0 * w);\n  dzdx * dzdx + dzdy * dzdy\n}\n\nlemma LemmaAllEqualImpliesZeroSlope(a00: real, a01: real, a02: real,\n                                   a10: real, a11: real, a12: real,\n                                   a20: real, a21: real, a22: real, w: real)\n  requires w > 0.0\n  requires a00 == a01 && a01 == a02 && a02 == a10 && a10 == a11 && a11 == a12 && a12 == a20 && a20 == a21 && a21 == a22\n  ensures HornSlopeSq(a00, a01, a02, a10, a11, a12, a20, a21, a22, w) == 0.0\n{\n  // When all values are equal (let k = a00), both numerators become:\n  // dzdx_numerator = k + 2k + k - k - 2k - k = (1+2+1-1-2-1)k = 0\n  // dzdy_numerator = k + 2k + k - k - 2k - k = 0\n  // Thus dzdx = 0, dzdy = 0, and SlopeSq = 0\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

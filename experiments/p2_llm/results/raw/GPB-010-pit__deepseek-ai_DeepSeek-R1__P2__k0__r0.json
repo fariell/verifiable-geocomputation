@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-010-pit",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "5b1d80c9f558cecc7abebaec3f40a41e3aa5f66762cf489a62d60b5d8363feaf",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P005_d8.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 240,
+    "completion_tokens": 4211,
+    "total_tokens": 4451,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3859
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 240
+  },
+  "api_id": "01a08e317bc4dfb923c78bcee79932a8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "datatype Direction = NW | N | NE | W | E | SW | S | SE | NoFlow\n\ntype Grid = array2<int>\n\npredicate ValidGrid(grid: Grid) {\n  grid.Length0 > 0 && grid.Length1 > 0\n}\n\npredicate HasAllNeighbors(grid: Grid, i: int, j: int)\n  requires ValidGrid(grid)\n{\n  0 < i < grid.Length0 - 1 && 0 < j < grid.Length1 - 1\n}\n\npredicate IsNoFlow(grid: Grid, i: int, j: int)\n  requires ValidGrid(grid) && HasAllNeighbors(grid, i, j)\n  reads grid\n{\n  forall di, dj : int | \n    di in {-1,0,1} && dj in {-1,0,1} && (di != 0 || dj != 0) \n  :: \n    grid[i + di, j + dj] >= grid[i, j]\n}\n\nfunction method GetFlowDirection(grid: Grid, i: int, j: int): Direction\n  requires ValidGrid(grid) && HasAllNeighbors(grid, i, j)\n  reads grid\n  ensures IsNoFlow(grid, i, j) <==> dir == NoFlow\n{\n  if IsNoFlow(grid, i, j) then NoFlow else N\n}\n\nlemma Theorem(grid: Grid, i: int, j: int)\n  requires ValidGrid(grid)\n  requires HasAllNeighbors(grid, i, j)\n  requires IsNoFlow(grid, i, j)\n  ensures GetFlowDirection(grid, i, j) == NoFlow\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

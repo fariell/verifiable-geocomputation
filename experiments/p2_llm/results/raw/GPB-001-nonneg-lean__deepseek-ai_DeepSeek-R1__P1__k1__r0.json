@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3030,
+    "completion_tokens": 3560,
+    "total_tokens": 6590,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2860
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3030
+  },
+  "api_id": "01a08dffe76929328d47a911ed8d8859",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.HornSlope\n\nnoncomputable section\n\n/-!\n  3×3 window (p right, q down) - Horn (1981) slope operator.\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n-/\n\n/-- Horn slope in x-direction -/\ndef dzdx (a d g c f i w : ℝ) : ℝ := (c + 2*f + i - (a + 2*d + g)) / (8 * w)\n\n/-- Horn slope in y-direction -/\ndef dzdy (a b c g h i w : ℝ) : ℝ := (g + 2*h + i - (a + 2*b + c)) / (8 * w)\n\n/-- Squared slope magnitude -/\ndef slopeSq (a b c d e f g h i w : ℝ) : ℝ := \n  (dzdx a d g c f i w)^2 + (dzdy a b c g h i w)^2\n\n/-!\n  ==========================================================================\n   GeoProofBench · P-019\n   算子 : Horn (1981) slope magnitude squared\n   命题 : 任意 3×3 窗口和正网格间距下，SlopeSq ≥ 0\n   环境 : Lean 4.18.0 + mathlib\n  ==========================================================================\n\n  核心证明: 平方和结构保证非负性\n  ==========================================================================\n-/\n\ntheorem horn_slopeSq_nonneg (a b c d e f g h i w : ℝ) (hw : w > 0) : \n    slopeSq a b c d e f g h i w ≥ 0 := by\n  -- 展开定义\n  unfold slopeSq dzdx dzdy\n  -- 平方项自动非负\n  apply add_nonneg\n  · apply pow_two_nonneg  -- ∀ (r : ℝ), 0 ≤ r^2\n  · apply pow_two_nonneg\n\nend\nend VeriGIS.HornSlope\n```\n\nThis Lean formalization:\n1. Defines the Horn (1981) slope operators `dzdx` and `dzdy` exactly as specified\n2. Defines `slopeSq` as the sum of squared slopes\n3. Proves the key theorem `horn_slopeSq_nonneg`:\n   - For any 9 elevation values (a-i) \n   - With positive grid spacing `w > 0`\n   - The squared slope magnitude is nonnegative\n4. Proof leverages the mathematical property that squares are always nonnegative\n5. Maintains the 3x3 window convention from the specification\n6. Uses only essential imports matching the style guide\n7. Includes documentation headers in the GeoProofBench format\n\nThe proof is concise because the nonnegativity follows directly from the sum-of-squares structure, requiring only:\n- Unfolding definitions\n- Applying the mathematical fact that squares are nonnegative (`pow_two_nonneg`)\n- Using the additive property of nonnegativity (`add_nonneg`)\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

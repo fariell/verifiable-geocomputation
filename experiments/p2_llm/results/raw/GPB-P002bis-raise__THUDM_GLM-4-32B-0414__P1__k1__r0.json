@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3080,
+    "completion_tokens": 908,
+    "total_tokens": 3988,
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 8
+  },
+  "api_id": "01a08df63a123bdf643cdda5996fb09b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module RaiseNbr {\n  // Define the 4-neighbors of a cell (up, down, left, right)\n  function Nbr4(r: int, c: int): (int, int)[]\n  {\n    [ (r-1, c), (r+1, c), (r, c-1), (r, c+1) ]\n  }\n\n  // Define the RaiseNbr operation\n  function RaiseNbr(h: real[][], p: (int, int), processed: set<(int, int)>): real[][]\n  requires h != null\n  requires 0 <= p.0 < h.Length && 0 <= p.1 < h[p.0].Length\n  requires forall r, c :: (r, c) in processed ==> 0 <= r < h.Length && 0 <= c < h[r].Length\n  ensures forall r, c :: 0 <= r < h.Length && 0 <= c < h[r].Length ==>\n            (r, c) in processed ==>\n            RaiseNbr(h, p, processed)[r][c] == h[r][c]\n  ensures forall r, c :: 0 <= r < h.Length && 0 <= c < h[r].Length ==>\n            (r, c) not in processed ==>\n            RaiseNbr(h, p, processed)[r][c] >= h[r][c]\n  ensures forall r, c :: 0 <= r < h.Length && 0 <= c < h[r].Length ==>\n            (r, c) in Nbr4(p.0, p.1) && (r, c) not in processed ==>\n            RaiseNbr(h, p, processed)[r][c] >= max(h[r][c], h[p.0][p.1])\n  {\n    var h' := h;\n    var nbrs := Nbr4(p.0, p.1);\n    foreach n in nbrs\n    {\n      var r, c := n;\n      if r >= 0 && r < h.Length && c >= 0 && c < h[r].Length && (r, c) not in processed\n      {\n        h'[r][c] := max(h[r][c], h[p.0][p.1]);\n      }\n    }\n    return h';\n  }\n\n  // Lemma to prove the properties of RaiseNbr\n  lemma RaiseNbrProperties(h: real[][], p: (int, int), processed: set<(int, int)>)\n    requires h != null\n    requires 0 <= p.0 < h.Length && 0 <= p.1 < h[p.0].Length\n    requires forall r, c :: (r, c) in processed ==> 0 <= r < h.Length && 0 <= c < h[r].Length\n    ensures forall r, c :: 0 <= r < h.Length && 0 <= c < h[r].Length ==>\n            (r, c) in processed ==>\n            RaiseNbr(h, p, processed)[r][c] == h[r][c]\n    ensures forall r, c :: 0 <= r < h.Length && 0 <= c < h[r].Length ==>\n            (r, c) not in processed ==>\n            RaiseNbr(h, p, processed)[r][c] >= h[r][c]\n    ensures forall r, c :: 0 <= r < h.Length && 0 <= c < h[r].Length ==>\n            (r, c) in Nbr4(p.0, p.1) && (r, c) not in processed ==>\n            RaiseNbr(h, p, processed)[r][c] >= max(h[r][c], h[p.0][p.1])\n  {\n    var h' := RaiseNbr(h, p, processed);\n    var nbrs := Nbr4(p.0, p.1);\n    foreach n in nbrs\n    {\n      var r, c := n;\n      if r >= 0 && r < h.Length && c >= 0 && c < h[r].Length && (r, c) not in processed\n      {\n        assert h'[r][c] == max(h[r][c], h[p.0][p.1]);\n      }\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

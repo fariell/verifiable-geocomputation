@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "b9979c91b4a079152d202c6fd3c2f06fc6dba12f8615a60067330070e1ba3f37",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 5539,
+    "total_tokens": 5783,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5303
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 244
+  },
+  "api_id": "01a08e15cf3bb22aa1ac0210610df187",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic.Linarith\n\ntheorem local_max_imp_laplacian_nonpos (g : Fin 3 → Fin 3 → ℝ)\n    (h_top : g 1 1 ≥ g 0 1)\n    (h_bot : g 1 1 ≥ g 2 1)\n    (h_left : g 1 1 ≥ g 1 0)\n    (h_right : g 1 1 ≥ g 1 2) :\n    (g 0 1 + g 2 1 + g 1 0 + g 1 2) - 4 * g 1 1 ≤ 0 := by\n  have h1 : g 0 1 ≤ g 1 1 := h_top\n  have h2 : g 2 1 ≤ g 1 1 := h_bot\n  have h3 : g 1 0 ≤ g 1 1 := h_left\n  have h4 : g 1 2 ≤ g 1 1 := h_right\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

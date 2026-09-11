@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5606f6e9991905af037cdb9ea5597de389593a31b444409949f4b797c24eca49",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1612,
+    "completion_tokens": 5146,
+    "total_tokens": 6758,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4608
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1612
+  },
+  "api_id": "01a08e030ca7da38d7f7c190c52fbb2c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn finite-difference exactness on planar surfaces\nmodule HornExact {\n  lemma ExactRecovery(w: real, A: real, B: real, x0: real, y0: real, C: real, i: int, j: int)\n    requires w > 0.0\n  {\n    // Define planar elevation function\n    function elevation(i: int, j: int): real\n      reads \n    {\n      A * (x0 + j*w) + B * (y0 + i*w) + C\n    }\n\n    // Horn finite-difference operators\n    var dzdx := (elevation(i, j+1) - elevation(i, j-1)) / (2.0 * w);\n    var dzdy := (elevation(i+1, j) - elevation(i-1, j)) / (2.0 * w);\n\n    // Algebraic verification\n    assert dzdx == A by {\n      calc {\n        dzdx;\n        == // Expand elevation terms\n        ( (A*(x0 + (j+1)*w) + B*(y0 + i*w) + C) - \n          (A*(x0 + (j-1)*w) + B*(y0 + i*w) + C) ) / (2.0 * w);\n        == // Simplify by canceling B and C terms\n        (A*(x0 + (j+1)*w - x0 - (j-1)*w)) / (2.0 * w);\n        == // Simplify x-coordinate difference\n        (A*(2*w)) / (2.0 * w);\n        == // Cancel common factors\n        A;\n      }\n    }\n\n    assert dzdy == B by {\n      calc {\n        dzdy;\n        == // Expand elevation terms\n        ( (A*(x0 + j*w) + B*(y0 + (i+1)*w) + C) - \n          (A*(x0 + j*w) + B*(y0 + (i-1)*w) + C) ) / (2.0 * w);\n        == // Simplify by canceling A and C terms\n        (B*(y0 + (i+1)*w - y0 - (i-1)*w)) / (2.0 * w);\n        == // Simplify y-coordinate difference\n        (B*(2*w)) / (2.0 * w);\n        == // Cancel common factors\n        B;\n      }\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

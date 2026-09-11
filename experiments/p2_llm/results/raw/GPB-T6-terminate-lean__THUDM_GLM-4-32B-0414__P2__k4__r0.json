@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-T6-terminate-lean",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "4a7da383f62079d9c160db304784bf61ef573b046541c5373bd7997326fb56cd",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/P006Terminate.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 234,
+    "completion_tokens": 301,
+    "total_tokens": 535,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "prompt_cache_hit_tokens": 224,
+    "prompt_cache_miss_tokens": 10
+  },
+  "api_id": "01a08df7e50811de2a63e44fdecad547",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "I need to see the original attempt and the toolchain feedback to provide a proper repair. Since these are missing, I'll create a basic template for an iterative repair proof that follows the specification about strict descent and termination at fixed points.\n\nHere's a repaired version that should work for the given specification:\n\n```lean\nimport Mathlib.Data.Nat.Basic\n\nsection OrbitTermination\n\nvariable {α : Type*} (r : α → α → Prop) [IsStrictOrder α r]\nvariable (cells : Finset α)\n\n-- Define a measure based on the strict order\ndef measure (x : α) : ℕ := 0  -- This is a placeholder; in practice you'd use a proper measure\n\n-- The main theorem: under strict descent, every orbit terminates at a fixed point\ntheorem orbit_terminates (x : α) : \n  ∃ y, r y y := by\n    -- Use well-founded induction\n    apply Well-founded.induction\n    exact fun x _ => ⟨x, by simp [IsStrictOrder.refl]⟩\n\nend OrbitTermination\n```\n\nNote: This is a template that needs to be adapted to your specific context. The actual repair would depend on:\n1. The original attempt that failed\n2. The specific feedback from the toolchain\n3. The exact definitions of your order relation and orbit\n\nIf you can provide the original attempt and the toolchain feedback, I can give a more specific repair.\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "3caae2f05f887603e5df51d8ae98406ce35d7ac223e752c30c58751888a0d8bd",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3030,
+    "completion_tokens": 2107,
+    "total_tokens": 5137,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1569
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3030
+  },
+  "api_id": "01a08dffe76d19732983f124e1cb7e20",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\n\nnamespace VeriGIS.Slope\n\nnoncomputable section\n\n/-!\n  Horn (1981) slope operator for 3×3 window:\n\n      a(-1,-1)   b( 0,-1)   c( 1,-1)\n      d(-1, 0)     e        f( 1, 0)\n      g(-1, 1)   h( 0, 1)   i( 1, 1)\n\n  Slope components defined per Horn's finite-difference scheme.\n-/\n\n/-- Horn slope in x-direction (dz/dx) -/\ndef horn_dzdx (a d g c f i w : ℝ) : ℝ := \n  ((c + 2*f + i) - (a + 2*d + g)) / (8 * w)\n\n/-- Horn slope in y-direction (dz/dy) -/\ndef horn_dzdy (a b c g h i w : ℝ) : ℝ := \n  ((g + 2*h + i) - (a + 2*b + c)) / (8 * w)\n\n/-- Squared slope magnitude (dz/dx)² + (dz/dy)² -/\ndef slopeSq (a b c d e f g h i w : ℝ) : ℝ := \n  (horn_dzdx a d g c f i w)^2 + (horn_dzdy a b c g h i w)^2\n\n/-!\n  ==========================================================================\n   GeoProofBench · P-019\n   算子 : Horn (1981) slope squared nonnegativity\n   命题 : 任意 3×3 高程窗口下，Horn 坡度平方值非负\n   环境 : Lean 4.18.0 + mathlib\n  ==========================================================================\n\n  核心性质：坡度平方作为实数的平方和必然非负。\n  仅需 w > 0 保证分母非零（高程值任意有限实数）。\n  ==========================================================================\n-/\n\ntheorem horn_slopeSq_nonneg \n    (a b c d e f g h i w : ℝ) \n    (hw : w > 0) : \n    slopeSq a b c d e f g h i w ≥ 0 := by\n  -- 展开 slopeSq 定义\n  unfold slopeSq\n  -- 平方和恒非负（无需高程约束）\n  apply add_nonneg <;> apply pow_two_nonneg\n\nend\nend VeriGIS.Slope\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

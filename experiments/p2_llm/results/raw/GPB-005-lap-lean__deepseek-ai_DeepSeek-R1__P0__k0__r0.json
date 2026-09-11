@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P0",
+  "prompt_template_sha256": "5b0f7520ea943f52bd3e16b49e46eee59f031f081b8ac12a77e351ca7a3eb790",
+  "sample_index": 0,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 1712,
+    "completion_tokens": 2303,
+    "total_tokens": 4015,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1993
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1712
+  },
+  "api_id": "01a08e0fe8f028a9478d99b7ed69b932",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\n\ndef discrete_laplacian (w : Fin 3 → Fin 3 → ℝ) : ℝ :=\n  w 0 1 + w 1 0 + w 1 2 + w 2 1 - 4 * w 1 1\n\ntheorem local_max_imp_nonpos_laplacian (w : Fin 3 → Fin 3 → ℝ) :\n  w 1 1 ≥ w 0 1 →  -- Center ≥ up\n  w 1 1 ≥ w 2 1 →  -- Center ≥ down\n  w 1 1 ≥ w 1 0 →  -- Center ≥ left\n  w 1 1 ≥ w 1 2 →  -- Center ≥ right\n  discrete_laplacian w ≤ 0 := by\n  intro h_up h_down h_left h_right\n  unfold discrete_laplacian\n  have h1 : w 0 1 - w 1 1 ≤ 0 := by linarith\n  have h2 : w 2 1 - w 1 1 ≤ 0 := by linarith\n  have h3 : w 1 0 - w 1 1 ≤ 0 := by linarith\n  have h4 : w 1 2 - w 1 1 ≤ 0 := by linarith\n  linarith\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

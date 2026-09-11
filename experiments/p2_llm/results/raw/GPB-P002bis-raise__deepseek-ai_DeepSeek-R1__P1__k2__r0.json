@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "eefc34bf61ece60e28ba78f95bb06876a0c683486258e4b069bece3dc8ae5e50",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling_2d.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3078,
+    "completion_tokens": 6197,
+    "total_tokens": 9275,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5036
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 6
+  },
+  "api_id": "01a08e96d875407e004a4bbd670ea2c2",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-COMP-1\n//  算子 : Wang & Liu 4-connected pit filling (RaiseNbr step)\n//  覆盖 : GPB-021 (填洼后无4邻域洼地)\n//  环境 : Dafny 4.11\n//  日期 : 2026-09-06\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  本证明聚焦于填洼算法核心步骤 RaiseNbr 的局部性质:\n//      当从已处理单元 p 提升4邻域单元 n 时:\n//        (1) 提升操作不会降低 n 的高程\n//        (2) n 被提升至至少 max(原始高程[n], 已处理单元填充高程[p])\n//\n//  该性质是 Wang & Liu 算法正确性的基石, 保证:\n//      - 填洼后地形满足 4-neighbor 无洼条件\n//      - 提升操作是单调的 (仅升高地形)\n//      - 与下游分水岭算法的兼容性 (见 GPB-021 复合验证)\n//\n//  注: 本文件仅形式化局部提升步骤, 完整算法见 P-002-bis\n// ===========================================================================\n\nmodule RaiseNbrStep {\n\n  // ------------------------------\n  // 网格系统参数\n  // ------------------------------\n  const rows: int  // 网格行数 (>0)\n  const cols: int  // 网格列数 (>0)\n  requires rows > 0 && cols > 0\n\n  // ------------------------------\n  // 高程数据 (不可变)\n  // ------------------------------\n  const h: array2<real>  // 原始高程矩阵\n  requires h.Length0 == rows && h.Length1 == cols\n\n  // ------------------------------\n  // 算法状态 (可变)\n  // ------------------------------\n  var fill: array2<real>    // 填充后高程\n  var visited: array2<bool> // 单元处理状态\n  requires fill.Length0 == rows && fill.Length1 == cols\n  requires visited.Length0 == rows && visited.Length1 == cols\n\n  // ------------------------------\n  // 全局不变式 (算法执行中保持)\n  // ------------------------------\n  predicate Valid()\n    reads this, fill, visited, h\n  {\n    // 已访问单元满足: 填充高程 ≥ 原始高程\n    (forall r, c :: \n        0 <= r < rows && 0 <= c < cols && visited[r, c] == true ==>\n        fill[r, c] >= h[r, c])\n  }\n\n  // ==================================================================\n  // 核心引理: RaiseNbr 步骤性质\n  // ==================================================================\n  method RaiseNbr(r0: int, c0: int, dr: int, dc: int)\n    requires Valid()                                 // 初始状态满足不变式\n    requires 0 <= r0 < rows && 0 <= c0 < cols        // 已处理单元 p 在网格内\n    requires visited[r0, c0] == true                 // p 已处理\n    requires (dr, dc) in {(-1,0), (1,0), (0,-1), (0,1)} // 4邻域偏移\n    requires 0 <= r0+dr < rows && 0 <= c0+dc < cols  // 邻域单元 n 在网格内\n    requires visited[r0+dr, c0+dc] == false          // n 未处理\n    modifies fill, visited\n    ensures Valid()                                  // 操作后不变式保持\n    ensures visited[r0+dr, c0+dc] == true            // n 标记为已处理\n    // 性质 (1): 提升后高程 ≥ 原始高程\n    ensures fill[r0+dr, c0+dc] >= h[r0+dr, c0+dc]\n    // 性质 (2): 提升后高程 ≥ max(原始n, 填充p)\n    ensures fill[r0+dr, c0+dc] >= max(h[r0+dr, c0+dc], old(fill[r0, c0]))\n  {\n    // 邻域单元坐标\n    var r1 := r0 + dr;\n    var c1 := c0 + dc;\n\n    // 提升操作: fill[n] = max(原始高程[n], 已处理单元填充高程[p])\n    var new_fill := max(h[r1, c1], fill[r0, c0]);\n    visited[r1, c1] := true;\n    fill[r1, c1] := new_fill;\n\n    // 性质 (1) 直接满足: new_fill ≥ h[r1,c1] (由max定义)\n    // 性质 (2) 直接满足: new_fill = max(h[r1,c1], fill[r0,c0]) \n    //                  ≥ max(h[r1,c1], old(fill[r0,c0])) \n\n    // 不变式保持: 仅更新单元 n, 且满足 fill[n] ≥ h[n]\n    // (其他单元状态未变)\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-COMP-1 — RaiseNbr 步骤性质\\n\";\n  print \"验证命令: dafny verify PCOMP_1_RaiseNbr.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

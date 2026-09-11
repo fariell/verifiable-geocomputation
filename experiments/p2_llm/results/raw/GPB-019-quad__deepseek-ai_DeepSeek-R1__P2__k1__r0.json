@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-019-quad",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "fc8ae7734052c7bb319ce8c2ac693dbb93c65d198e38129f3c677e3f7c4f00af",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P004_consistency.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 1657,
+    "total_tokens": 1924,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1244
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 267
+  },
+  "api_id": "01a08e601717946eb3b69a8dfceaf554",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "method QuadraticExactness(A: real, B: real, C: real, w: real, i: int, j: int)\n  requires w > 0.0\n{\n  // Define quadratic surface: z = A*x + B*y + C\n  function z(i': int, j': int): real\n    requires w > 0.0\n  {\n    let x := i' as real * w;\n    let y := j' as real * w;\n    A*x + B*y + C\n  }\n\n  // Horn slope operator for x-direction\n  function DzDx(): real\n    requires w > 0.0\n  {\n    (z(i+1, j) - z(i-1, j)) / (2.0 * w)\n  }\n\n  // Horn slope operator for y-direction\n  function DzDy(): real\n    requires w > 0.0\n  {\n    (z(i, j+1) - z(i, j-1)) / (2.0 * w)\n  }\n\n  // Verify exact gradient recovery\n  assert DzDx() == A;\n  assert DzDy() == B;\n}\n\nmethod CubicRemainder(G: real, w: real)\n  requires w > 0.0\n{\n  // Define cubic surface: z = G*x^3\n  function z(i': int, j': int): real\n    requires w > 0.0\n  {\n    let x := i' as real * w;\n    G * x * x * x\n  }\n\n  // Horn slope operator at origin (0,0)\n  function DzDx(): real\n    requires w > 0.0\n  {\n    (z(1, 0) - z(-1, 0)) / (2.0 * w)\n  }\n\n  // Verify remainder term\n  assert DzDx() == G * w * w;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "924d6225ca9c7d163a4bf133861120ef7b5b388211942e8b0e92466878126bfe",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 259,
+    "completion_tokens": 4655,
+    "total_tokens": 4914,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4264
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 259
+  },
+  "api_id": "01a08e0fd96ee48e4c2c3386ff751eac",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "const A: real\nconst B: real\nconst C: real\nconst w: real where w > 0.0\n\nfunction z(x: real, y: real): real\n{\n  A * x + B * y + C\n}\n\nfunction grid(i: int, j: int): real\n{\n  z(i as real * w, j as real * w)\n}\n\nlemma Theorem(i: int, j: int)\n  ensures (grid(i+1, j) - grid(i-1, j)) / (2.0 * w) == A\n  ensures (grid(i, j+1) - grid(i, j-1)) / (2.0 * w) == B\n{\n  calc {\n    grid(i+1, j) - grid(i-1, j);\n    ==\n    (A * ((i+1) as real * w) + B * (j as real * w) + C) - \n    (A * ((i-1) as real * w) + B * (j as real * w) + C);\n    ==\n    A * w * ((i+1) as real - (i-1) as real);\n    ==\n    A * w * 2.0;\n  }\n  calc {\n    grid(i, j+1) - grid(i, j-1);\n    ==\n    (A * (i as real * w) + B * ((j+1) as real * w) + C) - \n    (A * (i as real * w) + B * ((j-1) as real * w) + C);\n    ==\n    B * w * ((j+1) as real - (j-1) as real);\n    ==\n    B * w * 2.0;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

@@ -1221,3 +1221,65 @@ task16-W3-live verdict = PASS (M4 live partial) / W3/RUNNING (M4 alive)
 
 STATUS remains W3/RUNNING. Batch left alive. No push.
 
+
+---
+
+## LLM 自动形式化 GPB 基准 · W3 冷启动恢复 + 并发池(task16-W3 / A.17.12)
+
+```
+[task]      task16-W3 / A.17.12 cold-start + pool + M3 catchup + M4 partial
+[step]      jsonl integrity → reconcile → run_l1_batch_pool.py → M3 8-task catchup → M4 R1 pool → NEEDS_HUMAN list
+[cmd]       python _autorun/_pool_validate_check.py
+            python run_l1_batch_pool.py --limit/task validate (V3.2 P0 k=2) → PASS
+            python run_l1_batch_pool.py --models THUDM/GLM-4-32B-0414 --task-ids <8> --no-capability-fuse --workers 8
+            python run_l1_batch_pool.py --models deepseek-ai/DeepSeek-R1 --prompts P0,P1,P2 --k 5 --workers 8
+            retry --workers 2 → BLOCKED siliconflow balance insufficient (code 30001)
+[rc]        pool_validate=0; M3=0 PASS 120/120; M4=0 PARTIAL 208/210 then HTTP_STREAK_10; retry=2 BLOCKED
+[key lines]
+  jsonl: 745→1075 lines, all parseable; orphan dfy=1 fixture only; no missing paid .dfy
+  A.17.4: pool SKIP_EXISTING preserves .dfy sha; attempt field appended; metric_eligible OK
+  M3 catchup: 8 tasks×3P×k5=120 GENERATED in 662s; GLM unique 200/210 (GPB-010-pit still 5/15 pre-existing); compile_rc=0 on 0/125 with_compile → valid negative
+  M4 R1 pool: unique 208/210; GENERATED+SKIP=133; PROVIDER_ERROR=75; circuit HTTP_STREAK_10; spend~$1.41
+  R1 (last-wins, cells with compile_rc): compile0=28/92≈0.304; verify0=24/92≈0.261
+  M1 V3.2: compile0=24/134≈0.179; verify0=18/134≈0.134
+  M2 Qwen: compile0=1/132≈0.008; verify0=0/132
+  M3 GLM: compile0=0/125; verify0=0/125 (full 14-task coverage for the 0 claim)
+  retry blocked: {"code":30001,"message":"Sorry, your account balance is insufficient"}
+  NO semantic_fidelity_pct reported (PI must judge NEEDS_HUMAN first)
+[gates]     A.17.12 steps 1–6 executed; M4 incomplete; siliconflow balance BLOCKED
+[verdict]   PARTIAL / BLOCKED
+[blocker]   (1) siliconflow 余额不足 — 需 PI 充值后把 STATUS 改回 W3/PENDING 续跑 75 个 R1 PROVIDER_ERROR
+            (2) Lean 仍 TOOLCHAIN_MISSING（本机无 lake）
+            (3) 17 条 VERIFIED_NEEDS_HUMAN 待 PI 判 ALIGNED/DRIFT — 此前禁止写 semantic fidelity %
+```
+
+### A.17.11 · VERIFIED_NEEDS_HUMAN（PI 判断；Cursor 不下结论）
+
+**原 A.17.11 四条（.dfy 仍在，勿删）:**
+1. `deepseek-ai/DeepSeek-R1` / `GPB-001-flat` / P1 / k1 → `GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy`
+2. `deepseek-ai/DeepSeek-R1` / `GPB-001-flat` / P1 / k2 → `GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy`
+3. `deepseek-ai/DeepSeek-R1` / `GPB-001-flat` / P2 / k0 → `GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy`
+4. `deepseek-ai/DeepSeek-R1` / `GPB-001-flat` / P2 / k1 → `GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy`
+
+人工看什么：gold 命题是「3×3 全等高程 ⇒ Horn SlopeSq≡0 且 w>0」。对照 lemma 的 ensures / requires 是否就是该命题，还是弱化/强化/换题。dossier 草稿：`_autorun/needs_human_dossier.md`（仅辅助，非裁决）。
+
+**last-wins 当前共 17 条 NEEDS_HUMAN（全 R1，含上列之外的新增）:**
+- GPB-001-flat P0 k3; P2 k3; P2 k4
+- GPB-002-planar P1 k0/k1/k2/k4
+- GPB-019-quad P1 k1
+- GPB-P002-idem P0 k2
+- GPB-P002-mono P0 k0/k2; P2 k0/k2/k3/k4
+- GPB-P002bis-raise P2 k0/k4
+（完整路径见 `experiments/p2_llm/results/scored/w3_coldstart_a1712_summary.json`）
+
+**DRIFT_SUSPECT last-wins = 1:** `DeepSeek-V3.2` / `GPB-001-flat` / P2 / k0
+
+### 改了什么
+- 新: `experiments/p2_llm/harness/run_l1_batch_pool.py`（ThreadPool + 主线程 jsonl + attempt + 429 降并发 + verify sem≤4 + `--no-capability-fuse`）
+- 新: `experiments/p2_llm/results/scored/w3_coldstart_a1712_summary.json`
+- 新: `_autorun/needs_human_dossier.md`（辅助）
+- 改: `l1_full_w3_live.jsonl` append-only（M3 120 + M4 208 + validate 2）
+- 改: raw `*.dfy`/`*.json` + scored verify/semantic sidecars（M3/M4 新产物）
+- 未改 papers/（FORM LOCK）；未 git push；未写 key；未编造 semantic fidelity %
+
+task16-W3 verdict = PARTIAL (M1+M2 done; M3 coverage PASS with compile@1=0; M4 133/210 + balance BLOCKED)

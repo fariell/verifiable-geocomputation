@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-002-planar",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "94a4cab2f023820dd95441b4a8480ed07465b1561ec2064886809dc2f2f269f6",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P001_horn_slope.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3120,
+    "completion_tokens": 3794,
+    "total_tokens": 6914,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1671
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3120
+  },
+  "api_id": "01a08e0c396171330b72c4130fe7751c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-001 (Horn slope exactness)\n//  算子 : Horn (1981) 有限差分坡度算子\n//  定理 : 在平面 z = A*x + B*y + C 上，Horn 差分精确恢复 A 和 B\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P001_horn_slope_exact.dfy\n// ===========================================================================\n\nmodule HornSlope {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定 (p 向右, q 向下)\n  //\n  //     a(-w,-w)   b(0,-w)   c(w,-w)\n  //     d(-w,0)     e(0,0)    f(w,0)\n  //     g(-w,w)    h(0,w)    i(w,w)\n  //\n  // Horn (1981) 有限差分坡度算子:\n  //   DzDx = [ (c + 2f + i) - (a + 2d + g) ] / (8 * w)\n  //   DzDy = [ (g + 2h + i) - (a + 2b + c) ] / (8 * w)\n  // ------------------------------------------------------------------\n\n  // 平面高程函数\n  function plane(x: real, y: real, A: real, B: real, C: real): real\n  {\n    A * x + B * y + C\n  }\n\n  // 窗口点高程计算\n  function Qa(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(-w, -w, A, B, C) }\n  \n  function Qb(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(0.0, -w, A, B, C) }\n  \n  function Qc(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(w, -w, A, B, C) }\n  \n  function Qd(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(-w, 0.0, A, B, C) }\n  \n  function Qe(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(0.0, 0.0, A, B, C) }\n  \n  function Qf(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(w, 0.0, A, B, C) }\n  \n  function Qg(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(-w, w, A, B, C) }\n  \n  function Qh(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(0.0, w, A, B, C) }\n  \n  function Qi(A: real, B: real, C: real, w: real): real\n    requires w > 0.0\n  { plane(w, w, A, B, C) }\n\n  // Horn 有限差分算子\n  function HornDzDx(\n    a: real, d: real, g: real,  // 左列\n    c: real, f: real, i: real,  // 右列\n    w: real\n  ): real\n    requires w > 0.0\n  {\n    ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w)\n  }\n\n  function HornDzDy(\n    a: real, b: real, c: real,  // 顶行\n    g: real, h: real, i: real,  // 底行\n    w: real\n  ): real\n    requires w > 0.0\n  {\n    ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w)\n  }\n\n  // ==================================================================\n  // 主定理: 在平面上 Horn 差分精确恢复梯度分量\n  // ==================================================================\n  lemma HornExactOnPlane(A: real, B: real, C: real, w: real)\n    requires w > 0.0\n    ensures HornDzDx(\n        Qa(A,B,C,w), Qd(A,B,C,w), Qg(A,B,C,w),\n        Qc(A,B,C,w), Qf(A,B,C,w), Qi(A,B,C,w),\n        w\n      ) == A\n    ensures HornDzDy(\n        Qa(A,B,C,w), Qb(A,B,C,w), Qc(A,B,C,w),\n        Qg(A,B,C,w), Qh(A,B,C,w), Qi(A,B,C,w),\n        w\n      ) == B\n  {\n    // 展开所有点的高程表达式\n    assert Qa(A,B,C,w) == A*(-w) + B*(-w) + C;\n    assert Qb(A,B,C,w) == A*0.0 + B*(-w) + C;\n    assert Qc(A,B,C,w) == A*w + B*(-w) + C;\n    assert Qd(A,B,C,w) == A*(-w) + B*0.0 + C;\n    assert Qe(A,B,C,w) == A*0.0 + B*0.0 + C;\n    assert Qf(A,B,C,w) == A*w + B*0.0 + C;\n    assert Qg(A,B,C,w) == A*(-w) + B*w + C;\n    assert Qh(A,B,C,w) == A*0.0 + B*w + C;\n    assert Qi(A,B,C,w) == A*w + B*w + C;\n\n    // 计算 DzDx 的分子部分\n    calc {\n      (Qc(A,B,C,w) + 2.0*Qf(A,B,C,w) + Qi(A,B,C,w)) \n        - (Qa(A,B,C,w) + 2.0*Qd(A,B,C,w) + Qg(A,B,C,w));\n      == \n        ( (A*w - B*w + C) + 2.0*(A*w + C) + (A*w + B*w + C) ) \n        - ( (-A*w - B*w + C) + 2.0*(-A*w + C) + (-A*w + B*w + C) );\n      == \n        (A*w - B*w + C + 2.0*A*w + 2.0*C + A*w + B*w + C) \n        - (-A*w - B*w + C -2.0*A*w + 2.0*C -A*w + B*w + C);\n      == \n        (4.0*A*w + 4.0*C) - (-4.0*A*w + 4.0*C);\n      == 8.0 * A * w;\n    }\n    // 最终 DzDx = (8Aw)/(8w) = A\n    assert HornDzDx(Qa(A,B,C,w), Qd(A,B,C,w), Qg(A,B,C,w),\n                   Qc(A,B,C,w), Qf(A,B,C,w), Qi(A,B,C,w), w) \n           == (8.0 * A * w) / (8.0 * w) \n           == A;\n\n    // 计算 DzDy 的分子部分\n    calc {\n      (Qg(A,B,C,w) + 2.0*Qh(A,B,C,w) + Qi(A,B,C,w)) \n        - (Qa(A,B,C,w) + 2.0*Qb(A,B,C,w) + Qc(A,B,C,w));\n      == \n        ( (-A*w + B*w + C) + 2.0*(B*w + C) + (A*w + B*w + C) ) \n        - ( (-A*w - B*w + C) + 2.0*(-B*w + C) + (A*w - B*w + C) );\n      == \n        (-A*w + B*w + C + 2.0*B*w + 2.0*C + A*w + B*w + C) \n        - (-A*w - B*w + C -2.0*B*w + 2.0*C + A*w - B*w + C);\n      == \n        (4.0*B*w + 4.0*C) - (-4.0*B*w + 4.0*C);\n      == 8.0 * B * w;\n    }\n    // 最终 DzDy = (8Bw)/(8w) = B\n    assert HornDzDy(Qa(A,B,C,w), Qb(A,B,C,w), Qc(A,B,C,w),\n                   Qg(A,B,C,w), Qh(A,B,C,w), Qi(A,B,C,w), w) \n           == (8.0 * B * w) / (8.0 * w) \n           == B;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-001 — Horn slope exact on planes\\n\";\n  print \"验证命令: dafny verify P001_horn_slope_exact.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": null
+}

@@ -1,0 +1,36 @@
+{
+  "task_id": "GPB-P002-idem",
+  "model": "THUDM/GLM-4-32B-0414",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "e7259d8e0cdbadd4d6a9c95611f82308d16f6e32d600244daf01cd1edbf6bb35",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P002_pit_filling.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3162,
+    "completion_tokens": 983,
+    "total_tokens": 4145,
+    "prompt_tokens_details": {
+      "cached_tokens": 1696
+    },
+    "prompt_cache_hit_tokens": 1696,
+    "prompt_cache_miss_tokens": 1466
+  },
+  "api_id": "01a08df4a8e1ea11db0966e73697934f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module PitFillingIdempotent {\n  // ------------------------------------------------------------------\n  // 1D Fill 算子定义 (左出口约定)\n  // ------------------------------------------------------------------\n  function Fill1D(a: array<int>): array<int>\n  {\n    var n := a.Length;\n    var out := new int[n];\n    out[0] := a[0];\n    var i := 1;\n    while i < n\n      invariant i <= n;\n      invariant forall j :: 0 <= j < i ==> out[j] == a[j] || (j > 0 && out[j] == out[j-1]);\n      invariant forall j :: 0 <= j < i ==> out[j] >= a[j];\n    {\n      out[i] := max(a[i], out[i-1]);\n      i := i + 1;\n    }\n    return out;\n  }\n\n  // ------------------------------------------------------------------\n  // 坑填充的不动点性质\n  // ------------------------------------------------------------------\n  lemma IdempotentFill(a: array<int>)\n    requires a != null;\n    ensures Fill1D(Fill1D(a)) == Fill1D(a);\n  {\n    var n := a.Length;\n    var filled := Fill1D(a);\n    var filled_filled := Fill1D(filled);\n    \n    // 基础情况:第一个元素不变\n    assert filled_filled[0] == filled[0] == a[0];\n    \n    // 归纳证明:每个后续元素要么等于输入,要么等于前一个填充值\n    var i := 1;\n    while i < n\n      invariant 1 <= i <= n;\n      invariant forall j :: 0 <= j < i ==> filled_filled[j] == filled[j];\n    {\n      // 填充后的数组已经满足单调不减\n      assert filled[i] >= filled[i-1];\n      \n      // 第二次填充不会改变已经填充的值\n      assert filled_filled[i] == max(filled[i], filled_filled[i-1]);\n      assert filled_filled[i-1] == filled[i-1];\n      assert filled[i] >= filled[i-1];\n      \n      // 因此第二次填充等于第一次填充\n      assert filled_filled[i] == filled[i];\n      \n      i := i + 1;\n    }\n  }\n\n  // ------------------------------------------------------------------\n  // 不溢出左方的格点是不动点\n  // ------------------------------------------------------------------\n  lemma FixedPointNoSpill(a: array<int>, i: int)\n    requires 0 < i < a.Length;\n    requires a[i] >= a[i-1];\n    ensures Fill1D(a)[i] == a[i];\n  {\n    var filled := Fill1D(a);\n    // 填充过程保持前缀最大值性质\n    assert filled[i] == max(a[i], filled[i-1]);\n    // 由于a[i] >= a[i-1],且填充过程单调不减\n    assert filled[i-1] == a[i-1];\n    assert a[i] >= a[i-1];\n    // 因此max(a[i], filled[i-1]) == a[i]\n    assert filled[i] == a[i];\n  }\n\n  method Main()\n  {\n    // 测试用例1:平面\n    var plane := new int[4];\n    plane[0] := 5; plane[1] := 5; plane[2] := 5; plane[3] := 5;\n    var filled := Fill1D(plane);\n    var filled_filled := Fill1D(filled);\n    print \"Plane test: \", filled == filled_filled;\n    \n    // 测试用例2:坑\n    var pit := new int[3];\n    pit[0] := 3; pit[1] := 1; pit[2] := 4;\n    filled := Fill1D(pit);\n    filled_filled := Fill1D(filled);\n    print \"Pit test: \", filled == filled_filled;\n    \n    // 测试用例3:斜坡\n    var slope := new int[4];\n    slope[0] := 0; slope[1] := 1; slope[2] := 2; slope[3] := 3;\n    filled := Fill1D(slope);\n    filled_filled := Fill1D(filled);\n    print \"Slope test: \", filled == filled_filled;\n    \n    // 测试用例4:级联\n    var cascade := new int[3];\n    cascade[0] := 3; cascade[1] := 1; cascade[2] := 0;\n    filled := Fill1D(cascade);\n    filled_filled := Fill1D(filled);\n    print \"Cascade test: \", filled == filled_filled;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

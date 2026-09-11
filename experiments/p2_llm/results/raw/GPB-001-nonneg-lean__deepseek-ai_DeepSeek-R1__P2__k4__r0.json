@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-001-nonneg-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "8b9c0663bb132c9d9ba47e78f517c93c6884a3c4d7a6bb1d6f724e317cde3e13",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/HornSlope.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 244,
+    "completion_tokens": 2060,
+    "total_tokens": 2304,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1814
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 244
+  },
+  "api_id": "01a08e02f3d813d117fc31faec2992e3",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\n\ndef horn_dx (a b c d e f g h i w : ℝ) : ℝ :=\n  ((c + 2*f + i) - (a + 2*d + g)) / (8 * w)\n\ndef horn_dy (a b c d e f g h i w : ℝ) : ℝ :=\n  ((g + 2*h + i) - (a + 2*b + c)) / (8 * w)\n\ndef slope_sq (a b c d e f g h i w : ℝ) : ℝ :=\n  (horn_dx a b c d e f g h i w)^2 + (horn_dy a b c d e f g h i w)^2\n\ntheorem slope_sq_nonneg (a b c d e f g h i w : ℝ) (h : w > 0) : \n  slope_sq a b c d e f g h i w ≥ 0 := by\n  unfold slope_sq\n  apply add_nonneg\n  · apply pow_two_nonneg\n  · apply pow_two_nonneg\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

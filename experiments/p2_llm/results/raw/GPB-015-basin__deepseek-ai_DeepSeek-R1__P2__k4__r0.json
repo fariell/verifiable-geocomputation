@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 4,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 5808,
+    "total_tokens": 6069,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5455
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08e51cf2bd70bb6eae0a03cb04a26",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function succ(x: int): int\n\npredicate isFixedPoint(s: int) {\n  succ(s) == s\n}\n\nfunction stepN(s: int, n: nat): int\n  decreases n;\n{\n  if n == 0 then s else succ(stepN(s, n-1))\n}\n\nlemma FixedPointAfter(s0: int, n: nat, m: nat)\n  requires n <= m\n  requires isFixedPoint(stepN(s0, n))\n  ensures stepN(s0, m) == stepN(s0, n)\n  decreases m - n;\n{\n  if m == n {\n    // Base case: same step count\n  } else {\n    // Induction on decreasing m-n\n    FixedPointAfter(s0, n, m-1);\n    // Unfold stepN definition for m\n    // stepN(s0, m) = succ(stepN(s0, m-1))\n    // By induction: stepN(s0, m-1) = stepN(s0, n)\n    // Thus: succ(stepN(s0, n)) = stepN(s0, n)  [by fixed point property]\n  }\n}\n\nlemma WatershedUniqueness(s0: int, n: nat, m: nat)\n  requires isFixedPoint(stepN(s0, n))\n  requires isFixedPoint(stepN(s0, m))\n  ensures stepN(s0, n) == stepN(s0, m)\n{\n  if n <= m {\n    FixedPointAfter(s0, n, m);\n  } else {\n    FixedPointAfter(s0, m, n);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}

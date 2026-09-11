@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-005-lap-lean",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P1",
+  "prompt_template_sha256": "7975017c46b6a10272cb205ac39c0a02bec0719ae7d2e44774ab55a7f87e3e2a",
+  "sample_index": 1,
+  "repair_round": 0,
+  "target": "lean",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/lean4/VeriGIS/Curvature.lean",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": null,
+  "verify_rc": null,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 3118,
+    "completion_tokens": 2195,
+    "total_tokens": 5313,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1750
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3118
+  },
+  "api_id": "01a08e13225d00b7d84b03328609ab1f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · Discrete Local Maximum and Laplacian\n   文件 : formal/lean4/VeriGIS/LocalMaxLaplacian.lean\n   算子 : Discrete Laplacian in 3×3 window\n   环境 : Lean 4 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  Formalizes the property: If center cell is local maximum (≥ orthogonal neighbors),\n  then discrete Laplacian at center is non-positive.\n-/\n\nimport Mathlib.Tactic\n\nnamespace VeriGIS.LocalMaxLaplacian\n\nnoncomputable section\n\n/-!\n  ## 3×3 window convention (orthogonal neighbors labeled)\n\n      a   b   c\n      d   e   f   → Orthogonal neighbors: b (top), d (left), f (right), h (bottom)\n      g   h   i\n-/\n\n/-- Discrete Laplacian operator for center cell e -/\ndef laplacian (b d f h e : ℝ) : ℝ := (b + d + f + h) - 4 * e\n\n/--\n  Main theorem: When center cell e is local maximum (≥ all four orthogonal neighbors),\n  the discrete Laplacian is non-positive.\n-/\ntheorem local_max_imp_nonpos_laplacian (b d f h e : ℝ)\n    (h_top : e ≥ b) (h_left : e ≥ d) (h_right : e ≥ f) (h_bottom : e ≥ h) :\n    laplacian b d f h e ≤ 0 := by\n  -- Expand Laplacian definition\n  unfold laplacian\n  -- Combine inequalities: b + d + f + h ≤ 4*e\n  have sum_le : b + d + f + h ≤ e + e + e + e := by\n    linarith [h_top, h_left, h_right, h_bottom]\n  -- Rearrange to required form\n  linarith\n\nend -- noncomputable section\n\nend VeriGIS.LocalMaxLaplacian\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
+}

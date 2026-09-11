@@ -1,0 +1,39 @@
+{
+  "task_id": "GPB-015-basin",
+  "model": "deepseek-ai/DeepSeek-R1",
+  "call_date": "2026-09-11",
+  "temperature": 0.0,
+  "prompt_id": "P2",
+  "prompt_template_sha256": "51f657cc0690f71bfab2c805111b45ac596d0639588a5bc4ce0c73117efe5f04",
+  "sample_index": 2,
+  "repair_round": 0,
+  "target": "dafny",
+  "expected_verdict": "PASS",
+  "gold_formal": "formal/dafny/P006_watershed.dfy",
+  "schema_version": "p2_llm_task_v1",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "dry_run": false,
+  "backend": "openai",
+  "api_usage": {
+    "prompt_tokens": 261,
+    "completion_tokens": 4991,
+    "total_tokens": 5252,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4665
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 261
+  },
+  "api_id": "01a08e51cf4c789607cc34ef56fbcfaf",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "type Cell\n\nfunction succ(c: Cell): Cell\n\nfunction stepN(s: Cell, k: nat): Cell\n  decreases k\n{\n  if k == 0 then s else succ(stepN(s, k-1))\n}\n\npredicate isOutlet(c: Cell) {\n  succ(c) == c\n}\n\nlemma outletFixed(o: Cell, k: nat)\n  requires isOutlet(o)\n  ensures stepN(o, k) == o\n  decreases k\n{\n  if k != 0 {\n    outletFixed(o, k-1);\n  }\n}\n\nlemma stepNAdd(s: Cell, n: nat, k: nat)\n  ensures stepN(s, n+k) == stepN(stepN(s, n), k)\n  decreases k\n{\n  if k == 0 {\n  } else {\n    stepNAdd(s, n, k-1);\n  }\n}\n\ntheorem watershedUniqueness(s: Cell, n: nat, m: nat)\n  requires isOutlet(stepN(s, n))\n  requires isOutlet(stepN(s, m))\n  ensures stepN(s, n) == stepN(s, m)\n{\n  if n <= m {\n    var diff: nat := m - n;\n    stepNAdd(s, n, diff);\n    outletFixed(stepN(s, n), diff);\n  } else {\n    var diff: nat := n - m;\n    stepNAdd(s, m, diff);\n    outletFixed(stepN(s, m), diff);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
+}
