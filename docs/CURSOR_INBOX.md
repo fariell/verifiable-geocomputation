@@ -9,8 +9,8 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/BLOCKED  
-UPDATED: 2026-09-11 12:30  
+STATUS: W3/PENDING
+UPDATED: 2026-09-11 14:02 (PI recharged siliconflow; secretary manual unblock - BLOCKED makes gate noop so no agent could ever spawn to implement the probe)  
 TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 catchup PASS compile@1=0; M4 R1 PARTIAL)  
 A.17.12 done: pool.py + M3 120/120 + M4 133/210 then HTTP_STREAK_10.  
 BLOCKER: siliconflow balance insufficient (code 30001) — 75 R1 PROVIDER_ERROR need retry after PI recharge.  
