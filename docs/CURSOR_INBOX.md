@@ -1442,6 +1442,76 @@ PI 已开始人工判定,**不要把他的判定结果覆盖掉** —— 规范�
 配合 A.17.13(余额自动解阻)一起做:任何 BLOCKED / 卡住的状态都必须有自恢复通道,
 否则会形成「BLOCKED → gate noop → agent 永不启动 → 永远没人解 BLOCKED」的死锁。
 
+## §A.17.19 · Dafny-only 主表已锁定 —— 立即开始写稿(PI 问"何时能动笔")
+
+秘书 2026-09-12 12:4x 复核,**结论:论文现在就可以写。** 此前把两个通道混在一起统计,
+导致"278 条 TOOLCHAIN_MISSING"看起来像大面积失败,其实是误读。
+
+### A.17.19.1 那 278 条不是失败品,是另一条通道
+
+`tasks/*.yaml` 里有 `target:` 字段,14 个 L1 任务天然分两轨:
+
+| | 任务数 | cell 目标 | 产物 | 验证工具链 | 状态 |
+|---|---|---|---|---|---|
+| **Dafny 轨** | 9 | 540 | `.dfy` | WSL Dafny 4.11 ✅ | **RAN 507/540 = 93.9%** |
+| **Lean 轨** | 5 | 300 | `.lean` | 无 lake/lean ❌ | 298/300 已生成,278 个 `.lean` 在盘 |
+
+`TOOLCHAIN_MISSING` 的 278 条**恰好就是 Lean 轨的全部**:它们有 `target: lean`,
+生成成功(status=GENERATED 或 SKIP_EXISTING,文件真实存在),只是没有 Lean 工具链可验。
+**用 Dafny 去验 `.lean` 当然 MISSING。** 这不是数据缺陷,是统计没分轨。
+
+教训记下:**凡跨 target 的统计必须先按 `target:` 字段分轨,否则 Lean 的缺席会被
+误算成 Dafny 的失败率。**
+
+### A.17.19.2 写作基线 = Dafny 轨,deduplicated per cell
+
+主实验所有数字以 Dafny 轨为准。当前实测(2026-09-12 12:4x):
+
+| 模型 | cell | RAN | compile@1 | verify@1 |
+|---|---|---|---|---|
+| DeepSeek-R1 | 135 | 116 | **27.6%** | **20.7%** |
+| DeepSeek-V3.2 | 135 | 134 | 17.9% | 13.4% |
+| Qwen2.5-72B-Instruct | 135 | 132 | 0.8% | 0.0% |
+| GLM-4-32B-0414 | 125 | 125 | 0.0% | 0.0% |
+
+semantic(Dafny 轨,去重后):`VERIFIED_NEEDS_HUMAN` 10、`LIKELY_ALIGNED` 4、
+`COMPILE_ONLY` 7、`VERIFIED_BUT_DRIFT_SUSPECT` 1。
+
+**每个数字必须注明是 deduplicated-per-cell 还是 all-attempts**(§A.17.8 铁律不变)。
+
+### A.17.19.3 现在就开始写,不要等 Lean
+
+按 §A.15.2 的 KBS framing 起草。以下章节**数据已足,立刻写**:
+
+1. Introduction —— gap 是"可验证的形式化规约是一类无 benchmark 覆盖的规约形态"
+2. Related Work —— 三条线:autoformalization(miniF2F/ProofNet)、pass@k 方法论
+   (HumanEval/MBPP;我们的 verify@1/verify@3 是其在形式化维度的类比)、
+   spec-gaming / reward-hacking
+3. Benchmark design —— GPB 任务构造、`target:` 双轨设计、三层 prompt P0/P1/P2
+4. Experimental setup —— harness、模型清单、k=5、Dafny 4.11 via WSL
+5. **Main results —— 用上面那张表**
+6. Failure taxonomy F1–F8 —— 含 A.17.16 新增的"判定器失效"类
+7. Threats to validity
+
+**只有第 8 节 semantic fidelity 留占位**,注明待 PI 裁决 10 条 NEEDS_HUMAN
+(A.17.11 红线不变:**在 PI 裁定前不许出现任何 semantic fidelity 百分比**)。
+
+Lean 轨单独一张表如实报告"cell 已生成但目标验证器未部署",列为 limitation,
+**不许写成 0% 通过率** —— 未验证和验证失败是两回事。
+
+### A.17.19.4 把 NEEDS_HUMAN 对照表重生成一版
+
+昨天给 PI 的表是 17 条,重跑后已变成 10 条,旧表有失效记录。
+用 `_autorun/extract_needs_human.py` 重新跑一遍覆盖
+`_autorun/needs_human_review.md`,并在表头写明"本表共 N 条,生成于 <时间戳>,
+重跑会使条数变化,以最新版为准"。
+
+### A.17.19.5 缺口清单(不阻塞写作,但要在 W4 收尾补上)
+
+- R1 缺 19 个 cell 未 RAN(116/135)—— 正在跑,别中断它
+- GLM 缺 10 个 cell(125/135)
+- Lean 轨 278 个 `.lean` 待验 —— PI 正在决定是否上 AutoDL
+
 ## §B · 协议与档案(只读)
 
 ### B.1 优先级与新情况
