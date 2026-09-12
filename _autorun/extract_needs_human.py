@@ -7,6 +7,7 @@
 import json
 import os
 import re
+from datetime import datetime, timezone
 
 ROOT = r"E:\AI for Math与DEM空间网格交叉研究\verifiable-geocomputation"
 RAW = os.path.join(ROOT, "experiments", "p2_llm", "results", "raw")
@@ -87,10 +88,15 @@ groups = {}
 for (model, task_id, prompt_id, sample_index), v in nh:
     groups.setdefault(task_id, []).append((model, prompt_id, sample_index, v))
 
+ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 out = []
 out.append("# VERIFIED_NEEDS_HUMAN 人工判定表\n")
-out.append("由秘书自动生成(`_autorun/extract_needs_human.py`),只读,不改实验数据。\n")
-out.append("共 **%d 条**,来自 %d 个题目,全部由 DeepSeek-R1 生成。\n" % (len(nh), len(groups)))
+out.append(
+    "> **本表共 %d 条**,生成于 **%s**。"
+    "重跑会使条数变化,以最新版为准。\n" % (len(nh), ts)
+)
+out.append("由 `_autorun/extract_needs_human.py` 自动生成,只读,不改实验数据。\n")
+out.append("共 **%d 条**,来自 %d 个题目。\n" % (len(nh), len(groups)))
 
 out.append("\n## 判定方法(照着做)\n")
 out.append("对每一条,只回答一个问题:**它证明的还是原来那个命题吗?**\n")

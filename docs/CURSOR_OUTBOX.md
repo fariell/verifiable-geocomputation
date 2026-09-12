@@ -1283,3 +1283,53 @@ STATUS remains W3/RUNNING. Batch left alive. No push.
 - 未改 papers/（FORM LOCK）；未 git push；未写 key；未编造 semantic fidelity %
 
 task16-W3 verdict = PARTIAL (M1+M2 done; M3 coverage PASS with compile@1=0; M4 133/210 + balance BLOCKED)
+
+---
+
+## P3 论文起草 · W4/WRITING-S1 (task16-W4)
+
+```
+[task]      task16-W4 / WRITING-S1 · P3 manuscript draft (KBS)
+[step]      Read A.15.2/A.17.19/A.18 → measure Dafny-track rates (read-only) → regen NEEDS_HUMAN → draft manuscript → STATUS W4/BLOCKED-VERDICT
+[cmd]       python _autorun/_w4_dafny_metrics.py
+            python _autorun/extract_needs_human.py
+            (no run_l1_batch*; no jsonl append; no API)
+[rc]        0
+[key lines]
+  NEW papers/P3-llm-autoformalization/manuscript.md (~S1 complete)
+  KBS Guide (ScienceDirect 2026-09-12): research preferably ≤20 dbl-spaced pp;
+    Abstract≤250w; Keywords 1–7; Highlights 3–5×≤85 chars; CRediT + AI declaration + data statement
+  Snapshot ~12:59 CST Dafny last-wins (compile_rc≠null = RAN):
+    R1    cell=135 RAN=122 compile@1=26.2% (32/122) verify@1=19.7% (24/122)
+    V3.2  cell=135 RAN=134 compile@1=17.9% (24/134) verify@1=13.4% (18/134)
+    Qwen  cell=135 RAN=132 compile@1=0.8%  (1/132)  verify@1=0.0%  (0/132)
+    GLM   cell=125 RAN=125 compile@1=0.0%  (0/125)  verify@1=0.0%  (0/125)
+  Lean unique=298; TOOLCHAIN_MISSING=278 (reported as undeployed, NOT 0% pass)
+  semantic counts (Dafny): NH=10 LIKELY_ALIGNED=4 COMPILE_ONLY=7 DRIFT_SUSPECT=1
+  needs_human_review.md regenerated: N=10 @ 2026-09-12 04:59 UTC
+  Sections DONE: Highlights, Abstract, Intro, Related (3 lines), Benchmark, Setup,
+    Main results Tables 1–2, Failure taxonomy F1–F8+F-J, Threats, Discussion, Conclusion
+  Sections PLACEHOLDER: §Semantic fidelity (pending PI on 10 NH)
+  NO semantic fidelity % anywhere; TOOLCHAIN_MISSING never counted as pass
+  papers/P2/ untouched; experiment processes untouched
+[gates]     A.18.1–A.18.6: PASS (S1 draft + NH regen + STATUS advance)
+[verdict]   PASS
+[blocker]   W4 next = PI verdict on 10× VERIFIED_NEEDS_HUMAN → then fidelity section (WRITING-S2)
+```
+
+### Chapters status
+| Chapter | Status |
+|---------|--------|
+| Intro / Related / Benchmark / Setup / Main results | DONE |
+| Failure taxonomy + Threats + Discussion + Conclusion | DONE |
+| Semantic fidelity | PLACEHOLDER (10 NH) |
+| verify@3 / repair gain / figures | deferred (experiment still RUNNING) |
+
+### 改了什么
+- 新: papers/P3-llm-autoformalization/manuscript.md
+- 新: _autorun/_w4_dafny_metrics.py (read-only number provenance)
+- 改: _autorun/extract_needs_human.py (表头 N+时间戳); _autorun/needs_human_review.md (N=10)
+- 改: docs/CURSOR_INBOX.md STATUS → W3/RUNNING + W4/BLOCKED-VERDICT
+- 未改: papers/P2/; 未触碰 un_l1_batch*.py; 未 append jsonl; 未 git push
+
+task16-W4/WRITING-S1 verdict = PASS

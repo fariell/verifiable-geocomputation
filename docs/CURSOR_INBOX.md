@@ -9,12 +9,13 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/RUNNING + W4/WRITING-S1
-UPDATED: 2026-09-12 12:5x
-TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 catchup PASS; M4 R1 errors-only retry RUNNING 73q @w4; A.17.16 normalize: 1/17 NH promoted)
-A.17.12 done: pool.py + M3 120/120 + M4 133/210 then HTTP_STREAK_10.  
-BLOCKER: siliconflow balance insufficient (code 30001) — 75 R1 PROVIDER_ERROR need retry after PI recharge.  
-Then set STATUS → W3/PENDING. NEEDS_HUMAN 17 listed in OUTBOX (no semantic fidelity % yet).
+STATUS: W3/RUNNING + W4/BLOCKED-VERDICT
+UPDATED: 2026-09-12 13:05
+TASK: **task16-W3 · L1 主实验**(实验通道继续) + **W4/S1 初稿已落盘** → 等 PI 裁决 10× VERIFIED_NEEDS_HUMAN 后写 fidelity 节
+A.18 S1 DONE: `papers/P3-llm-autoformalization/manuscript.md` (Intro…Conclusion; fidelity 占位).
+NEEDS_HUMAN: `_autorun/needs_human_review.md` 重生 (N=10, 2026-09-12 04:59 UTC).
+BLOCKER (写作): PI verdict on 10 NH → then W4/WRITING-S2 (fidelity section).
+实验通道: 勿动; R1/补跑由实验 agent 负责.
 
 > **🚀 2026-09-09 01:50 自动化升级(PI 01:43 拍板)**:不再需要 PI 每次手写 "go"。  
 > 本机已部署 **INBOX watcher + Cursor headless CLI(`agent -p --force`)**:  
