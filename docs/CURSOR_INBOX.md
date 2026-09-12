@@ -9,8 +9,8 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/RUNNING
-UPDATED: 2026-09-12 11:32 (agent: R1 errors-only pool pid=3204 alive; STATUS->RUNNING anti-double-spawn; A.17.16 = 1/17 NH->ALIGNED)
+STATUS: W3/RUNNING + W4/WRITING-S1
+UPDATED: 2026-09-12 12:5x
 TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 catchup PASS; M4 R1 errors-only retry RUNNING 73q @w4; A.17.16 normalize: 1/17 NH promoted)
 A.17.12 done: pool.py + M3 120/120 + M4 133/210 then HTTP_STREAK_10.  
 BLOCKER: siliconflow balance insufficient (code 30001) — 75 R1 PROVIDER_ERROR need retry after PI recharge.  
@@ -1511,6 +1511,79 @@ Lean 轨单独一张表如实报告"cell 已生成但目标验证器未部署",�
 - R1 缺 19 个 cell 未 RAN(116/135)—— 正在跑,别中断它
 - GLM 缺 10 个 cell(125/135)
 - Lean 轨 278 个 `.lean` 待验 —— PI 正在决定是否上 AutoDL
+
+## §A.18 · W4/WRITING-S1 —— 第二篇正式开写(PI 2026-09-12 12:5x 下令)
+
+> PI 原话:"在 cursor 中调用 paper-writing 工具,并在 cursor 中开始撰写论文"。
+> 澄清:**本仓没有名为 `paper-writing` 的工具或 slash command**。写作的既定机制是
+> INBOX → Cursor 执笔 → OUTBOX,模板在 `papers/TEMPLATE.md`。本条指令即为该工具
+> 的等价物。为落实 PI 要求,gate.ps1 已新增**写作专用通道**(独立于实验通道的锁与
+> prompt),因此发 §A.18 之后**不必等 R1 批次跑完**,两条线并行。
+
+### A.18.1 文件位置(务必看清,别改错稿)
+
+| 目录 | 内容 | 状态 |
+|---|---|---|
+| `papers/P2/` | **第一篇** GeoProofBench Data Descriptor → Scientific Data,**已投稿** | **不许动** |
+| `papers/P3-llm-autoformalization/` | **第二篇** 本任务,→ KBS | **在此新建** |
+
+从 `papers/TEMPLATE.md` 复制成 `papers/P3-llm-autoformalization/manuscript.md`。
+编号用 P3 是为了跟已投出的 P2 目录区分;元信息块里仍按内部代号 task16 标注。
+
+### A.18.2 目标与 framing
+
+目标期刊 **Knowledge-Based Systems**(Elsevier,IF 8.0,CAS 计算机 Q1 Top)。
+必须严格遵守 §A.15.2 三条 framing 硬约束:
+
+1. **地理是测试床,不是卖点。** gap = "可验证的形式化规约是一类现有 autoformalization
+   benchmark 都没覆盖的规约形态",**不是**"我们做了个地理基准"。
+2. **semantic fidelity 是头条指标**,`"verified but drifted"` 单列一张表,
+   abstract 与 conclusion 各点一次。
+3. **Related Work 覆盖三条线**:LLM autoformalization(miniF2F / ProofNet / Lean)、
+   pass@k 方法论(HumanEval / MBPP;verify@1 / verify@3 是它在形式化维度的类比)、
+   spec-gaming / reward-hacking(semantic fidelity 的真正落点)。
+
+P1 数据集以第三人称引用:DOI `10.57760/sciencedb.011r9`。
+格式:必须拉取 KBS 官方 Guide for Authors 确认,不凭记忆写。
+
+### A.18.3 本阶段要写完的章节(S1)
+
+数据基线见 §A.17.19.2(Dafny 轨 507/540 = 93.9%),主表:
+
+| 模型 | cell | RAN | compile@1 | verify@1 |
+|---|---|---|---|---|
+| DeepSeek-R1 | 135 | 116 | 27.6% | 20.7% |
+| DeepSeek-V3.2 | 135 | 134 | 17.9% | 13.4% |
+| Qwen2.5-72B-Instruct | 135 | 132 | 0.8% | 0.0% |
+| GLM-4-32B-0414 | 125 | 125 | 0.0% | 0.0% |
+
+起草:Intro · Related Work · Benchmark design · Experimental setup · **Main results(上表)** ·
+Failure taxonomy F1–F8(含 §A.17.16 新类"判定器失效")· Threats to validity ·
+Conclusion(暂不含 fidelity 措辞)。
+
+**Lean 轨单独一张表**,如实写为"cell 已生成、目标验证器未部署",列为 limitation。
+**绝不许写成 0% 通过率** —— 未验证 ≠ 验证失败,混淆二者是方法学错误。
+
+### A.18.4 唯一不许写的部分
+
+**§Semantic fidelity 整节留占位**,注明 `<<placeholder: pending PI verdict on 10
+VERIFIED_NEEDS_HUMAN records>>`。§A.17.11 红线不变:**PI 裁定前不许出现任何
+semantic fidelity 百分比**,记录文件路径 `_autorun/needs_human_review.md`。
+
+顺带执行 §A.17.19.4:把 `needs_human_review.md` 重生成一版(17 条 → 现存 10 条,
+旧表含失效记录)。
+
+### A.18.5 完成后怎么改 STATUS
+
+写完 S1 后把 STATUS 改为 `W3/RUNNING + W4/BLOCKED-VERDICT`,并在 OUTBOX 写明哪些章节
+已完成、哪些是占位。**不要写 DONE** —— 实验还在跑。
+
+### A.18.6 并行铁律
+
+- 不许启动 / 恢复 / 杀死 `run_l1_batch*.py`;不许追加写任何 experiment jsonl
+- 只读 `experiments/p2_llm/results/` 取数字
+- 不许用 API key 跑新实验
+- 稿子里每个数字必须能追溯到 jsonl 的具体记录
 
 ## §B · 协议与档案(只读)
 
