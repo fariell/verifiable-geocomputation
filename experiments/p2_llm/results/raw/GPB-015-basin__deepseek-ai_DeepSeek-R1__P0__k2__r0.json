@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-015-basin",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P006_watershed.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1606,
+    "completion_tokens": 5173,
+    "total_tokens": 6779,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4696
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1606
+  },
+  "api_id": "01a093d9d2c54695ffdd15014babf086",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module Watershed {\n  const H: int, W: int\n  assume H > 0 && W > 0\n\n  type Cell = (int, int)\n  predicate inGrid(c: Cell) {\n    0 <= c.0 < H && 0 <= c.1 < W\n  }\n\n  function succ(c: Cell): Cell\n    requires inGrid(c)\n    ensures inGrid(result)\n\n  predicate isOutlet(c: Cell)\n    requires inGrid(c)\n  {\n    succ(c) == c\n  }\n\n  function stepN(n: nat, c: Cell): Cell\n    requires inGrid(c)\n    ensures inGrid(result)\n    decreases n\n  {\n    if n == 0 then c\n    else stepN(n-1, succ(c))\n  }\n\n  lemma FixedPointStays(c: Cell, k: nat)\n    requires inGrid(c) && isOutlet(c)\n    ensures stepN(k, c) == c\n    decreases k\n  {\n    if k != 0 {\n      FixedPointStays(c, k-1);\n    }\n  }\n\n  lemma StepNAdd(n: nat, m: nat, c: Cell)\n    requires inGrid(c)\n    ensures stepN(n+m, c) == stepN(m, stepN(n, c))\n    decreases n\n  {\n    if n != 0 {\n      StepNAdd(n-1, m, succ(c));\n    }\n  }\n\n  lemma WatershedUniqueness(r: int, c: int, n: nat, m: nat)\n    requires inGrid((r,c))\n    requires isOutlet(stepN(n, (r,c)))\n    requires isOutlet(stepN(m, (r,c)))\n    ensures stepN(n, (r,c)) == stepN(m, (r,c))\n  {\n    if n <= m {\n      var diff: nat := m - n;\n      StepNAdd(n, diff, (r,c));\n      FixedPointStays(stepN(n, (r,c)), diff);\n    } else {\n      var diff: nat := n - m;\n      StepNAdd(m, diff, (r,c));\n      FixedPointStays(stepN(m, (r,c)), diff);\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

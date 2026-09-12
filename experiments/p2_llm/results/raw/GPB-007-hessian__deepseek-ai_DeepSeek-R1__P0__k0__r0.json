@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P003_curvature.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1737,
+    "completion_tokens": 5467,
+    "total_tokens": 7204,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4401
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1737
+  },
+  "api_id": "01a09116085a0815af6fe28856c3d8af",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "module P003_curvature {\n  function quad(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n\n  lemma ZTHessianExact(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n    requires w > 0.0\n    ensures \n      let a00 := quad(A,B,C,D,E,F, -w, -w) in\n      let a01 := quad(A,B,C,D,E,F,  0.0, -w) in\n      let a02 := quad(A,B,C,D,E,F,  w, -w) in\n      let a10 := quad(A,B,C,D,E,F, -w,  0.0) in\n      let a11 := quad(A,B,C,D,E,F,  0.0,  0.0) in\n      let a12 := quad(A,B,C,D,E,F,  w,  0.0) in\n      let a20 := quad(A,B,C,D,E,F, -w,  w) in\n      let a21 := quad(A,B,C,D,E,F,  0.0,  w) in\n      let a22 := quad(A,B,C,D,E,F,  w,  w) in\n      let hxx := (a10 - 2.0*a11 + a12) / (w*w) in\n      let hyy := (a01 - 2.0*a11 + a21) / (w*w) in\n      let hxy := (a00 - a02 - a20 + a22) / (4.0 * w * w) in\n      hxx == 2.0 * A && hyy == 2.0 * B && hxy == C\n  {\n    // Expansion of hxx\n    calc {\n      (a10 - 2.0*a11 + a12) / (w*w);\n      ==\n      (quad(A,B,C,D,E,F, -w, 0.0) - 2.0*quad(A,B,C,D,E,F, 0.0, 0.0) + quad(A,B,C,D,E,F, w, 0.0)) / (w*w);\n      ==\n      ((A*w*w - D*w + F) - 2.0*F + (A*w*w + D*w + F)) / (w*w);\n      ==\n      (2.0*A*w*w) / (w*w);\n      ==\n      2.0*A;\n    }\n\n    // Expansion of hyy\n    calc {\n      (a01 - 2.0*a11 + a21) / (w*w);\n      ==\n      (quad(A,B,C,D,E,F, 0.0, -w) - 2.0*quad(A,B,C,D,E,F, 0.0, 0.0) + quad(A,B,C,D,E,F, 0.0, w)) / (w*w);\n      ==\n      ((B*w*w - E*w + F) - 2.0*F + (B*w*w + E*w + F)) / (w*w);\n      ==\n      (2.0*B*w*w) / (w*w);\n      ==\n      2.0*B;\n    }\n\n    // Expansion of hxy numerator\n    calc {\n      a00 - a02 - a20 + a22;\n      ==\n      quad(A,B,C,D,E,F, -w, -w) - quad(A,B,C,D,E,F, w, -w) - quad(A,B,C,D,E,F, -w, w) + quad(A,B,C,D,E,F, w, w);\n      ==\n      (A*w*w + B*w*w + C*w*w - D*w - E*w + F) \n      - (A*w*w + B*w*w - C*w*w + D*w - E*w + F) \n      - (A*w*w + B*w*w - C*w*w - D*w + E*w + F) \n      + (A*w*w + B*w*w + C*w*w + D*w + E*w + F);\n      ==\n      4.0*C*w*w;\n    }\n    // Final hxy result\n    assert (a00 - a02 - a20 + a22) / (4.0 * w * w) == 4.0*C*w*w / (4.0 * w * w) by {\n      calc {\n        4.0*C*w*w / (4.0 * w * w);\n        ==\n        C * (4.0 * w * w) / (4.0 * w * w);\n        ==\n        C;\n      }\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

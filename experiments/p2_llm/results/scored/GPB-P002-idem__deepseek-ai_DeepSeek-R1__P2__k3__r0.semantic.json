@@ -1,0 +1,75 @@
+{
+  "task_id": "GPB-P002-idem",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [
+    "Fill"
+  ],
+  "n_gen_names": 4,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "already",
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit": [
+      "fill",
+      "fixed",
+      "idempotent"
+    ],
+    "miss": [
+      "already",
+      "cells",
+      "filling",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit_ratio": 0.25
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 3,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "fill",
+      "forall",
+      "max"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill",
+      "forall"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "function max(a: int, b: int): int {\n if a >= b then a else b\n}\n\nfunction Fill(a: seq<int>): seq<int>\n requires |a| > 0\n ensures |Fill(a)| == |a|\n ensures Fill(a)[0] == a[0]\n ensures forall i :: 1 <= i < |a| ==> Fill(a)[i] == max(a[i], Fill(a)[i-1])\n{\n if |a| == 1 then\n [a[0]]\n else\n var b := Fill(a[0..|a|-1]);\n b + [max(a[|a|-1], b[|b|-1])]\n}\n\nlemma Idempotent(a: seq<int>)\n requires |a| > 0\n ensur"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

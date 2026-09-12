@@ -1,0 +1,74 @@
+{
+  "task_id": "GPB-P002-idem",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "Fill"
+  ],
+  "n_gen_names": 5,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "already",
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit": [
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent"
+    ],
+    "miss": [
+      "already",
+      "cells",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit_ratio": 0.3333
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 5,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "fill",
+      "forall"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill",
+      "forall"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nmodule PitFilling1D {\n\n \n \n \n \n \n function Fill(a: seq<real>): seq<real>\n requires |a| > 0 \n ensures |Fill(a)| == |a|\n {\n if |a| == 1 then\n [a[0]] \n else\n var prefix := Fill(a[0..|a|-1]); \n prefix + [max(a[|a|-1], prefix[|a|-2])] \n }\n\n \n \n \n \n lemma FillIsNonDecreasing(a: seq<real>)\n requires |a| > 0\n ensures forall i: int :: 1 <= i < |Fill(a)| ==> Fill(a)[i] >= Fill(a)[i-1]\n {"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

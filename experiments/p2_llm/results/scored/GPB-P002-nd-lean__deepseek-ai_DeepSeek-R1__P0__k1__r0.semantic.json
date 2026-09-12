@@ -1,0 +1,76 @@
+{
+  "task_id": "GPB-P002-nd-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [
+    "fill",
+    "fill_nondec"
+  ],
+  "n_gen_names": 2,
+  "n_gold_names": 15,
+  "keyword_hits": {
+    "keywords": [
+      "defined",
+      "fill",
+      "lean",
+      "left-outlet",
+      "nondecreasing",
+      "operator",
+      "sequence",
+      "yields"
+    ],
+    "hit": [
+      "fill"
+    ],
+    "miss": [
+      "defined",
+      "lean",
+      "left-outlet",
+      "nondecreasing",
+      "operator",
+      "sequence",
+      "yields"
+    ],
+    "hit_ratio": 0.125
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 0,
+    "n_gold_clauses": 1,
+    "gen_clause_tokens": [],
+    "gold_clause_tokens": [
+      "acc",
+      "cases",
+      "cons",
+      "def",
+      "else",
+      "fill",
+      "fill_go_length",
+      "fill_length",
+      "generalizing",
+      "induction",
+      "length",
+      "list",
+      "nil",
+      "omega",
+      "raise",
+      "raise_length",
+      "rfl",
+      "simp",
+      "split_ifs",
+      "then",
+      "theorem",
+      "unfold",
+      "with"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "import Std\n\nvariable {α : Type} [LinearOrder α]\n\ndef fill (a : ℕ → α) : ℕ → α\n| 0 => a 0\n| n+1 => max (a (n+1)) (fill a n)\n\ntheorem fill_nondec (a : ℕ → α) (i : ℕ) : fill a i ≤ fill a (i+1) := by\n rw [fill]\n exact le_max_right (a (i+1)) (fill a i)"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

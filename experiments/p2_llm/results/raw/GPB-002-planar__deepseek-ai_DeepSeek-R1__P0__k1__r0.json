@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P001_horn_slope.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1612,
+    "completion_tokens": 6488,
+    "total_tokens": 8100,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6022
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1612
+  },
+  "api_id": "01a0911d9e64316c70f96253d685ca28",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// This Dafny module proves that the Horn finite-difference operator\n// exactly recovers the slope parameters A and B of a planar surface\n// z = A*x + B*y + C on a regular grid with spacing w>0.\n\nconst A: real\nconst B: real\nconst C: real\nconst w: real\n\nfunction grid(i: int, j: int): real\n{\n  A * i * w + B * j * w + C\n}\n\nfunction DzDx(i: int, j: int): real\n{\n  (grid(i+1, j) - grid(i-1, j)) / (2.0 * w)\n}\n\nfunction DzDy(i: int, j: int): real\n{\n  (grid(i, j+1) - grid(i, j-1)) / (2.0 * w)\n}\n\nlemma LemmaExactRecovery(i: int, j: int)\n  requires w > 0.0\n  ensures DzDx(i, j) == A\n  ensures DzDy(i, j) == B\n{\n  // For DzDx\n  assert grid(i+1, j) == A * (i+1) * w + B * j * w + C;\n  assert grid(i-1, j) == A * (i-1) * w + B * j * w + C;\n  assert grid(i+1, j) - grid(i-1, j) == 2 * A * w;\n  assert DzDx(i, j) == (2 * A * w) / (2.0 * w) == A;\n\n  // For DzDy\n  assert grid(i, j+1) == A * i * w + B * (j+1) * w + C;\n  assert grid(i, j-1) == A * i * w + B * (j-1) * w + C;\n  assert grid(i, j+1) - grid(i, j-1) == 2 * B * w;\n  assert DzDy(i, j) == (2 * B * w) / (2.0 * w) == B;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
 }

@@ -1,0 +1,76 @@
+{
+  "task_id": "GPB-P002-idem",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "Fill"
+  ],
+  "n_gen_names": 7,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "already",
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit": [
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "left",
+      "left-outlet",
+      "specialization",
+      "spill"
+    ],
+    "miss": [
+      "already",
+      "idempotent",
+      "points",
+      "raise"
+    ],
+    "hit_ratio": 0.6667
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 11,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "fill",
+      "forall",
+      "idx",
+      "maxseq"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill",
+      "forall"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "To address the problem of proving the idempotence of pit filling in a 1D left-outlet specialization and the fixed-point property of cells that do not spill left, we formalize the solution in Dafny. The approach involves defining a function `Fill` that computes the cumulative maximum of the elevation sequence, ensuring the result is non-decreasing. Key lemmas establish that applying `Fill` twice yi"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

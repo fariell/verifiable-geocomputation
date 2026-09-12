@@ -1,0 +1,61 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 6,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "across",
+      "cells",
+      "change",
+      "constant",
+      "datum",
+      "direction",
+      "elevation",
+      "flow",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit": [
+      "constant",
+      "direction",
+      "flow",
+      "slope"
+    ],
+    "miss": [
+      "across",
+      "cells",
+      "change",
+      "datum",
+      "elevation",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "translating"
+    ],
+    "hit_ratio": 0.2857
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 0,
+    "n_gold_clauses": 0,
+    "gen_clause_tokens": [],
+    "gold_clause_tokens": [],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.List.MinMax\n\nstructure GridPoint where\n i : ℤ\n j : ℤ\n\ndef Direction := ℤ × ℤ\n\ndef slope (A B : ℝ) (dx dy : ℤ) : ℝ :=\n let denom := if dx = 0 || dy = 0 then 1 else Real.sqrt 2\n (-A * dx - B * dy) / denom\n\ndef directions : List Direction :=\n [ (-1, -1), (-1, 0), (-1, 1),\n ( 0, -1), ( 0, 1),\n ( 1, -1), ( 1, 0), ( 1, 1) ]\n\ndef flow_dir_at (A B : ℝ) (C"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

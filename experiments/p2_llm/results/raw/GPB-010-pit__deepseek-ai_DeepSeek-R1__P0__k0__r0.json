@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-010-pit",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "c0f7f224e109c2739446007eac25fd1a8990ff0624f7afd5e305ce1a76c9a81d",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P005_d8.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1687,
+    "completion_tokens": 11238,
+    "total_tokens": 12925,
+    "completion_tokens_details": {
+      "reasoning_tokens": 10287
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1687
+  },
+  "api_id": "01a093ae91efd80893ef73b3e0650787",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "datatype Direction = E | SE | S | SW | W | NW | N | NE | NoFlow\n\nfunction method D8(grid: array2<real>, i: int, j: int): Direction\n  requires 1 <= i < grid.Length0 - 1\n  requires 1 <= j < grid.Length1 - 1\n{\n  var best := NoFlow;\n  var best_p := 0.0;\n  \n  // Process E neighbor (0,1)\n  if grid[i, j] - grid[i, j+1] > 0.0 {\n    let drop := grid[i, j] - grid[i, j+1];\n    let p := drop * drop;\n    if best == NoFlow || p > best_p {\n      best, best_p := E, p;\n    }\n  }\n  \n  // Process SE neighbor (1,1)\n  if grid[i, j] - grid[i+1, j+1] > 0.0 {\n    let drop := grid[i, j] - grid[i+1, j+1];\n    let p := (drop * drop) / 2.0;\n    if best == NoFlow || p > best_p {\n      best, best_p := SE, p;\n    }\n  }\n  \n  // Process S neighbor (1,0)\n  if grid[i, j] - grid[i+1, j] > 0.0 {\n    let drop := grid[i, j] - grid[i+1, j];\n    let p := drop * drop;\n    if best == NoFlow || p > best_p {\n      best, best_p := S, p;\n    }\n  }\n  \n  // Process SW neighbor (1,-1)\n  if grid[i, j] - grid[i+1, j-1] > 0.0 {\n    let drop := grid[i, j] - grid[i+1, j-1];\n    let p := (drop * drop) / 2.0;\n    if best == NoFlow || p > best_p {\n      best, best_p := SW, p;\n    }\n  }\n  \n  // Process W neighbor (0,-1)\n  if grid[i, j] - grid[i, j-1] > 0.0 {\n    let drop := grid[i, j] - grid[i, j-1];\n    let p := drop * drop;\n    if best == NoFlow || p > best_p {\n      best, best_p := W, p;\n    }\n  }\n  \n  // Process NW neighbor (-1,-1)\n  if grid[i, j] - grid[i-1, j-1] > 0.0 {\n    let drop := grid[i, j] - grid[i-1, j-1];\n    let p := (drop * drop) / 2.0;\n    if best == NoFlow || p > best_p {\n      best, best_p := NW, p;\n    }\n  }\n  \n  // Process N neighbor (-1,0)\n  if grid[i, j] - grid[i-1, j] > 0.0 {\n    let drop := grid[i, j] - grid[i-1, j];\n    let p := drop * drop;\n    if best == NoFlow || p > best_p {\n      best, best_p := N, p;\n    }\n  }\n  \n  // Process NE neighbor (-1,1)\n  if grid[i, j] - grid[i-1, j+1] > 0.0 {\n    let drop := grid[i, j] - grid[i-1, j+1];\n    let p := (drop * drop) / 2.0;\n    if best == NoFlow || p > best_p {\n      best, best_p := NE, p;\n    }\n  }\n  \n  best\n}\n\nlemma Theorem(grid: array2<real>, i: int, j: int)\n  requires 1 <= i < grid.Length0 - 1\n  requires 1 <= j < grid.Length1 - 1\n  requires forall di: int, dj: int :: \n      (di,dj) in { (0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1) } \n      ==> grid[i+di, j+dj] >= grid[i, j]\n  ensures D8(grid, i, j) == NoFlow\n{\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

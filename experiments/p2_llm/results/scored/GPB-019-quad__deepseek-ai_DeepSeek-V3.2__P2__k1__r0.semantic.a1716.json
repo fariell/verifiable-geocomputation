@@ -1,0 +1,85 @@
+{
+  "task_id": "GPB-019-quad",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 0,
+  "n_gold_names": 19,
+  "keyword_hits": {
+    "keywords": [
+      "coefficients",
+      "dzdx",
+      "dzdy",
+      "equals",
+      "exact",
+      "gradient",
+      "horn",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "quadratic",
+      "recover",
+      "remainder",
+      "separately",
+      "slope",
+      "surfaces",
+      "true"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "exact",
+      "quadratic",
+      "remainder"
+    ],
+    "miss": [
+      "coefficients",
+      "equals",
+      "gradient",
+      "horn",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "recover",
+      "separately",
+      "slope",
+      "surfaces",
+      "true"
+    ],
+    "hit_ratio": 0.2778
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 13,
+    "gen_clause_tokens": [
+      "dzdx",
+      "dzdy",
+      "remainder"
+    ],
+    "gold_clause_tokens": [
+      "abs",
+      "cubicx",
+      "cubicy",
+      "dzdx",
+      "dzdy",
+      "ens",
+      "numdx",
+      "numdy"
+    ],
+    "overlap": [
+      "dzdx",
+      "dzdy"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "\n\n\n\nmethod QuadraticExactness(A: real, B: real, C: real, w: real) \n returns (DzDx: real, DzDy: real)\n requires w != 0.0\n ensures DzDx == A && DzDy == B\n{\n \n \n \n \n \n \n var z00 := A*0.0 + B*0.0 + C;\n var zpw0 := A*w + B*0.0 + C;\n var zmw0 := A*(-w) + B*0.0 + C;\n var z0pw := A*0.0 + B*w + C;\n var z0mw := A*0.0 + B*(-w) + C;\n \n DzDx := (zpw0 - zmw0) / (2.0 * w);\n DzDy := (z0pw - z0mw) / (2.0 * w);\n \n "
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

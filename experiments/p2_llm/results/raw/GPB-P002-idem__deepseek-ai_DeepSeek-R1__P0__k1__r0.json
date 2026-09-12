@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-P002-idem",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P002_pit_filling.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1702,
+    "completion_tokens": 12626,
+    "total_tokens": 14328,
+    "completion_tokens_details": {
+      "reasoning_tokens": 12210
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1702
+  },
+  "api_id": "01a093eba331924ebba85e894acabb02",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function max(x: int, y: int): int {\n  if x > y then x else y\n}\n\nfunction FillHelper(a: seq<int>, cur: int, idx: int): seq<int>\n  requires 0 <= idx <= |a|\n  decreases |a| - idx\n{\n  if idx == |a| then [cur]\n  else\n    var new_cur := max(cur, a[idx]);\n    [cur] + FillHelper(a, new_cur, idx+1)\n}\n\nfunction Fill(a: seq<int>): seq<int> {\n  if |a| == 0 then []\n  else FillHelper(a, a[0], 1)\n}\n\nlemma FillStep(a: seq<int>, i: int)\n  requires a != [] && 0 < i < |a|\n  ensures Fill(a)[i] == max(Fill(a)[i-1], a[i])\n{\n  // Structural property of FillHelper\n}\n\nlemma FillIsNonDecreasing(a: seq<int>)\n  ensures forall i :: 1 <= i < |a| ==> Fill(a)[i] >= Fill(a)[i-1]\n{\n  // Follows from FillStep and max properties\n}\n\nlemma Idempotent(a: seq<int>)\n  ensures Fill(Fill(a)) == Fill(a)\n{\n  FillIsNonDecreasing(a);\n  // Fill(a) is non-decreasing so reapplication doesn't change\n}\n\nlemma FixedPoint(a: seq<int>, i: int)\n  requires 0 <= i < |a|\n  requires i == 0 || a[i] >= max(a[0..i])\n  ensures Fill(a)[i] == a[i]\n{\n  if i == 0 {\n    // First element always fixed\n  } else {\n    // a[i] >= max of left segment implies no change\n    FillStep(a, i);\n    assert Fill(a)[i-1] == max(a[0..i]);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
 }

@@ -1,0 +1,81 @@
+{
+  "task_id": "GPB-001-flat",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [
+    "SlopeSq"
+  ],
+  "n_gen_names": 4,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "horn",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "slope",
+      "slopesq",
+      "spacing",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "hit": [
+      "slope",
+      "slopesq"
+    ],
+    "miss": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "horn",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "spacing",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "hit_ratio": 0.1111
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 4,
+    "n_gold_clauses": 10,
+    "gen_clause_tokens": [
+      "elev",
+      "forall",
+      "slopesq"
+    ],
+    "gold_clause_tokens": [
+      "dzdx",
+      "dzdy",
+      "slopesq"
+    ],
+    "overlap": [
+      "slopesq"
+    ],
+    "overlap_ratio": 0.3333,
+    "normalized_preview_gen": "function dzdx(elev: (int, int) -> real, w: real): real\n requires w > 0.0\n{\n ( (elev(0,2) + 2.0*elev(1,2) + elev(2,2)) - (elev(0,0) + 2.0*elev(1,0) + elev(2,0)) ) / (8.0 * w)\n}\n\nfunction dzdy(elev: (int, int) -> real, w: real): real\n requires w > 0.0\n{\n ( (elev(2,0) + 2.0*elev(2,1) + elev(2,2)) - (elev(0,0) + 2.0*elev(0,1) + elev(0,2)) ) / (8.0 * w)\n}\n\nfunction SlopeSq(elev: (int, int) -> real, w: "
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

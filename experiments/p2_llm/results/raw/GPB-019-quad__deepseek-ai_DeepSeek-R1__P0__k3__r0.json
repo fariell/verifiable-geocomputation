@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-019-quad",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P004_consistency.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 0,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1753,
+    "completion_tokens": 7515,
+    "total_tokens": 9268,
+    "completion_tokens_details": {
+      "reasoning_tokens": 6665
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1753
+  },
+  "api_id": "01a093e713628911bdf07dd70e50a851",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0: Zero-shot auto-formalization for Horn slope properties\n// Horn slope is exact on quadratic surfaces: recovers A and B exactly.\n// On cubic z = G x^3: DzDx remainder at origin is G w^2.\n\nfunction horn_dzdx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n{\n  ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w)\n}\n\nfunction horn_dzdy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n{\n  ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w)\n}\n\nfunction quadratic(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n  A*x + B*y + C + D*x*x + E*x*y + F*y*y\n}\n\nfunction cubic_x(x: real, y: real, G: real): real\n{\n  G * (x*x*x)\n}\n\nlemma QuadraticExact(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w > 0.0\n  ensures horn_dzdx(\n      quadratic(-w, -w, A, B, C, D, E, F),\n      quadratic(0.0, -w, A, B, C, D, E, F),\n      quadratic(w, -w, A, B, C, D, E, F),\n      quadratic(-w, 0.0, A, B, C, D, E, F),\n      quadratic(w, 0.0, A, B, C, D, E, F),\n      quadratic(-w, w, A, B, C, D, E, F),\n      quadratic(0.0, w, A, B, C, D, E, F),\n      quadratic(w, w, A, B, C, D, E, F),\n      w\n  ) == A\n  ensures horn_dzdy(\n      quadratic(-w, -w, A, B, C, D, E, F),\n      quadratic(0.0, -w, A, B, C, D, E, F),\n      quadratic(w, -w, A, B, C, D, E, F),\n      quadratic(-w, 0.0, A, B, C, D, E, F),\n      quadratic(w, 0.0, A, B, C, D, E, F),\n      quadratic(-w, w, A, B, C, D, E, F),\n      quadratic(0.0, w, A, B, C, D, E, F),\n      quadratic(w, w, A, B, C, D, E, F),\n      w\n  ) == B\n{\n  // Proof follows from algebraic expansion and cancellation\n}\n\nlemma CubicRemainder(G: real, w: real)\n  requires w > 0.0\n  ensures horn_dzdx(\n      cubic_x(-w, -w, G),\n      cubic_x(0.0, -w, G),\n      cubic_x(w, -w, G),\n      cubic_x(-w, 0.0, G),\n      cubic_x(w, 0.0, G),\n      cubic_x(-w, w, G),\n      cubic_x(0.0, w, G),\n      cubic_x(w, w, G),\n      w\n  ) == G * w * w\n{\n  // Proof follows from algebraic expansion and simplification\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

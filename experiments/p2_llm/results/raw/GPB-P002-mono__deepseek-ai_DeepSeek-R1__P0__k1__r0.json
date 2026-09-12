@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-P002-mono",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "eab8c2a3213e460c9bd707579906280dd615923ea4a9033bad5daa0dc361f804",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P002_pit_filling.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1605,
+    "completion_tokens": 5635,
+    "total_tokens": 7240,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5410
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1605
+  },
+  "api_id": "01a09408b003eba58edc68c1df807f5f",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function Fill(orig: seq<real>, i: int): real\n  requires 0 <= i < |orig|\n  decreases i\n{\n  if i == 0 then orig[0] else max(orig[i], Fill(orig, i-1))\n}\n\nlemma Monotonicity(orig: seq<real>, i: int)\n  requires |orig| >= 1\n  requires 0 <= i < |orig|\n  ensures Fill(orig, i) >= orig[i]\n{\n  if i != 0 {\n    Monotonicity(orig, i-1);\n  }\n}\n\nlemma Nondecreasing(orig: seq<real>, i: int)\n  requires |orig| >= 1\n  requires 0 <= i < |orig| - 1\n  ensures Fill(orig, i) <= Fill(orig, i+1)\n{\n  if i+1 != 0 {\n    assert Fill(orig, i+1) == max(orig[i+1], Fill(orig, i));\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
 }

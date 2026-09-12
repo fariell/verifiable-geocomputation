@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-007-hessian",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P2",
   "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P003_curvature.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 0,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 4792,
+    "total_tokens": 5061,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4178
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a093adeb15f9dfc0e5eb91274942a8",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function quad(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n  A * x * x + B * y * y + C * x * y + D * x + E * y + F\n}\n\nmethod Main(A: real, B: real, C: real, D: real, E: real, F: real, x0: real, y0: real, w: real)\n  requires w > 0.0\n{\n  // Define grid points\n  var x1 := x0 - w;\n  var x2 := x0;\n  var x3 := x0 + w;\n  var y1 := y0 - w;\n  var y2 := y0;\n  var y3 := y0 + w;\n\n  // Compute z-values at grid points\n  var z11 := quad(x1, y3, A, B, C, D, E, F);\n  var z12 := quad(x2, y3, A, B, C, D, E, F);\n  var z13 := quad(x3, y3, A, B, C, D, E, F);\n  var z21 := quad(x1, y2, A, B, C, D, E, F);\n  var z22 := quad(x2, y2, A, B, C, D, E, F);\n  var z23 := quad(x3, y2, A, B, C, D, E, F);\n  var z31 := quad(x1, y1, A, B, C, D, E, F);\n  var z32 := quad(x2, y1, A, B, C, D, E, F);\n  var z33 := quad(x3, y1, A, B, C, D, E, F);\n\n  // Compute discrete Hessian components\n  var dxx := (z11 - 2.0*z12 + z13 + 2.0*z21 - 4.0*z22 + 2.0*z23 + z31 - 2.0*z32 + z33) / (6.0 * w * w);\n  var dyy := (z11 + 2.0*z12 + z13 - 2.0*z21 - 4.0*z22 - 2.0*z23 + z31 + 2.0*z32 + z33) / (6.0 * w * w);\n  var dxy := (z11 - z13 - z31 + z33) / (4.0 * w * w);\n\n  // Verify recovery of Hessian components\n  assert dxx == 2.0 * A;\n  assert dyy == 2.0 * B;\n  assert dxy == C;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
 }

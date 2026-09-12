@@ -1,0 +1,87 @@
+{
+  "task_id": "GPB-019-quad",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 2,
+  "n_gold_names": 19,
+  "keyword_hits": {
+    "keywords": [
+      "coefficients",
+      "dzdx",
+      "dzdy",
+      "equals",
+      "exact",
+      "gradient",
+      "horn",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "quadratic",
+      "recover",
+      "remainder",
+      "separately",
+      "slope",
+      "surfaces",
+      "true"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "exact",
+      "horn",
+      "quadratic",
+      "remainder",
+      "slope"
+    ],
+    "miss": [
+      "coefficients",
+      "equals",
+      "gradient",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "recover",
+      "separately",
+      "surfaces",
+      "true"
+    ],
+    "hit_ratio": 0.3889
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 13,
+    "gen_clause_tokens": [
+      "cubic_x",
+      "dzdx",
+      "dzdy",
+      "let",
+      "quad"
+    ],
+    "gold_clause_tokens": [
+      "abs",
+      "cubicx",
+      "cubicy",
+      "dzdx",
+      "dzdy",
+      "ens",
+      "numdx",
+      "numdy"
+    ],
+    "overlap": [
+      "dzdx",
+      "dzdy"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ninclude \"P001_horn_slope.dfy\" \n\nmodule HornConsistency {\n import opened HornSlope \n\n \n \n \n lemma QuadraticExactness(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n requires w > 0.0\n ensures \n \n let quad(p: int, q: int) := \n A*(p*w) + B*(q*w) + C + D*(p*w)*(p*w) + E*(p*w)*(q*w) + F*(q*w)*(q*w)\n \n let a := quad(-1, -1)\n let b := quad( 0, -1)\n let c := quad( 1, -1)"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

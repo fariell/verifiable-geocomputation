@@ -1,0 +1,68 @@
+{
+  "task_id": "GPB-002-planar",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 4,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "dzdx",
+      "dzdy",
+      "estimates",
+      "exactly",
+      "finite-difference",
+      "grid",
+      "horn",
+      "identity",
+      "planar",
+      "recover",
+      "regular",
+      "sampled",
+      "spacing",
+      "surface"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "horn"
+    ],
+    "miss": [
+      "estimates",
+      "exactly",
+      "finite-difference",
+      "grid",
+      "identity",
+      "planar",
+      "recover",
+      "regular",
+      "sampled",
+      "spacing",
+      "surface"
+    ],
+    "hit_ratio": 0.2143
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 12,
+    "n_gold_clauses": 10,
+    "gen_clause_tokens": [
+      "horndzdx",
+      "horndzdy"
+    ],
+    "gold_clause_tokens": [
+      "dzdx",
+      "dzdy",
+      "slopesq"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "\n\n\n\n\n\n\nmodule HornSlope {\n\n \n \n \n \n \n \n \n \n \n \n \n\n \n function plane(x: real, y: real, A: real, B: real, C: real): real\n {\n A * x + B * y + C\n }\n\n \n function Qa(A: real, B: real, C: real, w: real): real\n requires w > 0.0\n { plane(-w, -w, A, B, C) }\n \n function Qb(A: real, B: real, C: real, w: real): real\n requires w > 0.0\n { plane(0.0, -w, A, B, C) }\n \n function Qc(A: real, B: real, C: real, w: rea"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

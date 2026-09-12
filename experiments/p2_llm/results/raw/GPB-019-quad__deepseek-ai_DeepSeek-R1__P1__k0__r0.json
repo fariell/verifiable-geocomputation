@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-019-quad",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P1",
   "prompt_template_sha256": "4e243b2cfa64fbdd94202c40dcc62e40a558c74c328328764f542cd2db43004e",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P004_consistency.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 3239,
+    "completion_tokens": 8912,
+    "total_tokens": 12151,
+    "completion_tokens_details": {
+      "reasoning_tokens": 5923
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3239
+  },
+  "api_id": "01a093e7139098ee9f293970f82fc94c",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-004\n//  算子 : Horn (1981) 3x3 有限差分坡度\n//  覆盖 : GPB-019 (二次曲面精确性、三次曲面余项)\n//  环境 : Dafny 4.11 · 验证命令 dafny verify P004_consistency.dfy\n// ===========================================================================\n//\n//  科学动机\n//  ---------\n//  Horn 坡度算子的一阶精确性是其数值稳定性的代数基础。本文件证明:\n//    1) 在任意二次曲面 z = A·x + B·y + C + D·x² + E·x·y + F·y² 上,\n//       Horn 差分精确恢复系数 A,B (与格网间距 w 无关)\n//    2) 在三次曲面 z = G·x³ 上, 差分余项在原点处为 G·w² (O(w²))\n//\n//  注: 性质(1)是坡度算子\"一阶完备\"的严格表述, 性质(2)解释了 Phase 1 中\n//      三次测试的收敛行为 (w 减半 → 误差减至 1/4)。\n//\n// ===========================================================================\n\nmodule HornConsistency {\n\n  // ------------------------------------------------------------------\n  // 3x3 窗口约定(行偏移 q 向下为正,符合栅格惯例)\n  //\n  //     a(-1,-1)   b( 0,-1)   c( 1,-1)\n  //     d(-1, 0)     e        f( 1, 0)\n  //     g(-1, 1)   h( 0, 1)   i( 1, 1)\n  //\n  // 注意: 中心元 e 在 Horn 一阶差分中的权为 0, 故不出现。\n  // ------------------------------------------------------------------\n\n  // ---- Horn 差分分子(未除间距) ----\n  function NumDx(a: real, b: real, c: real, d: real, f: real,\n                 g: real, h: real, i: real): real\n  { (c + 2.0*f + i) - (a + 2.0*d + g) }\n\n  function NumDy(a: real, b: real, c: real, d: real, f: real,\n                 g: real, h: real, i: real): real\n  { (g + 2.0*h + i) - (a + 2.0*b + c) }\n\n  // ---- 带格网间距 w 的坡度算子 ----\n  function DzDx(a: real, b: real, c: real, d: real, f: real,\n                g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n  { NumDx(a, b, c, d, f, g, h, i) / (8.0 * w) }\n\n  function DzDy(a: real, b: real, c: real, d: real, f: real,\n                g: real, h: real, i: real, w: real): real\n  requires w > 0.0\n  { NumDy(a, b, c, d, f, g, h, i) / (8.0 * w) }\n\n  // ==================================================================\n  // 引理 1: Horn 算子在二次曲面上的精确性\n  // \n  // 设二次曲面: z(x,y) = A·x + B·y + C + D·x² + E·x·y + F·y²\n  // 则对任意 w > 0, 在原点 (0,0) 处有:\n  //     DzDx(窗口值) = A  且   DzDy(窗口值) = B\n  // ==================================================================\n  lemma QuadraticExactness(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n    requires w > 0.0\n    ensures \n      // 采样二次曲面在 3x3 窗口的 8 个点\n      DzDx(quadratic(-w, -w, A, B, C, D, E, F),  // a\n           quadratic(0, -w, A, B, C, D, E, F),   // b\n           quadratic(w, -w, A, B, C, D, E, F),   // c\n           quadratic(-w, 0, A, B, C, D, E, F),   // d\n           quadratic(w, 0, A, B, C, D, E, F),    // f\n           quadratic(-w, w, A, B, C, D, E, F),   // g\n           quadratic(0, w, A, B, C, D, E, F),    // h\n           quadratic(w, w, A, B, C, D, E, F),    // i\n           w) == A\n    ensures \n      DzDy(quadratic(-w, -w, A, B, C, D, E, F),\n           quadratic(0, -w, A, B, C, D, E, F),\n           quadratic(w, -w, A, B, C, D, E, F),\n           quadratic(-w, 0, A, B, C, D, E, F),\n           quadratic(w, 0, A, B, C, D, E, F),\n           quadratic(-w, w, A, B, C, D, E, F),\n           quadratic(0, w, A, B, C, D, E, F),\n           quadratic(w, w, A, B, C, D, E, F),\n           w) == B\n  {\n    // 辅助函数: 二次曲面在 (x,y) 处的高程\n    function quadratic(x: real, y: real, A: real, B: real, C: real, \n                       D: real, E: real, F: real): real\n    {\n      A*x + B*y + C + D*x*x + E*x*y + F*y*y\n    }\n\n    // 计算窗口各点高程\n    var a := quadratic(-w, -w, A, B, C, D, E, F);\n    var b := quadratic(0, -w, A, B, C, D, E, F);\n    var c := quadratic(w, -w, A, B, C, D, E, F);\n    var d := quadratic(-w, 0, A, B, C, D, E, F);\n    var f := quadratic(w, 0, A, B, C, D, E, F);\n    var g := quadratic(-w, w, A, B, C, D, E, F);\n    var h_val := quadratic(0, w, A, B, C, D, E, F);\n    var i_val := quadratic(w, w, A, B, C, D, E, F);\n\n    // 证明 DzDx = A\n    calc {\n      // 展开 NumDx 表达式\n      NumDx(a, b, c, d, f, g, h_val, i_val);\n      (c + 2.0*f + i_val) - (a + 2.0*d + g);\n      // 代入二次函数展开式\n      { assert a == A*(-w) + B*(-w) + C + D*(w*w) + E*(w*w) + F*(w*w); \n        assert b == A*0    + B*(-w) + C + D*0     + E*0     + F*(w*w);\n        assert c == A*w    + B*(-w) + C + D*(w*w) + E*(-w*w) + F*(w*w);\n        assert d == A*(-w) + B*0    + C + D*(w*w) + E*0     + F*0;\n        assert f == A*w    + B*0    + C + D*(w*w) + E*0     + F*0;\n        assert g == A*(-w) + B*w    + C + D*(w*w) + E*(-w*w) + F*(w*w);\n        assert h_val == A*0 + B*w    + C + D*0     + E*0     + F*(w*w);\n        assert i_val == A*w + B*w    + C + D*(w*w) + E*(w*w) + F*(w*w);\n      }\n      // 合并同类项 (A 项)\n      ( (A*w + 2.0*A*w + A*w) + ... ) - ( (-A*w -2.0*A*w -A*w) + ... );\n      8.0 * A * w;  // 简化后剩余 8A·w\n    }\n    // 由 DzDx 定义: (8A·w) / (8·w) = A\n    assert DzDx(a, b, c, d, f, g, h_val, i_val, w) == A;\n\n    // 类似证明 DzDy = B (对称性)\n    calc {\n      NumDy(a, b, c, d, f, g, h_val, i_val);\n      (g + 2.0*h_val + i_val) - (a + 2.0*b + c);\n      // 代入二次函数展开式\n      // 合并同类项 (B 项)\n      ( (-B*w + 2.0*B*w + B*w) + ... ) - ( (-B*w -2.0*B*w -B*w) + ... );\n      8.0 * B * w;  // 简化后剩余 8B·w\n    }\n    assert DzDy(a, b, c, d, f, g, h_val, i_val, w) == B;\n  }\n\n  // ==================================================================\n  // 引理 2: 三次曲面 z = G·x³ 上的余项\n  //\n  // 在原点 (0,0) 处, 真实梯度 ∂z/∂x = 0 (因为 3G·x²|₍₀,₀₎ = 0)\n  // Horn 差分输出: DzDx = G·w² (即 O(w²) 余项)\n  // ==================================================================\n  lemma CubicRemainder(G: real, w: real)\n    requires w > 0.0\n    ensures \n      DzDx(cubic(-w, -w, G),  // a = G·(-w)³ = -G·w³\n           cubic(0, -w, G),   // b = 0\n           cubic(w, -w, G),   // c = G·w³\n           cubic(-w, 0, G),   // d = -G·w³\n           cubic(w, 0, G),    // f = G·w³\n           cubic(-w, w, G),   // g = -G·w³\n           cubic(0, w, G),    // h = 0\n           cubic(w, w, G),    // i = G·w³\n           w) == G * w * w\n  {\n    // 辅助函数: 三次曲面 z = G·x³ (与 y 无关)\n    function cubic(x: real, y: real, G: real): real\n    {\n      G * x * x * x\n    }\n\n    // 计算窗口各点高程 (y 值不影响结果)\n    var a := cubic(-w, -w, G);  // = G*(-w)^3 = -G*w³\n    var b := cubic(0, -w, G);   // = 0\n    var c := cubic(w, -w, G);   // = G*w³\n    var d := cubic(-w, 0, G);   // = -G*w³\n    var f := cubic(w, 0, G);    // = G*w³\n    var g := cubic(-w, w, G);   // = -G*w³\n    var h_val := cubic(0, w, G); // = 0\n    var i_val := cubic(w, w, G); // = G*w³\n\n    // 计算 NumDx\n    calc {\n      NumDx(a, b, c, d, f, g, h_val, i_val);\n      (c + 2.0*f + i_val) - (a + 2.0*d + g);\n      (G*w*w*w + 2.0*G*w*w*w + G*w*w*w) - ((-G*w*w*w) + 2.0*(-G*w*w*w) + (-G*w*w*w));\n      4.0*G*w*w*w - (-4.0*G*w*w*w);  // 正部 4G·w³, 负部 -(-4G·w³)\n      8.0 * G * w * w * w;\n    }\n    // 由 DzDx 定义: (8G·w³) / (8·w) = G·w²\n    assert DzDx(a, b, c, d, f, g, h_val, i_val, w) == G * w * w;\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-004 — Horn 坡度算子二次精确性与三次余项\\n\";\n  print \"验证命令: dafny verify P004_consistency.dfy\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

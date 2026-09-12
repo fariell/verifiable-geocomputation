@@ -1,0 +1,29 @@
+{
+  "toolchain": "wsl:/usr/local/bin/dafny",
+  "status": "RAN",
+  "compile": null,
+  "verify": {
+    "cmd": [
+      "wsl",
+      "--",
+      "bash",
+      "-lc",
+      "dafny verify --json-output \"/mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\""
+    ],
+    "rc": 4,
+    "stdout": "{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":1453,\"line\":40,\"character\":27},\"end\":{\"pos\":1454,\"line\":40,\"character\":28}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"cannot prove termination; try supplying a decreases clause\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":1453,\"line\":40,\"character\":27},\"end\":{\"pos\":1454,\"line\":40,\"character\":28}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"decreases expression at index 0 must be bounded below by 0.0\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":1315,\"line\":36,\"character\":22},\"end\":{\"pos\":1318,\"line\":36,\"character\":25}}},\"arguments\":[],\"errorId\":\"\",\"defaultFormatMessage\":\"this decreases clause was not satisfied\"}]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":2027,\"line\":58,\"character\":28},\"end\":{\"pos\":2028,\"line\":58,\"character\":29}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"assertion might not hold\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":1555,\"line\":45,\"character\":4},\"end\":{\"pos\":1561,\"line\":45,\"character\":10}}},\"arguments\":[],\"errorId\":\"\",\"defaultFormatMessage\":\"this proposition could not be proved\"}]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":4340,\"line\":127,\"character\":38},\"end\":{\"pos\":4341,\"line\":127,\"character\":39}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"index out of range\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":4386,\"line\":128,\"character\":19},\"end\":{\"pos\":4387,\"line\":128,\"character\":20}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"index out of range\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[]}}\n{\"type\":\"diagnostic\",\"value\":{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":4504,\"line\":133,\"character\":11},\"end\":{\"pos\":4505,\"line\":133,\"character\":12}}},\"severity\":1,\"arguments\":[],\"defaultFormatMessage\":\"a postcondition could not be proved on this return path\",\"errorId\":null,\"source\":\"Verifier\",\"relatedInformation\":[{\"location\":{\"filename\":\"candidate.dfy\",\"filePath\":\"candidate.dfy\",\"uri\":\"file:///mnt/c/Users/Administrator/AppData/Local/Temp/p2_llm_verify/p2_llm_dafny_odcjmof4/candidate.dfy\",\"range\":{\"start\":{\"pos\":4390,\"line\":128,\"character\":23},\"end\":{\"pos\":4392,\"line\":128,\"character\":25}}},\"arguments\":[],\"errorId\":\"\",\"defaultFormatMessage\":\"this is the postcondition that could not be proved\"}]}}\n{\"type\":\"status\",\"value\":\"\\nDafny program verifier finished with 5 verified, 6 errors\\n\"}\n",
+    "stderr": ""
+  },
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "failure_code": "F5",
+  "interpret": {
+    "compile_rc": 0,
+    "verify_rc": 1,
+    "failure_code": "F5",
+    "interpreted_from": "verifier_finished",
+    "proc_rc": 4,
+    "n_verify_errors": 6
+  },
+  "note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp"
+}

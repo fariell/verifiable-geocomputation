@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-015-basin",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P1",
   "prompt_template_sha256": "062ee12d2999255b5ae49024e284dbadfc9665f95fb2b69b1146f21ae3fc15f0",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P006_watershed.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 3092,
+    "completion_tokens": 4687,
+    "total_tokens": 7779,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4164
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 3072
+    },
+    "prompt_cache_hit_tokens": 3072,
+    "prompt_cache_miss_tokens": 20
+  },
+  "api_id": "01a093dd2e60b7ec9873b614f4b60b8e",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// ===========================================================================\n//  GeoProofBench · P-006\n//  文件 : formal/dafny/P006_watershed.dfy\n//  算子 : 流域唯一性(确定性流)\n//  覆盖 : GPB-015 (流域唯一性)\n//  环境 : Dafny 4.11\n// ===========================================================================\n//\n//  定理: 若从同一栅格单元 s 出发,在有限步数 n 和 m 分别到达两个出水口(不动点),\n//        则这两个出水口必相同。\n//\n//  注: 本文件仅处理\"有限步终止\"的情形,不处理循环(如 P-006b 的 4 元环)。\n//      循环情形见 P-006b (非终止轨道)。\n//\n// ===========================================================================\n\nmodule Watershed {\n  // 单元类型(抽象)\n  type Cell\n\n  // 后继函数(抽象)\n  function succ(c: Cell): Cell\n\n  // 不动点谓词\n  predicate isFixedPoint(c: Cell) {\n    succ(c) == c\n  }\n\n  // 迭代 n 步\n  function stepN(s: Cell, n: nat): Cell {\n    if n == 0 then s else succ(stepN(s, n-1))\n  }\n\n  // 引理: 不动点迭代任意步不变\n  lemma FixedPointStable(c: Cell, k: nat)\n    requires isFixedPoint(c)\n    ensures stepN(c, k) == c\n    decreases k\n  {\n    if k != 0 {\n      FixedPointStable(c, k-1);\n    }\n  }\n\n  // 主定理: 流域唯一性\n  lemma WatershedUniqueness(s: Cell, n: nat, m: nat)\n    requires isFixedPoint(stepN(s, n))\n    requires isFixedPoint(stepN(s, m))\n    ensures stepN(s, n) == stepN(s, m)\n  {\n    if n <= m {\n      var t: nat := m - n;\n      FixedPointStable(stepN(s, n), t);\n    } else {\n      var t: nat := n - m;\n      FixedPointStable(stepN(s, m), t);\n    }\n  }\n}\n\nmethod Main() {\n  print \"GeoProofBench P-006 — Watershed uniqueness under deterministic flow\\n\";\n  print \"Verified: WatershedUniqueness lemma\\n\";\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F2"
 }

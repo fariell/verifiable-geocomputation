@@ -1,0 +1,61 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 12,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "across",
+      "cells",
+      "change",
+      "constant",
+      "datum",
+      "direction",
+      "elevation",
+      "flow",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit": [
+      "constant",
+      "direction",
+      "flow",
+      "planar"
+    ],
+    "miss": [
+      "across",
+      "cells",
+      "change",
+      "datum",
+      "elevation",
+      "interior",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit_ratio": 0.2857
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 0,
+    "n_gold_clauses": 0,
+    "gen_clause_tokens": [],
+    "gold_clause_tokens": [],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "/-\n ==========================================================================\n GeoProofBench · P-005\n 算子 : D8 flow direction on planar DEM\n 定理 : 在平面DEM上，D8流向在具有相同(A,B,w)的内部单元中恒定，且不依赖于高程基准C\n 环境 : Lean 4.18.0 + mathlib\n ==========================================================================\n\n 本文件形式化平面DEM上D8流向的常数性质：\n 对于平面 z = A x + B y + C (A,B ≠ 0) 和固定格网间距w>0，\n 所有内部单元的D8流向相同，且与高程基准C无关。\n\n 关键观察：\n "
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

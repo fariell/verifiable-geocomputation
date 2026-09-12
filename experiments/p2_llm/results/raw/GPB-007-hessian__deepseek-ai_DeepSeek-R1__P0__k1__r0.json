@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-007-hessian",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "d34fd7b8db3db26e47da9f27b79634e15ac6ce6d69ac25c57178283bdec4fb59",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P003_curvature.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 0,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1737,
+    "completion_tokens": 4745,
+    "total_tokens": 6482,
+    "completion_tokens_details": {
+      "reasoning_tokens": 4226
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1737
+  },
+  "api_id": "01a093a4a772cea367502edc3a74835b",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0 · Zero-shot auto-formalization: ZT Hessian exact on quadratics\nfunction quadratic(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n{\n  A * x * x + B * y * y + C * x * y + D * x + E * y + F\n}\n\nlemma LemmaExactRecovery(A: real, B: real, C: real, D: real, E: real, F: real, x0: real, y0: real, w: real)\n  requires w > 0.0\n  ensures \n    var a_val := quadratic(A, B, C, D, E, F, x0 - w, y0 + w);\n    var b_val := quadratic(A, B, C, D, E, F, x0, y0 + w);\n    var c_val := quadratic(A, B, C, D, E, F, x0 + w, y0 + w);\n    var d_val := quadratic(A, B, C, D, E, F, x0 - w, y0);\n    var e_val := quadratic(A, B, C, D, E, F, x0, y0);\n    var f_val := quadratic(A, B, C, D, E, F, x0 + w, y0);\n    var g_val := quadratic(A, B, C, D, E, F, x0 - w, y0 - w);\n    var h_val := quadratic(A, B, C, D, E, F, x0, y0 - w);\n    var i_val := quadratic(A, B, C, D, E, F, x0 + w, y0 - w);\n\n    var hxx := (d_val - 2.0 * e_val + f_val) / (w * w);\n    var hyy := (b_val - 2.0 * e_val + h_val) / (w * w);\n    var hxy := (a_val - c_val - g_val + i_val) / (4.0 * w * w);\n\n    hxx == 2.0 * A &&\n    hyy == 2.0 * B &&\n    hxy == C\n{\n  // Proof by algebraic expansion - Dafny's real arithmetic handles cancellations\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
 }

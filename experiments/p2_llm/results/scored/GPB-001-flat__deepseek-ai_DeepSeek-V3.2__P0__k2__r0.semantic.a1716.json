@@ -1,0 +1,85 @@
+{
+  "task_id": "GPB-001-flat",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 4,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "horn",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "slope",
+      "slopesq",
+      "spacing",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "hit": [
+      "horn",
+      "slope",
+      "slopesq",
+      "spacing",
+      "window",
+      "zero"
+    ],
+    "miss": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "square",
+      "values"
+    ],
+    "hit_ratio": 0.3333
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 4,
+    "n_gold_clauses": 10,
+    "gen_clause_tokens": [
+      "hornslopesq",
+      "spacing",
+      "z00",
+      "z01",
+      "z02",
+      "z10",
+      "z11",
+      "z12",
+      "z20",
+      "z21",
+      "z22"
+    ],
+    "gold_clause_tokens": [
+      "dzdx",
+      "dzdy",
+      "slopesq"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "\n\n\n\ndatatype Window = Window( z00: real, z01: real, z02: real, z10: real, z11: real, z12: real, z20: real, z21: real, z22: real )\n\n\nfunction HornDzDx(w: Window, spacing: real): real\n requires spacing > 0.0\n{\n ((w.z20 + 2.0*w.z21 + w.z22) - (w.z00 + 2.0*w.z01 + w.z02)) / (8.0 * spacing)\n}\n\nfunction HornDzDy(w: Window, spacing: real): real\n requires spacing > 0.0\n{\n ((w.z02 + 2.0*w.z12 + w.z22) - (w"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

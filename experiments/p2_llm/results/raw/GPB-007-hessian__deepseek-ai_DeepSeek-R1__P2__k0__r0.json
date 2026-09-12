@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-007-hessian",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P2",
   "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P003_curvature.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 11024,
+    "total_tokens": 11293,
+    "completion_tokens_details": {
+      "reasoning_tokens": 8803
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a093a7c1849c25d281df886fe01608",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "lemma HessianExact(A: real, B: real, C: real, D: real, E: real, F: real, w: real, x0: real, y0: real)\n  requires w > 0.0\n  ensures \n    (z(x0+w, y0) - 2.0*z(x0, y0) + z(x0-w, y0)) / (w*w) == 2.0 * A &&\n    (z(x0, y0+w) - 2.0*z(x0, y0) + z(x0, y0-w)) / (w*w) == 2.0 * B &&\n    ( (z(x0+w, y0+w) - z(x0-w, y0+w)) - (z(x0+w, y0-w) - z(x0-w, y0-w)) ) / (4.0 * w * w) == C\n{\n  function z(x: real, y: real): real\n  {\n    A*x*x + B*y*y + C*x*y + D*x + E*y + F\n  }\n\n  // Prove d²z/dx² = 2A\n  calc {\n    (z(x0+w, y0) - 2.0*z(x0, y0) + z(x0-w, y0)) / (w*w);\n    ==\n    // Expand z terms\n    ( (A*(x0+w)*(x0+w) + B*y0*y0 + C*(x0+w)*y0 + D*(x0+w) + E*y0 + F) \n      - 2.0*(A*x0*x0 + B*y0*y0 + C*x0*y0 + D*x0 + E*y0 + F)\n      + (A*(x0-w)*(x0-w) + B*y0*y0 + C*(x0-w)*y0 + D*(x0-w) + E*y0 + F)\n    ) / (w*w);\n    ==\n    // Expand squares and products\n    ( (A*(x0*x0 + 2*x0*w + w*w) + B*y0*y0 + C*(x0*y0 + w*y0) + D*(x0+w) + E*y0 + F)\n      - 2*A*x0*x0 - 2*B*y0*y0 - 2*C*x0*y0 - 2*D*x0 - 2*E*y0 - 2*F\n      + (A*(x0*x0 - 2*x0*w + w*w) + B*y0*y0 + C*(x0*y0 - w*y0) + D*(x0-w) + E*y0 + F)\n    ) / (w*w);\n    ==\n    // Combine like terms\n    ( (A*x0*x0 + 2*A*x0*w + A*w*w + B*y0*y0 + C*x0*y0 + C*w*y0 + D*x0 + D*w + E*y0 + F)\n      - 2*A*x0*x0 - 2*B*y0*y0 - 2*C*x0*y0 - 2*D*x0 - 2*E*y0 - 2*F\n      + (A*x0*x0 - 2*A*x0*w + A*w*w + B*y0*y0 + C*x0*y0 - C*w*y0 + D*x0 - D*w + E*y0 + F)\n    ) / (w*w);\n    ==\n    // Simplify coefficients\n    ( (A*x0*x0 - 2*A*x0*x0 + A*x0*x0) \n      + (2*A*x0*w - 2*A*x0*w) \n      + (A*w*w + A*w*w)\n      + (B*y0*y0 - 2*B*y0*y0 + B*y0*y0)\n      + (C*x0*y0 - 2*C*x0*y0 + C*x0*y0)\n      + (C*w*y0 - C*w*y0)\n      + (D*x0 - 2*D*x0 + D*x0)\n      + (D*w - D*w)\n      + (E*y0 - 2*E*y0 + E*y0)\n      + (F - 2*F + F)\n      + 2*A*w*w\n    ) / (w*w);\n    ==\n    // Final simplification\n    (2.0 * A * w * w) / (w * w);\n    ==\n    2.0 * A;\n  }\n\n  // Prove d²z/dy² = 2B\n  calc {\n    (z(x0, y0+w) - 2.0*z(x0, y0) + z(x0, y0-w)) / (w*w);\n    ==\n    // Expand z terms\n    ( (A*x0*x0 + B*(y0+w)*(y0+w) + C*x0*(y0+w) + D*x0 + E*(y0+w) + F)\n      - 2.0*(A*x0*x0 + B*y0*y0 + C*x0*y0 + D*x0 + E*y0 + F)\n      + (A*x0*x0 + B*(y0-w)*(y0-w) + C*x0*(y0-w) + D*x0 + E*(y0-w) + F)\n    ) / (w*w);\n    ==\n    // Expand squares and products\n    ( (A*x0*x0 + B*(y0*y0 + 2*y0*w + w*w) + C*x0*y0 + C*x0*w + D*x0 + E*y0 + E*w + F)\n      - 2*A*x0*x0 - 2*B*y0*y0 - 2*C*x0*y0 - 2*D*x0 - 2*E*y0 - 2*F\n      + (A*x0*x0 + B*(y0*y0 - 2*y0*w + w*w) + C*x0*y0 - C*x0*w + D*x0 + E*y0 - E*w + F)\n    ) / (w*w);\n    ==\n    // Combine like terms\n    ( (A*x0*x0 - 2*A*x0*x0 + A*x0*x0)\n      + (B*y0*y0 - 2*B*y0*y0 + B*y0*y0)\n      + (2*B*y0*w - 2*B*y0*w)\n      + (B*w*w + B*w*w)\n      + (C*x0*y0 - 2*C*x0*y0 + C*x0*y0)\n      + (C*x0*w - C*x0*w)\n      + (D*x0 - 2*D*x0 + D*x0)\n      + (E*y0 - 2*E*y0 + E*y0)\n      + (E*w - E*w)\n      + (F - 2*F + F)\n      + 2*B*w*w\n    ) / (w*w);\n    ==\n    // Final simplification\n    (2.0 * B * w * w) / (w * w);\n    ==\n    2.0 * B;\n  }\n\n  // Prove d²z/dxdy = C\n  calc {\n    ( (z(x0+w, y0+w) - z(x0-w, y0+w)) - (z(x0+w, y0-w) - z(x0-w, y0-w)) ) / (4.0 * w * w);\n    ==\n    // Expand all z terms\n    ( (A*(x0+w)*(x0+w) + B*(y0+w)*(y0+w) + C*(x0+w)*(y0+w) + D*(x0+w) + E*(y0+w) + F)\n      - (A*(x0-w)*(x0-w) + B*(y0+w)*(y0+w) + C*(x0-w)*(y0+w) + D*(x0-w) + E*(y0+w) + F)\n      - ( (A*(x0+w)*(x0+w) + B*(y0-w)*(y0-w) + C*(x0+w)*(y0-w) + D*(x0+w) + E*(y0-w) + F)\n        - (A*(x0-w)*(x0-w) + B*(y0-w)*(y0-w) + C*(x0-w)*(y0-w) + D*(x0-w) + E*(y0-w) + F) )\n    ) / (4.0 * w * w);\n    ==\n    // Simplify by canceling symmetric terms\n    ( (A*((x0+w)*(x0+w) - (x0-w)*(x0+w)) \n        + C*((x0+w)*(y0+w) - (x0-w)*(y0+w))\n        + D*((x0+w) - (x0-w))\n      )\n      - ( A*((x0+w)*(x0+w) - (x0-w)*(x0+w)) \n          + C*((x0+w)*(y0-w) - (x0-w)*(y0-w))\n          + D*((x0+w) - (x0-w))\n        )\n    ) / (4.0 * w * w);\n    ==\n    // Expand differences\n    ( (A*(4*x0*w) + C*(2*w*y0 + 2*w*w) + D*(2*w))\n      - (A*(4*x0*w) + C*(2*w*y0 - 2*w*w) + D*(2*w))\n    ) / (4.0 * w * w);\n    ==\n    // Simplify\n    (4*x0*w*A + 2*w*y0*C + 2*w*w*C + 2*w*D \n      - 4*x0*w*A - 2*w*y0*C + 2*w*w*C - 2*w*D\n    ) / (4.0 * w * w);\n    ==\n    (4*C*w*w) / (4.0 * w * w);\n    ==\n    C;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

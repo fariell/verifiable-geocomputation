@@ -1,27 +1,147 @@
 {
-  "ts_utc": "2026-09-10T07:55:03.258238+00:00",
+  "ts_utc": "2026-09-11T06:06:09.730300+00:00",
   "sanitize": {
     "ok": true,
-    "n_kept": 23,
+    "n_kept": 1106,
     "n_bad": 0,
     "bad_lines": [],
     "backup": null
   },
-  "n_sources": 14,
-  "n_ran": 14,
+  "n_sources": 484,
+  "n_ran": 484,
   "n_toolchain_missing": 0,
-  "n_metric_eligible": 13,
-  "n_compile_ok": 4,
-  "n_verify_ok": 4,
+  "n_metric_eligible": 483,
+  "n_compile_ok": 54,
+  "n_verify_ok": 43,
   "jsonl": {
     "ok": true,
-    "n_rows": 23,
-    "n_patched": 21,
-    "n_metric_eligible": 13,
-    "n_verify_ran": 13,
-    "n_toolchain_missing": 8
+    "n_rows": 1106,
+    "n_patched": 1023,
+    "n_metric_eligible": 662,
+    "n_verify_ran": 662,
+    "n_toolchain_missing": 361
   },
   "rows": [
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
       "skipped": true,
@@ -32,146 +152,3747 @@
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F1"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 0,
       "verify_rc": 0,
-      "semantic": "LIKELY_ALIGNED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": null
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 0,
       "verify_rc": 0,
-      "semantic": "LIKELY_ALIGNED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": null
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F1"
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F2"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F1"
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F2"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 0,
       "verify_rc": 0,
-      "semantic": "VERIFIED_BUT_DRIFT_SUSPECT",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": null
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F1"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F1"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F2"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 1,
       "verify_rc": 1,
-      "semantic": "UNCOMPILED",
-      "metric_eligible": true,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": "F2"
+      "metric_eligible": true
     },
     {
       "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__fixture-offline-w2__P0__k0__r0.dfy",
-      "skipped": false,
+      "skipped": true,
       "verify_status": "RAN",
       "compile_rc": 0,
       "verify_rc": 0,
-      "semantic": "VERIFIED_NEEDS_HUMAN",
-      "metric_eligible": false,
-      "toolchain": "wsl:/usr/local/bin/dafny",
-      "failure_code": null
+      "metric_eligible": false
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-001-flat__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-002-planar__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-007-hessian__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-010-pit__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-015-basin__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-019-quad__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-idem__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002-mono__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-R1__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 0,
+      "verify_rc": 0,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__deepseek-ai_DeepSeek-V3.2__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__Qwen_Qwen2.5-72B-Instruct__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P0__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P0__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P0__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P0__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P0__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P1__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P1__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P1__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P1__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P1__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P2__k0__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P2__k1__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P2__k2__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P2__k3__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
+    },
+    {
+      "source": "E:\\AI for Math与DEM空间网格交叉研究\\verifiable-geocomputation\\experiments\\p2_llm\\results\\raw\\GPB-P002bis-raise__THUDM_GLM-4-32B-0414__P2__k4__r0.dfy",
+      "skipped": true,
+      "verify_status": "RAN",
+      "compile_rc": 1,
+      "verify_rc": 1,
+      "metric_eligible": true
     }
   ]
 }

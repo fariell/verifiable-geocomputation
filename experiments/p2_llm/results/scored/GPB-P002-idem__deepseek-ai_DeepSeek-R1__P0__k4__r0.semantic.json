@@ -1,0 +1,79 @@
+{
+  "task_id": "GPB-P002-idem",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "Fill"
+  ],
+  "n_gen_names": 8,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "already",
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit": [
+      "fill",
+      "fixed",
+      "idempotent"
+    ],
+    "miss": [
+      "already",
+      "cells",
+      "filling",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit_ratio": 0.25
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 9,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "fill",
+      "forall",
+      "lemma",
+      "lemma_fill_nondecreasing",
+      "max",
+      "nondecreasing"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill",
+      "forall",
+      "nondecreasing"
+    ],
+    "overlap_ratio": 0.375,
+    "normalized_preview_gen": "predicate NonDecreasing(a: seq<int>) {\n forall i: int :: 0 <= i < |a| - 1 ==> a[i] <= a[i+1]\n}\n\nfunction Max(s: seq<int>): int\n requires |s| > 0\n{\n if |s| == 1 then s[0]\n else max(s[0], Max(s[1..]))\n}\n\nlemma Lemma_Max_concat(s: seq<int>, x: int)\n requires |s| > 0\n ensures Max(s + [x]) == max(Max(s), x)\n{\n if |s| == 1 {\n } else {\n Lemma_Max_concat(s[1..], x);\n }\n}\n\nlemma Lemma_Max_last(s: seq<int>)"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

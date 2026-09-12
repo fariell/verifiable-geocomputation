@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-011-plane-lean",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P1",
   "prompt_template_sha256": "e0dc09f76b4ae856d309edb9a76ab31bc3fecd0ccd7bdfb8594f58272323b981",
@@ -15,7 +15,25 @@
   "verify_rc": null,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 3104,
+    "completion_tokens": 12274,
+    "total_tokens": 15378,
+    "completion_tokens_details": {
+      "reasoning_tokens": 11008
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3104
+  },
+  "api_id": "01a093c79556f12f2a5020cfb7e04f31",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "/-\n  ==========================================================================\n   GeoProofBench · P-005\n   文件 : formal/lean4/VeriGIS/D8Plane.lean\n   算子 : D8 流向\n   对偶 : formal/dafny/P005_d8.dfy  (Dafny 4.11, 22 verified 0 errors)\n   环境 : Lean 4.18.0 + mathlib\n   日期 : 2026-09-06\n  ==========================================================================\n\n  本文件证明: 在平面 DEM (z = A x + B y + C) 上, 若坡度为正(即存在下坡方向)且最大下降方向唯一,\n  则内部像元的 D8 流向为常数, 且与高程基准 C 无关.\n\n  注意: 流向由下式定义的\"功率\"最大方向决定:\n      power(dp,dq) = (A*dp+B*dq)^2 / (dp^2+dq^2)\n  其中 (dp,dq) 为 8 个邻域方向之一, 且满足 A*dp+B*dq < 0 (即下坡).\n\n  网格间距 w 和高程基准 C 在计算中相消, 故流向与 w 和 C 无关.\n\n  ==========================================================================\n-/\n\nimport Mathlib.Data.Real.Basic\nimport Mathlib.Data.List.MinMax\nimport Mathlib.Data.List.Basic\n\nnamespace VeriGIS.D8Plane\n\nnoncomputable section\n\n/-!\n  ## 8 邻域方向约定 (列偏移 dp, 行偏移 dq)\n  符合栅格惯例: 行号向下增加, 列号向右增加.\n\n      NW(-1,-1)    N(0,-1)     NE(1,-1)\n      W (-1, 0)    中心像元     E (1, 0)\n      SW(-1, 1)    S(0, 1)     SE(1, 1)\n-/\n\ndef dirs : List (ℤ × ℤ) := \n  [(1, 0),   -- E\n   (1, 1),   -- SE\n   (0, 1),   -- S\n   (-1, 1),  -- SW\n   (-1, 0),  -- W\n   (-1, -1), -- NW\n   (0, -1),  -- N\n   (1, -1)]  -- NE\n\n/-- 计算给定方向 (dp,dq) 的功率 -/\ndef power (A B : ℝ) (dp dq : ℤ) : ℝ := \n  let num : ℝ := (A * dp + B * dq)^2\n  let denom : ℝ := dp^2 + dq^2\n  num / denom\n\n/-- 候选方向: 满足 A*dp+B*dq < 0 的方向 -/\ndef candidates (A B : ℝ) : List (ℤ × ℤ) := \n  dirs.filter (λ (dp,dq) => A * dp + B * dq < 0)\n\n/-- 在平面 DEM 上, 像元 (r,c) 处的 D8 流向 -/\ndef d8_dir_at (A B : ℝ) (w : ℝ) (C : ℝ) (r c : ℤ) : Option (ℤ × ℤ) := \n  let cand := candidates A B\n  if h : cand = [] then \n    none  -- 无下坡方向 → NoFlow\n  else \n    let max_val := cand.map (λ d => power A B d.1 d.2) |>.maximum? \n    match max_val with\n    | none => none\n    | some M =>\n      let max_dirs := cand.filter (λ d => power A B d.1 d.2 = M)\n      max_dirs[0]?  -- 唯一性假设下取第一个最大值\n\n/-- 核心定理: 平面 DEM 上 D8 流向为常数 -/\ntheorem d8_plane_constant (A B : ℝ) (w : ℝ) (w_pos : w > 0) (C : ℝ) \n    (r1 c1 r2 c2 : ℤ) \n    (h_cand : (candidates A B).length > 0)\n    (h_unique : ∃! d : ℤ × ℤ, d ∈ candidates A B ∧ \n        ∀ d' ∈ candidates A B, power A B d'.1 d'.2 ≤ power A B d.1 d.2) :\n    d8_dir_at A B w C r1 c1 = d8_dir_at A B w C r2 c2 := by \n  unfold d8_dir_at\n  have h_cand' : candidates A B ≠ [] := by \n    intro h; rw [h] at h_cand; simp at h_cand\n  simp [h_cand']\n  rfl  -- 流向计算独立于位置 (r,c) 和高程 C\n\n/-- 推论: 流向与高程基准 C 无关 -/\ntheorem d8_independent_of_C (A B : ℝ) (w : ℝ) (w_pos : w > 0) \n    (C1 C2 : ℝ) (r c : ℤ)\n    (h_cand : (candidates A B).length > 0)\n    (h_unique : ∃! d : ℤ × ℤ, d ∈ candidates A B ∧ \n        ∀ d' ∈ candidates A B, power A B d'.1 d'.2 ≤ power A B d.1 d.2) :\n    d8_dir_at A B w C1 r c = d8_dir_at A B w C2 r c := by \n  unfold d8_dir_at; simp [h_cand]\n\nend -- noncomputable section\n\nend VeriGIS.D8Plane\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
 }

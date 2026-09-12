@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-011-plane-lean",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "a5915f33cdfcd0ec8174bcb313a63b5617a2ba388c6b8fdc7c5071411b9e6cad",
@@ -15,7 +15,25 @@
   "verify_rc": null,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1698,
+    "completion_tokens": 13317,
+    "total_tokens": 15015,
+    "completion_tokens_details": {
+      "reasoning_tokens": 12884
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1698
+  },
+  "api_id": "01a093b5bbc3350adac94f912e932091",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Data.Real.Basic\nimport Mathlib.Data.Int.Basic\nimport Mathlib.Data.List.Basic\n\nopen Real\n\ndef dirs : List (ℤ × ℤ) :=\n  [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]\n\ndef admissible (A B : ℝ) (d : ℤ × ℤ) : Prop :=\n  A * d.1 + B * d.2 < 0\n\ndef steepness (A B : ℝ) (d : ℤ × ℤ) : ℝ :=\n  (A * d.1 + B * d.2)^2 / (d.1^2 + d.2^2)\n\nvariable (A B w : ℝ) (hw : w > 0)\n\nvariable (huniq : ∃! d, d ∈ dirs ∧ admissible A B d ∧\n  (∀ d' ∈ dirs, admissible A B d' → steepness A B d ≥ steepness A B d') ∧\n  (∀ d' ∈ dirs, admissible A B d' → steepness A B d' = steepness A B d → d' = d))\n\ndef flow_dir : ℤ × ℤ :=\n  Classical.choose huniq\n\ndef grid (C : ℝ) (i j : ℤ) : ℝ :=\n  A * (w * j) + B * (w * i) + C\n\ndef flow_direction_at (C : ℝ) (i j : ℤ) : ℤ × ℤ :=\n  flow_dir A B w\n\ntheorem flow_direction_constant (C₁ C₂ : ℝ) (i₁ j₁ i₂ j₂ : ℤ) :\n    flow_direction_at A B w C₁ i₁ j₁ = flow_direction_at A B w C₂ i₂ j₂ :=\n  rfl\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
 }

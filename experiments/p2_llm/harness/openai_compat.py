@@ -133,7 +133,7 @@ def _extract_content(data: dict[str, Any]) -> str:
     if isinstance(choices, list) and choices:
         msg = choices[0].get("message") or {}
         text = msg.get("content")
-        if isinstance(text, str):
+        if isinstance(text, str) and text.strip():
             return text
         if isinstance(text, list):  # some gateways return content parts
             parts = [
@@ -143,6 +143,10 @@ def _extract_content(data: dict[str, Any]) -> str:
             ]
             if parts:
                 return "\n".join(parts)
+        # DeepSeek-R1 via siliconflow: final answer in content; if empty, do not
+        # substitute reasoning_content (that would poison .dfy). Surface empty.
+        if isinstance(text, str):
+            return text
     # OpenAI-compatible gateways sometimes expose a bare completion field.
     if isinstance(data.get("content"), str):
         return data["content"]
@@ -150,6 +154,110 @@ def _extract_content(data: dict[str, Any]) -> str:
         "cannot extract text from OpenAI-compatible response keys="
         f"{list(data)}; body={json.dumps(data)[:400]}"
     )
+
+
+def _call_chat_api_stream(
+    *,
+    name: str,
+    spec: dict[str, Any],
+    api_key: str,
+    resolved_model: str,
+    prompt: str,
+    temperature: float,
+    max_tokens: int,
+    timeout_s: float,
+) -> dict[str, Any]:
+    """Stream reasoner responses so idle-until-first-byte does not ReadTimeout.
+
+    Non-stream R1 calls often sit silent for >900s while the server reasons, then
+    httpx raises ReadTimeout before any body arrives. Streaming resets the read
+    idle timer on each SSE chunk (reasoning_content / content deltas).
+    """
+    body = {
+        "model": resolved_model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "stream": True,
+        "stream_options": {"include_usage": True},
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "content-type": "application/json",
+    }
+    # Per-chunk idle timeout + generous overall wall clock for long chains.
+    timeout = httpx.Timeout(timeout_s, connect=30.0)
+    content_parts: list[str] = []
+    reasoning_parts: list[str] = []
+    usage: dict[str, Any] | None = None
+    resp_model = resolved_model
+    resp_id: str | None = None
+
+    with httpx.Client(timeout=timeout) as client:
+        try:
+            with client.stream(
+                "POST", spec["chat_url"], headers=headers, json=body
+            ) as resp:
+                if resp.status_code >= 400:
+                    err_body = resp.read().decode("utf-8", errors="replace")[:500]
+                    hint = ""
+                    if resp.status_code in (401, 403):
+                        hint = (
+                            " — endpoint is REACHABLE but the key was rejected "
+                            "(invalid, wrong provider, or account not entitled); "
+                            "this is not a network fault"
+                        )
+                    raise RuntimeError(
+                        f"{name} HTTP {resp.status_code}: {err_body}{hint}"
+                    )
+                for line in resp.iter_lines():
+                    if not line:
+                        continue
+                    if line.startswith(":"):
+                        continue  # SSE comment / keepalive
+                    if not line.startswith("data:"):
+                        continue
+                    payload = line[5:].strip()
+                    if payload == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(payload)
+                    except json.JSONDecodeError:
+                        continue
+                    if chunk.get("id"):
+                        resp_id = chunk["id"]
+                    if chunk.get("model"):
+                        resp_model = chunk["model"]
+                    if chunk.get("usage"):
+                        usage = chunk["usage"]
+                    choices = chunk.get("choices") or []
+                    if not choices:
+                        continue
+                    delta = choices[0].get("delta") or {}
+                    c = delta.get("content")
+                    if isinstance(c, str) and c:
+                        content_parts.append(c)
+                    rc = delta.get("reasoning_content")
+                    if isinstance(rc, str) and rc:
+                        reasoning_parts.append(rc)
+        except Exception as exc:
+            raise RuntimeError(
+                f"{name} unreachable at {spec['chat_url']}: "
+                f"{type(exc).__name__}: {exc}"
+            ) from exc
+
+    text = "".join(content_parts)
+    return {
+        "content": [{"type": "text", "text": text}],
+        "model": resp_model,
+        "usage": usage,
+        "id": resp_id,
+        "_resolved_base": spec["chat_url"],
+        "_provider": name,
+        "_requested_model": resolved_model,
+        "_streamed": True,
+        "_reasoning_chars": sum(len(x) for x in reasoning_parts),
+    }
 
 
 def call_chat_api(
@@ -165,12 +273,22 @@ def call_chat_api(
     name, spec = discover_provider(provider)
     api_key = next(os.environ.get(k) for k in spec["env"] if os.environ.get(k))
     resolved_model = model or spec["default_model"]
-    # R1/reasoners need long read budgets (formalization prompts >> ping).
+    is_reasoner = any(tag in resolved_model for tag in ("R1", "reasoner", "Reasoner"))
+    # A.17.14 +: reasoners need long budgets; streaming avoids first-byte ReadTimeout.
     if timeout_s is None:
-        if any(tag in resolved_model for tag in ("R1", "reasoner", "Reasoner")):
-            timeout_s = 600.0
-        else:
-            timeout_s = 180.0
+        timeout_s = 1800.0 if is_reasoner else 180.0
+
+    if is_reasoner:
+        return _call_chat_api_stream(
+            name=name,
+            spec=spec,
+            api_key=api_key,
+            resolved_model=resolved_model,
+            prompt=prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout_s=timeout_s,
+        )
 
     body = {
         "model": resolved_model,

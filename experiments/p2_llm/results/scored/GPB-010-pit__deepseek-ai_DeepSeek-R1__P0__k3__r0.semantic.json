@@ -1,0 +1,75 @@
+{
+  "task_id": "GPB-010-pit",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 2,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "center",
+      "direction",
+      "eight",
+      "flow",
+      "lower",
+      "neighbors",
+      "noflow",
+      "none",
+      "routing",
+      "steepest-descent",
+      "strictly",
+      "undefined"
+    ],
+    "hit": [
+      "flow",
+      "noflow"
+    ],
+    "miss": [
+      "center",
+      "direction",
+      "eight",
+      "lower",
+      "neighbors",
+      "none",
+      "routing",
+      "steepest-descent",
+      "strictly",
+      "undefined"
+    ],
+    "hit_ratio": 0.1667
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 3,
+    "n_gold_clauses": 11,
+    "gen_clause_tokens": [
+      "forall",
+      "grid",
+      "length0",
+      "length1",
+      "noflow"
+    ],
+    "gold_clause_tokens": [
+      "dirnw",
+      "dirw",
+      "dist2",
+      "nbr",
+      "noflow",
+      "planewin",
+      "score",
+      "uphill",
+      "win"
+    ],
+    "overlap": [
+      "noflow"
+    ],
+    "overlap_ratio": 0.1111,
+    "normalized_preview_gen": "datatype Dir = E | SE | S | SW | W | NW | N | NE | NoFlow\n\nfunction method D8(grid: array2<real>, i: int, j: int): Dir\n requires 0 <= i < grid.Length0\n requires 0 <= j < grid.Length1\n{\n var bestDir := NoFlow;\n var bestP := 0.0;\n\n \n if 0 <= j+1 < grid.Length1 {\n let drop := grid[i,j] - grid[i, j+1];\n if drop > 0.0 {\n let p := drop * drop;\n if bestDir == NoFlow || p > bestP {\n bestDir := E;\n bestP :"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

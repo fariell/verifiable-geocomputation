@@ -104,9 +104,10 @@ def run_cell_with_429_retry(
     sample_index: int,
     do_verify: bool,
     backend: str,
-    max_429_retries: int = 3,
+    max_429_retries: int = 8,
 ) -> dict[str, Any]:
-    delay = 1.0
+    # A.17.14 follow-up: siliconflow 50609 "too busy" needs longer backoff than 1→30s.
+    delay = 5.0
     last: dict[str, Any] = {}
     for attempt_429 in range(max_429_retries + 1):
         last = run_cell(
@@ -122,11 +123,31 @@ def run_cell_with_429_retry(
             return last
         if attempt_429 >= max_429_retries:
             break
+        print(
+            f"[pool] 429 backoff {delay:.0f}s "
+            f"(try {attempt_429 + 1}/{max_429_retries}) "
+            f"{load_task(task_path).get('id')} {prompt_id} k{sample_index}",
+            flush=True,
+        )
         time.sleep(delay)
-        delay = min(delay * 2.0, 30.0)
+        delay = min(delay * 2.0, 90.0)
     last["rate_limit_retries"] = max_429_retries
     last["note"] = ((last.get("note") or "") + " | gave_up_after_429_retries").strip(" |")
     return last
+
+
+def latest_raw_status(model: str, task_id: str, prompt_id: str, sample_index: int) -> str | None:
+    """Status from the on-disk raw/*.json for this cell (if any)."""
+    from run_l1_batch import existing_raw
+
+    prior = existing_raw(task_id, model, prompt_id, sample_index)
+    if prior is None:
+        return None
+    try:
+        data = json.loads(prior.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return data.get("status")
 
 
 def filter_task_paths(
@@ -176,6 +197,11 @@ def main(argv: list[str] | None = None) -> int:
         "--compare-serial-stems",
         default="",
         help="optional: comma stems already produced by serial; print content-hash check after run",
+    )
+    p.add_argument(
+        "--errors-only",
+        action="store_true",
+        help="only queue cells whose raw/*.json status is PROVIDER_ERROR (skip SKIP/GENERATED)",
     )
     args = p.parse_args(argv)
 
@@ -260,9 +286,20 @@ def main(argv: list[str] | None = None) -> int:
 
         work: list[tuple[Path, str, int]] = []
         for task_path in l1_paths:
+            tid = load_task(task_path).get("id")
             for prompt_id in prompts:
                 for sample_index in range(args.k):
+                    if args.errors_only:
+                        st = latest_raw_status(model, tid, prompt_id, sample_index)
+                        if st != "PROVIDER_ERROR":
+                            continue
                     work.append((task_path, prompt_id, sample_index))
+        report.setdefault("errors_only_queues", {})[model] = len(work)
+        print(
+            f"[L1-pool] queue {model}: {len(work)} cells "
+            f"(errors_only={args.errors_only})",
+            flush=True,
+        )
 
         # Process in waves so we can shrink the pool on 429 storms.
         idx = 0
@@ -323,10 +360,15 @@ def main(argv: list[str] | None = None) -> int:
                     else:
                         consecutive_429 = 0
 
-                    if cell.get("status") == "PROVIDER_ERROR":
+                    # Hard HTTP failures feed the circuit; bare 429 congestion does not
+                    # (otherwise a busy R1 endpoint trips HTTP_STREAK_10 before any regen).
+                    if cell.get("status") == "PROVIDER_ERROR" and not is_rate_limit_error(cell):
                         http_fail_streak += 1
                     elif cell.get("status") in ("GENERATED", "SKIP_EXISTING"):
                         http_fail_streak = 0
+                    elif is_rate_limit_error(cell):
+                        # keep streak unchanged on exhausted-429; do not increment
+                        pass
 
                     if cell.get("status") == "GENERATED":
                         model_gen += 1
@@ -347,8 +389,8 @@ def main(argv: list[str] | None = None) -> int:
                         flush=True,
                     )
 
-                    if consecutive_429 >= 3 and workers > 2:
-                        new_w = 4 if workers > 4 else 2
+                    if consecutive_429 >= 3 and workers > 1:
+                        new_w = max(1, workers // 2)
                         report["worker_reductions"].append(
                             {
                                 "from": workers,

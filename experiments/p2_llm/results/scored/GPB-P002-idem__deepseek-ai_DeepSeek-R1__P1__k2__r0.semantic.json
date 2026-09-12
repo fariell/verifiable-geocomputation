@@ -1,0 +1,75 @@
+{
+  "task_id": "GPB-P002-idem",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "Fill"
+  ],
+  "n_gen_names": 7,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "already",
+      "cells",
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit": [
+      "fill",
+      "filling",
+      "fixed",
+      "idempotent"
+    ],
+    "miss": [
+      "already",
+      "cells",
+      "left",
+      "left-outlet",
+      "points",
+      "raise",
+      "specialization",
+      "spill"
+    ],
+    "hit_ratio": 0.3333
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 4,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "cum",
+      "fill",
+      "fillhelper",
+      "isnondecreasing"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill"
+    ],
+    "overlap_ratio": 0.125,
+    "normalized_preview_gen": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nmodule PitFilling1D {\n\n \n function max(x: real, y: real): real {\n if x >= y then x else y\n }\n\n \n function Fill(a: seq<real>): seq<real> {\n if |a| == 0 then []\n else\n var first := a[0];\n [first] + FillHelper(first, a[1..])\n }\n\n \n function FillHelper(cum: real, a: seq<real>): seq<real> {\n if |a| == 0 then []\n else\n var newVal := max(a[0], cum);\n [newVal] + FillHelper(newVal, a[1.."
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "COMPILE_ONLY",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

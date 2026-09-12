@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-019-quad",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P004_consistency.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1753,
+    "completion_tokens": 6879,
+    "total_tokens": 8632,
+    "completion_tokens_details": {
+      "reasoning_tokens": 3907
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1753
+  },
+  "api_id": "01a093dfcb5a4b6ec58d2cf99b383746",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0 · Zero-shot auto-formalization: Horn slope properties\n// Horn slope is exact on quadratic surfaces and has O(w²) remainder on cubics\n\nfunction method HornDzDx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w != 0.0\n{\n  ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0 * w)\n}\n\nfunction method HornDzDy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n  requires w != 0.0\n{\n  ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0 * w)\n}\n\nfunction method Quadratic(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n  A*x + B*y + C + D*x*x + E*x*y + F*y*y\n}\n\nfunction method Cubic(x: real, y: real, G: real): real\n{\n  G * x * x * x\n}\n\nlemma ExactOnQuadratic(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n  requires w != 0.0\n  ensures \n    HornDzDx(\n      Quadratic(-w, -w, A, B, C, D, E, F),\n      Quadratic(0.0, -w, A, B, C, D, E, F),\n      Quadratic(w, -w, A, B, C, D, E, F),\n      Quadratic(-w, 0.0, A, B, C, D, E, F),\n      Quadratic(w, 0.0, A, B, C, D, E, F),\n      Quadratic(-w, w, A, B, C, D, E, F),\n      Quadratic(0.0, w, A, B, C, D, E, F),\n      Quadratic(w, w, A, B, C, D, E, F),\n      w\n    ) == A\n  ensures \n    HornDzDy(\n      Quadratic(-w, -w, A, B, C, D, E, F),\n      Quadratic(0.0, -w, A, B, C, D, E, F),\n      Quadratic(w, -w, A, B, C, D, E, F),\n      Quadratic(-w, 0.0, A, B, C, D, E, F),\n      Quadratic(w, 0.0, A, B, C, D, E, F),\n      Quadratic(-w, w, A, B, C, D, E, F),\n      Quadratic(0.0, w, A, B, C, D, E, F),\n      Quadratic(w, w, A, B, C, D, E, F),\n      w\n    ) == B\n{\n  // Expand all quadratic terms\n  var a := Quadratic(-w, -w, A, B, C, D, E, F);\n  var b := Quadratic(0.0, -w, A, B, C, D, E, F);\n  var c := Quadratic(w, -w, A, B, C, D, E, F);\n  var d := Quadratic(-w, 0.0, A, B, C, D, E, F);\n  var f := Quadratic(w, 0.0, A, B, C, D, E, F);\n  var g := Quadratic(-w, w, A, B, C, D, E, F);\n  var h := Quadratic(0.0, w, A, B, C, D, E, F);\n  var i := Quadratic(w, w, A, B, C, D, E, F);\n\n  // Algebraic proof for DzDx\n  calc {\n    (c + 2.0*f + i) - (a + 2.0*d + g);\n    ==\n    (A*w + B*(-w) + C + D*w*w + E*w*(-w) + F*(-w)*(-w) +\n     2.0*(A*w + B*0.0 + C + D*w*w + E*w*0.0 + F*0.0) +\n     A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n    -\n    (A*(-w) + B*(-w) + C + D*(-w)*(-w) + E*(-w)*(-w) + F*(-w)*(-w) +\n     2.0*(A*(-w) + B*0.0 + C + D*(-w)*(-w) + E*(-w)*0.0 + F*0.0) +\n     A*(-w) + B*w + C + D*(-w)*(-w) + E*(-w)*w + F*w*w);\n    ==\n    (A*w - B*w + C + D*w*w - E*w*w + F*w*w +\n     2.0*(A*w + C + D*w*w) +\n     A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n    -\n    (-A*w - B*w + C + D*w*w + E*w*w + F*w*w +\n     2.0*(-A*w + C + D*w*w) +\n     -A*w + B*w + C + D*w*w - E*w*w + F*w*w);\n    ==\n    (A*w - B*w + C + D*w*w - E*w*w + F*w*w +\n     2.0*A*w + 2.0*C + 2.0*D*w*w +\n     A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n    -\n    (-A*w - B*w + C + D*w*w + E*w*w + F*w*w +\n     -2.0*A*w + 2.0*C + 2.0*D*w*w +\n     -A*w + B*w + C + D*w*w - E*w*w + F*w*w);\n    ==\n    ( (A*w + 2.0*A*w + A*w) + (-B*w + B*w) + (C + 2.0*C + C) + \n      (D*w*w + 2.0*D*w*w + D*w*w) + (-E*w*w + E*w*w) + (F*w*w + F*w*w) ) \n    -\n    ( (-A*w -2.0*A*w -A*w) + (-B*w + B*w) + (C + 2.0*C + C) + \n      (D*w*w + 2.0*D*w*w + D*w*w) + (E*w*w - E*w*w) + (F*w*w + F*w*w) );\n    ==\n    (4.0*A*w + 4.0*C + 4.0*D*w*w + 2.0*F*w*w) \n    -\n    (-4.0*A*w + 4.0*C + 4.0*D*w*w + 2.0*F*w*w);\n    ==\n    4.0*A*w - (-4.0*A*w);\n    ==\n    8.0*A*w;\n  }\n  // Final division step for DzDx\n  assert HornDzDx(a, b, c, d, f, g, h, i, w) == (8.0 * A * w) / (8.0 * w) by {\n    assert (8.0 * A * w) / (8.0 * w) == A;\n  }\n\n  // Algebraic proof for DzDy\n  calc {\n    (g + 2.0*h + i) - (a + 2.0*b + c);\n    ==\n    (A*(-w) + B*w + C + D*(-w)*(-w) + E*(-w)*w + F*w*w +\n     2.0*(A*0.0 + B*w + C + D*0.0 + E*0.0*w + F*w*w) +\n     A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n    -\n    (A*(-w) + B*(-w) + C + D*(-w)*(-w) + E*(-w)*(-w) + F*(-w)*(-w) +\n     2.0*(A*0.0 + B*(-w) + C + D*0.0 + E*0.0*(-w) + F*(-w)*(-w)) +\n     A*w + B*(-w) + C + D*w*w + E*w*(-w) + F*(-w)*(-w));\n    ==\n    (-A*w + B*w + C + D*w*w - E*w*w + F*w*w +\n     2.0*(B*w + C + F*w*w) +\n     A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n    -\n    (-A*w - B*w + C + D*w*w + E*w*w + F*w*w +\n     2.0*(-B*w + C + F*w*w) +\n     A*w - B*w + C + D*w*w - E*w*w + F*w*w);\n    ==\n    ( (-A*w + A*w) + (B*w + 2.0*B*w + B*w) + (C + 2.0*C + C) + \n      (D*w*w + D*w*w) + (-E*w*w + E*w*w) + (F*w*w + 2.0*F*w*w + F*w*w) ) \n    -\n    ( (-A*w + A*w) + (-B*w -2.0*B*w - B*w) + (C + 2.0*C + C) + \n      (D*w*w + D*w*w) + (E*w*w - E*w*w) + (F*w*w + 2.0*F*w*w + F*w*w) );\n    ==\n    (0.0 + 4.0*B*w + 4.0*C + 2.0*D*w*w + 4.0*F*w*w) \n    -\n    (0.0 - 4.0*B*w + 4.0*C + 2.0*D*w*w + 4.0*F*w*w);\n    ==\n    4.0*B*w - (-4.0*B*w);\n    ==\n    8.0*B*w;\n  }\n  // Final division step for DzDy\n  assert HornDzDy(a, b, c, d, f, g, h, i, w) == (8.0 * B * w) / (8.0 * w) by {\n    assert (8.0 * B * w) / (8.0 * w) == B;\n  }\n}\n\nlemma CubicRemainder(G: real, w: real)\n  requires w != 0.0\n  ensures \n    HornDzDx(\n      Cubic(-w, -w, G),\n      Cubic(0.0, -w, G),\n      Cubic(w, -w, G),\n      Cubic(-w, 0.0, G),\n      Cubic(w, 0.0, G),\n      Cubic(-w, w, G),\n      Cubic(0.0, w, G),\n      Cubic(w, w, G),\n      w\n    ) == G * w * w\n{\n  // Expand all cubic terms\n  var a := Cubic(-w, -w, G);\n  var b := Cubic(0.0, -w, G);\n  var c := Cubic(w, -w, G);\n  var d := Cubic(-w, 0.0, G);\n  var f := Cubic(w, 0.0, G);\n  var g := Cubic(-w, w, G);\n  var h := Cubic(0.0, w, G);\n  var i := Cubic(w, w, G);\n\n  // Algebraic proof\n  calc {\n    (c + 2.0*f + i) - (a + 2.0*d + g);\n    ==\n    (G*(w*w*w) + 2.0*(G*(w*w*w)) + G*(w*w*w)) \n    - \n    (G*((-w)*(-w)*(-w)) + 2.0*(G*((-w)*(-w)*(-w))) + G*((-w)*(-w)*(-w)));\n    ==\n    (G*w*w*w + 2.0*G*w*w*w + G*w*w*w) \n    - \n    (G*(-w*w*w) + 2.0*G*(-w*w*w) + G*(-w*w*w));\n    ==\n    (4.0*G*w*w*w) \n    - \n    (-4.0*G*w*w*w);\n    ==\n    8.0*G*w*w*w;\n  }\n  // Final division step\n  assert HornDzDx(a, b, c, d, f, g, h, i, w) == (8.0 * G * w * w * w) / (8.0 * w) by {\n    assert (8.0 * G * w * w * w) / (8.0 * w) == G * w * w;\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

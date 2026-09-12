@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-011-plane-lean",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P1",
   "prompt_template_sha256": "e0dc09f76b4ae856d309edb9a76ab31bc3fecd0ccd7bdfb8594f58272323b981",
@@ -15,7 +15,25 @@
   "verify_rc": null,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 3104,
+    "completion_tokens": 19607,
+    "total_tokens": 22711,
+    "completion_tokens_details": {
+      "reasoning_tokens": 18273
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 3104
+  },
+  "api_id": "01a093c795452e9b6f55f2ab6eec7ca1",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "import Mathlib.Tactic\nimport Mathlib.Data.Real.Basic\nimport Mathlib.Data.List.MinMax\nimport Mathlib.Data.List.Basic\n\nnamespace VeriGIS.D8\n\nnoncomputable section\n\n/-!\n  ==========================================================================\n   GeoProofBench · P-005\n   算子 : D8 流向算法 (平面不变性)\n   定理 : 在平面 DEM (z = A x + B y + C) 上，只要坡度非零 (A,B) ≠ (0,0)，\n          则所有具有相同 (A,B) 的内部栅格流向相同，且与高程基准 C 无关。\n   环境 : Lean 4.18.0 + mathlib\n   ==========================================================================\n\n  本文件形式化 D8 流向算法的关键不变性：在平面 DEM 上，流向由平面坡度 (A,B) 唯一确定，\n  与高程基准 C 和栅格间距 w 无关。\n\n  证明策略：\n    1. 定义 8 个流向的偏移量 (D8 邻域)\n    2. 定义平面高程函数 (z = A x + B y + C)\n    3. 定义流向决策函数 (基于最大坡度下降)\n    4. 证明流向决策仅依赖于 (A,B)，与 C 和 w 无关\n-/\n\nopen Real\n\n/-- D8 流向定义：8 邻域方向标签与坐标偏移 -/\ndef directions : List (String × ℤ × ℤ) := \n  [ (\"E\", 1, 0), \n    (\"SE\", 1, 1), \n    (\"S\", 0, 1), \n    (\"SW\", -1, 1), \n    (\"W\", -1, 0), \n    (\"NW\", -1, -1), \n    (\"N\", 0, -1), \n    (\"NE\", 1, -1) ]\n\n/-- 平面 DEM 高程函数 -/\ndef planar_elevation (A B w C : ℝ) (i j : ℤ) : ℝ := \n  A * (i * w) + B * (j * w) + C\n\n/-- 计算中心点流向 (返回方向标签) -/\ndef d8_flow_direction (A B w C : ℝ) : String :=\n  let center_elev := planar_elevation A B w C 0 0\n  let candidates := directions.map (λ (name, di, dj) => \n    let neighbor_elev := planar_elevation A B w C di dj\n    let drop := center_elev - neighbor_elev\n    (name, drop, di, dj))\n  \n  let valid := candidates.filter (λ (_, drop, _, _) => drop > 0)\n  \n  if h : valid = [] then \"NoFlow\" else\n    let slopes := valid.map (λ (name, drop, di, dj) => \n      let dist_sq := (di : ℝ)^2 + (dj : ℝ)^2\n      (name, drop^2 / dist_sq))  -- 坡度平方 (与真实坡度单调一致)\n    \n    let max_val := (slopes.map (·.2)).maximum  -- 获取最大坡度平方值\n    have : ∃ (s : slopes), s.2 = max_val := by  -- 最大值存在性证明\n      apply List.maximum_of_nonempty\n      rw [List.map_eq_nil, not_iff_not] at h\n      exact h.1 (λ _ => False.elim)\n    \n    let best := slopes.filter (λ (_, v) => v = max_val)\n    (best.head (by simp [h])).1  -- 取第一个最大值方向 (方向顺序固定)\n\n/-- \n  核心定理：在平面 DEM 上，只要坡度非零 (A,B) ≠ (0,0)，\n  则流向决策与高程基准 C 和栅格间距 w 无关\n-/\ntheorem d8_planar_constant (A B : ℝ) (hAB : A ≠ 0 ∨ B ≠ 0) \n    (w₁ w₂ : ℝ) (hw₁ : w₁ > 0) (hw₂ : w₂ > 0) (C₁ C₂ : ℝ) :\n    d8_flow_direction A B w₁ C₁ = d8_flow_direction A B w₂ C₂ := by\n  -- 展开流向决策函数定义\n  unfold d8_flow_direction\n  -- 提取高程计算函数\n  unfold planar_elevation\n  -- 化简表达式：中心高程与邻域高程差\n  simp only [sub_self, add_zero, mul_zero, zero_mul, sub_add_cancel, \n             sub_eq_neg_add, neg_add_rev, neg_mul, mul_neg, neg_neg]\n  \n  -- 关键步骤：证明有效方向集相同\n  have dirs_eq : \n      (directions.filter (λ (_, di, dj) => \n          center_elev - planar_elevation A B w₁ C₁ di dj > 0)) =\n      (directions.filter (λ (_, di, dj) => \n          center_elev - planar_elevation A B w₂ C₂ di dj > 0)) := by\n    apply List.ext\n    intro (name, di, dj)\n    simp only [List.mem_filter, and_congr_right_iff]\n    intro _\n    -- 展开高程计算\n    unfold planar_elevation\n    -- 化简高程差表达式\n    field_simp [hw₁, hw₂]\n    rw [← sub_pos, ← mul_sub, ← mul_sub]\n    simp only [mul_eq_mul_left_iff, sub_eq_zero]\n    -- 证明方向有效性条件等价\n    apply iff_of_eq\n    congr 2\n    ring  -- 消除 C 和 w 的影响\n\n  -- 应用方向集等价性\n  rw [dirs_eq]\n  -- 后续计算仅依赖方向集和 (A,B)，与 w,C 无关\n  congr! 2  -- 强制推进计算一致性\n\nend -- noncomputable section\n\nend VeriGIS.D8\n",
+  "verify_status": "TOOLCHAIN_MISSING",
+  "verify_note": "lake/lean not on PATH (local or WSL). Authority build is AutoDL.",
+  "failure_code_auto": null
 }

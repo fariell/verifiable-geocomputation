@@ -1,0 +1,62 @@
+{
+  "task_id": "GPB-007-hessian",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 1,
+  "n_gold_names": 20,
+  "keyword_hits": {
+    "keywords": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit": [],
+    "miss": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit_ratio": 0.0
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 1,
+    "n_gold_clauses": 16,
+    "gen_clause_tokens": [],
+    "gold_clause_tokens": [
+      "cxy",
+      "delta",
+      "hxx",
+      "hxy",
+      "hyy",
+      "laplacian",
+      "numhxx",
+      "phase1wronghxx",
+      "phase1wronghyy"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "function quad(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n A * x * x + B * y * y + C * x * y + D * x + E * y + F\n}\n\nmethod Main(A: real, B: real, C: real, D: real, E: real, F: real, x0: real, y0: real, w: real)\n requires w > 0.0\n{\n \n var x1 := x0 - w;\n var x2 := x0;\n var x3 := x0 + w;\n var y1 := y0 - w;\n var y2 := y0;\n var y3 := y0 + w;\n\n \n var z11 := quad(x1, y"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "COMPILE_ONLY",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

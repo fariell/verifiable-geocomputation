@@ -1,0 +1,84 @@
+{
+  "task_id": "GPB-007-hessian",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 5,
+  "n_gold_names": 20,
+  "keyword_hits": {
+    "keywords": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "zevenbergen-thorne"
+    ],
+    "miss": [
+      "window"
+    ],
+    "hit_ratio": 0.9
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 16,
+    "gen_clause_tokens": [
+      "a_val",
+      "adheres",
+      "and",
+      "checkable",
+      "discrete",
+      "exactness",
+      "for",
+      "hessian",
+      "machine",
+      "problem",
+      "proof",
+      "property",
+      "providing",
+      "quad",
+      "quadratic",
+      "requirements",
+      "rigorous",
+      "surfaces",
+      "the",
+      "var"
+    ],
+    "gold_clause_tokens": [
+      "cxy",
+      "delta",
+      "hxx",
+      "hxy",
+      "hyy",
+      "laplacian",
+      "numhxx",
+      "phase1wronghxx",
+      "phase1wronghyy"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "To solve this problem, we need to formalize the property that the Zevenbergen-Thorne discrete Hessian recovers the exact Hessian components (2A, 2B, C) for a quadratic surface sampled on a 3x3 grid with spacing w > 0. The quadratic surface is defined as \\( z = A x^2 + B y^2 + C xy + D x + E y + F \\). The Hessian components are the second derivatives \\( \\frac{\\partial^2 z}{\\partial x^2} = 2A \\), \\("
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

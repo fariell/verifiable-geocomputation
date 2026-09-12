@@ -1,0 +1,100 @@
+{
+  "task_id": "GPB-015-basin",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "stepN"
+  ],
+  "n_gen_names": 4,
+  "n_gold_names": 15,
+  "keyword_hits": {
+    "keywords": [
+      "bounded",
+      "cell",
+      "counts",
+      "deterministic",
+      "equal",
+      "finite",
+      "fixed",
+      "function",
+      "iterate",
+      "layer",
+      "outlet",
+      "outlets",
+      "point",
+      "points",
+      "reaches",
+      "recursion",
+      "searching",
+      "start",
+      "step",
+      "stepn",
+      "successor",
+      "those",
+      "uniqueness",
+      "watershed",
+      "without"
+    ],
+    "hit": [
+      "cell",
+      "deterministic",
+      "fixed",
+      "function",
+      "point",
+      "points",
+      "step",
+      "stepn",
+      "uniqueness",
+      "watershed"
+    ],
+    "miss": [
+      "bounded",
+      "counts",
+      "equal",
+      "finite",
+      "iterate",
+      "layer",
+      "outlet",
+      "outlets",
+      "reaches",
+      "recursion",
+      "searching",
+      "start",
+      "successor",
+      "those",
+      "without"
+    ],
+    "hit_ratio": 0.4
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 14,
+    "gen_clause_tokens": [
+      "isfixedpoint",
+      "stepn"
+    ],
+    "gold_clause_tokens": [
+      "chainoutlet",
+      "chainsucc",
+      "dirw",
+      "planewin",
+      "ringstep",
+      "ringsucc",
+      "stepn",
+      "succ",
+      "win"
+    ],
+    "overlap": [
+      "stepn"
+    ],
+    "overlap_ratio": 0.1111,
+    "normalized_preview_gen": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nmodule Watershed {\n \n type Cell\n\n \n function succ(c: Cell): Cell\n\n \n predicate isFixedPoint(c: Cell) {\n succ(c) == c\n }\n\n \n function stepN(s: Cell, n: nat): Cell {\n if n == 0 then s else succ(stepN(s, n-1))\n }\n\n \n lemma FixedPointStable(c: Cell, k: nat)\n requires isFixedPoint(c)\n ensures stepN(c, k) == c\n decreases k\n {\n if k != 0 {\n FixedPointStable(c, k-1);\n }\n }\n\n \n lemma Waters"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

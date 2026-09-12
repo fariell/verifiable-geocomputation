@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-015-basin",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "ef4e631e0096c6929a02bdf08ef54e137573930fb1a9655f73fc3607b208b84e",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P006_watershed.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1606,
+    "completion_tokens": 7375,
+    "total_tokens": 8981,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7012
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1606
+  },
+  "api_id": "01a093d9d2cd35285f141795b8a4f2f6",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "type Point\n\nfunction succ(p: Point): Point\n\npredicate IsOutlet(p: Point) {\n  succ(p) == p\n}\n\nfunction stepN(p: Point, n: nat): Point\n  decreases n;\n{\n  if n == 0 then p else succ(stepN(p, n-1))\n}\n\nlemma StepNAdd(p: Point, n: nat, m: nat)\n  ensures stepN(p, n+m) == stepN(stepN(p, n), m)\n  decreases n;\n{\n  if n == 0 {\n  } else {\n    StepNAdd(p, n-1, m);\n  }\n}\n\nlemma OutletStays(q: Point, m: nat)\n  requires IsOutlet(q)\n  ensures stepN(q, m) == q\n  decreases m;\n{\n  if m == 0 {\n  } else {\n    OutletStays(q, m-1);\n  }\n}\n\nlemma WatershedUniqueness(p0: Point, n1: nat, n2: nat)\n  requires IsOutlet(stepN(p0, n1))\n  requires IsOutlet(stepN(p0, n2))\n  ensures stepN(p0, n1) == stepN(p0, n2)\n{\n  if n1 <= n2 {\n    var diff: nat := n2 - n1;\n    StepNAdd(p0, n1, diff);\n    OutletStays(stepN(p0, n1), diff);\n  } else {\n    var diff: nat := n1 - n2;\n    StepNAdd(p0, n2, diff);\n    OutletStays(stepN(p0, n2), diff);\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

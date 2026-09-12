@@ -1,0 +1,71 @@
+{
+  "task_id": "GPB-002-planar",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 0,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "dzdx",
+      "dzdy",
+      "estimates",
+      "exactly",
+      "finite-difference",
+      "grid",
+      "horn",
+      "identity",
+      "planar",
+      "recover",
+      "regular",
+      "sampled",
+      "spacing",
+      "surface"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "horn",
+      "recover"
+    ],
+    "miss": [
+      "estimates",
+      "exactly",
+      "finite-difference",
+      "grid",
+      "identity",
+      "planar",
+      "regular",
+      "sampled",
+      "spacing",
+      "surface"
+    ],
+    "hit_ratio": 0.2857
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 1,
+    "n_gold_clauses": 10,
+    "gen_clause_tokens": [
+      "dzdx",
+      "dzdy"
+    ],
+    "gold_clause_tokens": [
+      "dzdx",
+      "dzdy",
+      "slopesq"
+    ],
+    "overlap": [
+      "dzdx",
+      "dzdy"
+    ],
+    "overlap_ratio": 0.6667,
+    "normalized_preview_gen": "\n\n\n\n\nmethod HornExactRecovery(A: real, B: real, C: real, w: real) \n returns (DzDx: real, DzDy: real)\n requires w > 0.0\n ensures DzDx == A && DzDy == B\n{\n \n var z00 := A*(-w) + B*(-w) + C; \n var z01 := A*(-w) + B*0.0 + C; \n var z02 := A*(-w) + B*w + C; \n var z10 := A*0.0 + B*(-w) + C; \n var z11 := A*0.0 + B*0.0 + C; \n var z12 := A*0.0 + B*w + C; \n var z20 := A*w + B*(-w) + C; \n var z21 := A*w + B*0"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "LIKELY_ALIGNED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

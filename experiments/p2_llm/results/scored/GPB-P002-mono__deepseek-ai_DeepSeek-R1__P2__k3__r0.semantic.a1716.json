@@ -1,0 +1,85 @@
+{
+  "task_id": "GPB-P002-mono",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 0,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "cell",
+      "consider",
+      "decreases",
+      "elevation",
+      "fill",
+      "full",
+      "left",
+      "monotone",
+      "nondecreasing",
+      "orig",
+      "outlet",
+      "pit-filling",
+      "profile",
+      "raise",
+      "scan",
+      "specialization",
+      "wang-liu"
+    ],
+    "hit": [
+      "decreases",
+      "fill",
+      "orig"
+    ],
+    "miss": [
+      "cell",
+      "consider",
+      "elevation",
+      "full",
+      "left",
+      "monotone",
+      "nondecreasing",
+      "outlet",
+      "pit-filling",
+      "profile",
+      "raise",
+      "scan",
+      "specialization",
+      "wang-liu"
+    ],
+    "hit_ratio": 0.1765
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "fill",
+      "forall",
+      "length",
+      "null",
+      "orig"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill",
+      "forall"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "method FillPits(orig: array<int>) returns (fill: array<int>)\n requires orig != null\n ensures fill != null && fill.Length == orig.Length\n ensures forall i :: 0 <= i < fill.Length ==> fill[i] >= orig[i]\n ensures forall i :: 1 <= i < fill.Length ==> fill[i] >= fill[i-1]\n{\n fill := new int[orig.Length];\n if orig.Length == 0 {\n return;\n }\n fill[0] := orig[0];\n var i := 1;\n while i < orig.Length\n invari"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

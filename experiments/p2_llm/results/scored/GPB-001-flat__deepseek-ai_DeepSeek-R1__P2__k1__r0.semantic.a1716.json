@@ -1,0 +1,84 @@
+{
+  "task_id": "GPB-001-flat",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 2,
+  "n_gold_names": 12,
+  "keyword_hits": {
+    "keywords": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "horn",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "slope",
+      "slopesq",
+      "spacing",
+      "square",
+      "values",
+      "window",
+      "zero"
+    ],
+    "hit": [
+      "horn",
+      "slope",
+      "slopesq",
+      "zero"
+    ],
+    "miss": [
+      "cells",
+      "elevation",
+      "equivalently",
+      "finite",
+      "grid",
+      "identically",
+      "magnitude",
+      "nine",
+      "positive",
+      "share",
+      "spacing",
+      "square",
+      "values",
+      "window"
+    ],
+    "hit_ratio": 0.2222
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 10,
+    "gen_clause_tokens": [
+      "a00",
+      "a01",
+      "a02",
+      "a10",
+      "a11",
+      "a12",
+      "a20",
+      "a21",
+      "a22",
+      "hornslopesq"
+    ],
+    "gold_clause_tokens": [
+      "dzdx",
+      "dzdy",
+      "slopesq"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "function HornSlopeSq(a00: real, a01: real, a02: real, a10: real, a11: real, a12: real, a20: real, a21: real, a22: real, w: real): real\n requires w > 0.0\n{\n var dzdx_numerator := a02 + 2.0*a12 + a22 - a00 - 2.0*a10 - a20;\n var dzdy_numerator := a20 + 2.0*a21 + a22 - a00 - 2.0*a01 - a02;\n var dzdx := dzdx_numerator / (8.0 * w);\n var dzdy := dzdy_numerator / (8.0 * w);\n dzdx * dzdx + dzdy * dzdy\n}\n\nl"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

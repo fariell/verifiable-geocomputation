@@ -1,0 +1,61 @@
+{
+  "task_id": "GPB-011-plane-lean",
+  "expected_verdict": "PASS",
+  "compile_rc": null,
+  "verify_rc": null,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 6,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "across",
+      "cells",
+      "change",
+      "constant",
+      "datum",
+      "direction",
+      "elevation",
+      "flow",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit": [
+      "constant",
+      "flow"
+    ],
+    "miss": [
+      "across",
+      "cells",
+      "change",
+      "datum",
+      "direction",
+      "elevation",
+      "interior",
+      "planar",
+      "positive",
+      "share",
+      "slope",
+      "translating"
+    ],
+    "hit_ratio": 0.1429
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 0,
+    "n_gold_clauses": 0,
+    "gen_clause_tokens": [],
+    "gold_clause_tokens": [],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "/-\n ==========================================================================\n GeoProofBench · P-005\n 文件 : formal/lean4/VeriGIS/D8Plane.lean\n 算子 : D8 流向\n 对偶 : formal/dafny/P005_d8.dfy (Dafny 4.11, 22 verified 0 errors)\n 环境 : Lean 4.18.0 + mathlib\n 日期 : 2026-09-06\n ==========================================================================\n\n 本文件证明: 在平面 DEM (z = A x + B y + C) 上, 若坡度为正(即存在下坡方向)且最大下降"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFY_SKIPPED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

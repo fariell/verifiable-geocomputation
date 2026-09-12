@@ -1,0 +1,98 @@
+{
+  "task_id": "GPB-P002bis-raise",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 1,
+  "n_gold_names": 11,
+  "keyword_hits": {
+    "keywords": [
+      "already-processed",
+      "cell",
+      "decreases",
+      "elevation",
+      "fill",
+      "least",
+      "lifted",
+      "local",
+      "neighbor",
+      "never",
+      "original",
+      "processed",
+      "raise",
+      "raisenbr",
+      "raising",
+      "step"
+    ],
+    "hit": [
+      "neighbor",
+      "processed",
+      "raise",
+      "raisenbr"
+    ],
+    "miss": [
+      "already-processed",
+      "cell",
+      "decreases",
+      "elevation",
+      "fill",
+      "least",
+      "lifted",
+      "local",
+      "never",
+      "original",
+      "raising",
+      "step"
+    ],
+    "hit_ratio": 0.25
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 1,
+    "n_gold_clauses": 13,
+    "gen_clause_tokens": [
+      "forall",
+      "grid",
+      "is4neighbor",
+      "length0",
+      "length1",
+      "max",
+      "neighbor",
+      "null",
+      "old",
+      "processed"
+    ],
+    "gold_clause_tokens": [
+      "adjacent4",
+      "else",
+      "fill",
+      "fillfrom",
+      "fillstrip",
+      "fillstripfrom",
+      "forall",
+      "ingrid",
+      "max",
+      "orig",
+      "pitfilling",
+      "raise",
+      "raisenbr",
+      "rect",
+      "sameshape",
+      "setat",
+      "stripinv",
+      "then"
+    ],
+    "overlap": [
+      "forall",
+      "max"
+    ],
+    "overlap_ratio": 0.1111,
+    "normalized_preview_gen": "function max(a: int, b: int): int {\n if a < b then b else a\n}\n\npredicate Is4Neighbor(processed: (int, int), neighbor: (int, int)) {\n (processed.0 == neighbor.0 && (processed.1 == neighbor.1 - 1 || processed.1 == neighbor.1 + 1)) ||\n (processed.1 == neighbor.1 && (processed.0 == neighbor.0 - 1 || processed.0 == neighbor.0 + 1))\n}\n\nmethod RaiseNbr(grid: array2<int>, processed: (int, int), neighbor: "
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

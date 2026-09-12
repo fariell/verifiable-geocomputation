@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-P002-idem",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "764e2a7faa4f499646250de669aecce4a1d95583dabf9afbccb4446f6f92f853",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P002_pit_filling.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1702,
+    "completion_tokens": 9616,
+    "total_tokens": 11318,
+    "completion_tokens_details": {
+      "reasoning_tokens": 9021
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1702
+  },
+  "api_id": "01a093eb75accbdc5bb34b57bfa14e93",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// P0 · Zero-shot auto-formalization: 1D pit filling properties\n// Proof of idempotence and fixed points.\n\npredicate NonDecreasing(a: seq<int>) {\n  forall j | 1 <= j < |a| :: a[j-1] <= a[j]\n}\n\nfunction prefixMax(a: seq<int>, i: int): int\n  requires 0 <= i < |a|\n  decreases i\n{\n  if i == 0 then a[0]\n  else max(prefixMax(a, i-1), a[i])\n}\n\nfunction Fill(a: seq<int>): seq<int>\n  ensures |Fill(a)| == |a|\n{\n  if |a| == 0 then []\n  else seq i | 0 <= i < |a| :: prefixMax(a, i)\n}\n\nlemma FillNonDecreasing(a: seq<int>)\n  ensures NonDecreasing(Fill(a))\n{\n  // Automatically verified by Dafny\n}\n\nlemma FillOfNonDecreasing(c: seq<int>)\n  requires NonDecreasing(c)\n  ensures Fill(c) == c\n{\n  if |c| == 0 {\n    // Trivial case\n  } else {\n    for i := 0 to |c|-1\n      invariant forall k | 0 <= k < i :: Fill(c)[k] == c[k]\n    {\n      if i == 0 {\n        // Base case: Fill(c)[0] = prefixMax(c,0) = c[0]\n      } else {\n        // Inductive step: \n        //   Fill(c)[i] = prefixMax(c, i) \n        //              = max(prefixMax(c, i-1), c[i])\n        //              = max(Fill(c)[i-1], c[i])\n        //              = max(c[i-1], c[i])   // by invariant\n        //              = c[i]                // since c[i-1] <= c[i]\n      }\n    }\n  }\n}\n\nlemma FillIdempotent(a: seq<int>)\n  ensures Fill(Fill(a)) == Fill(a)\n{\n  FillNonDecreasing(a);\n  var b := Fill(a);\n  FillOfNonDecreasing(b);\n}\n\nlemma FixedPoint(a: seq<int>, i: int)\n  requires 0 <= i < |a|\n  ensures (i == 0 || a[i] >= prefixMax(a, i-1)) ==> Fill(a)[i] == a[i]\n{\n  // Direct from definitions:\n  //   i=0: Fill(a)[0] = a[0]\n  //   i>0: Fill(a)[i] = max(prefixMax(a, i-1), a[i]) = a[i] when a[i] >= prefixMax(a, i-1)\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

@@ -1,0 +1,89 @@
+{
+  "task_id": "GPB-P002-mono",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 0,
+  "timed_out": false,
+  "name_overlap": [
+    "Fill"
+  ],
+  "n_gen_names": 3,
+  "n_gold_names": 14,
+  "keyword_hits": {
+    "keywords": [
+      "cell",
+      "consider",
+      "decreases",
+      "elevation",
+      "fill",
+      "full",
+      "left",
+      "monotone",
+      "nondecreasing",
+      "orig",
+      "outlet",
+      "pit-filling",
+      "profile",
+      "raise",
+      "scan",
+      "specialization",
+      "wang-liu"
+    ],
+    "hit": [
+      "fill",
+      "orig"
+    ],
+    "miss": [
+      "cell",
+      "consider",
+      "decreases",
+      "elevation",
+      "full",
+      "left",
+      "monotone",
+      "nondecreasing",
+      "outlet",
+      "pit-filling",
+      "profile",
+      "raise",
+      "scan",
+      "specialization",
+      "wang-liu"
+    ],
+    "hit_ratio": 0.1176
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 18,
+    "gen_clause_tokens": [
+      "fill",
+      "fillrest",
+      "forall",
+      "max",
+      "orig",
+      "prev",
+      "rest"
+    ],
+    "gold_clause_tokens": [
+      "else",
+      "fill",
+      "fillfrom",
+      "forall",
+      "nondecreasing",
+      "prefixnondec",
+      "raise",
+      "then"
+    ],
+    "overlap": [
+      "fill",
+      "forall"
+    ],
+    "overlap_ratio": 0.25,
+    "normalized_preview_gen": "function max(a: real, b: real): real {\n if a >= b then a else b\n}\n\nfunction Fill(orig: seq<real>): seq<real>\n ensures |Fill(orig)| == |orig|\n ensures |orig| > 0 ==> Fill(orig)[0] == orig[0]\n ensures forall i :: 1 <= i < |orig| ==> Fill(orig)[i] == max(orig[i], Fill(orig)[i-1])\n ensures forall i, j :: 0 <= i <= j < |orig| ==> Fill(orig)[i] <= Fill(orig)[j]\n{\n if orig == [] then []\n else\n var f0 := "
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "VERIFIED_NEEDS_HUMAN",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

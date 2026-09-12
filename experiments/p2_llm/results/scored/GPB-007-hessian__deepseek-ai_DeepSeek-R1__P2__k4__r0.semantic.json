@@ -1,0 +1,62 @@
+{
+  "task_id": "GPB-007-hessian",
+  "expected_verdict": "PASS",
+  "compile_rc": 0,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 0,
+  "n_gold_names": 20,
+  "keyword_hits": {
+    "keywords": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit": [],
+    "miss": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit_ratio": 0.0
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 1,
+    "n_gold_clauses": 16,
+    "gen_clause_tokens": [],
+    "gold_clause_tokens": [
+      "cxy",
+      "delta",
+      "hxx",
+      "hxy",
+      "hyy",
+      "laplacian",
+      "numhxx",
+      "phase1wronghxx",
+      "phase1wronghyy"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "function z(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n A*x*x + B*y*y + C*x*y + D*x + E*y + F\n}\n\nmethod Theorem(A: real, B: real, C: real, D: real, E: real, F: real, x0: real, y0: real, w: real)\n requires w > 0.0\n{\n \n \n var g00 := z(x0, y0 + 2.0*w, A, B, C, D, E, F); \n var g10 := z(x0 + w, y0 + 2.0*w, A, B, C, D, E, F);\n var g20 := z(x0 + 2.0*w, y0 + 2.0*w, A, B"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "COMPILE_ONLY",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

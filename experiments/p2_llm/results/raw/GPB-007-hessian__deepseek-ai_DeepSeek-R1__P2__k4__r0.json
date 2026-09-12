@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-007-hessian",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P2",
   "prompt_template_sha256": "cd7f514c1ff554d6a86ebe4bd1508ac9cf20fa3d7fa5d8a5673cca2d2c21bb1f",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P003_curvature.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 0,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 269,
+    "completion_tokens": 11214,
+    "total_tokens": 11483,
+    "completion_tokens_details": {
+      "reasoning_tokens": 10602
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 269
+  },
+  "api_id": "01a093ae005e10dd5aefb3e87882b9fd",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "function z(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real\n{\n  A*x*x + B*y*y + C*x*y + D*x + E*y + F\n}\n\nmethod Theorem(A: real, B: real, C: real, D: real, E: real, F: real, x0: real, y0: real, w: real)\n  requires w > 0.0\n{\n  // Define grid points (row-major: [row][col])\n  // Row 0 (top): y = y0 + 2w\n  var g00 := z(x0, y0 + 2.0*w, A, B, C, D, E, F);  // (x0, y0+2w)\n  var g10 := z(x0 + w, y0 + 2.0*w, A, B, C, D, E, F);\n  var g20 := z(x0 + 2.0*w, y0 + 2.0*w, A, B, C, D, E, F);\n  \n  // Row 1 (middle): y = y0 + w\n  var g01 := z(x0, y0 + w, A, B, C, D, E, F);      // (x0, y0+w)\n  var g11 := z(x0 + w, y0 + w, A, B, C, D, E, F);  // center\n  var g21 := z(x0 + 2.0*w, y0 + w, A, B, C, D, E, F);\n  \n  // Row 2 (bottom): y = y0\n  var g02 := z(x0, y0, A, B, C, D, E, F);          // (x0, y0)\n  var g12 := z(x0 + w, y0, A, B, C, D, E, F);\n  var g22 := z(x0 + 2.0*w, y0, A, B, C, D, E, F);\n  \n  // Zevenbergen-Thorne discrete Hessian\n  var H_xx := (g01 - 2.0*g11 + g21) / (w*w);\n  var H_yy := (g10 - 2.0*g11 + g12) / (w*w);\n  var H_xy := (g20 - g00 - g22 + g02) / (4.0*w*w);\n  \n  // Exact recovery of continuous Hessian components\n  assert H_xx == 2.0 * A;\n  assert H_yy == 2.0 * B;\n  assert H_xy == C;\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F3"
 }

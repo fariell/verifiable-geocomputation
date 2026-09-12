@@ -1,0 +1,86 @@
+{
+  "task_id": "GPB-019-quad",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [],
+  "n_gen_names": 6,
+  "n_gold_names": 19,
+  "keyword_hits": {
+    "keywords": [
+      "coefficients",
+      "dzdx",
+      "dzdy",
+      "equals",
+      "exact",
+      "gradient",
+      "horn",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "quadratic",
+      "recover",
+      "remainder",
+      "separately",
+      "slope",
+      "surfaces",
+      "true"
+    ],
+    "hit": [
+      "dzdx",
+      "dzdy",
+      "exact",
+      "horn",
+      "quadratic",
+      "remainder"
+    ],
+    "miss": [
+      "coefficients",
+      "equals",
+      "gradient",
+      "identically",
+      "order",
+      "origin",
+      "planar",
+      "recover",
+      "separately",
+      "slope",
+      "surfaces",
+      "true"
+    ],
+    "hit_ratio": 0.3333
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 2,
+    "n_gold_clauses": 13,
+    "gen_clause_tokens": [
+      "cubic",
+      "function",
+      "horn_dzdx",
+      "horn_dzdy",
+      "lemma",
+      "quadratic",
+      "quadraticexact"
+    ],
+    "gold_clause_tokens": [
+      "abs",
+      "cubicx",
+      "cubicy",
+      "dzdx",
+      "dzdy",
+      "ens",
+      "numdx",
+      "numdy"
+    ],
+    "overlap": [],
+    "overlap_ratio": 0.0,
+    "normalized_preview_gen": "\nmodule P004_Consistency {\n \n function quadratic(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n := A*x + B*y + C + D*x*x + E*x*y + F*y*y\n\n \n function cubic(G: real, x: real, y: real): real\n := G * x * x * x\n\n \n function horn_dzdx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n requires w != 0.0\n := ((c + 2.0*f + i) - (a + 2.0*"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}

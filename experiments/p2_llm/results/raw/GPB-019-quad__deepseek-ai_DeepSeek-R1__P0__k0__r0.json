@@ -1,7 +1,7 @@
 {
   "task_id": "GPB-019-quad",
   "model": "deepseek-ai/DeepSeek-R1",
-  "call_date": "2026-09-11",
+  "call_date": "2026-09-12",
   "temperature": 0.0,
   "prompt_id": "P0",
   "prompt_template_sha256": "6aabd9673de2e2fde10c87f3cd4665633a2113319a7801a02a7f02f3ab850026",
@@ -11,11 +11,29 @@
   "expected_verdict": "PASS",
   "gold_formal": "formal/dafny/P004_consistency.dfy",
   "schema_version": "p2_llm_task_v1",
-  "compile_rc": null,
-  "verify_rc": null,
+  "compile_rc": 1,
+  "verify_rc": 1,
   "dry_run": false,
   "backend": "openai",
-  "api_error": "siliconflow unreachable at https://api.siliconflow.cn/v1/chat/completions: ReadTimeout: The read operation timed out",
-  "status": "PROVIDER_ERROR",
-  "raw_text": ""
+  "api_usage": {
+    "prompt_tokens": 1753,
+    "completion_tokens": 4119,
+    "total_tokens": 5872,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1743
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 1753
+  },
+  "api_id": "01a093dd2e539f0602b385fe699d0f26",
+  "api_base": "https://api.siliconflow.cn/v1/chat/completions",
+  "provider": "siliconflow",
+  "status": "GENERATED",
+  "raw_text": "// Horn slope exactness on quadratic surfaces and cubic remainder\nmodule P004_Consistency {\n  // Quadratic surface function: z = A*x + B*y + C + D*x² + E*x*y + F*y²\n  function quadratic(A: real, B: real, C: real, D: real, E: real, F: real, x: real, y: real): real\n    := A*x + B*y + C + D*x*x + E*x*y + F*y*y\n\n  // Cubic surface function: z = G*x³\n  function cubic(G: real, x: real, y: real): real\n    := G * x * x * x\n\n  // Horn derivative DzDx computation\n  function horn_dzdx(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n    requires w != 0.0\n    := ((c + 2.0*f + i) - (a + 2.0*d + g)) / (8.0*w)\n\n  // Horn derivative DzDy computation\n  function horn_dzdy(a: real, b: real, c: real, d: real, f: real, g: real, h: real, i: real, w: real): real\n    requires w != 0.0\n    := ((g + 2.0*h + i) - (a + 2.0*b + c)) / (8.0*w)\n\n  // Lemma: Horn derivatives are exact on quadratic surfaces\n  lemma QuadraticExact(A: real, B: real, C: real, D: real, E: real, F: real, w: real)\n    requires w != 0.0\n    ensures horn_dzdx(\n      quadratic(A,B,C,D,E,F, -w,-w), quadratic(A,B,C,D,E,F, 0,-w), quadratic(A,B,C,D,E,F, w,-w),\n      quadratic(A,B,C,D,E,F, -w, 0), quadratic(A,B,C,D,E,F, w, 0),\n      quadratic(A,B,C,D,E,F, -w, w), quadratic(A,B,C,D,E,F, 0, w), quadratic(A,B,C,D,E,F, w, w),\n      w) == A\n    ensures horn_dzdy(\n      quadratic(A,B,C,D,E,F, -w,-w), quadratic(A,B,C,D,E,F, 0,-w), quadratic(A,B,C,D,E,F, w,-w),\n      quadratic(A,B,C,D,E,F, -w, 0), quadratic(A,B,C,D,E,F, w, 0),\n      quadratic(A,B,C,D,E,F, -w, w), quadratic(A,B,C,D,E,F, 0, w), quadratic(A,B,C,D,E,F, w, w),\n      w) == B\n  {\n    // Stencil point abbreviations\n    var a := quadratic(A,B,C,D,E,F, -w,-w);\n    var b := quadratic(A,B,C,D,E,F,  0,-w);\n    var c := quadratic(A,B,C,D,E,F,  w,-w);\n    var d := quadratic(A,B,C,D,E,F, -w, 0);\n    var f := quadratic(A,B,C,D,E,F,  w, 0);\n    var g := quadratic(A,B,C,D,E,F, -w, w);\n    var h := quadratic(A,B,C,D,E,F,  0, w);\n    var i := quadratic(A,B,C,D,E,F,  w, w);\n\n    // DzDx numerator calculation\n    calc {\n      (c + 2.0*f + i) - (a + 2.0*d + g);\n      == { \n        // Expand all quadratic terms\n        assert a == A*(-w) + B*(-w) + C + D*(w*w) + E*(w*w) + F*(w*w);\n        assert c == A*(w)  + B*(-w) + C + D*(w*w) + E*(-w*w) + F*(w*w);\n        assert f == A*(w)  + B*(0)  + C + D*(w*w) + E*(0)    + F*(0);\n        assert i == A*(w)  + B*(w)  + C + D*(w*w) + E*(w*w)  + F*(w*w);\n        assert d == A*(-w) + B*(0)  + C + D*(w*w) + E*(0)    + F*(0);\n        assert g == A*(-w) + B*(w)  + C + D*(w*w) + E*(-w*w) + F*(w*w);\n      }\n      // Simplify expression\n      (A*w - B*w + C + D*w*w - E*w*w + F*w*w + \n        2.0*(A*w + C + D*w*w) + \n        A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n      - \n      (A*(-w) - B*w + C + D*w*w + E*w*w + F*w*w + \n        2.0*(A*(-w) + C + D*w*w) + \n        A*(-w) + B*w + C + D*w*w - E*w*w + F*w*w);\n      == // Combine like terms\n      8.0*A*w;\n    }\n    // Final division step for DzDx\n    assert horn_dzdx(a,b,c,d,f,g,h,i,w) == (8.0*A*w) / (8.0*w) by {\n      assert (8.0*A*w) / (8.0*w) == A by {\n        assert 8.0*w != 0.0;  // Because w != 0\n      }\n    }\n\n    // DzDy numerator calculation\n    calc {\n      (g + 2.0*h + i) - (a + 2.0*b + c);\n      == {\n        // Expand all quadratic terms\n        assert g == A*(-w) + B*(w)  + C + D*(w*w) + E*(-w*w) + F*(w*w);\n        assert h == A*(0)  + B*(w)  + C + D*(0)   + E*(0)    + F*(w*w);\n        assert i == A*(w)  + B*(w)  + C + D*(w*w) + E*(w*w)  + F*(w*w);\n        assert a == A*(-w) + B*(-w) + C + D*(w*w) + E*(w*w)  + F*(w*w);\n        assert b == A*(0)  + B*(-w) + C + D*(0)   + E*(0)    + F*(w*w);\n        assert c == A*(w)  + B*(-w) + C + D*(w*w) + E*(-w*w) + F*(w*w);\n      }\n      // Simplify expression\n      (A*(-w) + B*w + C + D*w*w - E*w*w + F*w*w + \n        2.0*(B*w + C + F*w*w) + \n        A*w + B*w + C + D*w*w + E*w*w + F*w*w) \n      - \n      (A*(-w) - B*w + C + D*w*w + E*w*w + F*w*w + \n        2.0*(B*(-w) + C + F*w*w) + \n        A*w - B*w + C + D*w*w - E*w*w + F*w*w);\n      == // Combine like terms\n      8.0*B*w;\n    }\n    // Final division step for DzDy\n    assert horn_dzdy(a,b,c,d,f,g,h,i,w) == (8.0*B*w) / (8.0*w) by {\n      assert (8.0*B*w) / (8.0*w) == B by {\n        assert 8.0*w != 0.0;  // Because w != 0\n      }\n    }\n  }\n\n  // Lemma: Horn derivative remainder on cubic surface z = G*x³\n  lemma CubicRemainder(G: real, w: real)\n    requires w != 0.0\n    ensures horn_dzdx(\n      cubic(G, -w,-w), cubic(G, 0,-w), cubic(G, w,-w),\n      cubic(G, -w, 0), cubic(G, w, 0),\n      cubic(G, -w, w), cubic(G, 0, w), cubic(G, w, w),\n      w) == G * w * w\n  {\n    // Stencil point abbreviations\n    var a := cubic(G, -w, -w);\n    var b := cubic(G,  0, -w);\n    var c := cubic(G,  w, -w);\n    var d := cubic(G, -w,  0);\n    var f := cubic(G,  w,  0);\n    var g := cubic(G, -w,  w);\n    var h := cubic(G,  0,  w);\n    var i := cubic(G,  w,  w);\n\n    // Compute DzDx numerator\n    calc {\n      (c + 2.0*f + i) - (a + 2.0*d + g);\n      == {\n        // Expand cubic terms\n        assert a == G * (-w)*(-w)*(-w) == -G*w*w*w;\n        assert c == G * (w)*(w)*(w) == G*w*w*w;\n        assert f == G * (w)*(w)*(w) == G*w*w*w;\n        assert i == G * (w)*(w)*(w) == G*w*w*w;\n        assert d == G * (-w)*(-w)*(-w) == -G*w*w*w;\n        assert g == G * (-w)*(-w)*(-w) == -G*w*w*w;\n      }\n      (G*w*w*w + 2.0*G*w*w*w + G*w*w*w) - ((-G*w*w*w) + 2.0*(-G*w*w*w) + (-G*w*w*w));\n      ==\n      (4.0*G*w*w*w) - (-4.0*G*w*w*w);\n      ==\n      8.0*G*w*w*w;\n    }\n    // Final division step\n    assert horn_dzdx(a,b,c,d,f,g,h,i,w) == (8.0*G*w*w*w) / (8.0*w) by {\n      assert (8.0*G*w*w*w) / (8.0*w) == G*w*w by {\n        assert 8.0*w != 0.0;  // Because w != 0\n        assert (8.0*G*w*w*w) / (8.0*w) == G*w*w*w / w == G*w*w;\n      }\n    }\n  }\n}\n",
+  "verify_status": "RAN",
+  "verify_note": "via WSL2 Ubuntu dafny 4.11; source copied to ASCII temp",
+  "failure_code_auto": "F1"
 }

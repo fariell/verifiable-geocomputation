@@ -1,0 +1,76 @@
+{
+  "task_id": "GPB-007-hessian",
+  "expected_verdict": "PASS",
+  "compile_rc": 1,
+  "verify_rc": 1,
+  "timed_out": false,
+  "name_overlap": [
+    "Hxx",
+    "Hxy",
+    "Hyy"
+  ],
+  "n_gen_names": 5,
+  "n_gold_names": 20,
+  "keyword_hits": {
+    "keywords": [
+      "discrete",
+      "exactly",
+      "hessian",
+      "quadratic",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window",
+      "zevenbergen-thorne"
+    ],
+    "hit": [
+      "hessian",
+      "quadratic",
+      "zevenbergen-thorne"
+    ],
+    "miss": [
+      "discrete",
+      "exactly",
+      "recovers",
+      "sampled",
+      "spacing",
+      "surface",
+      "window"
+    ],
+    "hit_ratio": 0.3
+  },
+  "clause_overlap": {
+    "n_gen_clauses": 4,
+    "n_gold_clauses": 16,
+    "gen_clause_tokens": [
+      "hxx",
+      "hxy",
+      "hyy",
+      "quadratic"
+    ],
+    "gold_clause_tokens": [
+      "cxy",
+      "delta",
+      "hxx",
+      "hxy",
+      "hyy",
+      "laplacian",
+      "numhxx",
+      "phase1wronghxx",
+      "phase1wronghyy"
+    ],
+    "overlap": [
+      "hxx",
+      "hxy",
+      "hyy"
+    ],
+    "overlap_ratio": 0.3333,
+    "normalized_preview_gen": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nmodule ZTHessian {\n\n \n \n \n \n \n \n \n \n \n\n \n function quadratic(x: real, y: real, A: real, B: real, C: real, D: real, E: real, F: real): real \n {\n A*x*x + B*y*y + C*x*y + D*x + E*y + F\n }\n\n \n function Hxx(a: real, b: real, c: real, d: real, e: real, f: real, g: real, h: real, i: real, w: real): real\n requires w != 0.0\n {\n (d - 2.0*e + f) / (w*w)\n }\n\n function Hyy(a: real, b: real,"
+  },
+  "normalized_used": true,
+  "trivial_assume": false,
+  "drift_suspect": false,
+  "fidelity_label": "UNCOMPILED",
+  "note": "Heuristic only (A.17.16 normalized). F7 semantic drift requires human adjudication. Do not treat LIKELY_ALIGNED as paper-ready fidelity. NEEDS_HUMAN remaining after normalize still need PI judgment."
+}
