@@ -9,9 +9,9 @@
 
 ## §A · 当前活跃任务(读这个)
 
-STATUS: W3/PENDING
-UPDATED: 2026-09-11 14:02 (PI recharged siliconflow; secretary manual unblock - BLOCKED makes gate noop so no agent could ever spawn to implement the probe)  
-TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 catchup PASS compile@1=0; M4 R1 PARTIAL)  
+STATUS: W3/RUNNING
+UPDATED: 2026-09-12 11:32 (agent: R1 errors-only pool pid=3204 alive; STATUS->RUNNING anti-double-spawn; A.17.16 = 1/17 NH->ALIGNED)
+TASK: **task16-W3 · L1 主实验**(M1+M2 done; M3 catchup PASS; M4 R1 errors-only retry RUNNING 73q @w4; A.17.16 normalize: 1/17 NH promoted)
 A.17.12 done: pool.py + M3 120/120 + M4 133/210 then HTTP_STREAK_10.  
 BLOCKER: siliconflow balance insufficient (code 30001) — 75 R1 PROVIDER_ERROR need retry after PI recharge.  
 Then set STATUS → W3/PENDING. NEEDS_HUMAN 17 listed in OUTBOX (no semantic fidelity % yet).
@@ -1406,6 +1406,41 @@ PI 已知晓,会在开机后手动重启任务。
 
 PI 已开始人工判定,**不要把他的判定结果覆盖掉** —— 规范化重跑的结果单独列一份,
 与 PI 的人工判定并列,两者的差异本身就是「判定器可靠性」的实测数据。
+
+### A.17.18 看门狗:杀掉「活着但零输出」的 agent(秘书 2026-09-12 11:3x,根治第三次同类故障)
+
+这个故障模式已经第三次导致长时间停滞,本次代价是 **21 小时零进展**,请把它当作
+必做项,不要排在实验后面。
+
+**模式**:agent 进程**没有死**,只是卡住(zombie-connected),于是 `.running` 锁一直
+被认为有效,gate 每个 tick 都 `skip: another run in flight`,整条链挂着不动,也没有
+任何人触发下一阶段。
+
+| 日期 | 表现 | 代价 |
+|---|---|---|
+| 09-10 20:07 | gate 实例卡住,后续 tick 全被吞 | 3.5 小时,M2 靠孤儿 python 跑完 |
+| 09-11 14:02 | CLI 升级到 2026.09.10,agent 连不上网关但进程不退出,占锁到被人工杀 | **21 小时** |
+| 09-12 11:20 | 同 09-11 14:02 | 秘书人工清理才恢复 |
+
+**要做的**(改 `_autorun/gate.ps1`):
+1. 在锁检查里加**产出活性判定**,而不仅是进程存活判定:
+   锁存在 + cursor-agent node 存在 + **agent 日志在过去 N 分钟(N=12)没有任何增长**
+   → 判定为 zombie:**杀掉该 node 与其子进程树,删除锁,本次 tick 直接重拉**。
+2. 杀进程要杀整棵子树(`Get-CimInstance Win32_Process | ? ParentProcessId -eq <pid>`
+   递归),不要只杀一个 node,否则会留下孤儿 python 重复烧钱。
+3. 日志增长判定用 `LastWriteTime` 与 `Length`,**两者任一变大即视为活着**。
+4. 每次触发看门狗都要写一行明确日志:`WATCHDOG: killed zombie agent pid=<n>,
+   log flat for <k> min`,便于事后复盘。
+5. **注意:不要用 `tasklist` 查进程** —— 本机 `tasklist //FI "IMAGENAME eq node.exe"`
+   查不到实际存在的 cursor-agent 进程(09-12 实测)。一律用
+   `Get-CimInstance Win32_Process` + `CommandLine -match 'cursor-agent'`。
+
+**顺带**:agent 日志只有一行 `agent started ... pid=` **不代表它没在干活**。
+09-12 11:30 那次日志仅 48 bytes,但 `run_l1_batch_pool.py` 正在跑且产物在落盘。
+判断依据是「实验子进程是否存在 + 产物时间戳是否在变」,**不是日志大小**。
+
+配合 A.17.13(余额自动解阻)一起做:任何 BLOCKED / 卡住的状态都必须有自恢复通道,
+否则会形成「BLOCKED → gate noop → agent 永不启动 → 永远没人解 BLOCKED」的死锁。
 
 ## §B · 协议与档案(只读)
 
