@@ -36,10 +36,7 @@ if ($status -match 'DONE') { Log "noop (STATUS is DONE)"; exit 0 }
 # making it queue behind a 2.7-min-per-cell batch would waste days. Each channel gets
 # its own lock file and its own marker token in the prompt, so liveness detection can
 # tell the two agents apart instead of one masking the other.
-$wchan   = $status -match 'WRITING'
-$lock    = if ($wchan) { Join-Path $runDir '.writing.lock' } else { Join-Path $runDir '.running' }
-$marker  = if ($wchan) { 'W4-PAPER-WRITING' } else { 'cursor-agent' }
-Log "channel: $(if ($wchan) { 'writing' } else { 'experiment' })  lock: $(Split-Path $lock -Leaf)"
+# chosen per channel below, once the batch state is known.
 
 # --- provider key discovery + env injection (2026-09-09) ---
 # PI stores keys as User/Machine env vars (never in git). Read them straight from the
@@ -85,16 +82,31 @@ if ($status -match 'BLOCKED') {
 # W3/RUNNING: L1 live batch may already be writing jsonl. Skip agent launch while
 # run_l1_batch.py / run_l1_batch_pool.py is alive (avoids double-spend). If the batch
 # process died, fall through so the next agent can resume or finalize (A.15.4).
-# The writing channel does not spawn batches, so it is never blocked by one.
-if ($status -match 'RUNNING' -and -not $wchan) {
+# The writing channel never spawns batches, so a live batch must not block it.
+# But experiment recovery OUTRANKS writing: if the batch died, a tick must go to
+# resuming it even while STATUS still carries WRITING, otherwise the writing
+# channel monopolises every tick and the dead batch is never picked up again.
+$expNeeded = $false
+if ($status -match 'RUNNING') {
     $batchAlive = Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
                   Where-Object { $_.CommandLine -match 'run_l1_batch(_pool)?\.py' }
     if ($batchAlive) {
-        Log "noop (STATUS is RUNNING and L1 batch alive pid=$($batchAlive.ProcessId))"
-        exit 0
+        if ($status -match 'WRITING') {
+            Log "L1 batch alive pid=$($batchAlive.ProcessId); deferring it to the writing channel"
+        } else {
+            Log "noop (STATUS is RUNNING and L1 batch alive pid=$($batchAlive.ProcessId))"
+            exit 0
+        }
+    } else {
+        $expNeeded = $true
+        Log "STATUS RUNNING but no live run_l1_batch*.py - experiment recovery takes priority"
     }
-    Log "STATUS RUNNING but no live run_l1_batch*.py - proceeding to resume/finalize"
 }
+
+$wchan  = ($status -match 'WRITING') -and (-not $expNeeded)
+$lock   = if ($wchan) { Join-Path $runDir '.writing.lock' } else { Join-Path $runDir '.running' }
+$marker = if ($wchan) { 'W4-PAPER-WRITING' } else { 'cursor-agent' }
+Log "channel: $(if ($wchan) { 'writing' } else { 'experiment' })  lock: $(Split-Path $lock -Leaf)"
 
 # concurrency guard: skip if an agent run is already in flight
 if (Test-Path $lock) {
