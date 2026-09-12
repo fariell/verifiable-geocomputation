@@ -71,16 +71,16 @@ if ($status -match 'BLOCKED') {
 }
 
 # W3/RUNNING: L1 live batch may already be writing jsonl. Skip agent launch while
-# run_l1_batch.py is alive (avoids double-spend). If the batch process died, fall
-# through so the next agent can resume or finalize (A.15.4).
+# run_l1_batch.py / run_l1_batch_pool.py is alive (avoids double-spend). If the batch
+# process died, fall through so the next agent can resume or finalize (A.15.4).
 if ($status -match 'RUNNING') {
     $batchAlive = Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
-                  Where-Object { $_.CommandLine -match 'run_l1_batch\.py' }
+                  Where-Object { $_.CommandLine -match 'run_l1_batch(_pool)?\.py' }
     if ($batchAlive) {
-        Log "noop (STATUS is RUNNING and run_l1_batch.py is alive pid=$($batchAlive.ProcessId))"
+        Log "noop (STATUS is RUNNING and L1 batch alive pid=$($batchAlive.ProcessId))"
         exit 0
     }
-    Log "STATUS RUNNING but no live run_l1_batch.py - proceeding to resume/finalize"
+    Log "STATUS RUNNING but no live run_l1_batch*.py - proceeding to resume/finalize"
 }
 
 # concurrency guard: skip if an agent run is already in flight
@@ -104,10 +104,28 @@ if (Test-Path $lock) {
     }
 }
 
-# locate newest cursor-agent version dir
+# locate cursor-agent version dir.
+# PINNED, not "newest". The CLI self-updates, and every upgrade so far has
+# broken headless mode: 2026.09.10-fd3934a (installed 2026-09-11 14:02) dies on
+# startup with "Connection lost, reconnecting to agentn.global.api5.cursor.sh"
+# and left the whole chain stalled for 21 hours with zero output.
+# 2026.09.08-6caf4ff is the last version verified to work end to end.
+# To adopt a newer version, test it with a one-off `agent -p --trust --force`
+# run first and then bump PINNED_VER deliberately - never let the chain
+# silently follow whatever the updater dropped in.
 $base = Join-Path $env:LOCALAPPDATA 'cursor-agent\versions'
-$ver  = Get-ChildItem -Path $base -Directory -ErrorAction SilentlyContinue |
-        Sort-Object Name -Descending | Select-Object -First 1
+$PINNED_VER = '2026.09.08-6caf4ff'
+
+$ver = $null
+$pinned = Join-Path $base $PINNED_VER
+if (Test-Path $pinned) {
+    $ver = Get-Item $pinned
+    Log "agent CLI pinned $PINNED_VER"
+} else {
+    Log "WARN: pinned $PINNED_VER missing - falling back to newest (unverified)"
+    $ver = Get-ChildItem -Path $base -Directory -ErrorAction SilentlyContinue |
+           Sort-Object Name -Descending | Select-Object -First 1
+}
 if (-not $ver) { Log "ERROR: no cursor-agent version dir under $base"; exit 1 }
 
 $node = Join-Path $ver.FullName 'node.exe'
